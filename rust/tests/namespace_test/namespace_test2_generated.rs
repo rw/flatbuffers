@@ -7,7 +7,8 @@ extern crate flatbuffers;
 
 mod NamespaceA {
 
-struct TableInFirstNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for TableInFirstNS {}
+pub struct TableInFirstNS /* private flatbuffers::Table */ {
   enum {
     VT_FOO_TABLE = 4,
     VT_FOO_ENUM = 6,
@@ -22,7 +23,7 @@ struct TableInFirstNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   NamespaceA::NamespaceB::EnumInNestedNS foo_enum() const {
     return GetField<i8>(VT_FOO_ENUM, 0) as NamespaceA::NamespaceB::EnumInNestedNS;
   }
-  bool mutate_foo_enum(NamespaceA::NamespaceB::EnumInNestedNS _foo_enum) {
+  fn mutate_foo_enum(NamespaceA::NamespaceB::EnumInNestedNS _foo_enum) -> bool {
     return SetField<i8>(VT_FOO_ENUM, _foo_enum as i8, 0);
   }
   const NamespaceA::NamespaceB::StructInNestedNS *foo_struct() const {
@@ -31,7 +32,7 @@ struct TableInFirstNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   fn mutable_foo_struct(&mut self) -> &mut NamespaceA::NamespaceB::StructInNestedNS * {
     &mut GetStruct<NamespaceA::NamespaceB::StructInNestedNS *>(VT_FOO_STRUCT)
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_FOO_TABLE) &&
            verifier.VerifyTable(foo_table()) &&
@@ -81,7 +82,8 @@ inline flatbuffers::Offset<TableInFirstNS> CreateTableInFirstNS(
 
 mod NamespaceC {
 
-struct TableInC FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for TableInC {}
+pub struct TableInC /* private flatbuffers::Table */ {
   enum {
     VT_REFER_TO_A1 = 4,
     VT_REFER_TO_A2 = 6
@@ -98,7 +100,7 @@ struct TableInC FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   fn mutable_refer_to_a2(&mut self) -> &mut NamespaceA::SecondTableInA * {
     &mut GetPointer<NamespaceA::SecondTableInA *>(VT_REFER_TO_A2)
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_A1) &&
            verifier.VerifyTable(refer_to_a1()) &&
@@ -143,7 +145,8 @@ inline flatbuffers::Offset<TableInC> CreateTableInC(
 
 mod NamespaceA {
 
-struct SecondTableInA FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for SecondTableInA {}
+pub struct SecondTableInA /* private flatbuffers::Table */ {
   enum {
     VT_REFER_TO_C = 4
   };
@@ -153,7 +156,7 @@ struct SecondTableInA FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   fn mutable_refer_to_c(&mut self) -> &mut NamespaceC::TableInC * {
     &mut GetPointer<NamespaceC::TableInC *>(VT_REFER_TO_C)
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_C) &&
            verifier.VerifyTable(refer_to_c()) &&

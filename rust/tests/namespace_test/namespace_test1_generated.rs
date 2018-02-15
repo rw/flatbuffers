@@ -62,17 +62,18 @@ impl StructInNestedNS {
 }
 // STRUCT_END(StructInNestedNS, 8);
 
-struct TableInNestedNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for TableInNestedNS {}
+pub struct TableInNestedNS /* private flatbuffers::Table */ {
   enum {
     VT_FOO = 4
   };
   i32 foo() const {
     return GetField<i32>(VT_FOO, 0);
   }
-  bool mutate_foo(i32 _foo) {
+  fn mutate_foo(i32 _foo) -> bool {
     return SetField<i32>(VT_FOO, _foo, 0);
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyField<i32>(verifier, VT_FOO) &&
            verifier.EndTable();
