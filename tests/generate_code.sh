@@ -22,3 +22,6 @@
 cd ../samples
 ../flatc --cpp --lobster --gen-mutable --reflect-names --gen-object-api --cpp-ptr-type flatbuffers::unique_ptr monster.fbs
 cd ../reflection
+
+cp monster_test_generated.rs ../rust/tests/
+cp -r namespace_test/namespace_test1_generated.rs namespace_test/namespace_test2_generated.rs ../rust/tests/namespace_test/
