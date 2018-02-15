@@ -28,14 +28,14 @@ inline char ToUpper(char c) { return static_cast<char>(::toupper(c)); }
 
 static std::string GeneratedFileName(const std::string &path,
                                      const std::string &file_name) {
-  return path + file_name + "_generated.h";
+  return path + file_name + "_generated.rs";
 }
 
-namespace cpp {
-class CppGenerator : public BaseGenerator {
+namespace rust {
+class RustGenerator : public BaseGenerator {
  public:
-  CppGenerator(const Parser &parser, const std::string &path,
-               const std::string &file_name)
+  RustGenerator(const Parser &parser, const std::string &path,
+                const std::string &file_name)
       : BaseGenerator(parser, path, file_name, "", "::"),
         cur_name_space_(nullptr) {
     const char *keywords[] = { "alignas",
@@ -174,7 +174,7 @@ class CppGenerator : public BaseGenerator {
 
       code_ += "#include \"" + parser_.opts.include_prefix +
                (parser_.opts.keep_include_path ? noext : basename) +
-               "_generated.h\"";
+               "_generated.rs\"";
       num_includes++;
     }
     if (num_includes) code_ += "";
@@ -447,8 +447,9 @@ class CppGenerator : public BaseGenerator {
   std::string GenTypeBasic(const Type &type, bool user_facing_type) const {
     static const char *ctypename[] = {
     // clang-format off
-    #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE) \
-            #CTYPE,
+    #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE, \
+                           RTYPE) \
+            #RTYPE,
         FLATBUFFERS_GEN_TYPES(FLATBUFFERS_TD)
     #undef FLATBUFFERS_TD
       // clang-format on
@@ -2527,22 +2528,22 @@ class CppGenerator : public BaseGenerator {
 
 }  // namespace cpp
 
-bool GenerateCPP(const Parser &parser, const std::string &path,
-                 const std::string &file_name) {
-  cpp::CppGenerator generator(parser, path, file_name);
+bool GenerateRust(const Parser &parser, const std::string &path,
+                  const std::string &file_name) {
+  rust::RustGenerator generator(parser, path, file_name);
   return generator.generate();
 }
 
-std::string CPPMakeRule(const Parser &parser, const std::string &path,
-                        const std::string &file_name) {
-  const auto filebase =
-      flatbuffers::StripPath(flatbuffers::StripExtension(file_name));
-  const auto included_files = parser.GetIncludedFilesRecursive(file_name);
-  std::string make_rule = GeneratedFileName(path, filebase) + ": ";
-  for (auto it = included_files.begin(); it != included_files.end(); ++it) {
-    make_rule += " " + *it;
-  }
-  return make_rule;
-}
+//std::string RustMakeRule(const Parser &parser, const std::string &path,
+//                        const std::string &file_name) {
+//  const auto filebase =
+//      flatbuffers::StripPath(flatbuffers::StripExtension(file_name));
+//  const auto included_files = parser.GetIncludedFilesRecursive(file_name);
+//  std::string make_rule = GeneratedFileName(path, filebase) + ": ";
+//  for (auto it = included_files.begin(); it != included_files.end(); ++it) {
+//    make_rule += " " + *it;
+//  }
+//  return make_rule;
+//}
 
 }  // namespace flatbuffers
