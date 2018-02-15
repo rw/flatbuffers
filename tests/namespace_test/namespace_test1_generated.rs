@@ -35,33 +35,36 @@ fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
   EnumNamesEnumInNestedNS[index]
 }
 
-MANUALLY_ALIGNED_STRUCT(4) StructInNestedNS FLATBUFFERS_FINAL_CLASS {
- private:
-  i32 a_;
-  i32 b_;
+// MANUALLY_ALIGNED_STRUCT(4)
+#[repr(C, packed)]
+pub struct StructInNestedNS {
+  i32: a_,
+  i32: b_,
+} // pub struct StructInNestedNS
 
- public:
-  StructInNestedNS() {
-    memset(this, 0, sizeof(StructInNestedNS));
+impl StructInNestedNS {
+  fn Reset(&mut self) {
+    memset(this, 0, size_of(StructInNestedNS));
   }
-  StructInNestedNS(i32 _a, i32 _b)
-      : a_(flatbuffers::EndianScalar(_a)),
-        b_(flatbuffers::EndianScalar(_b)) {
+  fn init(&mut self, i32: _a, i32: _b) {
+      self.a_ = flatbuffers::EndianScalar(_a);
+      self.b_ = flatbuffers::EndianScalar(_b);
+
   }
-  i32 a() const {
-    return flatbuffers::EndianScalar(a_);
+  fn a(&self) -> i32  {
+    flatbuffers::EndianScalar(a_)
   }
-  void mutate_a(i32 _a) {
-    flatbuffers::WriteScalar(&a_, _a);
+  fn mutate_a(&mut self, _a: i32) {
+    flatbuffers::WriteScalar(&self.a_, _a);
   }
-  i32 b() const {
-    return flatbuffers::EndianScalar(b_);
+  fn b(&self) -> i32  {
+    flatbuffers::EndianScalar(b_)
   }
-  void mutate_b(i32 _b) {
-    flatbuffers::WriteScalar(&b_, _b);
+  fn mutate_b(&mut self, _b: i32) {
+    flatbuffers::WriteScalar(&self.b_, _b);
   }
-};
-STRUCT_END(StructInNestedNS, 8);
+}
+// STRUCT_END(StructInNestedNS, 8);
 
 struct TableInNestedNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
