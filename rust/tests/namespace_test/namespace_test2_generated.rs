@@ -42,8 +42,10 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
 }
 
 struct TableInFirstNSBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl TableInFirstNSBuilder {
   void add_foo_table(flatbuffers::Offset<NamespaceA::NamespaceB::TableInNestedNS> foo_table) {
     fbb_.AddOffset(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
@@ -109,8 +111,10 @@ impl TableInC /* private flatbuffers::Table */ {
 }
 
 struct TableInCBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl TableInCBuilder {
   void add_refer_to_a1(flatbuffers::Offset<NamespaceA::TableInFirstNS> refer_to_a1) {
     fbb_.AddOffset(TableInC::VT_REFER_TO_A1, refer_to_a1);
   }
@@ -162,8 +166,10 @@ impl SecondTableInA /* private flatbuffers::Table */ {
 }
 
 struct SecondTableInABuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl SecondTableInABuilder {
   void add_refer_to_c(flatbuffers::Offset<NamespaceC::TableInC> refer_to_c) {
     fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }

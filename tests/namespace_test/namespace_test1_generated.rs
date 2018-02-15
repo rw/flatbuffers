@@ -80,8 +80,10 @@ impl TableInNestedNS /* private flatbuffers::Table */ {
 }
 
 struct TableInNestedNSBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl TableInNestedNSBuilder {
   void add_foo(i32 foo) {
     fbb_.AddElement<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }

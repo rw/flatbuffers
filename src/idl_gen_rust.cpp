@@ -1736,9 +1736,12 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a builder struct:
     code_ += "struct {{STRUCT_NAME}}Builder {";
-    code_ += "  flatbuffers::FlatBufferBuilder &fbb_;";
-    code_ += "  flatbuffers::uoffset_t start_;";
+    code_ += "  fbb_: &flatbuffers::FlatBufferBuilder,";
+    code_ += "  start_: flatbuffers::uoffset_t,";
+    code_ += "}";
 
+    // Generate builder functions:
+    code_ += "impl {{STRUCT_NAME}}Builder {";
     bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
