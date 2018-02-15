@@ -1462,9 +1462,8 @@ class RustGenerator : public BaseGenerator {
     GenComment(struct_def.doc_comment);
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
-    code_ +=
-        "struct {{STRUCT_NAME}} FLATBUFFERS_FINAL_CLASS"
-        " : private flatbuffers::Table {";
+    code_ += "impl flatbuffers::Table for {{STRUCT_NAME}} {}";
+    code_ += "pub struct {{STRUCT_NAME}} /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
     //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
     //}
@@ -1579,8 +1578,8 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("DEFAULT_VALUE", GenDefaultConstant(field));
 
           code_ +=
-              "  bool mutate_{{FIELD_NAME}}({{FIELD_TYPE}} "
-              "_{{FIELD_NAME}}) {";
+              "  fn mutate_{{FIELD_NAME}}({{FIELD_TYPE}} "
+              "_{{FIELD_NAME}}) -> bool {";
           code_ +=
               "    return {{SET_FN}}({{OFFSET_NAME}}, {{FIELD_VALUE}}, "
               "{{DEFAULT_VALUE}});";
@@ -1627,7 +1626,7 @@ class RustGenerator : public BaseGenerator {
       if (field.key) {
         const bool is_string = (field.value.type.base_type == BASE_TYPE_STRING);
 
-        code_ += "  bool KeyCompareLessThan(const {{STRUCT_NAME}} *o) const {";
+        code_ += "  fn KeyCompareLessThan(const {{STRUCT_NAME}} *o) -> bool {";
         if (is_string) {
           code_ += "    return *{{FIELD_NAME}}() < *o->{{FIELD_NAME}}();";
         } else {
@@ -1636,7 +1635,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "  }";
 
         if (is_string) {
-          code_ += "  int KeyCompareWithValue(const char *val) const {";
+          code_ += "  fn KeyCompareWithValue(const char *val) -> isize {";
           code_ += "    return strcmp({{FIELD_NAME}}()->c_str(), val);";
           code_ += "  }";
         } else {
@@ -1647,7 +1646,7 @@ class RustGenerator : public BaseGenerator {
           }
 
           code_.SetValue("KEY_TYPE", type);
-          code_ += "  int KeyCompareWithValue({{KEY_TYPE}} val) const {";
+          code_ += "  fn KeyCompareWithValue({{KEY_TYPE}} val) -> isize {";
           code_ += "    const auto key = {{FIELD_NAME}}();";
           code_ += "    if (key < val) {";
           code_ += "      return -1;";
@@ -1663,7 +1662,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a verifier function that can check a buffer from an untrusted
     // source will never cause reads outside the buffer.
-    code_ += "  bool Verify(flatbuffers::Verifier &verifier) const {";
+    code_ += "  fn Verify(flatbuffers::Verifier &verifier) -> bool {";
     code_ += "    return VerifyTableStart(verifier)\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {

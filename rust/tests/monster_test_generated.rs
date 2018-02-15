@@ -202,8 +202,9 @@ impl Ability {
 
 }  // mod Example
 
-struct InParentNamespace FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  bool Verify(flatbuffers::Verifier &verifier) const {
+impl flatbuffers::Table for InParentNamespace {}
+pub struct InParentNamespace /* private flatbuffers::Table */ {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
   }
@@ -232,8 +233,9 @@ inline flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(
 
 mod Example2 {
 
-struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  bool Verify(flatbuffers::Verifier &verifier) const {
+impl flatbuffers::Table for Monster {}
+pub struct Monster /* private flatbuffers::Table */ {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
   }
@@ -264,17 +266,18 @@ inline flatbuffers::Offset<Monster> CreateMonster(
 
 mod Example {
 
-struct TestSimpleTableWithEnum FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for TestSimpleTableWithEnum {}
+pub struct TestSimpleTableWithEnum /* private flatbuffers::Table */ {
   enum {
     VT_COLOR = 4
   };
   Color color() const {
     return GetField<i8>(VT_COLOR, 2) as Color;
   }
-  bool mutate_color(Color _color) {
+  fn mutate_color(Color _color) -> bool {
     return SetField<i8>(VT_COLOR, _color as i8, 2);
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyField<i8>(verifier, VT_COLOR) &&
            verifier.EndTable();
@@ -307,7 +310,8 @@ inline flatbuffers::Offset<TestSimpleTableWithEnum> CreateTestSimpleTableWithEnu
   return builder_.Finish();
 }
 
-struct Stat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for Stat {}
+pub struct Stat /* private flatbuffers::Table */ {
   enum {
     VT_ID = 4,
     VT_VAL = 6,
@@ -322,16 +326,16 @@ struct Stat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   i64 val() const {
     return GetField<i64>(VT_VAL, 0);
   }
-  bool mutate_val(i64 _val) {
+  fn mutate_val(i64 _val) -> bool {
     return SetField<i64>(VT_VAL, _val, 0);
   }
   u16 count() const {
     return GetField<u16>(VT_COUNT, 0);
   }
-  bool mutate_count(u16 _count) {
+  fn mutate_count(u16 _count) -> bool {
     return SetField<u16>(VT_COUNT, _count, 0);
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_ID) &&
            verifier.Verify(id()) &&
@@ -390,7 +394,8 @@ inline flatbuffers::Offset<Stat> CreateStatDirect(
 }
 
 /// an example documentation comment: monster object
-struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for Monster {}
+pub struct Monster /* private flatbuffers::Table */ {
   enum {
     VT_POS = 4,
     VT_MANA = 6,
@@ -436,13 +441,13 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   i16 mana() const {
     return GetField<i16>(VT_MANA, 150);
   }
-  bool mutate_mana(i16 _mana) {
+  fn mutate_mana(i16 _mana) -> bool {
     return SetField<i16>(VT_MANA, _mana, 150);
   }
   i16 hp() const {
     return GetField<i16>(VT_HP, 100);
   }
-  bool mutate_hp(i16 _hp) {
+  fn mutate_hp(i16 _hp) -> bool {
     return SetField<i16>(VT_HP, _hp, 100);
   }
   const flatbuffers::String *name() const {
@@ -451,10 +456,10 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   fn mutable_name(&mut self) -> &mut flatbuffers::String * {
     &mut GetPointer<flatbuffers::String *>(VT_NAME)
   }
-  bool KeyCompareLessThan(const Monster *o) const {
+  fn KeyCompareLessThan(const Monster *o) -> bool {
     return *name() < *o->name();
   }
-  int KeyCompareWithValue(const char *val) const {
+  fn KeyCompareWithValue(const char *val) -> isize {
     return strcmp(name()->c_str(), val);
   }
   const flatbuffers::Vector<u8> *inventory() const {
@@ -466,13 +471,13 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   Color color() const {
     return GetField<i8>(VT_COLOR, 8) as Color;
   }
-  bool mutate_color(Color _color) {
+  fn mutate_color(Color _color) -> bool {
     return SetField<i8>(VT_COLOR, _color as i8, 8);
   }
   Any test_type() const {
     return GetField<u8>(VT_TEST_TYPE, 0) as Any;
   }
-  bool mutate_test_type(Any _test_type) {
+  fn mutate_test_type(Any _test_type) -> bool {
     return SetField<u8>(VT_TEST_TYPE, _test_type as u8, 0);
   }
   const void *test() const {
@@ -535,55 +540,55 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool testbool() const {
     return GetField<bool>(VT_TESTBOOL, 0) != 0;
   }
-  bool mutate_testbool(bool _testbool) {
+  fn mutate_testbool(bool _testbool) -> bool {
     return SetField<bool>(VT_TESTBOOL, _testbool as bool, 0);
   }
   i32 testhashs32_fnv1() const {
     return GetField<i32>(VT_TESTHASHS32_FNV1, 0);
   }
-  bool mutate_testhashs32_fnv1(i32 _testhashs32_fnv1) {
+  fn mutate_testhashs32_fnv1(i32 _testhashs32_fnv1) -> bool {
     return SetField<i32>(VT_TESTHASHS32_FNV1, _testhashs32_fnv1, 0);
   }
   u32 testhashu32_fnv1() const {
     return GetField<u32>(VT_TESTHASHU32_FNV1, 0);
   }
-  bool mutate_testhashu32_fnv1(u32 _testhashu32_fnv1) {
+  fn mutate_testhashu32_fnv1(u32 _testhashu32_fnv1) -> bool {
     return SetField<u32>(VT_TESTHASHU32_FNV1, _testhashu32_fnv1, 0);
   }
   i64 testhashs64_fnv1() const {
     return GetField<i64>(VT_TESTHASHS64_FNV1, 0);
   }
-  bool mutate_testhashs64_fnv1(i64 _testhashs64_fnv1) {
+  fn mutate_testhashs64_fnv1(i64 _testhashs64_fnv1) -> bool {
     return SetField<i64>(VT_TESTHASHS64_FNV1, _testhashs64_fnv1, 0);
   }
   u64 testhashu64_fnv1() const {
     return GetField<u64>(VT_TESTHASHU64_FNV1, 0);
   }
-  bool mutate_testhashu64_fnv1(u64 _testhashu64_fnv1) {
+  fn mutate_testhashu64_fnv1(u64 _testhashu64_fnv1) -> bool {
     return SetField<u64>(VT_TESTHASHU64_FNV1, _testhashu64_fnv1, 0);
   }
   i32 testhashs32_fnv1a() const {
     return GetField<i32>(VT_TESTHASHS32_FNV1A, 0);
   }
-  bool mutate_testhashs32_fnv1a(i32 _testhashs32_fnv1a) {
+  fn mutate_testhashs32_fnv1a(i32 _testhashs32_fnv1a) -> bool {
     return SetField<i32>(VT_TESTHASHS32_FNV1A, _testhashs32_fnv1a, 0);
   }
   u32 testhashu32_fnv1a() const {
     return GetField<u32>(VT_TESTHASHU32_FNV1A, 0);
   }
-  bool mutate_testhashu32_fnv1a(u32 _testhashu32_fnv1a) {
+  fn mutate_testhashu32_fnv1a(u32 _testhashu32_fnv1a) -> bool {
     return SetField<u32>(VT_TESTHASHU32_FNV1A, _testhashu32_fnv1a, 0);
   }
   i64 testhashs64_fnv1a() const {
     return GetField<i64>(VT_TESTHASHS64_FNV1A, 0);
   }
-  bool mutate_testhashs64_fnv1a(i64 _testhashs64_fnv1a) {
+  fn mutate_testhashs64_fnv1a(i64 _testhashs64_fnv1a) -> bool {
     return SetField<i64>(VT_TESTHASHS64_FNV1A, _testhashs64_fnv1a, 0);
   }
   u64 testhashu64_fnv1a() const {
     return GetField<u64>(VT_TESTHASHU64_FNV1A, 0);
   }
-  bool mutate_testhashu64_fnv1a(u64 _testhashu64_fnv1a) {
+  fn mutate_testhashu64_fnv1a(u64 _testhashu64_fnv1a) -> bool {
     return SetField<u64>(VT_TESTHASHU64_FNV1A, _testhashu64_fnv1a, 0);
   }
   const flatbuffers::Vector<bool> *testarrayofbools() const {
@@ -595,19 +600,19 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   f32 testf() const {
     return GetField<f32>(VT_TESTF, 3.14159f);
   }
-  bool mutate_testf(f32 _testf) {
+  fn mutate_testf(f32 _testf) -> bool {
     return SetField<f32>(VT_TESTF, _testf, 3.14159f);
   }
   f32 testf2() const {
     return GetField<f32>(VT_TESTF2, 3.0f);
   }
-  bool mutate_testf2(f32 _testf2) {
+  fn mutate_testf2(f32 _testf2) -> bool {
     return SetField<f32>(VT_TESTF2, _testf2, 3.0f);
   }
   f32 testf3() const {
     return GetField<f32>(VT_TESTF3, 0.0f);
   }
-  bool mutate_testf3(f32 _testf3) {
+  fn mutate_testf3(f32 _testf3) -> bool {
     return SetField<f32>(VT_TESTF3, _testf3, 0.0f);
   }
   const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *testarrayofstring2() const {
@@ -656,7 +661,7 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   fn mutable_parent_namespace_test(&mut self) -> &mut MyGame::InParentNamespace * {
     &mut GetPointer<MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST)
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyField<Vec3>(verifier, VT_POS) &&
            VerifyField<i16>(verifier, VT_MANA) &&
@@ -994,7 +999,8 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
       parent_namespace_test);
 }
 
-struct TypeAliases FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+impl flatbuffers::Table for TypeAliases {}
+pub struct TypeAliases /* private flatbuffers::Table */ {
   enum {
     VT_I8 = 4,
     VT_U8 = 6,
@@ -1012,61 +1018,61 @@ struct TypeAliases FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   i8 i8() const {
     return GetField<i8>(VT_I8, 0);
   }
-  bool mutate_i8(i8 _i8) {
+  fn mutate_i8(i8 _i8) -> bool {
     return SetField<i8>(VT_I8, _i8, 0);
   }
   u8 u8() const {
     return GetField<u8>(VT_U8, 0);
   }
-  bool mutate_u8(u8 _u8) {
+  fn mutate_u8(u8 _u8) -> bool {
     return SetField<u8>(VT_U8, _u8, 0);
   }
   i16 i16() const {
     return GetField<i16>(VT_I16, 0);
   }
-  bool mutate_i16(i16 _i16) {
+  fn mutate_i16(i16 _i16) -> bool {
     return SetField<i16>(VT_I16, _i16, 0);
   }
   u16 u16() const {
     return GetField<u16>(VT_U16, 0);
   }
-  bool mutate_u16(u16 _u16) {
+  fn mutate_u16(u16 _u16) -> bool {
     return SetField<u16>(VT_U16, _u16, 0);
   }
   i32 i32() const {
     return GetField<i32>(VT_I32, 0);
   }
-  bool mutate_i32(i32 _i32) {
+  fn mutate_i32(i32 _i32) -> bool {
     return SetField<i32>(VT_I32, _i32, 0);
   }
   u32 u32() const {
     return GetField<u32>(VT_U32, 0);
   }
-  bool mutate_u32(u32 _u32) {
+  fn mutate_u32(u32 _u32) -> bool {
     return SetField<u32>(VT_U32, _u32, 0);
   }
   i64 i64() const {
     return GetField<i64>(VT_I64, 0);
   }
-  bool mutate_i64(i64 _i64) {
+  fn mutate_i64(i64 _i64) -> bool {
     return SetField<i64>(VT_I64, _i64, 0);
   }
   u64 u64() const {
     return GetField<u64>(VT_U64, 0);
   }
-  bool mutate_u64(u64 _u64) {
+  fn mutate_u64(u64 _u64) -> bool {
     return SetField<u64>(VT_U64, _u64, 0);
   }
   f32 f32() const {
     return GetField<f32>(VT_F32, 0.0f);
   }
-  bool mutate_f32(f32 _f32) {
+  fn mutate_f32(f32 _f32) -> bool {
     return SetField<f32>(VT_F32, _f32, 0.0f);
   }
   f64 f64() const {
     return GetField<f64>(VT_F64, 0.0);
   }
-  bool mutate_f64(f64 _f64) {
+  fn mutate_f64(f64 _f64) -> bool {
     return SetField<f64>(VT_F64, _f64, 0.0);
   }
   const flatbuffers::Vector<i8> *v8() const {
@@ -1081,7 +1087,7 @@ struct TypeAliases FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   fn mutable_vf64(&mut self) -> &mut flatbuffers::Vector<f64> * {
     &mut GetPointer<flatbuffers::Vector<f64> *>(VT_VF64)
   }
-  bool Verify(flatbuffers::Verifier &verifier) const {
+  fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyField<i8>(verifier, VT_I8) &&
            VerifyField<u8>(verifier, VT_U8) &&
