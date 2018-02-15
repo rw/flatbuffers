@@ -35,6 +35,9 @@ fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
   EnumNamesEnumInNestedNS[index]
 }
 
+pub trait EnumInNestedNSTraits {
+  const enum_value: usize;
+}
 MANUALLY_ALIGNED_STRUCT(4) StructInNestedNS FLATBUFFERS_FINAL_CLASS {
  private:
   i32 a_;

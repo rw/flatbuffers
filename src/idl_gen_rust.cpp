@@ -890,7 +890,7 @@ class RustGenerator : public BaseGenerator {
     if (range / static_cast<int64_t>(enum_def.vals.vec.size()) <
         kMaxSparseness) {
       code_ += "const EnumNames{{ENUM_NAME}}:[&'static str; " +
-                std::to_string(range) + "] = [";
+                NumToString(range) + "] = [";
 
       auto val = enum_def.vals.vec.front()->value;
       for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
@@ -918,21 +918,20 @@ class RustGenerator : public BaseGenerator {
     }
 
     // Generate type traits for unions to map from a type to union enum value.
+    code_ += "pub trait {{ENUM_NAME}}Traits {";
+    code_ += "  const enum_value: usize = ;";
+    code_ += "}";
     if (enum_def.is_union && !enum_def.uses_type_aliases) {
       for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
            ++it) {
         const auto &ev = **it;
 
         if (it == enum_def.vals.vec.begin()) {
-          code_ += "template<typename T> struct {{ENUM_NAME}}Traits {";
-        } else {
-          auto name = GetUnionElement(ev, true, true);
-          code_ += "template<> struct {{ENUM_NAME}}Traits<" + name + "> {";
-        }
-
+        auto name = GetUnionElement(ev, true, true);
         auto value = GetEnumValUse(enum_def, ev);
-        code_ += "  static const {{ENUM_NAME}} enum_value = " + value + ";";
-        code_ += "};";
+        code_ += "impl {{ENUM_NAME}}Traits for " + name + " {";
+        code_ += "  const enum_value: usize = " + value + ";";
+        code_ += "}";
         code_ += "";
       }
     }
