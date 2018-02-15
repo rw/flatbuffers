@@ -917,105 +917,107 @@ class RustGenerator : public BaseGenerator {
       code_ += "";
     }
 
-    // Generate type traits for unions to map from a type to union enum value.
-    code_ += "pub trait {{ENUM_NAME}}Traits {";
-    code_ += "  const enum_value: usize = ;";
-    code_ += "}";
-    if (enum_def.is_union && !enum_def.uses_type_aliases) {
-      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
-           ++it) {
-        const auto &ev = **it;
+    // Skip this since we only use it (I think!) for object based api.
+    //// Generate type traits for unions to map from a type to union enum value.
+    //code_ += "pub trait {{ENUM_NAME}}Traits {";
+    //code_ += "  const enum_value: usize = ;";
+    //code_ += "}";
+    //if (enum_def.is_union && !enum_def.uses_type_aliases) {
+    //  for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+    //       ++it) {
+    //    const auto &ev = **it;
 
-        if (it == enum_def.vals.vec.begin()) {
-        auto name = GetUnionElement(ev, true, true);
-        auto value = GetEnumValUse(enum_def, ev);
-        code_ += "impl {{ENUM_NAME}}Traits for " + name + " {";
-        code_ += "  const enum_value: usize = " + value + ";";
-        code_ += "}";
-        code_ += "";
-      }
-    }
+    //    if (it == enum_def.vals.vec.begin()) {
+    //    auto name = GetUnionElement(ev, true, true);
+    //    auto value = GetEnumValUse(enum_def, ev);
+    //    code_ += "impl {{ENUM_NAME}}Traits for " + name + " {";
+    //    code_ += "  const enum_value: usize = " + value + ";";
+    //    code_ += "}";
+    //    code_ += "";
+    //  }
+    //}
 
-    if (parser_.opts.generate_object_based_api && enum_def.is_union) {
-      // Generate a union type
-      code_.SetValue("NAME", Name(enum_def));
-      code_.SetValue("NONE",
-                     GetEnumValUse(enum_def, *enum_def.vals.Lookup("NONE")));
+    // Skip this since we only use it (I think!) for object based api.
+    //if (parser_.opts.generate_object_based_api && enum_def.is_union) {
+    //  // Generate a union type
+    //  code_.SetValue("NAME", Name(enum_def));
+    //  code_.SetValue("NONE",
+    //                 GetEnumValUse(enum_def, *enum_def.vals.Lookup("NONE")));
 
-      code_ += "struct {{NAME}}Union {";
-      code_ += "  {{NAME}} type;";
-      code_ += "  void *value;";
-      code_ += "";
-      code_ += "  {{NAME}}Union() : type({{NONE}}), value(nullptr) {}";
-      code_ += "  {{NAME}}Union({{NAME}}Union&& u) FLATBUFFERS_NOEXCEPT :";
-      code_ += "    type({{NONE}}), value(nullptr)";
-      code_ += "    { std::swap(type, u.type); std::swap(value, u.value); }";
-      code_ += "  {{NAME}}Union(const {{NAME}}Union &) FLATBUFFERS_NOEXCEPT;";
-      code_ +=
-          "  {{NAME}}Union &operator=(const {{NAME}}Union &u) "
-          "FLATBUFFERS_NOEXCEPT";
-      code_ +=
-          "    { {{NAME}}Union t(u); std::swap(type, t.type); std::swap(value, "
-          "t.value); return *this; }";
-      code_ +=
-          "  {{NAME}}Union &operator=({{NAME}}Union &&u) FLATBUFFERS_NOEXCEPT";
-      code_ +=
-          "    { std::swap(type, u.type); std::swap(value, u.value); return "
-          "*this; }";
-      code_ += "  ~{{NAME}}Union() { Reset(); }";
-      code_ += "";
-      code_ += "  void Reset();";
-      code_ += "";
-      if (!enum_def.uses_type_aliases) {
-        code_ += "#ifndef FLATBUFFERS_CPP98_STL";
-        code_ += "  template <typename T>";
-        code_ += "  void Set(T&& val) {";
-        code_ += "    Reset();";
-        code_ +=
-            "    type = {{NAME}}Traits<typename T::TableType>::enum_value;";
-        code_ += "    if (type != {{NONE}}) {";
-        code_ += "      value = new T(std::forward<T>(val));";
-        code_ += "    }";
-        code_ += "  }";
-        code_ += "#endif  // FLATBUFFERS_CPP98_STL";
-        code_ += "";
-      }
-      code_ += "  " + UnionUnPackSignature(enum_def, true) + ";";
-      code_ += "  " + UnionPackSignature(enum_def, true) + ";";
-      code_ += "";
+    //  code_ += "struct {{NAME}}Union {";
+    //  code_ += "  {{NAME}} type;";
+    //  code_ += "  void *value;";
+    //  code_ += "";
+    //  code_ += "  {{NAME}}Union() : type({{NONE}}), value(nullptr) {}";
+    //  code_ += "  {{NAME}}Union({{NAME}}Union&& u) FLATBUFFERS_NOEXCEPT :";
+    //  code_ += "    type({{NONE}}), value(nullptr)";
+    //  code_ += "    { std::swap(type, u.type); std::swap(value, u.value); }";
+    //  code_ += "  {{NAME}}Union(const {{NAME}}Union &) FLATBUFFERS_NOEXCEPT;";
+    //  code_ +=
+    //      "  {{NAME}}Union &operator=(const {{NAME}}Union &u) "
+    //      "FLATBUFFERS_NOEXCEPT";
+    //  code_ +=
+    //      "    { {{NAME}}Union t(u); std::swap(type, t.type); std::swap(value, "
+    //      "t.value); return *this; }";
+    //  code_ +=
+    //      "  {{NAME}}Union &operator=({{NAME}}Union &&u) FLATBUFFERS_NOEXCEPT";
+    //  code_ +=
+    //      "    { std::swap(type, u.type); std::swap(value, u.value); return "
+    //      "*this; }";
+    //  code_ += "  ~{{NAME}}Union() { Reset(); }";
+    //  code_ += "";
+    //  code_ += "  void Reset();";
+    //  code_ += "";
+    //  if (!enum_def.uses_type_aliases) {
+    //    code_ += "#ifndef FLATBUFFERS_CPP98_STL";
+    //    code_ += "  template <typename T>";
+    //    code_ += "  void Set(T&& val) {";
+    //    code_ += "    Reset();";
+    //    code_ +=
+    //        "    type = {{NAME}}Traits<typename T::TableType>::enum_value;";
+    //    code_ += "    if (type != {{NONE}}) {";
+    //    code_ += "      value = new T(std::forward<T>(val));";
+    //    code_ += "    }";
+    //    code_ += "  }";
+    //    code_ += "#endif  // FLATBUFFERS_CPP98_STL";
+    //    code_ += "";
+    //  }
+    //  code_ += "  " + UnionUnPackSignature(enum_def, true) + ";";
+    //  code_ += "  " + UnionPackSignature(enum_def, true) + ";";
+    //  code_ += "";
 
-      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
-           ++it) {
-        const auto &ev = **it;
-        if (!ev.value) { continue; }
+    //  for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+    //       ++it) {
+    //    const auto &ev = **it;
+    //    if (!ev.value) { continue; }
 
-        const auto native_type =
-            NativeName(GetUnionElement(ev, true, true, true),
-                       ev.union_type.struct_def, parser_.opts);
-        code_.SetValue("NATIVE_TYPE", native_type);
-        code_.SetValue("NATIVE_NAME", Name(ev));
-        code_.SetValue("NATIVE_ID", GetEnumValUse(enum_def, ev));
+    //    const auto native_type =
+    //        NativeName(GetUnionElement(ev, true, true, true),
+    //                   ev.union_type.struct_def, parser_.opts);
+    //    code_.SetValue("NATIVE_TYPE", native_type);
+    //    code_.SetValue("NATIVE_NAME", Name(ev));
+    //    code_.SetValue("NATIVE_ID", GetEnumValUse(enum_def, ev));
 
-        code_ += "  {{NATIVE_TYPE}} *As{{NATIVE_NAME}}() {";
-        code_ += "    return type == {{NATIVE_ID}} ?";
-        code_ += "      reinterpret_cast<{{NATIVE_TYPE}} *>(value) : nullptr;";
-        code_ += "  }";
+    //    code_ += "  {{NATIVE_TYPE}} *As{{NATIVE_NAME}}() {";
+    //    code_ += "    return type == {{NATIVE_ID}} ?";
+    //    code_ += "      reinterpret_cast<{{NATIVE_TYPE}} *>(value) : nullptr;";
+    //    code_ += "  }";
 
-        code_ += "  const {{NATIVE_TYPE}} *As{{NATIVE_NAME}}() const {";
-        code_ += "    return type == {{NATIVE_ID}} ?";
-        code_ +=
-            "      reinterpret_cast<const {{NATIVE_TYPE}} *>(value) : nullptr;";
-        code_ += "  }";
-      }
-      code_ += "};";
-      code_ += "";
-    }
+    //    code_ += "  const {{NATIVE_TYPE}} *As{{NATIVE_NAME}}() const {";
+    //    code_ += "    return type == {{NATIVE_ID}} ?";
+    //    code_ +=
+    //        "      reinterpret_cast<const {{NATIVE_TYPE}} *>(value) : nullptr;";
+    //    code_ += "  }";
+    //  }
+    //  code_ += "};";
+    //  code_ += "";
+    //}
 
-    if (enum_def.is_union) {
-      code_ += UnionVerifySignature(enum_def) + ";";
-      code_ += UnionVectorVerifySignature(enum_def) + ";";
-      code_ += "";
-    }
+    //if (enum_def.is_union) {
+    //  code_ += UnionVerifySignature(enum_def) + ";";
+    //  code_ += UnionVectorVerifySignature(enum_def) + ";";
+    //  code_ += "";
+    //}
   }
 
   void GenUnionPost(const EnumDef &enum_def) {
