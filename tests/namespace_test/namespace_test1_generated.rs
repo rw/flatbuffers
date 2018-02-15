@@ -66,15 +66,15 @@ impl flatbuffers::Table for TableInNestedNS {}
 impl TableInNestedNS /* private flatbuffers::Table */ {
     const VT_FOO: isize = 4;
 
-  i32 foo() const {
-    return GetField<i32>(VT_FOO, 0);
+  fn foo() -> &i32  {
+    self.GetField::<i32>(VT_FOO, 0)
   }
-  fn mutate_foo(i32 _foo) -> bool {
-    return SetField<i32>(VT_FOO, _foo, 0);
+  fn mutate_foo(foo_: i32) -> bool {
+    return SetField::<i32>(VT_FOO, _foo, 0);
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
-           VerifyField<i32>(verifier, VT_FOO) &&
+           VerifyField::<i32>(verifier, VT_FOO) &&
            verifier.EndTable();
   }
 }
@@ -84,8 +84,8 @@ struct TableInNestedNSBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TableInNestedNSBuilder {
-  void add_foo(i32 foo) {
-    fbb_.AddElement<i32>(TableInNestedNS::VT_FOO, foo, 0);
+  fn add_foo(foo: i32 ) {
+    fbb_.AddElement::<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInNestedNSBuilder {
     TableInNestedNSBuilder {
@@ -104,7 +104,7 @@ impl TableInNestedNSBuilder {
 #[inline]
 fn CreateTableInNestedNS(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    i32 foo = 0) -> flatbuffers::Offset<TableInNestedNS> {
+    foo: i32  /* = 0 */) -> flatbuffers::Offset<TableInNestedNS> {
   let mut builder = TableInNestedNSBuilder::new(_fbb);
   builder_.add_foo(foo);
   builder_.Finish()

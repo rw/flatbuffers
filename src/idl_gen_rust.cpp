@@ -1294,7 +1294,7 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", true));
       code_.SetValue("PARAM_VALUE", GetDefaultScalarValue(field));
     }
-    code_ += "{{PRE}}{{PARAM_TYPE}}{{PARAM_NAME}} = {{PARAM_VALUE}}\\";
+    code_ += "{{PRE}}{{PARAM_NAME}}: {{PARAM_TYPE}} /* = {{PARAM_VALUE}} */\\";
   }
 
   // Generate a member, including a default value for scalars and raw pointers.
@@ -1400,7 +1400,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("OFFSET", GenFieldOffsetName(field));
     if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type)) {
       code_ +=
-          "{{PRE}}VerifyField{{REQUIRED}}<{{SIZE}}>(verifier, {{OFFSET}})\\";
+          "{{PRE}}VerifyField{{REQUIRED}}::<{{SIZE}}>(verifier, {{OFFSET}})\\";
     } else {
       code_ += "{{PRE}}VerifyOffset{{REQUIRED}}(verifier, {{OFFSET}})\\";
     }
@@ -1507,7 +1507,7 @@ class RustGenerator : public BaseGenerator {
       // Call a different accessor for pointers, that indirects.
       std::string accessor = "";
       if (is_scalar) {
-        accessor = "GetField<";
+        accessor = "GetField::<";
       } else if (is_struct) {
         accessor = "GetStruct<";
       } else {
@@ -1529,8 +1529,8 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
-      code_ += "  {{FIELD_TYPE}}{{FIELD_NAME}}() const {";
-      code_ += "    return {{FIELD_VALUE}};";
+      code_ += "  fn {{FIELD_NAME}}() -> &{{FIELD_TYPE}} {";
+      code_ += "    self.{{FIELD_VALUE}}";
       code_ += "  }";
 
       if (field.value.type.base_type == BASE_TYPE_UNION) {
@@ -1568,7 +1568,7 @@ class RustGenerator : public BaseGenerator {
       if (parser_.opts.mutable_buffer) {
         if (is_scalar) {
           const auto type = GenTypeWire(field.value.type, "", false);
-          code_.SetValue("SET_FN", "SetField<" + type + ">");
+          code_.SetValue("SET_FN", "SetField::<" + type + ">");
           code_.SetValue("OFFSET_NAME", offset_str);
           code_.SetValue("FIELD_TYPE", GenTypeBasic(field.value.type, true));
           code_.SetValue("FIELD_VALUE",
@@ -1576,8 +1576,8 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("DEFAULT_VALUE", GenDefaultConstant(field));
 
           code_ +=
-              "  fn mutate_{{FIELD_NAME}}({{FIELD_TYPE}} "
-              "_{{FIELD_NAME}}) -> bool {";
+              "  fn mutate_{{FIELD_NAME}}({{FIELD_NAME}}_: "
+              "{{FIELD_TYPE}}) -> bool {";
           code_ +=
               "    return {{SET_FN}}({{OFFSET_NAME}}, {{FIELD_VALUE}}, "
               "{{DEFAULT_VALUE}});";
@@ -1757,8 +1757,8 @@ class RustGenerator : public BaseGenerator {
         std::string value = is_scalar ? GenDefaultConstant(field) : "";
 
         // Generate accessor functions of the form:
-        // void add_name(type name) {
-        //   fbb_.AddElement<type>(offset, name, default);
+        // fn add_name(type name) {
+        //   fbb_.AddElement::<type>(offset, name, default);
         // }
         code_.SetValue("FIELD_NAME", Name(field));
         code_.SetValue("FIELD_TYPE", GenTypeWire(field.value.type, " ", true));
@@ -1767,14 +1767,14 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("ADD_VALUE", value);
         if (is_scalar) {
           const auto type = GenTypeWire(field.value.type, "", false);
-          code_.SetValue("ADD_FN", "AddElement<" + type + ">");
+          code_.SetValue("ADD_FN", "AddElement::<" + type + ">");
         } else if (IsStruct(field.value.type)) {
           code_.SetValue("ADD_FN", "AddStruct");
         } else {
           code_.SetValue("ADD_FN", "AddOffset");
         }
 
-        code_ += "  void add_{{FIELD_NAME}}({{FIELD_TYPE}}{{FIELD_NAME}}) {";
+        code_ += "  fn add_{{FIELD_NAME}}({{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         code_ += "    fbb_.{{ADD_FN}}(\\";
         if (is_scalar) {
           code_ += "{{ADD_OFFSET}}, {{ADD_NAME}}, {{ADD_VALUE}});";

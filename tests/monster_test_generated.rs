@@ -280,15 +280,15 @@ impl flatbuffers::Table for TestSimpleTableWithEnum {}
 impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
     const VT_COLOR: isize = 4;
 
-  Color color() const {
-    return GetField<i8>(VT_COLOR, 2) as Color;
+  fn color() -> &Color  {
+    self.GetField::<i8>(VT_COLOR, 2) as Color
   }
-  fn mutate_color(Color _color) -> bool {
-    return SetField<i8>(VT_COLOR, _color as i8, 2);
+  fn mutate_color(color_: Color) -> bool {
+    return SetField::<i8>(VT_COLOR, _color as i8, 2);
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
-           VerifyField<i8>(verifier, VT_COLOR) &&
+           VerifyField::<i8>(verifier, VT_COLOR) &&
            verifier.EndTable();
   }
 }
@@ -298,8 +298,8 @@ struct TestSimpleTableWithEnumBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TestSimpleTableWithEnumBuilder {
-  void add_color(Color color) {
-    fbb_.AddElement<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
+  fn add_color(color: Color ) {
+    fbb_.AddElement::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TestSimpleTableWithEnumBuilder {
     TestSimpleTableWithEnumBuilder {
@@ -318,7 +318,7 @@ impl TestSimpleTableWithEnumBuilder {
 #[inline]
 fn CreateTestSimpleTableWithEnum(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    Color color = Color_Green) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
+    color: Color  /* = Color_Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
   builder_.add_color(color);
   builder_.Finish()
@@ -330,30 +330,30 @@ impl Stat /* private flatbuffers::Table */ {
     const VT_VAL: isize = 6;
     const VT_COUNT: isize = 8;
 
-  const flatbuffers::String *id() const {
-    return GetPointer<const flatbuffers::String *>(VT_ID);
+  fn id() -> &const flatbuffers::String * {
+    self.GetPointer<const flatbuffers::String *>(VT_ID)
   }
   fn mutable_id(&mut self) -> &mut flatbuffers::String * {
     &mut GetPointer<flatbuffers::String *>(VT_ID)
   }
-  i64 val() const {
-    return GetField<i64>(VT_VAL, 0);
+  fn val() -> &i64  {
+    self.GetField::<i64>(VT_VAL, 0)
   }
-  fn mutate_val(i64 _val) -> bool {
-    return SetField<i64>(VT_VAL, _val, 0);
+  fn mutate_val(val_: i64) -> bool {
+    return SetField::<i64>(VT_VAL, _val, 0);
   }
-  u16 count() const {
-    return GetField<u16>(VT_COUNT, 0);
+  fn count() -> &u16  {
+    self.GetField::<u16>(VT_COUNT, 0)
   }
-  fn mutate_count(u16 _count) -> bool {
-    return SetField<u16>(VT_COUNT, _count, 0);
+  fn mutate_count(count_: u16) -> bool {
+    return SetField::<u16>(VT_COUNT, _count, 0);
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_ID) &&
            verifier.Verify(id()) &&
-           VerifyField<i64>(verifier, VT_VAL) &&
-           VerifyField<u16>(verifier, VT_COUNT) &&
+           VerifyField::<i64>(verifier, VT_VAL) &&
+           VerifyField::<u16>(verifier, VT_COUNT) &&
            verifier.EndTable();
   }
 }
@@ -363,14 +363,14 @@ struct StatBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl StatBuilder {
-  void add_id(flatbuffers::Offset<flatbuffers::String> id) {
+  fn add_id(id: flatbuffers::Offset<flatbuffers::String> ) {
     fbb_.AddOffset(Stat::VT_ID, id);
   }
-  void add_val(i64 val) {
-    fbb_.AddElement<i64>(Stat::VT_VAL, val, 0);
+  fn add_val(val: i64 ) {
+    fbb_.AddElement::<i64>(Stat::VT_VAL, val, 0);
   }
-  void add_count(u16 count) {
-    fbb_.AddElement<u16>(Stat::VT_COUNT, count, 0);
+  fn add_count(count: u16 ) {
+    fbb_.AddElement::<u16>(Stat::VT_COUNT, count, 0);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> StatBuilder {
     StatBuilder {
@@ -389,9 +389,9 @@ impl StatBuilder {
 #[inline]
 fn CreateStat(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    flatbuffers::Offset<flatbuffers::String> id = 0,
-    i64 val = 0,
-    u16 count = 0) -> flatbuffers::Offset<Stat> {
+    id: flatbuffers::Offset<flatbuffers::String>  /* = 0 */,
+    val: i64  /* = 0 */,
+    count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
   let mut builder = StatBuilder::new(_fbb);
   builder_.add_val(val);
   builder_.add_id(id);
@@ -401,9 +401,9 @@ fn CreateStat(
 
 inline flatbuffers::Offset<Stat> CreateStatDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const char *id = nullptr,
-    i64 val = 0,
-    u16 count = 0) {
+    id: const char * /* = nullptr */,
+    val: i64  /* = 0 */,
+    count: u16  /* = 0 */) {
   return MyGame::Example::CreateStat(
       _fbb,
       id ? _fbb.CreateString(id) : 0,
@@ -449,26 +449,26 @@ impl Monster /* private flatbuffers::Table */ {
     const VT_VECTOR_OF_DOUBLES: isize = 70;
     const VT_PARENT_NAMESPACE_TEST: isize = 72;
 
-  const Vec3 *pos() const {
-    return GetStruct<const Vec3 *>(VT_POS);
+  fn pos() -> &const Vec3 * {
+    self.GetStruct<const Vec3 *>(VT_POS)
   }
   fn mutable_pos(&mut self) -> &mut Vec3 * {
     &mut GetStruct<Vec3 *>(VT_POS)
   }
-  i16 mana() const {
-    return GetField<i16>(VT_MANA, 150);
+  fn mana() -> &i16  {
+    self.GetField::<i16>(VT_MANA, 150)
   }
-  fn mutate_mana(i16 _mana) -> bool {
-    return SetField<i16>(VT_MANA, _mana, 150);
+  fn mutate_mana(mana_: i16) -> bool {
+    return SetField::<i16>(VT_MANA, _mana, 150);
   }
-  i16 hp() const {
-    return GetField<i16>(VT_HP, 100);
+  fn hp() -> &i16  {
+    self.GetField::<i16>(VT_HP, 100)
   }
-  fn mutate_hp(i16 _hp) -> bool {
-    return SetField<i16>(VT_HP, _hp, 100);
+  fn mutate_hp(hp_: i16) -> bool {
+    return SetField::<i16>(VT_HP, _hp, 100);
   }
-  const flatbuffers::String *name() const {
-    return GetPointer<const flatbuffers::String *>(VT_NAME);
+  fn name() -> &const flatbuffers::String * {
+    self.GetPointer<const flatbuffers::String *>(VT_NAME)
   }
   fn mutable_name(&mut self) -> &mut flatbuffers::String * {
     &mut GetPointer<flatbuffers::String *>(VT_NAME)
@@ -479,26 +479,26 @@ impl Monster /* private flatbuffers::Table */ {
   fn KeyCompareWithValue(const char *val) -> isize {
     return strcmp(name()->c_str(), val);
   }
-  const flatbuffers::Vector<u8> *inventory() const {
-    return GetPointer<const flatbuffers::Vector<u8> *>(VT_INVENTORY);
+  fn inventory() -> &const flatbuffers::Vector<u8> * {
+    self.GetPointer<const flatbuffers::Vector<u8> *>(VT_INVENTORY)
   }
   fn mutable_inventory(&mut self) -> &mut flatbuffers::Vector<u8> * {
     &mut GetPointer<flatbuffers::Vector<u8> *>(VT_INVENTORY)
   }
-  Color color() const {
-    return GetField<i8>(VT_COLOR, 8) as Color;
+  fn color() -> &Color  {
+    self.GetField::<i8>(VT_COLOR, 8) as Color
   }
-  fn mutate_color(Color _color) -> bool {
-    return SetField<i8>(VT_COLOR, _color as i8, 8);
+  fn mutate_color(color_: Color) -> bool {
+    return SetField::<i8>(VT_COLOR, _color as i8, 8);
   }
-  Any test_type() const {
-    return GetField<u8>(VT_TEST_TYPE, 0) as Any;
+  fn test_type() -> &Any  {
+    self.GetField::<u8>(VT_TEST_TYPE, 0) as Any
   }
-  fn mutate_test_type(Any _test_type) -> bool {
-    return SetField<u8>(VT_TEST_TYPE, _test_type as u8, 0);
+  fn mutate_test_type(test_type_: Any) -> bool {
+    return SetField::<u8>(VT_TEST_TYPE, _test_type as u8, 0);
   }
-  const void *test() const {
-    return GetPointer<const void *>(VT_TEST);
+  fn test() -> &const void * {
+    self.GetPointer<const void *>(VT_TEST)
   }
   template<typename T> const T *test_as() const;
   const Monster *test_as_Monster() const {
@@ -513,34 +513,34 @@ impl Monster /* private flatbuffers::Table */ {
   fn mutable_test(&mut self) -> &mut void * {
     &mut GetPointer<void *>(VT_TEST)
   }
-  const flatbuffers::Vector<const Test *> *test4() const {
-    return GetPointer<const flatbuffers::Vector<const Test *> *>(VT_TEST4);
+  fn test4() -> &const flatbuffers::Vector<const Test *> * {
+    self.GetPointer<const flatbuffers::Vector<const Test *> *>(VT_TEST4)
   }
   fn mutable_test4(&mut self) -> &mut flatbuffers::Vector<const Test *> * {
     &mut GetPointer<flatbuffers::Vector<const Test *> *>(VT_TEST4)
   }
-  const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *testarrayofstring() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING);
+  fn testarrayofstring() -> &const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> * {
+    self.GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING)
   }
   fn mutable_testarrayofstring(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> * {
     &mut GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
-  const flatbuffers::Vector<flatbuffers::Offset<Monster>> *testarrayoftables() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Monster>> *>(VT_TESTARRAYOFTABLES);
+  fn testarrayoftables() -> &const flatbuffers::Vector<flatbuffers::Offset<Monster>> * {
+    self.GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Monster>> *>(VT_TESTARRAYOFTABLES)
   }
   fn mutable_testarrayoftables(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<Monster>> * {
     &mut GetPointer<flatbuffers::Vector<flatbuffers::Offset<Monster>> *>(VT_TESTARRAYOFTABLES)
   }
-  const Monster *enemy() const {
-    return GetPointer<const Monster *>(VT_ENEMY);
+  fn enemy() -> &const Monster * {
+    self.GetPointer<const Monster *>(VT_ENEMY)
   }
   fn mutable_enemy(&mut self) -> &mut Monster * {
     &mut GetPointer<Monster *>(VT_ENEMY)
   }
-  const flatbuffers::Vector<u8> *testnestedflatbuffer() const {
-    return GetPointer<const flatbuffers::Vector<u8> *>(VT_TESTNESTEDFLATBUFFER);
+  fn testnestedflatbuffer() -> &const flatbuffers::Vector<u8> * {
+    self.GetPointer<const flatbuffers::Vector<u8> *>(VT_TESTNESTEDFLATBUFFER)
   }
   fn mutable_testnestedflatbuffer(&mut self) -> &mut flatbuffers::Vector<u8> * {
     &mut GetPointer<flatbuffers::Vector<u8> *>(VT_TESTNESTEDFLATBUFFER)
@@ -548,104 +548,104 @@ impl Monster /* private flatbuffers::Table */ {
   const MyGame::Example::Monster *testnestedflatbuffer_nested_root() const {
     return flatbuffers::GetRoot<MyGame::Example::Monster>(testnestedflatbuffer()->Data());
   }
-  const Stat *testempty() const {
-    return GetPointer<const Stat *>(VT_TESTEMPTY);
+  fn testempty() -> &const Stat * {
+    self.GetPointer<const Stat *>(VT_TESTEMPTY)
   }
   fn mutable_testempty(&mut self) -> &mut Stat * {
     &mut GetPointer<Stat *>(VT_TESTEMPTY)
   }
-  bool testbool() const {
-    return GetField<bool>(VT_TESTBOOL, 0) != 0;
+  fn testbool() -> &bool  {
+    self.GetField::<bool>(VT_TESTBOOL, 0) != 0
   }
-  fn mutate_testbool(bool _testbool) -> bool {
-    return SetField<bool>(VT_TESTBOOL, _testbool as bool, 0);
+  fn mutate_testbool(testbool_: bool) -> bool {
+    return SetField::<bool>(VT_TESTBOOL, _testbool as bool, 0);
   }
-  i32 testhashs32_fnv1() const {
-    return GetField<i32>(VT_TESTHASHS32_FNV1, 0);
+  fn testhashs32_fnv1() -> &i32  {
+    self.GetField::<i32>(VT_TESTHASHS32_FNV1, 0)
   }
-  fn mutate_testhashs32_fnv1(i32 _testhashs32_fnv1) -> bool {
-    return SetField<i32>(VT_TESTHASHS32_FNV1, _testhashs32_fnv1, 0);
+  fn mutate_testhashs32_fnv1(testhashs32_fnv1_: i32) -> bool {
+    return SetField::<i32>(VT_TESTHASHS32_FNV1, _testhashs32_fnv1, 0);
   }
-  u32 testhashu32_fnv1() const {
-    return GetField<u32>(VT_TESTHASHU32_FNV1, 0);
+  fn testhashu32_fnv1() -> &u32  {
+    self.GetField::<u32>(VT_TESTHASHU32_FNV1, 0)
   }
-  fn mutate_testhashu32_fnv1(u32 _testhashu32_fnv1) -> bool {
-    return SetField<u32>(VT_TESTHASHU32_FNV1, _testhashu32_fnv1, 0);
+  fn mutate_testhashu32_fnv1(testhashu32_fnv1_: u32) -> bool {
+    return SetField::<u32>(VT_TESTHASHU32_FNV1, _testhashu32_fnv1, 0);
   }
-  i64 testhashs64_fnv1() const {
-    return GetField<i64>(VT_TESTHASHS64_FNV1, 0);
+  fn testhashs64_fnv1() -> &i64  {
+    self.GetField::<i64>(VT_TESTHASHS64_FNV1, 0)
   }
-  fn mutate_testhashs64_fnv1(i64 _testhashs64_fnv1) -> bool {
-    return SetField<i64>(VT_TESTHASHS64_FNV1, _testhashs64_fnv1, 0);
+  fn mutate_testhashs64_fnv1(testhashs64_fnv1_: i64) -> bool {
+    return SetField::<i64>(VT_TESTHASHS64_FNV1, _testhashs64_fnv1, 0);
   }
-  u64 testhashu64_fnv1() const {
-    return GetField<u64>(VT_TESTHASHU64_FNV1, 0);
+  fn testhashu64_fnv1() -> &u64  {
+    self.GetField::<u64>(VT_TESTHASHU64_FNV1, 0)
   }
-  fn mutate_testhashu64_fnv1(u64 _testhashu64_fnv1) -> bool {
-    return SetField<u64>(VT_TESTHASHU64_FNV1, _testhashu64_fnv1, 0);
+  fn mutate_testhashu64_fnv1(testhashu64_fnv1_: u64) -> bool {
+    return SetField::<u64>(VT_TESTHASHU64_FNV1, _testhashu64_fnv1, 0);
   }
-  i32 testhashs32_fnv1a() const {
-    return GetField<i32>(VT_TESTHASHS32_FNV1A, 0);
+  fn testhashs32_fnv1a() -> &i32  {
+    self.GetField::<i32>(VT_TESTHASHS32_FNV1A, 0)
   }
-  fn mutate_testhashs32_fnv1a(i32 _testhashs32_fnv1a) -> bool {
-    return SetField<i32>(VT_TESTHASHS32_FNV1A, _testhashs32_fnv1a, 0);
+  fn mutate_testhashs32_fnv1a(testhashs32_fnv1a_: i32) -> bool {
+    return SetField::<i32>(VT_TESTHASHS32_FNV1A, _testhashs32_fnv1a, 0);
   }
-  u32 testhashu32_fnv1a() const {
-    return GetField<u32>(VT_TESTHASHU32_FNV1A, 0);
+  fn testhashu32_fnv1a() -> &u32  {
+    self.GetField::<u32>(VT_TESTHASHU32_FNV1A, 0)
   }
-  fn mutate_testhashu32_fnv1a(u32 _testhashu32_fnv1a) -> bool {
-    return SetField<u32>(VT_TESTHASHU32_FNV1A, _testhashu32_fnv1a, 0);
+  fn mutate_testhashu32_fnv1a(testhashu32_fnv1a_: u32) -> bool {
+    return SetField::<u32>(VT_TESTHASHU32_FNV1A, _testhashu32_fnv1a, 0);
   }
-  i64 testhashs64_fnv1a() const {
-    return GetField<i64>(VT_TESTHASHS64_FNV1A, 0);
+  fn testhashs64_fnv1a() -> &i64  {
+    self.GetField::<i64>(VT_TESTHASHS64_FNV1A, 0)
   }
-  fn mutate_testhashs64_fnv1a(i64 _testhashs64_fnv1a) -> bool {
-    return SetField<i64>(VT_TESTHASHS64_FNV1A, _testhashs64_fnv1a, 0);
+  fn mutate_testhashs64_fnv1a(testhashs64_fnv1a_: i64) -> bool {
+    return SetField::<i64>(VT_TESTHASHS64_FNV1A, _testhashs64_fnv1a, 0);
   }
-  u64 testhashu64_fnv1a() const {
-    return GetField<u64>(VT_TESTHASHU64_FNV1A, 0);
+  fn testhashu64_fnv1a() -> &u64  {
+    self.GetField::<u64>(VT_TESTHASHU64_FNV1A, 0)
   }
-  fn mutate_testhashu64_fnv1a(u64 _testhashu64_fnv1a) -> bool {
-    return SetField<u64>(VT_TESTHASHU64_FNV1A, _testhashu64_fnv1a, 0);
+  fn mutate_testhashu64_fnv1a(testhashu64_fnv1a_: u64) -> bool {
+    return SetField::<u64>(VT_TESTHASHU64_FNV1A, _testhashu64_fnv1a, 0);
   }
-  const flatbuffers::Vector<bool> *testarrayofbools() const {
-    return GetPointer<const flatbuffers::Vector<bool> *>(VT_TESTARRAYOFBOOLS);
+  fn testarrayofbools() -> &const flatbuffers::Vector<bool> * {
+    self.GetPointer<const flatbuffers::Vector<bool> *>(VT_TESTARRAYOFBOOLS)
   }
   fn mutable_testarrayofbools(&mut self) -> &mut flatbuffers::Vector<bool> * {
     &mut GetPointer<flatbuffers::Vector<bool> *>(VT_TESTARRAYOFBOOLS)
   }
-  f32 testf() const {
-    return GetField<f32>(VT_TESTF, 3.14159f);
+  fn testf() -> &f32  {
+    self.GetField::<f32>(VT_TESTF, 3.14159f)
   }
-  fn mutate_testf(f32 _testf) -> bool {
-    return SetField<f32>(VT_TESTF, _testf, 3.14159f);
+  fn mutate_testf(testf_: f32) -> bool {
+    return SetField::<f32>(VT_TESTF, _testf, 3.14159f);
   }
-  f32 testf2() const {
-    return GetField<f32>(VT_TESTF2, 3.0f);
+  fn testf2() -> &f32  {
+    self.GetField::<f32>(VT_TESTF2, 3.0f)
   }
-  fn mutate_testf2(f32 _testf2) -> bool {
-    return SetField<f32>(VT_TESTF2, _testf2, 3.0f);
+  fn mutate_testf2(testf2_: f32) -> bool {
+    return SetField::<f32>(VT_TESTF2, _testf2, 3.0f);
   }
-  f32 testf3() const {
-    return GetField<f32>(VT_TESTF3, 0.0f);
+  fn testf3() -> &f32  {
+    self.GetField::<f32>(VT_TESTF3, 0.0f)
   }
-  fn mutate_testf3(f32 _testf3) -> bool {
-    return SetField<f32>(VT_TESTF3, _testf3, 0.0f);
+  fn mutate_testf3(testf3_: f32) -> bool {
+    return SetField::<f32>(VT_TESTF3, _testf3, 0.0f);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *testarrayofstring2() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING2);
+  fn testarrayofstring2() -> &const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> * {
+    self.GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING2)
   }
   fn mutable_testarrayofstring2(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> * {
     &mut GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING2)
   }
-  const flatbuffers::Vector<const Ability *> *testarrayofsortedstruct() const {
-    return GetPointer<const flatbuffers::Vector<const Ability *> *>(VT_TESTARRAYOFSORTEDSTRUCT);
+  fn testarrayofsortedstruct() -> &const flatbuffers::Vector<const Ability *> * {
+    self.GetPointer<const flatbuffers::Vector<const Ability *> *>(VT_TESTARRAYOFSORTEDSTRUCT)
   }
   fn mutable_testarrayofsortedstruct(&mut self) -> &mut flatbuffers::Vector<const Ability *> * {
     &mut GetPointer<flatbuffers::Vector<const Ability *> *>(VT_TESTARRAYOFSORTEDSTRUCT)
   }
-  const flatbuffers::Vector<u8> *flex() const {
-    return GetPointer<const flatbuffers::Vector<u8> *>(VT_FLEX);
+  fn flex() -> &const flatbuffers::Vector<u8> * {
+    self.GetPointer<const flatbuffers::Vector<u8> *>(VT_FLEX)
   }
   fn mutable_flex(&mut self) -> &mut flatbuffers::Vector<u8> * {
     &mut GetPointer<flatbuffers::Vector<u8> *>(VT_FLEX)
@@ -654,41 +654,41 @@ impl Monster /* private flatbuffers::Table */ {
     auto v = flex();
     return flexbuffers::GetRoot(v->Data(), v->size());
   }
-  const flatbuffers::Vector<const Test *> *test5() const {
-    return GetPointer<const flatbuffers::Vector<const Test *> *>(VT_TEST5);
+  fn test5() -> &const flatbuffers::Vector<const Test *> * {
+    self.GetPointer<const flatbuffers::Vector<const Test *> *>(VT_TEST5)
   }
   fn mutable_test5(&mut self) -> &mut flatbuffers::Vector<const Test *> * {
     &mut GetPointer<flatbuffers::Vector<const Test *> *>(VT_TEST5)
   }
-  const flatbuffers::Vector<i64> *vector_of_longs() const {
-    return GetPointer<const flatbuffers::Vector<i64> *>(VT_VECTOR_OF_LONGS);
+  fn vector_of_longs() -> &const flatbuffers::Vector<i64> * {
+    self.GetPointer<const flatbuffers::Vector<i64> *>(VT_VECTOR_OF_LONGS)
   }
   fn mutable_vector_of_longs(&mut self) -> &mut flatbuffers::Vector<i64> * {
     &mut GetPointer<flatbuffers::Vector<i64> *>(VT_VECTOR_OF_LONGS)
   }
-  const flatbuffers::Vector<f64> *vector_of_doubles() const {
-    return GetPointer<const flatbuffers::Vector<f64> *>(VT_VECTOR_OF_DOUBLES);
+  fn vector_of_doubles() -> &const flatbuffers::Vector<f64> * {
+    self.GetPointer<const flatbuffers::Vector<f64> *>(VT_VECTOR_OF_DOUBLES)
   }
   fn mutable_vector_of_doubles(&mut self) -> &mut flatbuffers::Vector<f64> * {
     &mut GetPointer<flatbuffers::Vector<f64> *>(VT_VECTOR_OF_DOUBLES)
   }
-  const MyGame::InParentNamespace *parent_namespace_test() const {
-    return GetPointer<const MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST);
+  fn parent_namespace_test() -> &const MyGame::InParentNamespace * {
+    self.GetPointer<const MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST)
   }
   fn mutable_parent_namespace_test(&mut self) -> &mut MyGame::InParentNamespace * {
     &mut GetPointer<MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
-           VerifyField<Vec3>(verifier, VT_POS) &&
-           VerifyField<i16>(verifier, VT_MANA) &&
-           VerifyField<i16>(verifier, VT_HP) &&
+           VerifyField::<Vec3>(verifier, VT_POS) &&
+           VerifyField::<i16>(verifier, VT_MANA) &&
+           VerifyField::<i16>(verifier, VT_HP) &&
            VerifyOffsetRequired(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            VerifyOffset(verifier, VT_INVENTORY) &&
            verifier.Verify(inventory()) &&
-           VerifyField<i8>(verifier, VT_COLOR) &&
-           VerifyField<u8>(verifier, VT_TEST_TYPE) &&
+           VerifyField::<i8>(verifier, VT_COLOR) &&
+           VerifyField::<u8>(verifier, VT_TEST_TYPE) &&
            VerifyOffset(verifier, VT_TEST) &&
            VerifyAny(verifier, test(), test_type()) &&
            VerifyOffset(verifier, VT_TEST4) &&
@@ -705,20 +705,20 @@ impl Monster /* private flatbuffers::Table */ {
            verifier.Verify(testnestedflatbuffer()) &&
            VerifyOffset(verifier, VT_TESTEMPTY) &&
            verifier.VerifyTable(testempty()) &&
-           VerifyField<bool>(verifier, VT_TESTBOOL) &&
-           VerifyField<i32>(verifier, VT_TESTHASHS32_FNV1) &&
-           VerifyField<u32>(verifier, VT_TESTHASHU32_FNV1) &&
-           VerifyField<i64>(verifier, VT_TESTHASHS64_FNV1) &&
-           VerifyField<u64>(verifier, VT_TESTHASHU64_FNV1) &&
-           VerifyField<i32>(verifier, VT_TESTHASHS32_FNV1A) &&
-           VerifyField<u32>(verifier, VT_TESTHASHU32_FNV1A) &&
-           VerifyField<i64>(verifier, VT_TESTHASHS64_FNV1A) &&
-           VerifyField<u64>(verifier, VT_TESTHASHU64_FNV1A) &&
+           VerifyField::<bool>(verifier, VT_TESTBOOL) &&
+           VerifyField::<i32>(verifier, VT_TESTHASHS32_FNV1) &&
+           VerifyField::<u32>(verifier, VT_TESTHASHU32_FNV1) &&
+           VerifyField::<i64>(verifier, VT_TESTHASHS64_FNV1) &&
+           VerifyField::<u64>(verifier, VT_TESTHASHU64_FNV1) &&
+           VerifyField::<i32>(verifier, VT_TESTHASHS32_FNV1A) &&
+           VerifyField::<u32>(verifier, VT_TESTHASHU32_FNV1A) &&
+           VerifyField::<i64>(verifier, VT_TESTHASHS64_FNV1A) &&
+           VerifyField::<u64>(verifier, VT_TESTHASHU64_FNV1A) &&
            VerifyOffset(verifier, VT_TESTARRAYOFBOOLS) &&
            verifier.Verify(testarrayofbools()) &&
-           VerifyField<f32>(verifier, VT_TESTF) &&
-           VerifyField<f32>(verifier, VT_TESTF2) &&
-           VerifyField<f32>(verifier, VT_TESTF3) &&
+           VerifyField::<f32>(verifier, VT_TESTF) &&
+           VerifyField::<f32>(verifier, VT_TESTF2) &&
+           VerifyField::<f32>(verifier, VT_TESTF3) &&
            VerifyOffset(verifier, VT_TESTARRAYOFSTRING2) &&
            verifier.Verify(testarrayofstring2()) &&
            verifier.VerifyVectorOfStrings(testarrayofstring2()) &&
@@ -755,106 +755,106 @@ struct MonsterBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl MonsterBuilder {
-  void add_pos(const Vec3 *pos) {
+  fn add_pos(pos: const Vec3 *) {
     fbb_.AddStruct(Monster::VT_POS, pos);
   }
-  void add_mana(i16 mana) {
-    fbb_.AddElement<i16>(Monster::VT_MANA, mana, 150);
+  fn add_mana(mana: i16 ) {
+    fbb_.AddElement::<i16>(Monster::VT_MANA, mana, 150);
   }
-  void add_hp(i16 hp) {
-    fbb_.AddElement<i16>(Monster::VT_HP, hp, 100);
+  fn add_hp(hp: i16 ) {
+    fbb_.AddElement::<i16>(Monster::VT_HP, hp, 100);
   }
-  void add_name(flatbuffers::Offset<flatbuffers::String> name) {
+  fn add_name(name: flatbuffers::Offset<flatbuffers::String> ) {
     fbb_.AddOffset(Monster::VT_NAME, name);
   }
-  void add_inventory(flatbuffers::Offset<flatbuffers::Vector<u8>> inventory) {
+  fn add_inventory(inventory: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
     fbb_.AddOffset(Monster::VT_INVENTORY, inventory);
   }
-  void add_color(Color color) {
-    fbb_.AddElement<i8>(Monster::VT_COLOR, color as i8, 8);
+  fn add_color(color: Color ) {
+    fbb_.AddElement::<i8>(Monster::VT_COLOR, color as i8, 8);
   }
-  void add_test_type(Any test_type) {
-    fbb_.AddElement<u8>(Monster::VT_TEST_TYPE, test_type as u8, 0);
+  fn add_test_type(test_type: Any ) {
+    fbb_.AddElement::<u8>(Monster::VT_TEST_TYPE, test_type as u8, 0);
   }
-  void add_test(flatbuffers::Offset<void> test) {
+  fn add_test(test: flatbuffers::Offset<void> ) {
     fbb_.AddOffset(Monster::VT_TEST, test);
   }
-  void add_test4(flatbuffers::Offset<flatbuffers::Vector<const Test *>> test4) {
+  fn add_test4(test4: flatbuffers::Offset<flatbuffers::Vector<const Test *>> ) {
     fbb_.AddOffset(Monster::VT_TEST4, test4);
   }
-  void add_testarrayofstring(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> testarrayofstring) {
+  fn add_testarrayofstring(testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
   }
-  void add_testarrayoftables(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>> testarrayoftables) {
+  fn add_testarrayoftables(testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
   }
-  void add_enemy(flatbuffers::Offset<Monster> enemy) {
+  fn add_enemy(enemy: flatbuffers::Offset<Monster> ) {
     fbb_.AddOffset(Monster::VT_ENEMY, enemy);
   }
-  void add_testnestedflatbuffer(flatbuffers::Offset<flatbuffers::Vector<u8>> testnestedflatbuffer) {
+  fn add_testnestedflatbuffer(testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
     fbb_.AddOffset(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer);
   }
-  void add_testempty(flatbuffers::Offset<Stat> testempty) {
+  fn add_testempty(testempty: flatbuffers::Offset<Stat> ) {
     fbb_.AddOffset(Monster::VT_TESTEMPTY, testempty);
   }
-  void add_testbool(bool testbool) {
-    fbb_.AddElement<bool>(Monster::VT_TESTBOOL, testbool as bool, 0);
+  fn add_testbool(testbool: bool ) {
+    fbb_.AddElement::<bool>(Monster::VT_TESTBOOL, testbool as bool, 0);
   }
-  void add_testhashs32_fnv1(i32 testhashs32_fnv1) {
-    fbb_.AddElement<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, 0);
+  fn add_testhashs32_fnv1(testhashs32_fnv1: i32 ) {
+    fbb_.AddElement::<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, 0);
   }
-  void add_testhashu32_fnv1(u32 testhashu32_fnv1) {
-    fbb_.AddElement<u32>(Monster::VT_TESTHASHU32_FNV1, testhashu32_fnv1, 0);
+  fn add_testhashu32_fnv1(testhashu32_fnv1: u32 ) {
+    fbb_.AddElement::<u32>(Monster::VT_TESTHASHU32_FNV1, testhashu32_fnv1, 0);
   }
-  void add_testhashs64_fnv1(i64 testhashs64_fnv1) {
-    fbb_.AddElement<i64>(Monster::VT_TESTHASHS64_FNV1, testhashs64_fnv1, 0);
+  fn add_testhashs64_fnv1(testhashs64_fnv1: i64 ) {
+    fbb_.AddElement::<i64>(Monster::VT_TESTHASHS64_FNV1, testhashs64_fnv1, 0);
   }
-  void add_testhashu64_fnv1(u64 testhashu64_fnv1) {
-    fbb_.AddElement<u64>(Monster::VT_TESTHASHU64_FNV1, testhashu64_fnv1, 0);
+  fn add_testhashu64_fnv1(testhashu64_fnv1: u64 ) {
+    fbb_.AddElement::<u64>(Monster::VT_TESTHASHU64_FNV1, testhashu64_fnv1, 0);
   }
-  void add_testhashs32_fnv1a(i32 testhashs32_fnv1a) {
-    fbb_.AddElement<i32>(Monster::VT_TESTHASHS32_FNV1A, testhashs32_fnv1a, 0);
+  fn add_testhashs32_fnv1a(testhashs32_fnv1a: i32 ) {
+    fbb_.AddElement::<i32>(Monster::VT_TESTHASHS32_FNV1A, testhashs32_fnv1a, 0);
   }
-  void add_testhashu32_fnv1a(u32 testhashu32_fnv1a) {
-    fbb_.AddElement<u32>(Monster::VT_TESTHASHU32_FNV1A, testhashu32_fnv1a, 0);
+  fn add_testhashu32_fnv1a(testhashu32_fnv1a: u32 ) {
+    fbb_.AddElement::<u32>(Monster::VT_TESTHASHU32_FNV1A, testhashu32_fnv1a, 0);
   }
-  void add_testhashs64_fnv1a(i64 testhashs64_fnv1a) {
-    fbb_.AddElement<i64>(Monster::VT_TESTHASHS64_FNV1A, testhashs64_fnv1a, 0);
+  fn add_testhashs64_fnv1a(testhashs64_fnv1a: i64 ) {
+    fbb_.AddElement::<i64>(Monster::VT_TESTHASHS64_FNV1A, testhashs64_fnv1a, 0);
   }
-  void add_testhashu64_fnv1a(u64 testhashu64_fnv1a) {
-    fbb_.AddElement<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, 0);
+  fn add_testhashu64_fnv1a(testhashu64_fnv1a: u64 ) {
+    fbb_.AddElement::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, 0);
   }
-  void add_testarrayofbools(flatbuffers::Offset<flatbuffers::Vector<bool>> testarrayofbools) {
+  fn add_testarrayofbools(testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<bool>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools);
   }
-  void add_testf(f32 testf) {
-    fbb_.AddElement<f32>(Monster::VT_TESTF, testf, 3.14159f);
+  fn add_testf(testf: f32 ) {
+    fbb_.AddElement::<f32>(Monster::VT_TESTF, testf, 3.14159f);
   }
-  void add_testf2(f32 testf2) {
-    fbb_.AddElement<f32>(Monster::VT_TESTF2, testf2, 3.0f);
+  fn add_testf2(testf2: f32 ) {
+    fbb_.AddElement::<f32>(Monster::VT_TESTF2, testf2, 3.0f);
   }
-  void add_testf3(f32 testf3) {
-    fbb_.AddElement<f32>(Monster::VT_TESTF3, testf3, 0.0f);
+  fn add_testf3(testf3: f32 ) {
+    fbb_.AddElement::<f32>(Monster::VT_TESTF3, testf3, 0.0f);
   }
-  void add_testarrayofstring2(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> testarrayofstring2) {
+  fn add_testarrayofstring2(testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
   }
-  void add_testarrayofsortedstruct(flatbuffers::Offset<flatbuffers::Vector<const Ability *>> testarrayofsortedstruct) {
+  fn add_testarrayofsortedstruct(testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<const Ability *>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct);
   }
-  void add_flex(flatbuffers::Offset<flatbuffers::Vector<u8>> flex) {
+  fn add_flex(flex: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
     fbb_.AddOffset(Monster::VT_FLEX, flex);
   }
-  void add_test5(flatbuffers::Offset<flatbuffers::Vector<const Test *>> test5) {
+  fn add_test5(test5: flatbuffers::Offset<flatbuffers::Vector<const Test *>> ) {
     fbb_.AddOffset(Monster::VT_TEST5, test5);
   }
-  void add_vector_of_longs(flatbuffers::Offset<flatbuffers::Vector<i64>> vector_of_longs) {
+  fn add_vector_of_longs(vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>> ) {
     fbb_.AddOffset(Monster::VT_VECTOR_OF_LONGS, vector_of_longs);
   }
-  void add_vector_of_doubles(flatbuffers::Offset<flatbuffers::Vector<f64>> vector_of_doubles) {
+  fn add_vector_of_doubles(vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
     fbb_.AddOffset(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
   }
-  void add_parent_namespace_test(flatbuffers::Offset<MyGame::InParentNamespace> parent_namespace_test) {
+  fn add_parent_namespace_test(parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace> ) {
     fbb_.AddOffset(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
@@ -875,40 +875,40 @@ impl MonsterBuilder {
 #[inline]
 fn CreateMonster(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    const Vec3 *pos = 0,
-    i16 mana = 150,
-    i16 hp = 100,
-    flatbuffers::Offset<flatbuffers::String> name = 0,
-    flatbuffers::Offset<flatbuffers::Vector<u8>> inventory = 0,
-    Color color = Color_Blue,
-    Any test_type = Any_NONE,
-    flatbuffers::Offset<void> test = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const Test *>> test4 = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> testarrayofstring = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>> testarrayoftables = 0,
-    flatbuffers::Offset<Monster> enemy = 0,
-    flatbuffers::Offset<flatbuffers::Vector<u8>> testnestedflatbuffer = 0,
-    flatbuffers::Offset<Stat> testempty = 0,
-    bool testbool = false,
-    i32 testhashs32_fnv1 = 0,
-    u32 testhashu32_fnv1 = 0,
-    i64 testhashs64_fnv1 = 0,
-    u64 testhashu64_fnv1 = 0,
-    i32 testhashs32_fnv1a = 0,
-    u32 testhashu32_fnv1a = 0,
-    i64 testhashs64_fnv1a = 0,
-    u64 testhashu64_fnv1a = 0,
-    flatbuffers::Offset<flatbuffers::Vector<bool>> testarrayofbools = 0,
-    f32 testf = 3.14159f,
-    f32 testf2 = 3.0f,
-    f32 testf3 = 0.0f,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> testarrayofstring2 = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const Ability *>> testarrayofsortedstruct = 0,
-    flatbuffers::Offset<flatbuffers::Vector<u8>> flex = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const Test *>> test5 = 0,
-    flatbuffers::Offset<flatbuffers::Vector<i64>> vector_of_longs = 0,
-    flatbuffers::Offset<flatbuffers::Vector<f64>> vector_of_doubles = 0,
-    flatbuffers::Offset<MyGame::InParentNamespace> parent_namespace_test = 0) -> flatbuffers::Offset<Monster> {
+    pos: const Vec3 * /* = 0 */,
+    mana: i16  /* = 150 */,
+    hp: i16  /* = 100 */,
+    name: flatbuffers::Offset<flatbuffers::String>  /* = 0 */,
+    inventory: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
+    color: Color  /* = Color_Blue */,
+    test_type: Any  /* = Any_NONE */,
+    test: flatbuffers::Offset<void>  /* = 0 */,
+    test4: flatbuffers::Offset<flatbuffers::Vector<const Test *>>  /* = 0 */,
+    testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
+    testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>>  /* = 0 */,
+    enemy: flatbuffers::Offset<Monster>  /* = 0 */,
+    testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
+    testempty: flatbuffers::Offset<Stat>  /* = 0 */,
+    testbool: bool  /* = false */,
+    testhashs32_fnv1: i32  /* = 0 */,
+    testhashu32_fnv1: u32  /* = 0 */,
+    testhashs64_fnv1: i64  /* = 0 */,
+    testhashu64_fnv1: u64  /* = 0 */,
+    testhashs32_fnv1a: i32  /* = 0 */,
+    testhashu32_fnv1a: u32  /* = 0 */,
+    testhashs64_fnv1a: i64  /* = 0 */,
+    testhashu64_fnv1a: u64  /* = 0 */,
+    testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<bool>>  /* = 0 */,
+    testf: f32  /* = 3.14159f */,
+    testf2: f32  /* = 3.0f */,
+    testf3: f32  /* = 0.0f */,
+    testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
+    testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<const Ability *>>  /* = 0 */,
+    flex: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
+    test5: flatbuffers::Offset<flatbuffers::Vector<const Test *>>  /* = 0 */,
+    vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>>  /* = 0 */,
+    vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */,
+    parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder_.add_testhashu64_fnv1a(testhashu64_fnv1a);
   builder_.add_testhashs64_fnv1a(testhashs64_fnv1a);
@@ -949,40 +949,40 @@ fn CreateMonster(
 
 inline flatbuffers::Offset<Monster> CreateMonsterDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const Vec3 *pos = 0,
-    i16 mana = 150,
-    i16 hp = 100,
-    const char *name = nullptr,
-    const std::vector<u8> *inventory = nullptr,
-    Color color = Color_Blue,
-    Any test_type = Any_NONE,
-    flatbuffers::Offset<void> test = 0,
-    const std::vector<Test> *test4 = nullptr,
-    const std::vector<flatbuffers::Offset<flatbuffers::String>> *testarrayofstring = nullptr,
-    const std::vector<flatbuffers::Offset<Monster>> *testarrayoftables = nullptr,
-    flatbuffers::Offset<Monster> enemy = 0,
-    const std::vector<u8> *testnestedflatbuffer = nullptr,
-    flatbuffers::Offset<Stat> testempty = 0,
-    bool testbool = false,
-    i32 testhashs32_fnv1 = 0,
-    u32 testhashu32_fnv1 = 0,
-    i64 testhashs64_fnv1 = 0,
-    u64 testhashu64_fnv1 = 0,
-    i32 testhashs32_fnv1a = 0,
-    u32 testhashu32_fnv1a = 0,
-    i64 testhashs64_fnv1a = 0,
-    u64 testhashu64_fnv1a = 0,
-    const std::vector<bool> *testarrayofbools = nullptr,
-    f32 testf = 3.14159f,
-    f32 testf2 = 3.0f,
-    f32 testf3 = 0.0f,
-    const std::vector<flatbuffers::Offset<flatbuffers::String>> *testarrayofstring2 = nullptr,
-    const std::vector<Ability> *testarrayofsortedstruct = nullptr,
-    const std::vector<u8> *flex = nullptr,
-    const std::vector<Test> *test5 = nullptr,
-    const std::vector<i64> *vector_of_longs = nullptr,
-    const std::vector<f64> *vector_of_doubles = nullptr,
-    flatbuffers::Offset<MyGame::InParentNamespace> parent_namespace_test = 0) {
+    pos: const Vec3 * /* = 0 */,
+    mana: i16  /* = 150 */,
+    hp: i16  /* = 100 */,
+    name: const char * /* = nullptr */,
+    inventory: const std::vector<u8> * /* = nullptr */,
+    color: Color  /* = Color_Blue */,
+    test_type: Any  /* = Any_NONE */,
+    test: flatbuffers::Offset<void>  /* = 0 */,
+    test4: const std::vector<Test> * /* = nullptr */,
+    testarrayofstring: const std::vector<flatbuffers::Offset<flatbuffers::String>> * /* = nullptr */,
+    testarrayoftables: const std::vector<flatbuffers::Offset<Monster>> * /* = nullptr */,
+    enemy: flatbuffers::Offset<Monster>  /* = 0 */,
+    testnestedflatbuffer: const std::vector<u8> * /* = nullptr */,
+    testempty: flatbuffers::Offset<Stat>  /* = 0 */,
+    testbool: bool  /* = false */,
+    testhashs32_fnv1: i32  /* = 0 */,
+    testhashu32_fnv1: u32  /* = 0 */,
+    testhashs64_fnv1: i64  /* = 0 */,
+    testhashu64_fnv1: u64  /* = 0 */,
+    testhashs32_fnv1a: i32  /* = 0 */,
+    testhashu32_fnv1a: u32  /* = 0 */,
+    testhashs64_fnv1a: i64  /* = 0 */,
+    testhashu64_fnv1a: u64  /* = 0 */,
+    testarrayofbools: const std::vector<bool> * /* = nullptr */,
+    testf: f32  /* = 3.14159f */,
+    testf2: f32  /* = 3.0f */,
+    testf3: f32  /* = 0.0f */,
+    testarrayofstring2: const std::vector<flatbuffers::Offset<flatbuffers::String>> * /* = nullptr */,
+    testarrayofsortedstruct: const std::vector<Ability> * /* = nullptr */,
+    flex: const std::vector<u8> * /* = nullptr */,
+    test5: const std::vector<Test> * /* = nullptr */,
+    vector_of_longs: const std::vector<i64> * /* = nullptr */,
+    vector_of_doubles: const std::vector<f64> * /* = nullptr */,
+    parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace>  /* = 0 */) {
   return MyGame::Example::CreateMonster(
       _fbb,
       pos,
@@ -1036,90 +1036,90 @@ impl TypeAliases /* private flatbuffers::Table */ {
     const VT_V8: isize = 24;
     const VT_VF64: isize = 26;
 
-  i8 i8() const {
-    return GetField<i8>(VT_I8, 0);
+  fn i8() -> &i8  {
+    self.GetField::<i8>(VT_I8, 0)
   }
-  fn mutate_i8(i8 _i8) -> bool {
-    return SetField<i8>(VT_I8, _i8, 0);
+  fn mutate_i8(i8_: i8) -> bool {
+    return SetField::<i8>(VT_I8, _i8, 0);
   }
-  u8 u8() const {
-    return GetField<u8>(VT_U8, 0);
+  fn u8() -> &u8  {
+    self.GetField::<u8>(VT_U8, 0)
   }
-  fn mutate_u8(u8 _u8) -> bool {
-    return SetField<u8>(VT_U8, _u8, 0);
+  fn mutate_u8(u8_: u8) -> bool {
+    return SetField::<u8>(VT_U8, _u8, 0);
   }
-  i16 i16() const {
-    return GetField<i16>(VT_I16, 0);
+  fn i16() -> &i16  {
+    self.GetField::<i16>(VT_I16, 0)
   }
-  fn mutate_i16(i16 _i16) -> bool {
-    return SetField<i16>(VT_I16, _i16, 0);
+  fn mutate_i16(i16_: i16) -> bool {
+    return SetField::<i16>(VT_I16, _i16, 0);
   }
-  u16 u16() const {
-    return GetField<u16>(VT_U16, 0);
+  fn u16() -> &u16  {
+    self.GetField::<u16>(VT_U16, 0)
   }
-  fn mutate_u16(u16 _u16) -> bool {
-    return SetField<u16>(VT_U16, _u16, 0);
+  fn mutate_u16(u16_: u16) -> bool {
+    return SetField::<u16>(VT_U16, _u16, 0);
   }
-  i32 i32() const {
-    return GetField<i32>(VT_I32, 0);
+  fn i32() -> &i32  {
+    self.GetField::<i32>(VT_I32, 0)
   }
-  fn mutate_i32(i32 _i32) -> bool {
-    return SetField<i32>(VT_I32, _i32, 0);
+  fn mutate_i32(i32_: i32) -> bool {
+    return SetField::<i32>(VT_I32, _i32, 0);
   }
-  u32 u32() const {
-    return GetField<u32>(VT_U32, 0);
+  fn u32() -> &u32  {
+    self.GetField::<u32>(VT_U32, 0)
   }
-  fn mutate_u32(u32 _u32) -> bool {
-    return SetField<u32>(VT_U32, _u32, 0);
+  fn mutate_u32(u32_: u32) -> bool {
+    return SetField::<u32>(VT_U32, _u32, 0);
   }
-  i64 i64() const {
-    return GetField<i64>(VT_I64, 0);
+  fn i64() -> &i64  {
+    self.GetField::<i64>(VT_I64, 0)
   }
-  fn mutate_i64(i64 _i64) -> bool {
-    return SetField<i64>(VT_I64, _i64, 0);
+  fn mutate_i64(i64_: i64) -> bool {
+    return SetField::<i64>(VT_I64, _i64, 0);
   }
-  u64 u64() const {
-    return GetField<u64>(VT_U64, 0);
+  fn u64() -> &u64  {
+    self.GetField::<u64>(VT_U64, 0)
   }
-  fn mutate_u64(u64 _u64) -> bool {
-    return SetField<u64>(VT_U64, _u64, 0);
+  fn mutate_u64(u64_: u64) -> bool {
+    return SetField::<u64>(VT_U64, _u64, 0);
   }
-  f32 f32() const {
-    return GetField<f32>(VT_F32, 0.0f);
+  fn f32() -> &f32  {
+    self.GetField::<f32>(VT_F32, 0.0f)
   }
-  fn mutate_f32(f32 _f32) -> bool {
-    return SetField<f32>(VT_F32, _f32, 0.0f);
+  fn mutate_f32(f32_: f32) -> bool {
+    return SetField::<f32>(VT_F32, _f32, 0.0f);
   }
-  f64 f64() const {
-    return GetField<f64>(VT_F64, 0.0);
+  fn f64() -> &f64  {
+    self.GetField::<f64>(VT_F64, 0.0)
   }
-  fn mutate_f64(f64 _f64) -> bool {
-    return SetField<f64>(VT_F64, _f64, 0.0);
+  fn mutate_f64(f64_: f64) -> bool {
+    return SetField::<f64>(VT_F64, _f64, 0.0);
   }
-  const flatbuffers::Vector<i8> *v8() const {
-    return GetPointer<const flatbuffers::Vector<i8> *>(VT_V8);
+  fn v8() -> &const flatbuffers::Vector<i8> * {
+    self.GetPointer<const flatbuffers::Vector<i8> *>(VT_V8)
   }
   fn mutable_v8(&mut self) -> &mut flatbuffers::Vector<i8> * {
     &mut GetPointer<flatbuffers::Vector<i8> *>(VT_V8)
   }
-  const flatbuffers::Vector<f64> *vf64() const {
-    return GetPointer<const flatbuffers::Vector<f64> *>(VT_VF64);
+  fn vf64() -> &const flatbuffers::Vector<f64> * {
+    self.GetPointer<const flatbuffers::Vector<f64> *>(VT_VF64)
   }
   fn mutable_vf64(&mut self) -> &mut flatbuffers::Vector<f64> * {
     &mut GetPointer<flatbuffers::Vector<f64> *>(VT_VF64)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
-           VerifyField<i8>(verifier, VT_I8) &&
-           VerifyField<u8>(verifier, VT_U8) &&
-           VerifyField<i16>(verifier, VT_I16) &&
-           VerifyField<u16>(verifier, VT_U16) &&
-           VerifyField<i32>(verifier, VT_I32) &&
-           VerifyField<u32>(verifier, VT_U32) &&
-           VerifyField<i64>(verifier, VT_I64) &&
-           VerifyField<u64>(verifier, VT_U64) &&
-           VerifyField<f32>(verifier, VT_F32) &&
-           VerifyField<f64>(verifier, VT_F64) &&
+           VerifyField::<i8>(verifier, VT_I8) &&
+           VerifyField::<u8>(verifier, VT_U8) &&
+           VerifyField::<i16>(verifier, VT_I16) &&
+           VerifyField::<u16>(verifier, VT_U16) &&
+           VerifyField::<i32>(verifier, VT_I32) &&
+           VerifyField::<u32>(verifier, VT_U32) &&
+           VerifyField::<i64>(verifier, VT_I64) &&
+           VerifyField::<u64>(verifier, VT_U64) &&
+           VerifyField::<f32>(verifier, VT_F32) &&
+           VerifyField::<f64>(verifier, VT_F64) &&
            VerifyOffset(verifier, VT_V8) &&
            verifier.Verify(v8()) &&
            VerifyOffset(verifier, VT_VF64) &&
@@ -1133,40 +1133,40 @@ struct TypeAliasesBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TypeAliasesBuilder {
-  void add_i8(i8 i8) {
-    fbb_.AddElement<i8>(TypeAliases::VT_I8, i8, 0);
+  fn add_i8(i8: i8 ) {
+    fbb_.AddElement::<i8>(TypeAliases::VT_I8, i8, 0);
   }
-  void add_u8(u8 u8) {
-    fbb_.AddElement<u8>(TypeAliases::VT_U8, u8, 0);
+  fn add_u8(u8: u8 ) {
+    fbb_.AddElement::<u8>(TypeAliases::VT_U8, u8, 0);
   }
-  void add_i16(i16 i16) {
-    fbb_.AddElement<i16>(TypeAliases::VT_I16, i16, 0);
+  fn add_i16(i16: i16 ) {
+    fbb_.AddElement::<i16>(TypeAliases::VT_I16, i16, 0);
   }
-  void add_u16(u16 u16) {
-    fbb_.AddElement<u16>(TypeAliases::VT_U16, u16, 0);
+  fn add_u16(u16: u16 ) {
+    fbb_.AddElement::<u16>(TypeAliases::VT_U16, u16, 0);
   }
-  void add_i32(i32 i32) {
-    fbb_.AddElement<i32>(TypeAliases::VT_I32, i32, 0);
+  fn add_i32(i32: i32 ) {
+    fbb_.AddElement::<i32>(TypeAliases::VT_I32, i32, 0);
   }
-  void add_u32(u32 u32) {
-    fbb_.AddElement<u32>(TypeAliases::VT_U32, u32, 0);
+  fn add_u32(u32: u32 ) {
+    fbb_.AddElement::<u32>(TypeAliases::VT_U32, u32, 0);
   }
-  void add_i64(i64 i64) {
-    fbb_.AddElement<i64>(TypeAliases::VT_I64, i64, 0);
+  fn add_i64(i64: i64 ) {
+    fbb_.AddElement::<i64>(TypeAliases::VT_I64, i64, 0);
   }
-  void add_u64(u64 u64) {
-    fbb_.AddElement<u64>(TypeAliases::VT_U64, u64, 0);
+  fn add_u64(u64: u64 ) {
+    fbb_.AddElement::<u64>(TypeAliases::VT_U64, u64, 0);
   }
-  void add_f32(f32 f32) {
-    fbb_.AddElement<f32>(TypeAliases::VT_F32, f32, 0.0f);
+  fn add_f32(f32: f32 ) {
+    fbb_.AddElement::<f32>(TypeAliases::VT_F32, f32, 0.0f);
   }
-  void add_f64(f64 f64) {
-    fbb_.AddElement<f64>(TypeAliases::VT_F64, f64, 0.0);
+  fn add_f64(f64: f64 ) {
+    fbb_.AddElement::<f64>(TypeAliases::VT_F64, f64, 0.0);
   }
-  void add_v8(flatbuffers::Offset<flatbuffers::Vector<i8>> v8) {
+  fn add_v8(v8: flatbuffers::Offset<flatbuffers::Vector<i8>> ) {
     fbb_.AddOffset(TypeAliases::VT_V8, v8);
   }
-  void add_vf64(flatbuffers::Offset<flatbuffers::Vector<f64>> vf64) {
+  fn add_vf64(vf64: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
     fbb_.AddOffset(TypeAliases::VT_VF64, vf64);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TypeAliasesBuilder {
@@ -1186,18 +1186,18 @@ impl TypeAliasesBuilder {
 #[inline]
 fn CreateTypeAliases(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    i8 i8 = 0,
-    u8 u8 = 0,
-    i16 i16 = 0,
-    u16 u16 = 0,
-    i32 i32 = 0,
-    u32 u32 = 0,
-    i64 i64 = 0,
-    u64 u64 = 0,
-    f32 f32 = 0.0f,
-    f64 f64 = 0.0,
-    flatbuffers::Offset<flatbuffers::Vector<i8>> v8 = 0,
-    flatbuffers::Offset<flatbuffers::Vector<f64>> vf64 = 0) -> flatbuffers::Offset<TypeAliases> {
+    i8: i8  /* = 0 */,
+    u8: u8  /* = 0 */,
+    i16: i16  /* = 0 */,
+    u16: u16  /* = 0 */,
+    i32: i32  /* = 0 */,
+    u32: u32  /* = 0 */,
+    i64: i64  /* = 0 */,
+    u64: u64  /* = 0 */,
+    f32: f32  /* = 0.0f */,
+    f64: f64  /* = 0.0 */,
+    v8: flatbuffers::Offset<flatbuffers::Vector<i8>>  /* = 0 */,
+    vf64: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */) -> flatbuffers::Offset<TypeAliases> {
   let mut builder = TypeAliasesBuilder::new(_fbb);
   builder_.add_f64(f64);
   builder_.add_u64(u64);
@@ -1216,18 +1216,18 @@ fn CreateTypeAliases(
 
 inline flatbuffers::Offset<TypeAliases> CreateTypeAliasesDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    i8 i8 = 0,
-    u8 u8 = 0,
-    i16 i16 = 0,
-    u16 u16 = 0,
-    i32 i32 = 0,
-    u32 u32 = 0,
-    i64 i64 = 0,
-    u64 u64 = 0,
-    f32 f32 = 0.0f,
-    f64 f64 = 0.0,
-    const std::vector<i8> *v8 = nullptr,
-    const std::vector<f64> *vf64 = nullptr) {
+    i8: i8  /* = 0 */,
+    u8: u8  /* = 0 */,
+    i16: i16  /* = 0 */,
+    u16: u16  /* = 0 */,
+    i32: i32  /* = 0 */,
+    u32: u32  /* = 0 */,
+    i64: i64  /* = 0 */,
+    u64: u64  /* = 0 */,
+    f32: f32  /* = 0.0f */,
+    f64: f64  /* = 0.0 */,
+    v8: const std::vector<i8> * /* = nullptr */,
+    vf64: const std::vector<f64> * /* = nullptr */) {
   return MyGame::Example::CreateTypeAliases(
       _fbb,
       i8,
