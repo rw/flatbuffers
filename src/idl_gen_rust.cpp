@@ -889,21 +889,18 @@ class RustGenerator : public BaseGenerator {
     static const int kMaxSparseness = 5;
     if (range / static_cast<int64_t>(enum_def.vals.vec.size()) <
         kMaxSparseness) {
-      code_ += "inline const char **EnumNames{{ENUM_NAME}}() {";
-      code_ += "  static const char *names[] = {";
+      code_ += "const EnumNames{{ENUM_NAME}}:[&'static str; " +
+                std::to_string(range) + "] = [";
 
       auto val = enum_def.vals.vec.front()->value;
       for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
            ++it) {
         const auto &ev = **it;
         while (val++ != ev.value) { code_ += "    \"\","; }
-        code_ += "    \"" + Name(ev) + "\",";
+        auto suffix = *it != enum_def.vals.vec.back() ? "," : "";
+        code_ += "    \"" + Name(ev) + "\"" + suffix;
       }
-      code_ += "    nullptr";
-      code_ += "  };";
-
-      code_ += "  return names;";
-      code_ += "}";
+      code_ += "]";
       code_ += "";
 
       code_ += "inline const char *EnumName{{ENUM_NAME}}({{ENUM_NAME}} e) {";
