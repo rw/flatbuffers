@@ -211,8 +211,10 @@ impl InParentNamespace /* private flatbuffers::Table */ {
 }
 
 struct InParentNamespaceBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl InParentNamespaceBuilder {
   explicit InParentNamespaceBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -242,8 +244,10 @@ impl Monster /* private flatbuffers::Table */ {
 }
 
 struct MonsterBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl MonsterBuilder {
   explicit MonsterBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -284,8 +288,10 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
 }
 
 struct TestSimpleTableWithEnumBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl TestSimpleTableWithEnumBuilder {
   void add_color(Color color) {
     fbb_.AddElement<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
   }
@@ -344,8 +350,10 @@ impl Stat /* private flatbuffers::Table */ {
 }
 
 struct StatBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl StatBuilder {
   void add_id(flatbuffers::Offset<flatbuffers::String> id) {
     fbb_.AddOffset(Stat::VT_ID, id);
   }
@@ -731,8 +739,10 @@ template<> inline const MyGame::Example2::Monster *Monster::test_as<MyGame::Exam
 }
 
 struct MonsterBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl MonsterBuilder {
   void add_pos(const Vec3 *pos) {
     fbb_.AddStruct(Monster::VT_POS, pos);
   }
@@ -1104,8 +1114,10 @@ impl TypeAliases /* private flatbuffers::Table */ {
 }
 
 struct TypeAliasesBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl TypeAliasesBuilder {
   void add_i8(i8 i8) {
     fbb_.AddElement<i8>(TypeAliases::VT_I8, i8, 0);
   }
