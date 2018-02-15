@@ -111,13 +111,13 @@ impl Test {
 
   }
   fn a(&self) -> i16  {
-    flatbuffers::EndianScalar(a_)
+    flatbuffers::EndianScalar(self.a_)
   }
   fn mutate_a(&mut self, _a: i16) {
     flatbuffers::WriteScalar(&self.a_, _a);
   }
   fn b(&self) -> i8  {
-    flatbuffers::EndianScalar(b_)
+    flatbuffers::EndianScalar(self.b_)
   }
   fn mutate_b(&mut self, _b: i8) {
     flatbuffers::WriteScalar(&self.b_, _b);
@@ -153,40 +153,40 @@ impl Vec3 {
 
   }
   fn x(&self) -> f32  {
-    flatbuffers::EndianScalar(x_)
+    flatbuffers::EndianScalar(self.x_)
   }
   fn mutate_x(&mut self, _x: f32) {
     flatbuffers::WriteScalar(&self.x_, _x);
   }
   fn y(&self) -> f32  {
-    flatbuffers::EndianScalar(y_)
+    flatbuffers::EndianScalar(self.y_)
   }
   fn mutate_y(&mut self, _y: f32) {
     flatbuffers::WriteScalar(&self.y_, _y);
   }
   fn z(&self) -> f32  {
-    flatbuffers::EndianScalar(z_)
+    flatbuffers::EndianScalar(self.z_)
   }
   fn mutate_z(&mut self, _z: f32) {
     flatbuffers::WriteScalar(&self.z_, _z);
   }
   fn test1(&self) -> f64  {
-    flatbuffers::EndianScalar(test1_)
+    flatbuffers::EndianScalar(self.test1_)
   }
   fn mutate_test1(&mut self, _test1: f64) {
     flatbuffers::WriteScalar(&self.test1_, _test1);
   }
   fn test2(&self) -> Color  {
-    flatbuffers::EndianScalar(test2_) as Color
+    flatbuffers::EndianScalar(self.test2_) as Color
   }
   fn mutate_test2(&mut self, _test2: Color) {
     flatbuffers::WriteScalar(&self.test2_, _test2 as i8);
   }
-  fn test3(&self) -> const Test & {
-    test3_
+  fn test3(&self) -> &Test {
+    self.test3_
   }
-  Test &mutable_test3() {
-    return test3_;
+  fn mutable_test3(&mut self) -> &mut Test {
+    self.test3_
   }
 }
 // STRUCT_END(Vec3, 32);
@@ -208,7 +208,7 @@ impl Ability {
 
   }
   fn id(&self) -> u32  {
-    flatbuffers::EndianScalar(id_)
+    flatbuffers::EndianScalar(self.id_)
   }
   fn mutate_id(&mut self, _id: u32) {
     flatbuffers::WriteScalar(&self.id_, _id);
@@ -221,7 +221,7 @@ impl Ability {
     return static_cast<int>(key > val) - static_cast<int>(key < val);
   }
   fn distance(&self) -> u32  {
-    flatbuffers::EndianScalar(distance_)
+    flatbuffers::EndianScalar(self.distance_)
   }
   fn mutate_distance(&mut self, _distance: u32) {
     flatbuffers::WriteScalar(&self.distance_, _distance);
@@ -395,8 +395,8 @@ struct Stat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *id() const {
     return GetPointer<const flatbuffers::String *>(VT_ID);
   }
-  flatbuffers::String *mutable_id() {
-    return GetPointer<flatbuffers::String *>(VT_ID);
+  fn mutable_id(&mut self) -> &mut flatbuffers::String * {
+    &mut GetPointer<flatbuffers::String *>(VT_ID)
   }
   i64 val() const {
     return GetField<i64>(VT_VAL, 0);
@@ -569,8 +569,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Vec3 *pos() const {
     return GetStruct<const Vec3 *>(VT_POS);
   }
-  Vec3 *mutable_pos() {
-    return GetStruct<Vec3 *>(VT_POS);
+  fn mutable_pos(&mut self) -> &mut Vec3 * {
+    &mut GetStruct<Vec3 *>(VT_POS)
   }
   i16 mana() const {
     return GetField<i16>(VT_MANA, 150);
@@ -587,8 +587,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
-  flatbuffers::String *mutable_name() {
-    return GetPointer<flatbuffers::String *>(VT_NAME);
+  fn mutable_name(&mut self) -> &mut flatbuffers::String * {
+    &mut GetPointer<flatbuffers::String *>(VT_NAME)
   }
   bool KeyCompareLessThan(const Monster *o) const {
     return *name() < *o->name();
@@ -599,8 +599,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<u8> *inventory() const {
     return GetPointer<const flatbuffers::Vector<u8> *>(VT_INVENTORY);
   }
-  flatbuffers::Vector<u8> *mutable_inventory() {
-    return GetPointer<flatbuffers::Vector<u8> *>(VT_INVENTORY);
+  fn mutable_inventory(&mut self) -> &mut flatbuffers::Vector<u8> * {
+    &mut GetPointer<flatbuffers::Vector<u8> *>(VT_INVENTORY)
   }
   Color color() const {
     return GetField<i8>(VT_COLOR, 8) as Color;
@@ -627,40 +627,40 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const MyGame::Example2::Monster *test_as_MyGame_Example2_Monster() const {
     return test_type() == Any_MyGame_Example2_Monster ? static_cast<const MyGame::Example2::Monster *>(test()) : nullptr;
   }
-  void *mutable_test() {
-    return GetPointer<void *>(VT_TEST);
+  fn mutable_test(&mut self) -> &mut void * {
+    &mut GetPointer<void *>(VT_TEST)
   }
   const flatbuffers::Vector<const Test *> *test4() const {
     return GetPointer<const flatbuffers::Vector<const Test *> *>(VT_TEST4);
   }
-  flatbuffers::Vector<const Test *> *mutable_test4() {
-    return GetPointer<flatbuffers::Vector<const Test *> *>(VT_TEST4);
+  fn mutable_test4(&mut self) -> &mut flatbuffers::Vector<const Test *> * {
+    &mut GetPointer<flatbuffers::Vector<const Test *> *>(VT_TEST4)
   }
   const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *testarrayofstring() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING);
   }
-  flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *mutable_testarrayofstring() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING);
+  fn mutable_testarrayofstring(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> * {
+    &mut GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
   const flatbuffers::Vector<flatbuffers::Offset<Monster>> *testarrayoftables() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Monster>> *>(VT_TESTARRAYOFTABLES);
   }
-  flatbuffers::Vector<flatbuffers::Offset<Monster>> *mutable_testarrayoftables() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Monster>> *>(VT_TESTARRAYOFTABLES);
+  fn mutable_testarrayoftables(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<Monster>> * {
+    &mut GetPointer<flatbuffers::Vector<flatbuffers::Offset<Monster>> *>(VT_TESTARRAYOFTABLES)
   }
   const Monster *enemy() const {
     return GetPointer<const Monster *>(VT_ENEMY);
   }
-  Monster *mutable_enemy() {
-    return GetPointer<Monster *>(VT_ENEMY);
+  fn mutable_enemy(&mut self) -> &mut Monster * {
+    &mut GetPointer<Monster *>(VT_ENEMY)
   }
   const flatbuffers::Vector<u8> *testnestedflatbuffer() const {
     return GetPointer<const flatbuffers::Vector<u8> *>(VT_TESTNESTEDFLATBUFFER);
   }
-  flatbuffers::Vector<u8> *mutable_testnestedflatbuffer() {
-    return GetPointer<flatbuffers::Vector<u8> *>(VT_TESTNESTEDFLATBUFFER);
+  fn mutable_testnestedflatbuffer(&mut self) -> &mut flatbuffers::Vector<u8> * {
+    &mut GetPointer<flatbuffers::Vector<u8> *>(VT_TESTNESTEDFLATBUFFER)
   }
   const MyGame::Example::Monster *testnestedflatbuffer_nested_root() const {
     return flatbuffers::GetRoot<MyGame::Example::Monster>(testnestedflatbuffer()->Data());
@@ -668,8 +668,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const Stat *testempty() const {
     return GetPointer<const Stat *>(VT_TESTEMPTY);
   }
-  Stat *mutable_testempty() {
-    return GetPointer<Stat *>(VT_TESTEMPTY);
+  fn mutable_testempty(&mut self) -> &mut Stat * {
+    &mut GetPointer<Stat *>(VT_TESTEMPTY)
   }
   bool testbool() const {
     return GetField<bool>(VT_TESTBOOL, 0) != 0;
@@ -728,8 +728,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<bool> *testarrayofbools() const {
     return GetPointer<const flatbuffers::Vector<bool> *>(VT_TESTARRAYOFBOOLS);
   }
-  flatbuffers::Vector<bool> *mutable_testarrayofbools() {
-    return GetPointer<flatbuffers::Vector<bool> *>(VT_TESTARRAYOFBOOLS);
+  fn mutable_testarrayofbools(&mut self) -> &mut flatbuffers::Vector<bool> * {
+    &mut GetPointer<flatbuffers::Vector<bool> *>(VT_TESTARRAYOFBOOLS)
   }
   f32 testf() const {
     return GetField<f32>(VT_TESTF, 3.14159f);
@@ -752,20 +752,20 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *testarrayofstring2() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING2);
   }
-  flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *mutable_testarrayofstring2() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING2);
+  fn mutable_testarrayofstring2(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> * {
+    &mut GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_TESTARRAYOFSTRING2)
   }
   const flatbuffers::Vector<const Ability *> *testarrayofsortedstruct() const {
     return GetPointer<const flatbuffers::Vector<const Ability *> *>(VT_TESTARRAYOFSORTEDSTRUCT);
   }
-  flatbuffers::Vector<const Ability *> *mutable_testarrayofsortedstruct() {
-    return GetPointer<flatbuffers::Vector<const Ability *> *>(VT_TESTARRAYOFSORTEDSTRUCT);
+  fn mutable_testarrayofsortedstruct(&mut self) -> &mut flatbuffers::Vector<const Ability *> * {
+    &mut GetPointer<flatbuffers::Vector<const Ability *> *>(VT_TESTARRAYOFSORTEDSTRUCT)
   }
   const flatbuffers::Vector<u8> *flex() const {
     return GetPointer<const flatbuffers::Vector<u8> *>(VT_FLEX);
   }
-  flatbuffers::Vector<u8> *mutable_flex() {
-    return GetPointer<flatbuffers::Vector<u8> *>(VT_FLEX);
+  fn mutable_flex(&mut self) -> &mut flatbuffers::Vector<u8> * {
+    &mut GetPointer<flatbuffers::Vector<u8> *>(VT_FLEX)
   }
   flexbuffers::Reference flex_flexbuffer_root() const {
     auto v = flex();
@@ -774,26 +774,26 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<const Test *> *test5() const {
     return GetPointer<const flatbuffers::Vector<const Test *> *>(VT_TEST5);
   }
-  flatbuffers::Vector<const Test *> *mutable_test5() {
-    return GetPointer<flatbuffers::Vector<const Test *> *>(VT_TEST5);
+  fn mutable_test5(&mut self) -> &mut flatbuffers::Vector<const Test *> * {
+    &mut GetPointer<flatbuffers::Vector<const Test *> *>(VT_TEST5)
   }
   const flatbuffers::Vector<i64> *vector_of_longs() const {
     return GetPointer<const flatbuffers::Vector<i64> *>(VT_VECTOR_OF_LONGS);
   }
-  flatbuffers::Vector<i64> *mutable_vector_of_longs() {
-    return GetPointer<flatbuffers::Vector<i64> *>(VT_VECTOR_OF_LONGS);
+  fn mutable_vector_of_longs(&mut self) -> &mut flatbuffers::Vector<i64> * {
+    &mut GetPointer<flatbuffers::Vector<i64> *>(VT_VECTOR_OF_LONGS)
   }
   const flatbuffers::Vector<f64> *vector_of_doubles() const {
     return GetPointer<const flatbuffers::Vector<f64> *>(VT_VECTOR_OF_DOUBLES);
   }
-  flatbuffers::Vector<f64> *mutable_vector_of_doubles() {
-    return GetPointer<flatbuffers::Vector<f64> *>(VT_VECTOR_OF_DOUBLES);
+  fn mutable_vector_of_doubles(&mut self) -> &mut flatbuffers::Vector<f64> * {
+    &mut GetPointer<flatbuffers::Vector<f64> *>(VT_VECTOR_OF_DOUBLES)
   }
   const MyGame::InParentNamespace *parent_namespace_test() const {
     return GetPointer<const MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST);
   }
-  MyGame::InParentNamespace *mutable_parent_namespace_test() {
-    return GetPointer<MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST);
+  fn mutable_parent_namespace_test(&mut self) -> &mut MyGame::InParentNamespace * {
+    &mut GetPointer<MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST)
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -1245,14 +1245,14 @@ struct TypeAliases FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<i8> *v8() const {
     return GetPointer<const flatbuffers::Vector<i8> *>(VT_V8);
   }
-  flatbuffers::Vector<i8> *mutable_v8() {
-    return GetPointer<flatbuffers::Vector<i8> *>(VT_V8);
+  fn mutable_v8(&mut self) -> &mut flatbuffers::Vector<i8> * {
+    &mut GetPointer<flatbuffers::Vector<i8> *>(VT_V8)
   }
   const flatbuffers::Vector<f64> *vf64() const {
     return GetPointer<const flatbuffers::Vector<f64> *>(VT_VF64);
   }
-  flatbuffers::Vector<f64> *mutable_vf64() {
-    return GetPointer<flatbuffers::Vector<f64> *>(VT_VF64);
+  fn mutable_vf64(&mut self) -> &mut flatbuffers::Vector<f64> * {
+    &mut GetPointer<flatbuffers::Vector<f64> *>(VT_VF64)
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&

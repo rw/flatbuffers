@@ -30,8 +30,8 @@ struct TableInFirstNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const NamespaceA::NamespaceB::TableInNestedNS *foo_table() const {
     return GetPointer<const NamespaceA::NamespaceB::TableInNestedNS *>(VT_FOO_TABLE);
   }
-  NamespaceA::NamespaceB::TableInNestedNS *mutable_foo_table() {
-    return GetPointer<NamespaceA::NamespaceB::TableInNestedNS *>(VT_FOO_TABLE);
+  fn mutable_foo_table(&mut self) -> &mut NamespaceA::NamespaceB::TableInNestedNS * {
+    &mut GetPointer<NamespaceA::NamespaceB::TableInNestedNS *>(VT_FOO_TABLE)
   }
   NamespaceA::NamespaceB::EnumInNestedNS foo_enum() const {
     return GetField<i8>(VT_FOO_ENUM, 0) as NamespaceA::NamespaceB::EnumInNestedNS;
@@ -42,8 +42,8 @@ struct TableInFirstNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const NamespaceA::NamespaceB::StructInNestedNS *foo_struct() const {
     return GetStruct<const NamespaceA::NamespaceB::StructInNestedNS *>(VT_FOO_STRUCT);
   }
-  NamespaceA::NamespaceB::StructInNestedNS *mutable_foo_struct() {
-    return GetStruct<NamespaceA::NamespaceB::StructInNestedNS *>(VT_FOO_STRUCT);
+  fn mutable_foo_struct(&mut self) -> &mut NamespaceA::NamespaceB::StructInNestedNS * {
+    &mut GetStruct<NamespaceA::NamespaceB::StructInNestedNS *>(VT_FOO_STRUCT)
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -103,14 +103,14 @@ struct TableInC FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const NamespaceA::TableInFirstNS *refer_to_a1() const {
     return GetPointer<const NamespaceA::TableInFirstNS *>(VT_REFER_TO_A1);
   }
-  NamespaceA::TableInFirstNS *mutable_refer_to_a1() {
-    return GetPointer<NamespaceA::TableInFirstNS *>(VT_REFER_TO_A1);
+  fn mutable_refer_to_a1(&mut self) -> &mut NamespaceA::TableInFirstNS * {
+    &mut GetPointer<NamespaceA::TableInFirstNS *>(VT_REFER_TO_A1)
   }
   const NamespaceA::SecondTableInA *refer_to_a2() const {
     return GetPointer<const NamespaceA::SecondTableInA *>(VT_REFER_TO_A2);
   }
-  NamespaceA::SecondTableInA *mutable_refer_to_a2() {
-    return GetPointer<NamespaceA::SecondTableInA *>(VT_REFER_TO_A2);
+  fn mutable_refer_to_a2(&mut self) -> &mut NamespaceA::SecondTableInA * {
+    &mut GetPointer<NamespaceA::SecondTableInA *>(VT_REFER_TO_A2)
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -164,8 +164,8 @@ struct SecondTableInA FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const NamespaceC::TableInC *refer_to_c() const {
     return GetPointer<const NamespaceC::TableInC *>(VT_REFER_TO_C);
   }
-  NamespaceC::TableInC *mutable_refer_to_c() {
-    return GetPointer<NamespaceC::TableInC *>(VT_REFER_TO_C);
+  fn mutable_refer_to_c(&mut self) -> &mut NamespaceC::TableInC * {
+    &mut GetPointer<NamespaceC::TableInC *>(VT_REFER_TO_C)
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&

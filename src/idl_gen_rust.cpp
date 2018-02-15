@@ -1594,8 +1594,8 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("FIELD_VALUE",
                          GenUnderlyingCast(field, true, underlying));
 
-          code_ += "  {{FIELD_TYPE}}mutable_{{FIELD_NAME}}() {";
-          code_ += "    return {{FIELD_VALUE}};";
+          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> &mut {{FIELD_TYPE}} {";
+          code_ += "    &mut {{FIELD_VALUE}}";
           code_ += "  }";
         }
       }
@@ -2387,9 +2387,9 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
 
-      auto field_type = GenTypeGet(field.value.type, " ", "const ", " &", true);
+      auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
       auto is_scalar = IsScalar(field.value.type.base_type);
-      auto member = Name(field) + "_";
+      auto member = "self." + Name(field) + "_";
       auto value =
           is_scalar ? "flatbuffers::EndianScalar(" + member + ")" : member;
 
@@ -2403,7 +2403,7 @@ class RustGenerator : public BaseGenerator {
       code_ += "  }";
 
       if (parser_.opts.mutable_buffer) {
-        auto mut_field_type = GenTypeGet(field.value.type, " ", "", " &", true);
+        auto mut_field_type = GenTypeGet(field.value.type, " ", "&mut ", " ", true);
         code_.SetValue("FIELD_TYPE", mut_field_type);
         if (is_scalar) {
           code_.SetValue("ARG", GenTypeBasic(field.value.type, true));
@@ -2416,8 +2416,8 @@ class RustGenerator : public BaseGenerator {
               "{{FIELD_VALUE}});";
           code_ += "  }";
         } else {
-          code_ += "  {{FIELD_TYPE}}mutable_{{FIELD_NAME}}() {";
-          code_ += "    return {{FIELD_NAME}}_;";
+          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> {{FIELD_TYPE}}{";
+          code_ += "    self.{{FIELD_NAME}}_";
           code_ += "  }";
         }
       }

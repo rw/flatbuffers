@@ -52,13 +52,13 @@ impl StructInNestedNS {
 
   }
   fn a(&self) -> i32  {
-    flatbuffers::EndianScalar(a_)
+    flatbuffers::EndianScalar(self.a_)
   }
   fn mutate_a(&mut self, _a: i32) {
     flatbuffers::WriteScalar(&self.a_, _a);
   }
   fn b(&self) -> i32  {
-    flatbuffers::EndianScalar(b_)
+    flatbuffers::EndianScalar(self.b_)
   }
   fn mutate_b(&mut self, _b: i32) {
     flatbuffers::WriteScalar(&self.b_, _b);
