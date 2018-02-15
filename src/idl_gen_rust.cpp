@@ -137,28 +137,6 @@ class RustGenerator : public BaseGenerator {
     for (auto kw = keywords; *kw; kw++) keywords_.insert(*kw);
   }
 
-  std::string GenIncludeGuard() const {
-    // Generate include guard.
-    std::string guard = file_name_;
-    // Remove any non-alpha-numeric characters that may appear in a filename.
-    struct IsAlnum {
-      bool operator()(char c) { return !isalnum(c); }
-    };
-    guard.erase(std::remove_if(guard.begin(), guard.end(), IsAlnum()),
-                guard.end());
-    guard = "FLATBUFFERS_GENERATED_" + guard;
-    guard += "_";
-    // For further uniqueness, also add the namespace.
-    auto name_space = parser_.current_namespace_;
-    for (auto it = name_space->components.begin();
-         it != name_space->components.end(); ++it) {
-      guard += *it + "_";
-    }
-    guard += "H_";
-    std::transform(guard.begin(), guard.end(), guard.begin(), ToUpper);
-    return guard;
-  }
-
   void GenIncludeDependencies() {
     int num_includes = 0;
     for (auto it = parser_.native_included_files_.begin();
@@ -195,11 +173,6 @@ class RustGenerator : public BaseGenerator {
   bool generate() {
     code_.Clear();
     code_ += "// " + std::string(FlatBuffersGeneratedWarning()) + "\n\n";
-
-    const auto include_guard = GenIncludeGuard();
-    code_ += "#ifndef " + include_guard;
-    code_ += "#define " + include_guard;
-    code_ += "";
 
     if (parser_.opts.gen_nullable) {
       code_ += "#pragma clang system_header\n\n";
@@ -406,9 +379,6 @@ class RustGenerator : public BaseGenerator {
     }
 
     if (cur_name_space_) SetNameSpace(nullptr);
-
-    // Close the include guard.
-    code_ += "#endif  // " + include_guard;
 
     const auto file_path = GeneratedFileName(path_, file_name_);
     const auto final_code = code_.ToString();
