@@ -2279,8 +2279,8 @@ class RustGenerator : public BaseGenerator {
   }
 
   static void PaddingDefinition(int bits, std::string *code_ptr, int *id) {
-    *code_ptr += "  int" + NumToString(bits) + "_t padding" +
-                 NumToString((*id)++) + "__;";
+    *code_ptr += "  u" + NumToString(bits) + ": padding" +
+                 NumToString((*id)++) + "__,";
   }
 
   static void PaddingInitializer(int bits, std::string *code_ptr, int *id) {
@@ -2290,7 +2290,7 @@ class RustGenerator : public BaseGenerator {
 
   static void PaddingNoop(int bits, std::string *code_ptr, int *id) {
     (void)bits;
-    *code_ptr += "    (void)padding" + NumToString((*id)++) + "__;";
+    *code_ptr += "    (void)padding" + NumToString((*id)++) + "__,";
   }
 
   // Generate an accessor struct with constructor for a flatbuffers struct.
@@ -2304,19 +2304,18 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("ALIGN", NumToString(struct_def.minalign));
     code_.SetValue("STRUCT_NAME", Name(struct_def));
 
-    code_ +=
-        "MANUALLY_ALIGNED_STRUCT({{ALIGN}}) "
-        "{{STRUCT_NAME}} FLATBUFFERS_FINAL_CLASS {";
-    code_ += " private:";
+    code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
+    code_ += "#[repr(C, packed)]";
+    code_ += "pub struct {{STRUCT_NAME}} {";
 
     int padding_id = 0;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       code_.SetValue("FIELD_TYPE",
-                     GenTypeGet(field.value.type, " ", "", " ", false));
+                     GenTypeGet(field.value.type, ": ", "", ": ", false));
       code_.SetValue("FIELD_NAME", Name(field));
-      code_ += "  {{FIELD_TYPE}}{{FIELD_NAME}}_;";
+      code_ += "  {{FIELD_TYPE}}{{FIELD_NAME}}_,";
 
       if (field.padding) {
         std::string padding;
@@ -2325,14 +2324,16 @@ class RustGenerator : public BaseGenerator {
       }
     }
 
+    code_ += "} // pub struct {{STRUCT_NAME}}";
+
     // Generate GetFullyQualifiedName
     code_ += "";
-    code_ += " public:";
+    code_ += "impl {{STRUCT_NAME}} {";
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate a default constructor.
-    code_ += "  {{STRUCT_NAME}}() {";
-    code_ += "    memset(this, 0, sizeof({{STRUCT_NAME}}));";
+    code_ += "  fn Reset(&mut self) {";
+    code_ += "    memset(this, 0, size_of({{STRUCT_NAME}}));";
     code_ += "  }";
 
     // Generate a constructor that takes all fields as arguments.
@@ -2345,40 +2346,40 @@ class RustGenerator : public BaseGenerator {
       const auto member_name = Name(field) + "_";
       const auto arg_name = "_" + Name(field);
       const auto arg_type =
-          GenTypeGet(field.value.type, " ", "const ", " &", true);
+          GenTypeGet(field.value.type, ": ", "const ", " &", true);
 
       if (it != struct_def.fields.vec.begin()) {
         arg_list += ", ";
-        init_list += ",\n        ";
+        //init_list += ";\n      ";
       }
       arg_list += arg_type;
       arg_list += arg_name;
-      init_list += member_name;
+      init_list += "      self." + member_name;
       if (IsScalar(field.value.type.base_type)) {
         auto type = GenUnderlyingCast(field, false, arg_name);
-        init_list += "(flatbuffers::EndianScalar(" + type + "))";
+        init_list += " = flatbuffers::EndianScalar(" + type + ");\n";
       } else {
-        init_list += "(" + arg_name + ")";
+        init_list += " = " + arg_name + ";\n";
       }
-      if (field.padding) {
-        GenPadding(field, &init_list, &padding_id, PaddingInitializer);
-      }
+      //if (field.padding) {
+      //  GenPadding(field, &init_list, &padding_id, PaddingInitializer);
+      //}
     }
 
     code_.SetValue("ARG_LIST", arg_list);
     code_.SetValue("INIT_LIST", init_list);
-    code_ += "  {{STRUCT_NAME}}({{ARG_LIST}})";
-    code_ += "      : {{INIT_LIST}} {";
-    padding_id = 0;
-    for (auto it = struct_def.fields.vec.begin();
-         it != struct_def.fields.vec.end(); ++it) {
-      const auto &field = **it;
-      if (field.padding) {
-        std::string padding;
-        GenPadding(field, &padding, &padding_id, PaddingNoop);
-        code_ += padding;
-      }
-    }
+    code_ += "  fn init(&mut self, {{ARG_LIST}}) {";
+    code_ += "{{INIT_LIST}}";
+    //padding_id = 0;
+    //for (auto it = struct_def.fields.vec.begin();
+    //     it != struct_def.fields.vec.end(); ++it) {
+    //  const auto &field = **it;
+    //  //if (field.padding) {
+    //  //  std::string padding;
+    //  //  GenPadding(field, &padding, &padding_id, PaddingNoop);
+    //  //  code_ += padding;
+    //  //}
+    //}
     code_ += "  }";
 
     // Generate accessor methods of the form:
@@ -2398,8 +2399,8 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, value));
 
       GenComment(field.doc_comment, "  ");
-      code_ += "  {{FIELD_TYPE}}{{FIELD_NAME}}() const {";
-      code_ += "    return {{FIELD_VALUE}};";
+      code_ += "  fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
+      code_ += "    {{FIELD_VALUE}}";
       code_ += "  }";
 
       if (parser_.opts.mutable_buffer) {
@@ -2410,9 +2411,9 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("FIELD_VALUE",
                          GenUnderlyingCast(field, false, "_" + Name(field)));
 
-          code_ += "  void mutate_{{FIELD_NAME}}({{ARG}} _{{FIELD_NAME}}) {";
+          code_ += "  fn mutate_{{FIELD_NAME}}(&mut self, _{{FIELD_NAME}}: {{ARG}}) {";
           code_ +=
-              "    flatbuffers::WriteScalar(&{{FIELD_NAME}}_, "
+              "    flatbuffers::WriteScalar(&self.{{FIELD_NAME}}_, "
               "{{FIELD_VALUE}});";
           code_ += "  }";
         } else {
@@ -2444,10 +2445,10 @@ class RustGenerator : public BaseGenerator {
     }
     code_.SetValue("NATIVE_NAME", Name(struct_def));
     GenOperatorNewDelete(struct_def);
-    code_ += "};";
+    code_ += "}";
 
     code_.SetValue("STRUCT_BYTE_SIZE", NumToString(struct_def.bytesize));
-    code_ += "STRUCT_END({{STRUCT_NAME}}, {{STRUCT_BYTE_SIZE}});";
+    code_ += "// STRUCT_END({{STRUCT_NAME}}, {{STRUCT_BYTE_SIZE}});";
     code_ += "";
   }
 

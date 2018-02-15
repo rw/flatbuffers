@@ -93,124 +93,125 @@ fn EnumNameAny(e: Any) -> &'static str {
   EnumNamesAny[index]
 }
 
-MANUALLY_ALIGNED_STRUCT(2) Test FLATBUFFERS_FINAL_CLASS {
- private:
-  i16 a_;
-  i8 b_;
-  int8_t padding0__;
+// MANUALLY_ALIGNED_STRUCT(2)
+#[repr(C, packed)]
+pub struct Test {
+  i16: a_,
+  i8: b_,
+  u8: padding0__,
+} // pub struct Test
 
- public:
-  Test() {
-    memset(this, 0, sizeof(Test));
+impl Test {
+  fn Reset(&mut self) {
+    memset(this, 0, size_of(Test));
   }
-  Test(i16 _a, i8 _b)
-      : a_(flatbuffers::EndianScalar(_a)),
-        b_(flatbuffers::EndianScalar(_b)),
-        padding0__(0) {
-    (void)padding0__;
-  }
-  i16 a() const {
-    return flatbuffers::EndianScalar(a_);
-  }
-  void mutate_a(i16 _a) {
-    flatbuffers::WriteScalar(&a_, _a);
-  }
-  i8 b() const {
-    return flatbuffers::EndianScalar(b_);
-  }
-  void mutate_b(i8 _b) {
-    flatbuffers::WriteScalar(&b_, _b);
-  }
-};
-STRUCT_END(Test, 4);
+  fn init(&mut self, i16: _a, i8: _b) {
+      self.a_ = flatbuffers::EndianScalar(_a);
+      self.b_ = flatbuffers::EndianScalar(_b);
 
-MANUALLY_ALIGNED_STRUCT(16) Vec3 FLATBUFFERS_FINAL_CLASS {
- private:
-  f32 x_;
-  f32 y_;
-  f32 z_;
-  int32_t padding0__;
-  f64 test1_;
-  i8 test2_;
-  int8_t padding1__;
-  Test test3_;
-  int16_t padding2__;
+  }
+  fn a(&self) -> i16  {
+    flatbuffers::EndianScalar(a_)
+  }
+  fn mutate_a(&mut self, _a: i16) {
+    flatbuffers::WriteScalar(&self.a_, _a);
+  }
+  fn b(&self) -> i8  {
+    flatbuffers::EndianScalar(b_)
+  }
+  fn mutate_b(&mut self, _b: i8) {
+    flatbuffers::WriteScalar(&self.b_, _b);
+  }
+}
+// STRUCT_END(Test, 4);
 
- public:
-  Vec3() {
-    memset(this, 0, sizeof(Vec3));
+// MANUALLY_ALIGNED_STRUCT(16)
+#[repr(C, packed)]
+pub struct Vec3 {
+  f32: x_,
+  f32: y_,
+  f32: z_,
+  u32: padding0__,
+  f64: test1_,
+  i8: test2_,
+  u8: padding1__,
+  Test: test3_,
+  u16: padding2__,
+} // pub struct Vec3
+
+impl Vec3 {
+  fn Reset(&mut self) {
+    memset(this, 0, size_of(Vec3));
   }
-  Vec3(f32 _x, f32 _y, f32 _z, f64 _test1, Color _test2, const Test &_test3)
-      : x_(flatbuffers::EndianScalar(_x)),
-        y_(flatbuffers::EndianScalar(_y)),
-        z_(flatbuffers::EndianScalar(_z)),
-        padding0__(0),
-        test1_(flatbuffers::EndianScalar(_test1)),
-        test2_(flatbuffers::EndianScalar(static_cast<i8>(_test2))),
-        padding1__(0),
-        test3_(_test3),
-        padding2__(0) {
-    (void)padding0__;
-    (void)padding1__;
-    (void)padding2__;
+  fn init(&mut self, f32: _x, f32: _y, f32: _z, f64: _test1, Color: _test2, const Test &_test3) {
+      self.x_ = flatbuffers::EndianScalar(_x);
+      self.y_ = flatbuffers::EndianScalar(_y);
+      self.z_ = flatbuffers::EndianScalar(_z);
+      self.test1_ = flatbuffers::EndianScalar(_test1);
+      self.test2_ = flatbuffers::EndianScalar(static_cast<i8>(_test2));
+      self.test3_ = _test3;
+
   }
-  f32 x() const {
-    return flatbuffers::EndianScalar(x_);
+  fn x(&self) -> f32  {
+    flatbuffers::EndianScalar(x_)
   }
-  void mutate_x(f32 _x) {
-    flatbuffers::WriteScalar(&x_, _x);
+  fn mutate_x(&mut self, _x: f32) {
+    flatbuffers::WriteScalar(&self.x_, _x);
   }
-  f32 y() const {
-    return flatbuffers::EndianScalar(y_);
+  fn y(&self) -> f32  {
+    flatbuffers::EndianScalar(y_)
   }
-  void mutate_y(f32 _y) {
-    flatbuffers::WriteScalar(&y_, _y);
+  fn mutate_y(&mut self, _y: f32) {
+    flatbuffers::WriteScalar(&self.y_, _y);
   }
-  f32 z() const {
-    return flatbuffers::EndianScalar(z_);
+  fn z(&self) -> f32  {
+    flatbuffers::EndianScalar(z_)
   }
-  void mutate_z(f32 _z) {
-    flatbuffers::WriteScalar(&z_, _z);
+  fn mutate_z(&mut self, _z: f32) {
+    flatbuffers::WriteScalar(&self.z_, _z);
   }
-  f64 test1() const {
-    return flatbuffers::EndianScalar(test1_);
+  fn test1(&self) -> f64  {
+    flatbuffers::EndianScalar(test1_)
   }
-  void mutate_test1(f64 _test1) {
-    flatbuffers::WriteScalar(&test1_, _test1);
+  fn mutate_test1(&mut self, _test1: f64) {
+    flatbuffers::WriteScalar(&self.test1_, _test1);
   }
-  Color test2() const {
-    return static_cast<Color>(flatbuffers::EndianScalar(test2_));
+  fn test2(&self) -> Color  {
+    static_cast<Color>(flatbuffers::EndianScalar(test2_))
   }
-  void mutate_test2(Color _test2) {
-    flatbuffers::WriteScalar(&test2_, static_cast<i8>(_test2));
+  fn mutate_test2(&mut self, _test2: Color) {
+    flatbuffers::WriteScalar(&self.test2_, static_cast<i8>(_test2));
   }
-  const Test &test3() const {
-    return test3_;
+  fn test3(&self) -> const Test & {
+    test3_
   }
   Test &mutable_test3() {
     return test3_;
   }
-};
-STRUCT_END(Vec3, 32);
+}
+// STRUCT_END(Vec3, 32);
 
-MANUALLY_ALIGNED_STRUCT(4) Ability FLATBUFFERS_FINAL_CLASS {
- private:
-  u32 id_;
-  u32 distance_;
+// MANUALLY_ALIGNED_STRUCT(4)
+#[repr(C, packed)]
+pub struct Ability {
+  u32: id_,
+  u32: distance_,
+} // pub struct Ability
 
- public:
-  Ability() {
-    memset(this, 0, sizeof(Ability));
+impl Ability {
+  fn Reset(&mut self) {
+    memset(this, 0, size_of(Ability));
   }
-  Ability(u32 _id, u32 _distance)
-      : id_(flatbuffers::EndianScalar(_id)),
-        distance_(flatbuffers::EndianScalar(_distance)) {
+  fn init(&mut self, u32: _id, u32: _distance) {
+      self.id_ = flatbuffers::EndianScalar(_id);
+      self.distance_ = flatbuffers::EndianScalar(_distance);
+
   }
-  u32 id() const {
-    return flatbuffers::EndianScalar(id_);
+  fn id(&self) -> u32  {
+    flatbuffers::EndianScalar(id_)
   }
-  void mutate_id(u32 _id) {
-    flatbuffers::WriteScalar(&id_, _id);
+  fn mutate_id(&mut self, _id: u32) {
+    flatbuffers::WriteScalar(&self.id_, _id);
   }
   bool KeyCompareLessThan(const Ability *o) const {
     return id() < o->id();
@@ -219,14 +220,14 @@ MANUALLY_ALIGNED_STRUCT(4) Ability FLATBUFFERS_FINAL_CLASS {
     const auto key = id();
     return static_cast<int>(key > val) - static_cast<int>(key < val);
   }
-  u32 distance() const {
-    return flatbuffers::EndianScalar(distance_);
+  fn distance(&self) -> u32  {
+    flatbuffers::EndianScalar(distance_)
   }
-  void mutate_distance(u32 _distance) {
-    flatbuffers::WriteScalar(&distance_, _distance);
+  fn mutate_distance(&mut self, _distance: u32) {
+    flatbuffers::WriteScalar(&self.distance_, _distance);
   }
-};
-STRUCT_END(Ability, 8);
+}
+// STRUCT_END(Ability, 8);
 
 }  // mod Example
 
