@@ -188,22 +188,22 @@ class RustGenerator : public BaseGenerator {
 
     assert(!cur_name_space_);
 
-    // Generate forward declarations for all structs/tables, since they may
-    // have circular references.
-    for (auto it = parser_.structs_.vec.begin();
-         it != parser_.structs_.vec.end(); ++it) {
-      const auto &struct_def = **it;
-      if (!struct_def.generated) {
-        SetNameSpace(struct_def.defined_namespace);
-        code_ += "struct " + Name(struct_def) + ";";
-        if (parser_.opts.generate_object_based_api && !struct_def.fixed) {
-          code_ += "struct " +
-                   NativeName(Name(struct_def), &struct_def, parser_.opts) +
-                   ";";
-        }
-        code_ += "";
-      }
-    }
+    //// Generate forward declarations for all structs/tables, since they may
+    //// have circular references.
+    //for (auto it = parser_.structs_.vec.begin();
+    //     it != parser_.structs_.vec.end(); ++it) {
+    //  const auto &struct_def = **it;
+    //  if (!struct_def.generated) {
+    //    SetNameSpace(struct_def.defined_namespace);
+    //    code_ += "struct " + Name(struct_def) + ";";
+    //    if (parser_.opts.generate_object_based_api && !struct_def.fixed) {
+    //      code_ += "struct " +
+    //               NativeName(Name(struct_def), &struct_def, parser_.opts) +
+    //               ";";
+    //    }
+    //    code_ += "";
+    //  }
+    //}
 
     // Generate code for all the enum declarations.
     for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
@@ -359,23 +359,23 @@ class RustGenerator : public BaseGenerator {
       code_ += "}";
       code_ += "";
 
-      if (parser_.opts.generate_object_based_api) {
-        // A convenient root unpack function.
-        auto native_name =
-            NativeName(WrapInNameSpace(struct_def), &struct_def, parser_.opts);
-        code_.SetValue("UNPACK_RETURN",
-                       GenTypeNativePtr(native_name, nullptr, false));
-        code_.SetValue("UNPACK_TYPE",
-                       GenTypeNativePtr(native_name, nullptr, true));
+      //if (parser_.opts.generate_object_based_api) {
+      //  // A convenient root unpack function.
+      //  auto native_name =
+      //      NativeName(WrapInNameSpace(struct_def), &struct_def, parser_.opts);
+      //  code_.SetValue("UNPACK_RETURN",
+      //                 GenTypeNativePtr(native_name, nullptr, false));
+      //  code_.SetValue("UNPACK_TYPE",
+      //                 GenTypeNativePtr(native_name, nullptr, true));
 
-        code_ += "inline {{UNPACK_RETURN}} UnPack{{STRUCT_NAME}}(";
-        code_ += "    const void *buf,";
-        code_ += "    const flatbuffers::resolver_function_t *res = nullptr) {";
-        code_ += "  return {{UNPACK_TYPE}}\\";
-        code_ += "(Get{{STRUCT_NAME}}(buf)->UnPack(res));";
-        code_ += "}";
-        code_ += "";
-      }
+      //  code_ += "inline {{UNPACK_RETURN}} UnPack{{STRUCT_NAME}}(";
+      //  code_ += "    const void *buf,";
+      //  code_ += "    const flatbuffers::resolver_function_t *res = nullptr) {";
+      //  code_ += "  return {{UNPACK_TYPE}}\\";
+      //  code_ += "(Get{{STRUCT_NAME}}(buf)->UnPack(res));";
+      //  code_ += "}";
+      //  code_ += "";
+      //}
     }
 
     if (cur_name_space_) SetNameSpace(nullptr);
@@ -1079,142 +1079,142 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
     code_ += "";
 
-    if (parser_.opts.generate_object_based_api) {
-      // Generate union Unpack() and Pack() functions.
-      code_ += "inline " + UnionUnPackSignature(enum_def, false) + " {";
-      code_ += "  switch (type) {";
-      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
-           ++it) {
-        const auto &ev = **it;
-        if (!ev.value) { continue; }
+    //if (parser_.opts.generate_object_based_api) {
+    //  // Generate union Unpack() and Pack() functions.
+    //  code_ += "inline " + UnionUnPackSignature(enum_def, false) + " {";
+    //  code_ += "  switch (type) {";
+    //  for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+    //       ++it) {
+    //    const auto &ev = **it;
+    //    if (!ev.value) { continue; }
 
-        code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
-        code_.SetValue("TYPE", GetUnionElement(ev, true, true));
-        code_ += "    case {{LABEL}}: {";
-        code_ += "      auto ptr = reinterpret_cast<const {{TYPE}} *>(obj);";
-        if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
-          if (ev.union_type.struct_def->fixed) {
-            code_ += "      return new " +
-                     WrapInNameSpace(*ev.union_type.struct_def) + "(*ptr);";
-          } else {
-            code_ += "      return ptr->UnPack(resolver);";
-          }
-        } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
-          code_ += "      return new std::string(ptr->c_str(), ptr->size());";
-        } else {
-          assert(false);
-        }
-        code_ += "    }";
-      }
-      code_ += "    default: return nullptr;";
-      code_ += "  }";
-      code_ += "}";
-      code_ += "";
+    //    code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
+    //    code_.SetValue("TYPE", GetUnionElement(ev, true, true));
+    //    code_ += "    case {{LABEL}}: {";
+    //    code_ += "      auto ptr = reinterpret_cast<const {{TYPE}} *>(obj);";
+    //    if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
+    //      if (ev.union_type.struct_def->fixed) {
+    //        code_ += "      return new " +
+    //                 WrapInNameSpace(*ev.union_type.struct_def) + "(*ptr);";
+    //      } else {
+    //        code_ += "      return ptr->UnPack(resolver);";
+    //      }
+    //    } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
+    //      code_ += "      return new std::string(ptr->c_str(), ptr->size());";
+    //    } else {
+    //      assert(false);
+    //    }
+    //    code_ += "    }";
+    //  }
+    //  code_ += "    default: return nullptr;";
+    //  code_ += "  }";
+    //  code_ += "}";
+    //  code_ += "";
 
-      code_ += "inline " + UnionPackSignature(enum_def, false) + " {";
-      code_ += "  switch (type) {";
-      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
-           ++it) {
-        auto &ev = **it;
-        if (!ev.value) { continue; }
+    //  code_ += "inline " + UnionPackSignature(enum_def, false) + " {";
+    //  code_ += "  switch (type) {";
+    //  for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+    //       ++it) {
+    //    auto &ev = **it;
+    //    if (!ev.value) { continue; }
 
-        code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
-        code_.SetValue("TYPE",
-                       NativeName(GetUnionElement(ev, true, true, true),
-                                  ev.union_type.struct_def, parser_.opts));
-        code_.SetValue("NAME", GetUnionElement(ev, false, true));
-        code_ += "    case {{LABEL}}: {";
-        code_ += "      auto ptr = reinterpret_cast<const {{TYPE}} *>(value);";
-        if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
-          if (ev.union_type.struct_def->fixed) {
-            code_ += "      return _fbb.CreateStruct(*ptr).Union();";
-          } else {
-            code_ +=
-                "      return Create{{NAME}}(_fbb, ptr, _rehasher).Union();";
-          }
-        } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
-          code_ += "      return _fbb.CreateString(*ptr).Union();";
-        } else {
-          assert(false);
-        }
-        code_ += "    }";
-      }
-      code_ += "    default: return 0;";
-      code_ += "  }";
-      code_ += "}";
-      code_ += "";
+    //    code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
+    //    code_.SetValue("TYPE",
+    //                   NativeName(GetUnionElement(ev, true, true, true),
+    //                              ev.union_type.struct_def, parser_.opts));
+    //    code_.SetValue("NAME", GetUnionElement(ev, false, true));
+    //    code_ += "    case {{LABEL}}: {";
+    //    code_ += "      auto ptr = reinterpret_cast<const {{TYPE}} *>(value);";
+    //    if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
+    //      if (ev.union_type.struct_def->fixed) {
+    //        code_ += "      return _fbb.CreateStruct(*ptr).Union();";
+    //      } else {
+    //        code_ +=
+    //            "      return Create{{NAME}}(_fbb, ptr, _rehasher).Union();";
+    //      }
+    //    } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
+    //      code_ += "      return _fbb.CreateString(*ptr).Union();";
+    //    } else {
+    //      assert(false);
+    //    }
+    //    code_ += "    }";
+    //  }
+    //  code_ += "    default: return 0;";
+    //  code_ += "  }";
+    //  code_ += "}";
+    //  code_ += "";
 
-      // Union copy constructor
-      code_ +=
-          "inline {{ENUM_NAME}}Union::{{ENUM_NAME}}Union(const "
-          "{{ENUM_NAME}}Union &u) FLATBUFFERS_NOEXCEPT : type(u.type), "
-          "value(nullptr) {";
-      code_ += "  switch (type) {";
-      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
-           ++it) {
-        const auto &ev = **it;
-        if (!ev.value) { continue; }
-        code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
-        code_.SetValue("TYPE",
-                       NativeName(GetUnionElement(ev, true, true, true),
-                                  ev.union_type.struct_def, parser_.opts));
-        code_ += "    case {{LABEL}}: {";
-        bool copyable = true;
-        if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
-          // Don't generate code to copy if table is not copyable.
-          // TODO(wvo): make tables copyable instead.
-          for (auto fit = ev.union_type.struct_def->fields.vec.begin();
-               fit != ev.union_type.struct_def->fields.vec.end(); ++fit) {
-            const auto &field = **fit;
-            if (!field.deprecated && field.value.type.struct_def) {
-              copyable = false;
-              break;
-            }
-          }
-        }
-        if (copyable) {
-          code_ +=
-              "      value = new {{TYPE}}(*reinterpret_cast<{{TYPE}} *>"
-              "(u.value));";
-        } else {
-          code_ += "      assert(false);  // {{TYPE}} not copyable.";
-        }
-        code_ += "      break;";
-        code_ += "    }";
-      }
-      code_ += "    default:";
-      code_ += "      break;";
-      code_ += "  }";
-      code_ += "}";
-      code_ += "";
+    //  // Union copy constructor
+    //  code_ +=
+    //      "inline {{ENUM_NAME}}Union::{{ENUM_NAME}}Union(const "
+    //      "{{ENUM_NAME}}Union &u) FLATBUFFERS_NOEXCEPT : type(u.type), "
+    //      "value(nullptr) {";
+    //  code_ += "  switch (type) {";
+    //  for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+    //       ++it) {
+    //    const auto &ev = **it;
+    //    if (!ev.value) { continue; }
+    //    code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
+    //    code_.SetValue("TYPE",
+    //                   NativeName(GetUnionElement(ev, true, true, true),
+    //                              ev.union_type.struct_def, parser_.opts));
+    //    code_ += "    case {{LABEL}}: {";
+    //    bool copyable = true;
+    //    if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
+    //      // Don't generate code to copy if table is not copyable.
+    //      // TODO(wvo): make tables copyable instead.
+    //      for (auto fit = ev.union_type.struct_def->fields.vec.begin();
+    //           fit != ev.union_type.struct_def->fields.vec.end(); ++fit) {
+    //        const auto &field = **fit;
+    //        if (!field.deprecated && field.value.type.struct_def) {
+    //          copyable = false;
+    //          break;
+    //        }
+    //      }
+    //    }
+    //    if (copyable) {
+    //      code_ +=
+    //          "      value = new {{TYPE}}(*reinterpret_cast<{{TYPE}} *>"
+    //          "(u.value));";
+    //    } else {
+    //      code_ += "      assert(false);  // {{TYPE}} not copyable.";
+    //    }
+    //    code_ += "      break;";
+    //    code_ += "    }";
+    //  }
+    //  code_ += "    default:";
+    //  code_ += "      break;";
+    //  code_ += "  }";
+    //  code_ += "}";
+    //  code_ += "";
 
-      // Union Reset() function.
-      code_.SetValue("NONE",
-                     GetEnumValUse(enum_def, *enum_def.vals.Lookup("NONE")));
+    //  // Union Reset() function.
+    //  code_.SetValue("NONE",
+    //                 GetEnumValUse(enum_def, *enum_def.vals.Lookup("NONE")));
 
-      code_ += "inline void {{ENUM_NAME}}Union::Reset() {";
-      code_ += "  switch (type) {";
-      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
-           ++it) {
-        const auto &ev = **it;
-        if (!ev.value) { continue; }
-        code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
-        code_.SetValue("TYPE",
-                       NativeName(GetUnionElement(ev, true, true, true),
-                                  ev.union_type.struct_def, parser_.opts));
-        code_ += "    case {{LABEL}}: {";
-        code_ += "      auto ptr = reinterpret_cast<{{TYPE}} *>(value);";
-        code_ += "      delete ptr;";
-        code_ += "      break;";
-        code_ += "    }";
-      }
-      code_ += "    default: break;";
-      code_ += "  }";
-      code_ += "  value = nullptr;";
-      code_ += "  type = {{NONE}};";
-      code_ += "}";
-      code_ += "";
-    }
+    //  code_ += "inline void {{ENUM_NAME}}Union::Reset() {";
+    //  code_ += "  switch (type) {";
+    //  for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+    //       ++it) {
+    //    const auto &ev = **it;
+    //    if (!ev.value) { continue; }
+    //    code_.SetValue("LABEL", GetEnumValUse(enum_def, ev));
+    //    code_.SetValue("TYPE",
+    //                   NativeName(GetUnionElement(ev, true, true, true),
+    //                              ev.union_type.struct_def, parser_.opts));
+    //    code_ += "    case {{LABEL}}: {";
+    //    code_ += "      auto ptr = reinterpret_cast<{{TYPE}} *>(value);";
+    //    code_ += "      delete ptr;";
+    //    code_ += "      break;";
+    //    code_ += "    }";
+    //  }
+    //  code_ += "    default: break;";
+    //  code_ += "  }";
+    //  code_ += "  value = nullptr;";
+    //  code_ += "  type = {{NONE}};";
+    //  code_ += "}";
+    //  code_ += "";
+    //}
   }
 
   // Generates a value with optionally a cast applied if the field has a
@@ -1455,7 +1455,7 @@ class RustGenerator : public BaseGenerator {
 
   // Generate an accessor struct, builder structs & function for a table.
   void GenTable(const StructDef &struct_def) {
-    if (parser_.opts.generate_object_based_api) { GenNativeTable(struct_def); }
+    //if (parser_.opts.generate_object_based_api) { GenNativeTable(struct_def); }
 
     // Generate an accessor struct, with methods of the form:
     // type name() const { return GetField<type>(offset, defaultval); }
@@ -1465,9 +1465,9 @@ class RustGenerator : public BaseGenerator {
     code_ +=
         "struct {{STRUCT_NAME}} FLATBUFFERS_FINAL_CLASS"
         " : private flatbuffers::Table {";
-    if (parser_.opts.generate_object_based_api) {
-      code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
-    }
+    //if (parser_.opts.generate_object_based_api) {
+    //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
+    //}
 
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
@@ -1675,14 +1675,14 @@ class RustGenerator : public BaseGenerator {
     code_ += " &&\n           verifier.EndTable();";
     code_ += "  }";
 
-    if (parser_.opts.generate_object_based_api) {
-      // Generate the UnPack() pre declaration.
-      code_ +=
-          "  " + TableUnPackSignature(struct_def, true, parser_.opts) + ";";
-      code_ +=
-          "  " + TableUnPackToSignature(struct_def, true, parser_.opts) + ";";
-      code_ += "  " + TablePackSignature(struct_def, true, parser_.opts) + ";";
-    }
+    //if (parser_.opts.generate_object_based_api) {
+    //  // Generate the UnPack() pre declaration.
+    //  code_ +=
+    //      "  " + TableUnPackSignature(struct_def, true, parser_.opts) + ";";
+    //  code_ +=
+    //      "  " + TableUnPackToSignature(struct_def, true, parser_.opts) + ";";
+    //  code_ += "  " + TablePackSignature(struct_def, true, parser_.opts) + ";";
+    //}
 
     code_ += "};";  // End of table.
     code_ += "";
@@ -1726,12 +1726,12 @@ class RustGenerator : public BaseGenerator {
 
     GenBuilders(struct_def);
 
-    if (parser_.opts.generate_object_based_api) {
-      // Generate a pre-declaration for a CreateX method that works with an
-      // unpacked C++ object.
-      code_ += TableCreateSignature(struct_def, true, parser_.opts) + ";";
-      code_ += "";
-    }
+    //if (parser_.opts.generate_object_based_api) {
+    //  // Generate a pre-declaration for a CreateX method that works with an
+    //  // unpacked C++ object.
+    //  code_ += TableCreateSignature(struct_def, true, parser_.opts) + ";";
+    //  code_ += "";
+    //}
   }
 
   void GenBuilders(const StructDef &struct_def) {
@@ -2165,103 +2165,103 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("NATIVE_NAME",
                    NativeName(Name(struct_def), &struct_def, parser_.opts));
 
-    if (parser_.opts.generate_object_based_api) {
-      // Generate the X::UnPack() method.
-      code_ += "inline " +
-               TableUnPackSignature(struct_def, false, parser_.opts) + " {";
-      code_ += "  auto _o = new {{NATIVE_NAME}}();";
-      code_ += "  UnPackTo(_o, _resolver);";
-      code_ += "  return _o;";
-      code_ += "}";
-      code_ += "";
+    //if (parser_.opts.generate_object_based_api) {
+    //  // Generate the X::UnPack() method.
+    //  code_ += "inline " +
+    //           TableUnPackSignature(struct_def, false, parser_.opts) + " {";
+    //  code_ += "  auto _o = new {{NATIVE_NAME}}();";
+    //  code_ += "  UnPackTo(_o, _resolver);";
+    //  code_ += "  return _o;";
+    //  code_ += "}";
+    //  code_ += "";
 
-      code_ += "inline " +
-               TableUnPackToSignature(struct_def, false, parser_.opts) + " {";
-      code_ += "  (void)_o;";
-      code_ += "  (void)_resolver;";
+    //  code_ += "inline " +
+    //           TableUnPackToSignature(struct_def, false, parser_.opts) + " {";
+    //  code_ += "  (void)_o;";
+    //  code_ += "  (void)_resolver;";
 
-      for (auto it = struct_def.fields.vec.begin();
-           it != struct_def.fields.vec.end(); ++it) {
-        const auto &field = **it;
-        if (field.deprecated) { continue; }
+    //  for (auto it = struct_def.fields.vec.begin();
+    //       it != struct_def.fields.vec.end(); ++it) {
+    //    const auto &field = **it;
+    //    if (field.deprecated) { continue; }
 
-        // Assign a value from |this| to |_o|.   Values from |this| are stored
-        // in a variable |_e| by calling this->field_type().  The value is then
-        // assigned to |_o| using the GenUnpackFieldStatement.
-        const bool is_union = field.value.type.base_type == BASE_TYPE_UTYPE;
-        const auto statement =
-            GenUnpackFieldStatement(field, is_union ? *(it + 1) : nullptr);
+    //    // Assign a value from |this| to |_o|.   Values from |this| are stored
+    //    // in a variable |_e| by calling this->field_type().  The value is then
+    //    // assigned to |_o| using the GenUnpackFieldStatement.
+    //    const bool is_union = field.value.type.base_type == BASE_TYPE_UTYPE;
+    //    const auto statement =
+    //        GenUnpackFieldStatement(field, is_union ? *(it + 1) : nullptr);
 
-        code_.SetValue("FIELD_NAME", Name(field));
-        auto prefix = "  { auto _e = {{FIELD_NAME}}(); ";
-        auto check = IsScalar(field.value.type.base_type) ? "" : "if (_e) ";
-        auto postfix = " };";
-        code_ += std::string(prefix) + check + statement + postfix;
-      }
-      code_ += "}";
-      code_ += "";
+    //    code_.SetValue("FIELD_NAME", Name(field));
+    //    auto prefix = "  { auto _e = {{FIELD_NAME}}(); ";
+    //    auto check = IsScalar(field.value.type.base_type) ? "" : "if (_e) ";
+    //    auto postfix = " };";
+    //    code_ += std::string(prefix) + check + statement + postfix;
+    //  }
+    //  code_ += "}";
+    //  code_ += "";
 
-      // Generate the X::Pack member function that simply calls the global
-      // CreateX function.
-      code_ += "inline " + TablePackSignature(struct_def, false, parser_.opts) +
-               " {";
-      code_ += "  return Create{{STRUCT_NAME}}(_fbb, _o, _rehasher);";
-      code_ += "}";
-      code_ += "";
+    //  // Generate the X::Pack member function that simply calls the global
+    //  // CreateX function.
+    //  code_ += "inline " + TablePackSignature(struct_def, false, parser_.opts) +
+    //           " {";
+    //  code_ += "  return Create{{STRUCT_NAME}}(_fbb, _o, _rehasher);";
+    //  code_ += "}";
+    //  code_ += "";
 
-      // Generate a CreateX method that works with an unpacked C++ object.
-      code_ += "inline " +
-               TableCreateSignature(struct_def, false, parser_.opts) + " {";
-      code_ += "  (void)_rehasher;";
-      code_ += "  (void)_o;";
+    //  // Generate a CreateX method that works with an unpacked C++ object.
+    //  code_ += "inline " +
+    //           TableCreateSignature(struct_def, false, parser_.opts) + " {";
+    //  code_ += "  (void)_rehasher;";
+    //  code_ += "  (void)_o;";
 
-      code_ +=
-          "  struct _VectorArgs "
-          "{ flatbuffers::FlatBufferBuilder *__fbb; "
-          "const " +
-          NativeName(Name(struct_def), &struct_def, parser_.opts) +
-          "* __o; "
-          "const flatbuffers::rehasher_function_t *__rehasher; } _va = { "
-          "&_fbb, _o, _rehasher}; (void)_va;";
+    //  code_ +=
+    //      "  struct _VectorArgs "
+    //      "{ flatbuffers::FlatBufferBuilder *__fbb; "
+    //      "const " +
+    //      NativeName(Name(struct_def), &struct_def, parser_.opts) +
+    //      "* __o; "
+    //      "const flatbuffers::rehasher_function_t *__rehasher; } _va = { "
+    //      "&_fbb, _o, _rehasher}; (void)_va;";
 
-      for (auto it = struct_def.fields.vec.begin();
-           it != struct_def.fields.vec.end(); ++it) {
-        auto &field = **it;
-        if (field.deprecated) { continue; }
-        code_ += "  auto _" + Name(field) + " = " + GenCreateParam(field) + ";";
-      }
-      // Need to call "Create" with the struct namespace.
-      const auto qualified_create_name =
-          struct_def.defined_namespace->GetFullyQualifiedName("Create");
-      code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
+    //  for (auto it = struct_def.fields.vec.begin();
+    //       it != struct_def.fields.vec.end(); ++it) {
+    //    auto &field = **it;
+    //    if (field.deprecated) { continue; }
+    //    code_ += "  auto _" + Name(field) + " = " + GenCreateParam(field) + ";";
+    //  }
+    //  // Need to call "Create" with the struct namespace.
+    //  const auto qualified_create_name =
+    //      struct_def.defined_namespace->GetFullyQualifiedName("Create");
+    //  code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
 
-      code_ += "  return {{CREATE_NAME}}{{STRUCT_NAME}}(";
-      code_ += "      _fbb\\";
-      for (auto it = struct_def.fields.vec.begin();
-           it != struct_def.fields.vec.end(); ++it) {
-        auto &field = **it;
-        if (field.deprecated) { continue; }
+    //  code_ += "  return {{CREATE_NAME}}{{STRUCT_NAME}}(";
+    //  code_ += "      _fbb\\";
+    //  for (auto it = struct_def.fields.vec.begin();
+    //       it != struct_def.fields.vec.end(); ++it) {
+    //    auto &field = **it;
+    //    if (field.deprecated) { continue; }
 
-        bool pass_by_address = false;
-        if (field.value.type.base_type == BASE_TYPE_STRUCT) {
-          if (IsStruct(field.value.type)) {
-            auto native_type =
-                field.value.type.struct_def->attributes.Lookup("native_type");
-            if (native_type) { pass_by_address = true; }
-          }
-        }
+    //    bool pass_by_address = false;
+    //    if (field.value.type.base_type == BASE_TYPE_STRUCT) {
+    //      if (IsStruct(field.value.type)) {
+    //        auto native_type =
+    //            field.value.type.struct_def->attributes.Lookup("native_type");
+    //        if (native_type) { pass_by_address = true; }
+    //      }
+    //    }
 
-        // Call the CreateX function using values from |_o|.
-        if (pass_by_address) {
-          code_ += ",\n      &_" + Name(field) + "\\";
-        } else {
-          code_ += ",\n      _" + Name(field) + "\\";
-        }
-      }
-      code_ += ");";
-      code_ += "}";
-      code_ += "";
-    }
+    //    // Call the CreateX function using values from |_o|.
+    //    if (pass_by_address) {
+    //      code_ += ",\n      &_" + Name(field) + "\\";
+    //    } else {
+    //      code_ += ",\n      _" + Name(field) + "\\";
+    //    }
+    //  }
+    //  code_ += ");";
+    //  code_ += "}";
+    //  code_ += "";
+    //}
   }
 
   static void GenPadding(

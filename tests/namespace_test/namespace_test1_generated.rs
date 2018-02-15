@@ -6,10 +6,6 @@ extern crate flatbuffers;
 mod NamespaceA {
 mod NamespaceB {
 
-struct TableInNestedNS;
-
-struct StructInNestedNS;
-
 enum EnumInNestedNS {
   EnumInNestedNS_A = 0,
   EnumInNestedNS_B = 1,

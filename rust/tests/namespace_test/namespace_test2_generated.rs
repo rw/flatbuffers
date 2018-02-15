@@ -7,20 +7,6 @@ extern crate flatbuffers;
 
 mod NamespaceA {
 
-struct TableInFirstNS;
-
-}  // mod NamespaceA
-
-mod NamespaceC {
-
-struct TableInC;
-
-}  // mod NamespaceC
-
-mod NamespaceA {
-
-struct SecondTableInA;
-
 struct TableInFirstNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_FOO_TABLE = 4,
