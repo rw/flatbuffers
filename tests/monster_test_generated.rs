@@ -204,11 +204,11 @@ impl Ability {
 
 impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
   }
-};
+}
 
 struct InParentNamespaceBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
@@ -235,11 +235,11 @@ mod Example2 {
 
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
   }
-};
+}
 
 struct MonsterBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
@@ -276,12 +276,12 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
   fn mutate_color(Color _color) -> bool {
     return SetField<i8>(VT_COLOR, _color as i8, 2);
   }
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyField<i8>(verifier, VT_COLOR) &&
            verifier.EndTable();
   }
-};
+}
 
 struct TestSimpleTableWithEnumBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
@@ -333,7 +333,7 @@ impl Stat /* private flatbuffers::Table */ {
   fn mutate_count(u16 _count) -> bool {
     return SetField<u16>(VT_COUNT, _count, 0);
   }
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_ID) &&
            verifier.Verify(id()) &&
@@ -341,7 +341,7 @@ impl Stat /* private flatbuffers::Table */ {
            VerifyField<u16>(verifier, VT_COUNT) &&
            verifier.EndTable();
   }
-};
+}
 
 struct StatBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
@@ -658,7 +658,7 @@ impl Monster /* private flatbuffers::Table */ {
   fn mutable_parent_namespace_test(&mut self) -> &mut MyGame::InParentNamespace * {
     &mut GetPointer<MyGame::InParentNamespace *>(VT_PARENT_NAMESPACE_TEST)
   }
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyField<Vec3>(verifier, VT_POS) &&
            VerifyField<i16>(verifier, VT_MANA) &&
@@ -716,7 +716,7 @@ impl Monster /* private flatbuffers::Table */ {
            verifier.VerifyTable(parent_namespace_test()) &&
            verifier.EndTable();
   }
-};
+}
 
 template<> inline const Monster *Monster::test_as<Monster>() const {
   return test_as_Monster();
@@ -1083,7 +1083,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
   fn mutable_vf64(&mut self) -> &mut flatbuffers::Vector<f64> * {
     &mut GetPointer<flatbuffers::Vector<f64> *>(VT_VF64)
   }
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyField<i8>(verifier, VT_I8) &&
            VerifyField<u8>(verifier, VT_U8) &&
@@ -1101,7 +1101,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
            verifier.Verify(vf64()) &&
            verifier.EndTable();
   }
-};
+}
 
 struct TypeAliasesBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;

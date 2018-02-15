@@ -31,7 +31,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
   fn mutable_foo_struct(&mut self) -> &mut NamespaceA::NamespaceB::StructInNestedNS * {
     &mut GetStruct<NamespaceA::NamespaceB::StructInNestedNS *>(VT_FOO_STRUCT)
   }
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_FOO_TABLE) &&
            verifier.VerifyTable(foo_table()) &&
@@ -39,7 +39,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
            VerifyField<NamespaceA::NamespaceB::StructInNestedNS>(verifier, VT_FOO_STRUCT) &&
            verifier.EndTable();
   }
-};
+}
 
 struct TableInFirstNSBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
@@ -98,7 +98,7 @@ impl TableInC /* private flatbuffers::Table */ {
   fn mutable_refer_to_a2(&mut self) -> &mut NamespaceA::SecondTableInA * {
     &mut GetPointer<NamespaceA::SecondTableInA *>(VT_REFER_TO_A2)
   }
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_A1) &&
            verifier.VerifyTable(refer_to_a1()) &&
@@ -106,7 +106,7 @@ impl TableInC /* private flatbuffers::Table */ {
            verifier.VerifyTable(refer_to_a2()) &&
            verifier.EndTable();
   }
-};
+}
 
 struct TableInCBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
@@ -153,13 +153,13 @@ impl SecondTableInA /* private flatbuffers::Table */ {
   fn mutable_refer_to_c(&mut self) -> &mut NamespaceC::TableInC * {
     &mut GetPointer<NamespaceC::TableInC *>(VT_REFER_TO_C)
   }
-  fn Verify(flatbuffers::Verifier &verifier) -> bool {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_C) &&
            verifier.VerifyTable(refer_to_c()) &&
            verifier.EndTable();
   }
-};
+}
 
 struct SecondTableInABuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
