@@ -63,10 +63,9 @@ impl StructInNestedNS {
 // STRUCT_END(StructInNestedNS, 8);
 
 impl flatbuffers::Table for TableInNestedNS {}
-pub struct TableInNestedNS /* private flatbuffers::Table */ {
-  enum {
-    VT_FOO = 4
-  };
+impl TableInNestedNS /* private flatbuffers::Table */ {
+    const VT_FOO: isize = 4;
+
   i32 foo() const {
     return GetField<i32>(VT_FOO, 0);
   }

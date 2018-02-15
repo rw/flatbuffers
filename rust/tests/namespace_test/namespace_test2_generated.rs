@@ -8,12 +8,11 @@ extern crate flatbuffers;
 mod NamespaceA {
 
 impl flatbuffers::Table for TableInFirstNS {}
-pub struct TableInFirstNS /* private flatbuffers::Table */ {
-  enum {
-    VT_FOO_TABLE = 4,
-    VT_FOO_ENUM = 6,
-    VT_FOO_STRUCT = 8
-  };
+impl TableInFirstNS /* private flatbuffers::Table */ {
+    const VT_FOO_TABLE: isize = 4;
+    const VT_FOO_ENUM: isize = 6;
+    const VT_FOO_STRUCT: isize = 8;
+
   const NamespaceA::NamespaceB::TableInNestedNS *foo_table() const {
     return GetPointer<const NamespaceA::NamespaceB::TableInNestedNS *>(VT_FOO_TABLE);
   }
@@ -83,11 +82,10 @@ inline flatbuffers::Offset<TableInFirstNS> CreateTableInFirstNS(
 mod NamespaceC {
 
 impl flatbuffers::Table for TableInC {}
-pub struct TableInC /* private flatbuffers::Table */ {
-  enum {
-    VT_REFER_TO_A1 = 4,
-    VT_REFER_TO_A2 = 6
-  };
+impl TableInC /* private flatbuffers::Table */ {
+    const VT_REFER_TO_A1: isize = 4;
+    const VT_REFER_TO_A2: isize = 6;
+
   const NamespaceA::TableInFirstNS *refer_to_a1() const {
     return GetPointer<const NamespaceA::TableInFirstNS *>(VT_REFER_TO_A1);
   }
@@ -146,10 +144,9 @@ inline flatbuffers::Offset<TableInC> CreateTableInC(
 mod NamespaceA {
 
 impl flatbuffers::Table for SecondTableInA {}
-pub struct SecondTableInA /* private flatbuffers::Table */ {
-  enum {
-    VT_REFER_TO_C = 4
-  };
+impl SecondTableInA /* private flatbuffers::Table */ {
+    const VT_REFER_TO_C: isize = 4;
+
   const NamespaceC::TableInC *refer_to_c() const {
     return GetPointer<const NamespaceC::TableInC *>(VT_REFER_TO_C);
   }

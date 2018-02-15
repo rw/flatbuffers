@@ -1463,7 +1463,7 @@ class RustGenerator : public BaseGenerator {
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
     code_ += "impl flatbuffers::Table for {{STRUCT_NAME}} {}";
-    code_ += "pub struct {{STRUCT_NAME}} /* private flatbuffers::Table */ {";
+    code_ += "impl {{STRUCT_NAME}} /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
     //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
     //}
@@ -1472,10 +1472,8 @@ class RustGenerator : public BaseGenerator {
 
     // Generate field id constants.
     if (struct_def.fields.vec.size() > 0) {
-      // We need to add a trailing comma to all elements except the last one as
-      // older versions of gcc complain about this.
-      code_.SetValue("SEP", "");
-      code_ += "  enum {";
+      //code_.SetValue("SEP", "");
+      //code_ += "  enum {";
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
         const auto &field = **it;
@@ -1486,11 +1484,11 @@ class RustGenerator : public BaseGenerator {
 
         code_.SetValue("OFFSET_NAME", GenFieldOffsetName(field));
         code_.SetValue("OFFSET_VALUE", NumToString(field.value.offset));
-        code_ += "{{SEP}}    {{OFFSET_NAME}} = {{OFFSET_VALUE}}\\";
-        code_.SetValue("SEP", ",\n");
+        code_ += "    const {{OFFSET_NAME}}: isize = {{OFFSET_VALUE}};";
+        //code_.SetValue("SEP", ",\n");
       }
       code_ += "";
-      code_ += "  };";
+      //code_ += "  };";
     }
 
     // Generate the accessors.
