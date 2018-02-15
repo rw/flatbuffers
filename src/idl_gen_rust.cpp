@@ -1660,7 +1660,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a verifier function that can check a buffer from an untrusted
     // source will never cause reads outside the buffer.
-    code_ += "  fn Verify(flatbuffers::Verifier &verifier) -> bool {";
+    code_ += "  fn Verify(verifier: &flatbuffers::Verifier) -> bool {";
     code_ += "    return VerifyTableStart(verifier)\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -1681,7 +1681,7 @@ class RustGenerator : public BaseGenerator {
     //  code_ += "  " + TablePackSignature(struct_def, true, parser_.opts) + ";";
     //}
 
-    code_ += "};";  // End of table.
+    code_ += "}";  // End of table.
     code_ += "";
 
     // Explicit specializations for union accessors
