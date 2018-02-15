@@ -34,10 +34,10 @@ struct TableInFirstNS FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return GetPointer<NamespaceA::NamespaceB::TableInNestedNS *>(VT_FOO_TABLE);
   }
   NamespaceA::NamespaceB::EnumInNestedNS foo_enum() const {
-    return static_cast<NamespaceA::NamespaceB::EnumInNestedNS>(GetField<i8>(VT_FOO_ENUM, 0));
+    return GetField<i8>(VT_FOO_ENUM, 0) as NamespaceA::NamespaceB::EnumInNestedNS;
   }
   bool mutate_foo_enum(NamespaceA::NamespaceB::EnumInNestedNS _foo_enum) {
-    return SetField<i8>(VT_FOO_ENUM, static_cast<i8>(_foo_enum), 0);
+    return SetField<i8>(VT_FOO_ENUM, _foo_enum as i8, 0);
   }
   const NamespaceA::NamespaceB::StructInNestedNS *foo_struct() const {
     return GetStruct<const NamespaceA::NamespaceB::StructInNestedNS *>(VT_FOO_STRUCT);
@@ -62,7 +62,7 @@ struct TableInFirstNSBuilder {
     fbb_.AddOffset(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
   void add_foo_enum(NamespaceA::NamespaceB::EnumInNestedNS foo_enum) {
-    fbb_.AddElement<i8>(TableInFirstNS::VT_FOO_ENUM, static_cast<i8>(foo_enum), 0);
+    fbb_.AddElement<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum as i8, 0);
   }
   void add_foo_struct(const NamespaceA::NamespaceB::StructInNestedNS *foo_struct) {
     fbb_.AddStruct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);

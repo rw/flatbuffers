@@ -1228,8 +1228,7 @@ class RustGenerator : public BaseGenerator {
     } else if ((field.value.type.enum_def &&
                 IsScalar(field.value.type.base_type)) ||
                field.value.type.base_type == BASE_TYPE_BOOL) {
-      return "static_cast<" + GenTypeBasic(field.value.type, from) + ">(" +
-             val + ")";
+      return val + " as " + GenTypeBasic(field.value.type, from);
     } else {
       return val;
     }

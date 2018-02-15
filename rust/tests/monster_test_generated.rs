@@ -148,7 +148,7 @@ impl Vec3 {
       self.y_ = flatbuffers::EndianScalar(_y);
       self.z_ = flatbuffers::EndianScalar(_z);
       self.test1_ = flatbuffers::EndianScalar(_test1);
-      self.test2_ = flatbuffers::EndianScalar(static_cast<i8>(_test2));
+      self.test2_ = flatbuffers::EndianScalar(_test2 as i8);
       self.test3_ = _test3;
 
   }
@@ -177,10 +177,10 @@ impl Vec3 {
     flatbuffers::WriteScalar(&self.test1_, _test1);
   }
   fn test2(&self) -> Color  {
-    static_cast<Color>(flatbuffers::EndianScalar(test2_))
+    flatbuffers::EndianScalar(test2_) as Color
   }
   fn mutate_test2(&mut self, _test2: Color) {
-    flatbuffers::WriteScalar(&self.test2_, static_cast<i8>(_test2));
+    flatbuffers::WriteScalar(&self.test2_, _test2 as i8);
   }
   fn test3(&self) -> const Test & {
     test3_
@@ -331,10 +331,10 @@ struct TestSimpleTableWithEnum FLATBUFFERS_FINAL_CLASS : private flatbuffers::Ta
     VT_COLOR = 4
   };
   Color color() const {
-    return static_cast<Color>(GetField<i8>(VT_COLOR, 2));
+    return GetField<i8>(VT_COLOR, 2) as Color;
   }
   bool mutate_color(Color _color) {
-    return SetField<i8>(VT_COLOR, static_cast<i8>(_color), 2);
+    return SetField<i8>(VT_COLOR, _color as i8, 2);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -350,7 +350,7 @@ struct TestSimpleTableWithEnumBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_color(Color color) {
-    fbb_.AddElement<i8>(TestSimpleTableWithEnum::VT_COLOR, static_cast<i8>(color), 2);
+    fbb_.AddElement<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
   }
   explicit TestSimpleTableWithEnumBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -603,16 +603,16 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return GetPointer<flatbuffers::Vector<u8> *>(VT_INVENTORY);
   }
   Color color() const {
-    return static_cast<Color>(GetField<i8>(VT_COLOR, 8));
+    return GetField<i8>(VT_COLOR, 8) as Color;
   }
   bool mutate_color(Color _color) {
-    return SetField<i8>(VT_COLOR, static_cast<i8>(_color), 8);
+    return SetField<i8>(VT_COLOR, _color as i8, 8);
   }
   Any test_type() const {
-    return static_cast<Any>(GetField<u8>(VT_TEST_TYPE, 0));
+    return GetField<u8>(VT_TEST_TYPE, 0) as Any;
   }
   bool mutate_test_type(Any _test_type) {
-    return SetField<u8>(VT_TEST_TYPE, static_cast<u8>(_test_type), 0);
+    return SetField<u8>(VT_TEST_TYPE, _test_type as u8, 0);
   }
   const void *test() const {
     return GetPointer<const void *>(VT_TEST);
@@ -675,7 +675,7 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return GetField<bool>(VT_TESTBOOL, 0) != 0;
   }
   bool mutate_testbool(bool _testbool) {
-    return SetField<bool>(VT_TESTBOOL, static_cast<bool>(_testbool), 0);
+    return SetField<bool>(VT_TESTBOOL, _testbool as bool, 0);
   }
   i32 testhashs32_fnv1() const {
     return GetField<i32>(VT_TESTHASHS32_FNV1, 0);
@@ -889,10 +889,10 @@ struct MonsterBuilder {
     fbb_.AddOffset(Monster::VT_INVENTORY, inventory);
   }
   void add_color(Color color) {
-    fbb_.AddElement<i8>(Monster::VT_COLOR, static_cast<i8>(color), 8);
+    fbb_.AddElement<i8>(Monster::VT_COLOR, color as i8, 8);
   }
   void add_test_type(Any test_type) {
-    fbb_.AddElement<u8>(Monster::VT_TEST_TYPE, static_cast<u8>(test_type), 0);
+    fbb_.AddElement<u8>(Monster::VT_TEST_TYPE, test_type as u8, 0);
   }
   void add_test(flatbuffers::Offset<void> test) {
     fbb_.AddOffset(Monster::VT_TEST, test);
@@ -916,7 +916,7 @@ struct MonsterBuilder {
     fbb_.AddOffset(Monster::VT_TESTEMPTY, testempty);
   }
   void add_testbool(bool testbool) {
-    fbb_.AddElement<bool>(Monster::VT_TESTBOOL, static_cast<bool>(testbool), 0);
+    fbb_.AddElement<bool>(Monster::VT_TESTBOOL, testbool as bool, 0);
   }
   void add_testhashs32_fnv1(i32 testhashs32_fnv1) {
     fbb_.AddElement<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, 0);
