@@ -49,8 +49,7 @@ const EnumValuesColor:[Color; 3] = [
   Color_Blue
 ];
 
-inline const char **EnumNamesColor() {
-  static const char *names[] = {
+const EnumNamesColor:[&'static str; 8] = [
     "Red",
     "Green",
     "",
@@ -58,11 +57,8 @@ inline const char **EnumNamesColor() {
     "",
     "",
     "",
-    "Blue",
-    nullptr
-  };
-  return names;
-}
+    "Blue"
+]
 
 inline const char *EnumNameColor(Color e) {
   const size_t index = static_cast<int>(e) - static_cast<int>(Color_Red);
@@ -85,16 +81,12 @@ const EnumValuesAny:[Any; 4] = [
   Any_MyGame_Example2_Monster
 ];
 
-inline const char **EnumNamesAny() {
-  static const char *names[] = {
+const EnumNamesAny:[&'static str; 4] = [
     "NONE",
     "Monster",
     "TestSimpleTableWithEnum",
-    "MyGame_Example2_Monster",
-    nullptr
-  };
-  return names;
-}
+    "MyGame_Example2_Monster"
+]
 
 inline const char *EnumNameAny(Any e) {
   const size_t index = static_cast<int>(e);

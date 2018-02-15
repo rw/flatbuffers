@@ -24,15 +24,11 @@ const EnumValuesEnumInNestedNS:[EnumInNestedNS; 3] = [
   EnumInNestedNS_C
 ];
 
-inline const char **EnumNamesEnumInNestedNS() {
-  static const char *names[] = {
+const EnumNamesEnumInNestedNS:[&'static str; 3] = [
     "A",
     "B",
-    "C",
-    nullptr
-  };
-  return names;
-}
+    "C"
+]
 
 inline const char *EnumNameEnumInNestedNS(EnumInNestedNS e) {
   const size_t index = static_cast<int>(e);
