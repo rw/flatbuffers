@@ -866,19 +866,16 @@ class RustGenerator : public BaseGenerator {
 
     // Generate an array of all enumeration values
     auto num_fields = NumToString(enum_def.vals.vec.size());
-    code_ += "inline {{ENUM_NAME}} (&EnumValues{{ENUM_NAME}}())[" + num_fields +
-             "] {";
-    code_ += "  static {{ENUM_NAME}} values[] = {";
+    code_ += "const EnumValues{{ENUM_NAME}}:[{{ENUM_NAME}}; " +
+              num_fields + "] = [";
     for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
          ++it) {
       const auto &ev = **it;
       auto value = GetEnumValUse(enum_def, ev);
       auto suffix = *it != enum_def.vals.vec.back() ? "," : "";
-      code_ += "    " + value + suffix;
+      code_ += "  " + value + suffix;
     }
-    code_ += "  };";
-    code_ += "  return values;";
-    code_ += "}";
+    code_ += "];";
     code_ += "";
 
     // Generate a generate string table for enum values.

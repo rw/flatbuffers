@@ -43,14 +43,11 @@ enum Color {
   Color_ANY = 11
 }
 
-inline Color (&EnumValuesColor())[3] {
-  static Color values[] = {
-    Color_Red,
-    Color_Green,
-    Color_Blue
-  };
-  return values;
-}
+const EnumValuesColor:[Color; 3] = [
+  Color_Red,
+  Color_Green,
+  Color_Blue
+];
 
 inline const char **EnumNamesColor() {
   static const char *names[] = {
@@ -81,15 +78,12 @@ enum Any {
   Any_MAX = Any_MyGame_Example2_Monster
 }
 
-inline Any (&EnumValuesAny())[4] {
-  static Any values[] = {
-    Any_NONE,
-    Any_Monster,
-    Any_TestSimpleTableWithEnum,
-    Any_MyGame_Example2_Monster
-  };
-  return values;
-}
+const EnumValuesAny:[Any; 4] = [
+  Any_NONE,
+  Any_Monster,
+  Any_TestSimpleTableWithEnum,
+  Any_MyGame_Example2_Monster
+];
 
 inline const char **EnumNamesAny() {
   static const char *names[] = {
