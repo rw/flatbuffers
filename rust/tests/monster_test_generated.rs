@@ -203,7 +203,7 @@ impl Ability {
 }  // mod Example
 
 impl flatbuffers::Table for InParentNamespace {}
-pub struct InParentNamespace /* private flatbuffers::Table */ {
+impl InParentNamespace /* private flatbuffers::Table */ {
   fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
@@ -234,7 +234,7 @@ inline flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(
 mod Example2 {
 
 impl flatbuffers::Table for Monster {}
-pub struct Monster /* private flatbuffers::Table */ {
+impl Monster /* private flatbuffers::Table */ {
   fn Verify(flatbuffers::Verifier &verifier) -> bool {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
@@ -267,10 +267,9 @@ inline flatbuffers::Offset<Monster> CreateMonster(
 mod Example {
 
 impl flatbuffers::Table for TestSimpleTableWithEnum {}
-pub struct TestSimpleTableWithEnum /* private flatbuffers::Table */ {
-  enum {
-    VT_COLOR = 4
-  };
+impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
+    const VT_COLOR: isize = 4;
+
   Color color() const {
     return GetField<i8>(VT_COLOR, 2) as Color;
   }
@@ -311,12 +310,11 @@ inline flatbuffers::Offset<TestSimpleTableWithEnum> CreateTestSimpleTableWithEnu
 }
 
 impl flatbuffers::Table for Stat {}
-pub struct Stat /* private flatbuffers::Table */ {
-  enum {
-    VT_ID = 4,
-    VT_VAL = 6,
-    VT_COUNT = 8
-  };
+impl Stat /* private flatbuffers::Table */ {
+    const VT_ID: isize = 4;
+    const VT_VAL: isize = 6;
+    const VT_COUNT: isize = 8;
+
   const flatbuffers::String *id() const {
     return GetPointer<const flatbuffers::String *>(VT_ID);
   }
@@ -395,43 +393,42 @@ inline flatbuffers::Offset<Stat> CreateStatDirect(
 
 /// an example documentation comment: monster object
 impl flatbuffers::Table for Monster {}
-pub struct Monster /* private flatbuffers::Table */ {
-  enum {
-    VT_POS = 4,
-    VT_MANA = 6,
-    VT_HP = 8,
-    VT_NAME = 10,
-    VT_INVENTORY = 14,
-    VT_COLOR = 16,
-    VT_TEST_TYPE = 18,
-    VT_TEST = 20,
-    VT_TEST4 = 22,
-    VT_TESTARRAYOFSTRING = 24,
-    VT_TESTARRAYOFTABLES = 26,
-    VT_ENEMY = 28,
-    VT_TESTNESTEDFLATBUFFER = 30,
-    VT_TESTEMPTY = 32,
-    VT_TESTBOOL = 34,
-    VT_TESTHASHS32_FNV1 = 36,
-    VT_TESTHASHU32_FNV1 = 38,
-    VT_TESTHASHS64_FNV1 = 40,
-    VT_TESTHASHU64_FNV1 = 42,
-    VT_TESTHASHS32_FNV1A = 44,
-    VT_TESTHASHU32_FNV1A = 46,
-    VT_TESTHASHS64_FNV1A = 48,
-    VT_TESTHASHU64_FNV1A = 50,
-    VT_TESTARRAYOFBOOLS = 52,
-    VT_TESTF = 54,
-    VT_TESTF2 = 56,
-    VT_TESTF3 = 58,
-    VT_TESTARRAYOFSTRING2 = 60,
-    VT_TESTARRAYOFSORTEDSTRUCT = 62,
-    VT_FLEX = 64,
-    VT_TEST5 = 66,
-    VT_VECTOR_OF_LONGS = 68,
-    VT_VECTOR_OF_DOUBLES = 70,
-    VT_PARENT_NAMESPACE_TEST = 72
-  };
+impl Monster /* private flatbuffers::Table */ {
+    const VT_POS: isize = 4;
+    const VT_MANA: isize = 6;
+    const VT_HP: isize = 8;
+    const VT_NAME: isize = 10;
+    const VT_INVENTORY: isize = 14;
+    const VT_COLOR: isize = 16;
+    const VT_TEST_TYPE: isize = 18;
+    const VT_TEST: isize = 20;
+    const VT_TEST4: isize = 22;
+    const VT_TESTARRAYOFSTRING: isize = 24;
+    const VT_TESTARRAYOFTABLES: isize = 26;
+    const VT_ENEMY: isize = 28;
+    const VT_TESTNESTEDFLATBUFFER: isize = 30;
+    const VT_TESTEMPTY: isize = 32;
+    const VT_TESTBOOL: isize = 34;
+    const VT_TESTHASHS32_FNV1: isize = 36;
+    const VT_TESTHASHU32_FNV1: isize = 38;
+    const VT_TESTHASHS64_FNV1: isize = 40;
+    const VT_TESTHASHU64_FNV1: isize = 42;
+    const VT_TESTHASHS32_FNV1A: isize = 44;
+    const VT_TESTHASHU32_FNV1A: isize = 46;
+    const VT_TESTHASHS64_FNV1A: isize = 48;
+    const VT_TESTHASHU64_FNV1A: isize = 50;
+    const VT_TESTARRAYOFBOOLS: isize = 52;
+    const VT_TESTF: isize = 54;
+    const VT_TESTF2: isize = 56;
+    const VT_TESTF3: isize = 58;
+    const VT_TESTARRAYOFSTRING2: isize = 60;
+    const VT_TESTARRAYOFSORTEDSTRUCT: isize = 62;
+    const VT_FLEX: isize = 64;
+    const VT_TEST5: isize = 66;
+    const VT_VECTOR_OF_LONGS: isize = 68;
+    const VT_VECTOR_OF_DOUBLES: isize = 70;
+    const VT_PARENT_NAMESPACE_TEST: isize = 72;
+
   const Vec3 *pos() const {
     return GetStruct<const Vec3 *>(VT_POS);
   }
@@ -1000,21 +997,20 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
 }
 
 impl flatbuffers::Table for TypeAliases {}
-pub struct TypeAliases /* private flatbuffers::Table */ {
-  enum {
-    VT_I8 = 4,
-    VT_U8 = 6,
-    VT_I16 = 8,
-    VT_U16 = 10,
-    VT_I32 = 12,
-    VT_U32 = 14,
-    VT_I64 = 16,
-    VT_U64 = 18,
-    VT_F32 = 20,
-    VT_F64 = 22,
-    VT_V8 = 24,
-    VT_VF64 = 26
-  };
+impl TypeAliases /* private flatbuffers::Table */ {
+    const VT_I8: isize = 4;
+    const VT_U8: isize = 6;
+    const VT_I16: isize = 8;
+    const VT_U16: isize = 10;
+    const VT_I32: isize = 12;
+    const VT_U32: isize = 14;
+    const VT_I64: isize = 16;
+    const VT_U64: isize = 18;
+    const VT_F32: isize = 20;
+    const VT_F64: isize = 22;
+    const VT_V8: isize = 24;
+    const VT_VF64: isize = 26;
+
   i8 i8() const {
     return GetField<i8>(VT_I8, 0);
   }
