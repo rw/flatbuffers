@@ -143,7 +143,7 @@ impl Vec3 {
   fn Reset(&mut self) {
     memset(this, 0, size_of(Vec3));
   }
-  fn init(&mut self, f32: _x, f32: _y, f32: _z, f64: _test1, Color: _test2, const Test &_test3) {
+  fn init(&mut self, f32: _x, f32: _y, f32: _z, f64: _test1, Color: _test2, &Test: _test3) {
       self.x_ = flatbuffers::EndianScalar(_x);
       self.y_ = flatbuffers::EndianScalar(_y);
       self.z_ = flatbuffers::EndianScalar(_z);
