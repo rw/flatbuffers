@@ -58,11 +58,11 @@ const EnumNamesColor:[&'static str; 8] = [
     "",
     "",
     "Blue"
-]
+];
 
-inline const char *EnumNameColor(Color e) {
-  const size_t index = static_cast<int>(e) - static_cast<int>(Color_Red);
-  return EnumNamesColor()[index];
+fn EnumNameColor(e: Color) -> &'static str {
+  let index: usize = e as usize - Color_Red as usize;
+  EnumNamesColor[index]
 }
 
 enum Any {
@@ -86,11 +86,11 @@ const EnumNamesAny:[&'static str; 4] = [
     "Monster",
     "TestSimpleTableWithEnum",
     "MyGame_Example2_Monster"
-]
+];
 
-inline const char *EnumNameAny(Any e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesAny()[index];
+fn EnumNameAny(e: Any) -> &'static str {
+  let index: usize = e as usize;
+  EnumNamesAny[index]
 }
 
 template<typename T> struct AnyTraits {

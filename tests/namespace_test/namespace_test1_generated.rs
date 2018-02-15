@@ -28,11 +28,11 @@ const EnumNamesEnumInNestedNS:[&'static str; 3] = [
     "A",
     "B",
     "C"
-]
+];
 
-inline const char *EnumNameEnumInNestedNS(EnumInNestedNS e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesEnumInNestedNS()[index];
+fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
+  let index: usize = e as usize;
+  EnumNamesEnumInNestedNS[index]
 }
 
 MANUALLY_ALIGNED_STRUCT(4) StructInNestedNS FLATBUFFERS_FINAL_CLASS {
