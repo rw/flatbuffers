@@ -55,9 +55,11 @@ impl TableInFirstNSBuilder {
   void add_foo_struct(const NamespaceA::NamespaceB::StructInNestedNS *foo_struct) {
     fbb_.AddStruct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
-  fn TableInFirstNSBuilder(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {
-    self.fbb_ = _fbb;
-    self.start_ = _fbb.StartTable();
+  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInFirstNSBuilder {
+    TableInFirstNSBuilder {
+      fbb_: _fbb,
+      start_: _fbb.StartTable(),
+    }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TableInFirstNS> {
@@ -67,16 +69,17 @@ impl TableInFirstNSBuilder {
   }
 }
 
-inline flatbuffers::Offset<TableInFirstNS> CreateTableInFirstNS(
-    flatbuffers::FlatBufferBuilder &_fbb,
+#[inline]
+fn CreateTableInFirstNS(
+    _fbb: &mut flatbuffers::FlatBufferBuilder,
     flatbuffers::Offset<NamespaceA::NamespaceB::TableInNestedNS> foo_table = 0,
     NamespaceA::NamespaceB::EnumInNestedNS foo_enum = NamespaceA::NamespaceB::EnumInNestedNS_A,
-    const NamespaceA::NamespaceB::StructInNestedNS *foo_struct = 0) {
-  TableInFirstNSBuilder builder_(_fbb);
+    const NamespaceA::NamespaceB::StructInNestedNS *foo_struct = 0) -> flatbuffers::Offset<TableInFirstNS> {
+  let mut builder = TableInFirstNSBuilder::new(_fbb);
   builder_.add_foo_struct(foo_struct);
   builder_.add_foo_table(foo_table);
   builder_.add_foo_enum(foo_enum);
-  return builder_.Finish();
+  builder_.Finish()
 }
 
 }  // mod NamespaceA
@@ -121,9 +124,11 @@ impl TableInCBuilder {
   void add_refer_to_a2(flatbuffers::Offset<NamespaceA::SecondTableInA> refer_to_a2) {
     fbb_.AddOffset(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
-  fn TableInCBuilder(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {
-    self.fbb_ = _fbb;
-    self.start_ = _fbb.StartTable();
+  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInCBuilder {
+    TableInCBuilder {
+      fbb_: _fbb,
+      start_: _fbb.StartTable(),
+    }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TableInC> {
@@ -133,14 +138,15 @@ impl TableInCBuilder {
   }
 }
 
-inline flatbuffers::Offset<TableInC> CreateTableInC(
-    flatbuffers::FlatBufferBuilder &_fbb,
+#[inline]
+fn CreateTableInC(
+    _fbb: &mut flatbuffers::FlatBufferBuilder,
     flatbuffers::Offset<NamespaceA::TableInFirstNS> refer_to_a1 = 0,
-    flatbuffers::Offset<NamespaceA::SecondTableInA> refer_to_a2 = 0) {
-  TableInCBuilder builder_(_fbb);
+    flatbuffers::Offset<NamespaceA::SecondTableInA> refer_to_a2 = 0) -> flatbuffers::Offset<TableInC> {
+  let mut builder = TableInCBuilder::new(_fbb);
   builder_.add_refer_to_a2(refer_to_a2);
   builder_.add_refer_to_a1(refer_to_a1);
-  return builder_.Finish();
+  builder_.Finish()
 }
 
 }  // mod NamespaceC
@@ -173,9 +179,11 @@ impl SecondTableInABuilder {
   void add_refer_to_c(flatbuffers::Offset<NamespaceC::TableInC> refer_to_c) {
     fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
-  fn SecondTableInABuilder(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {
-    self.fbb_ = _fbb;
-    self.start_ = _fbb.StartTable();
+  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder {
+    SecondTableInABuilder {
+      fbb_: _fbb,
+      start_: _fbb.StartTable(),
+    }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<SecondTableInA> {
@@ -185,12 +193,13 @@ impl SecondTableInABuilder {
   }
 }
 
-inline flatbuffers::Offset<SecondTableInA> CreateSecondTableInA(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<NamespaceC::TableInC> refer_to_c = 0) {
-  SecondTableInABuilder builder_(_fbb);
+#[inline]
+fn CreateSecondTableInA(
+    _fbb: &mut flatbuffers::FlatBufferBuilder,
+    flatbuffers::Offset<NamespaceC::TableInC> refer_to_c = 0) -> flatbuffers::Offset<SecondTableInA> {
+  let mut builder = SecondTableInABuilder::new(_fbb);
   builder_.add_refer_to_c(refer_to_c);
-  return builder_.Finish();
+  builder_.Finish()
 }
 
 }  // mod NamespaceA

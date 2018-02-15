@@ -1787,10 +1787,13 @@ class RustGenerator : public BaseGenerator {
 
     // Builder constructor
     code_ +=
-        "  fn {{STRUCT_NAME}}Builder"
-        "(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {";
-    code_ += "    self.fbb_ = _fbb;";
-    code_ += "    self.start_ = _fbb.StartTable();";
+        "  fn new"
+        "(_fbb: &mut flatbuffers::FlatBufferBuilder) -> "
+        "{{STRUCT_NAME}}Builder {";
+    code_ += "    {{STRUCT_NAME}}Builder {";
+    code_ += "      fbb_: _fbb,";
+    code_ += "      start_: _fbb.StartTable(),";
+    code_ += "    }";
     code_ += "  }";
 
     // Assignment operator;
@@ -1819,18 +1822,17 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
-    code_ +=
-        "inline flatbuffers::Offset<{{STRUCT_NAME}}> "
-        "Create{{STRUCT_NAME}}(";
-    code_ += "    flatbuffers::FlatBufferBuilder &_fbb\\";
+    code_ += "#[inline]";
+    code_ += "fn Create{{STRUCT_NAME}}(";
+    code_ += "    _fbb: &mut flatbuffers::FlatBufferBuilder\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated) { GenParam(field, false, ",\n    "); }
     }
-    code_ += ") {";
+    code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
 
-    code_ += "  {{STRUCT_NAME}}Builder builder_(_fbb);";
+    code_ += "  let mut builder = {{STRUCT_NAME}}Builder::new(_fbb);";
     for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
          size; size /= 2) {
       for (auto it = struct_def.fields.vec.rbegin();
@@ -1843,7 +1845,7 @@ class RustGenerator : public BaseGenerator {
         }
       }
     }
-    code_ += "  return builder_.Finish();";
+    code_ += "  builder_.Finish()";
     code_ += "}";
     code_ += "";
 
