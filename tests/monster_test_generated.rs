@@ -3,19 +3,19 @@
 
 extern crate flatbuffers;
 
-namespace MyGame {
+mod MyGame {
 
 struct InParentNamespace;
 struct InParentNamespaceT;
 
-namespace Example2 {
+mod Example2 {
 
 struct Monster;
 struct MonsterT;
 
-}  // namespace Example2
+}  // mod Example2
 
-namespace Example {
+mod Example {
 
 struct Test;
 
@@ -41,7 +41,7 @@ enum Color {
   Color_Blue = 8,
   Color_NONE = 0,
   Color_ANY = 11
-};
+}
 
 inline Color (&EnumValuesColor())[3] {
   static Color values[] = {
@@ -79,7 +79,7 @@ enum Any {
   Any_MyGame_Example2_Monster = 3,
   Any_MIN = Any_NONE,
   Any_MAX = Any_MyGame_Example2_Monster
-};
+}
 
 inline Any (&EnumValuesAny())[4] {
   static Any values[] = {
@@ -318,7 +318,7 @@ MANUALLY_ALIGNED_STRUCT(4) Ability FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(Ability, 8);
 
-}  // namespace Example
+}  // mod Example
 
 struct InParentNamespaceT : public flatbuffers::NativeTable {
   typedef InParentNamespace TableType;
@@ -360,7 +360,7 @@ inline flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(
 
 flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(flatbuffers::FlatBufferBuilder &_fbb, const InParentNamespaceT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-namespace Example2 {
+mod Example2 {
 
 struct MonsterT : public flatbuffers::NativeTable {
   typedef Monster TableType;
@@ -402,9 +402,9 @@ inline flatbuffers::Offset<Monster> CreateMonster(
 
 flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-}  // namespace Example2
+}  // mod Example2
 
-namespace Example {
+mod Example {
 
 struct TestSimpleTableWithEnumT : public flatbuffers::NativeTable {
   typedef TestSimpleTableWithEnum TableType;
@@ -1479,7 +1479,7 @@ inline flatbuffers::Offset<TypeAliases> CreateTypeAliasesDirect(
 
 flatbuffers::Offset<TypeAliases> CreateTypeAliases(flatbuffers::FlatBufferBuilder &_fbb, const TypeAliasesT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-}  // namespace Example
+}  // mod Example
 
 inline InParentNamespaceT *InParentNamespace::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new InParentNamespaceT();
@@ -1504,7 +1504,7 @@ inline flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(flatbuffer
       _fbb);
 }
 
-namespace Example2 {
+mod Example2 {
 
 inline MonsterT *Monster::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new MonsterT();
@@ -1529,9 +1529,9 @@ inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder
       _fbb);
 }
 
-}  // namespace Example2
+}  // mod Example2
 
-namespace Example {
+mod Example {
 
 inline TestSimpleTableWithEnumT *TestSimpleTableWithEnum::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new TestSimpleTableWithEnumT();
@@ -1886,17 +1886,17 @@ inline void AnyUnion::Reset() {
   type = Any_NONE;
 }
 
-}  // namespace Example
+}  // mod Example
 
 inline flatbuffers::TypeTable *InParentNamespaceTypeTable();
 
-namespace Example2 {
+mod Example2 {
 
 inline flatbuffers::TypeTable *MonsterTypeTable();
 
-}  // namespace Example2
+}  // mod Example2
 
-namespace Example {
+mod Example {
 
 inline flatbuffers::TypeTable *TestTypeTable();
 
@@ -1957,7 +1957,7 @@ inline flatbuffers::TypeTable *AnyTypeTable() {
   return &tt;
 }
 
-}  // namespace Example
+}  // mod Example
 
 inline flatbuffers::TypeTable *InParentNamespaceTypeTable() {
   static flatbuffers::TypeTable tt = {
@@ -1966,7 +1966,7 @@ inline flatbuffers::TypeTable *InParentNamespaceTypeTable() {
   return &tt;
 }
 
-namespace Example2 {
+mod Example2 {
 
 inline flatbuffers::TypeTable *MonsterTypeTable() {
   static flatbuffers::TypeTable tt = {
@@ -1975,9 +1975,9 @@ inline flatbuffers::TypeTable *MonsterTypeTable() {
   return &tt;
 }
 
-}  // namespace Example2
+}  // mod Example2
 
-namespace Example {
+mod Example {
 
 inline flatbuffers::TypeTable *TestTypeTable() {
   static flatbuffers::TypeCode type_codes[] = {
@@ -2236,6 +2236,6 @@ inline flatbuffers::unique_ptr<MonsterT> UnPackMonster(
   return flatbuffers::unique_ptr<MonsterT>(GetMonster(buf)->UnPack(res));
 }
 
-}  // namespace Example
-}  // namespace MyGame
+}  // mod Example
+}  // mod MyGame
 

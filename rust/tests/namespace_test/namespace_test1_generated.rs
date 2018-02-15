@@ -3,8 +3,8 @@
 
 extern crate flatbuffers;
 
-namespace NamespaceA {
-namespace NamespaceB {
+mod NamespaceA {
+mod NamespaceB {
 
 struct TableInNestedNS;
 
@@ -16,7 +16,7 @@ enum EnumInNestedNS {
   EnumInNestedNS_C = 2,
   EnumInNestedNS_MIN = EnumInNestedNS_A,
   EnumInNestedNS_MAX = EnumInNestedNS_C
-};
+}
 
 inline EnumInNestedNS (&EnumValuesEnumInNestedNS())[3] {
   static EnumInNestedNS values[] = {
@@ -166,6 +166,6 @@ inline flatbuffers::TypeTable *StructInNestedNSTypeTable() {
   return &tt;
 }
 
-}  // namespace NamespaceB
-}  // namespace NamespaceA
+}  // mod NamespaceB
+}  // mod NamespaceA
 
