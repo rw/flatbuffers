@@ -4,36 +4,7 @@
 extern crate flatbuffers;
 
 mod MyGame {
-
-struct InParentNamespace;
-struct InParentNamespaceT;
-
-mod Example2 {
-
-struct Monster;
-struct MonsterT;
-
-}  // mod Example2
-
 mod Example {
-
-struct Test;
-
-struct TestSimpleTableWithEnum;
-struct TestSimpleTableWithEnumT;
-
-struct Vec3;
-
-struct Ability;
-
-struct Stat;
-struct StatT;
-
-struct Monster;
-struct MonsterT;
-
-struct TypeAliases;
-struct TypeAliasesT;
 
 enum Color {
   Color_Red = 1,
@@ -231,21 +202,11 @@ impl Ability {
 
 }  // mod Example
 
-struct InParentNamespaceT : public flatbuffers::NativeTable {
-  typedef InParentNamespace TableType;
-  InParentNamespaceT() {
-  }
-};
-
 struct InParentNamespace FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef InParentNamespaceT NativeTableType;
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
   }
-  InParentNamespaceT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(InParentNamespaceT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<InParentNamespace> Pack(flatbuffers::FlatBufferBuilder &_fbb, const InParentNamespaceT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
 struct InParentNamespaceBuilder {
@@ -269,25 +230,13 @@ inline flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(
   return builder_.Finish();
 }
 
-flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(flatbuffers::FlatBufferBuilder &_fbb, const InParentNamespaceT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 mod Example2 {
 
-struct MonsterT : public flatbuffers::NativeTable {
-  typedef Monster TableType;
-  MonsterT() {
-  }
-};
-
 struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef MonsterT NativeTableType;
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            verifier.EndTable();
   }
-  MonsterT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(MonsterT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Monster> Pack(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
 struct MonsterBuilder {
@@ -311,22 +260,11 @@ inline flatbuffers::Offset<Monster> CreateMonster(
   return builder_.Finish();
 }
 
-flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 }  // mod Example2
 
 mod Example {
 
-struct TestSimpleTableWithEnumT : public flatbuffers::NativeTable {
-  typedef TestSimpleTableWithEnum TableType;
-  Color color;
-  TestSimpleTableWithEnumT()
-      : color(Color_Green) {
-  }
-};
-
 struct TestSimpleTableWithEnum FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef TestSimpleTableWithEnumT NativeTableType;
   enum {
     VT_COLOR = 4
   };
@@ -341,9 +279,6 @@ struct TestSimpleTableWithEnum FLATBUFFERS_FINAL_CLASS : private flatbuffers::Ta
            VerifyField<i8>(verifier, VT_COLOR) &&
            verifier.EndTable();
   }
-  TestSimpleTableWithEnumT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(TestSimpleTableWithEnumT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<TestSimpleTableWithEnum> Pack(flatbuffers::FlatBufferBuilder &_fbb, const TestSimpleTableWithEnumT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
 struct TestSimpleTableWithEnumBuilder {
@@ -372,21 +307,7 @@ inline flatbuffers::Offset<TestSimpleTableWithEnum> CreateTestSimpleTableWithEnu
   return builder_.Finish();
 }
 
-flatbuffers::Offset<TestSimpleTableWithEnum> CreateTestSimpleTableWithEnum(flatbuffers::FlatBufferBuilder &_fbb, const TestSimpleTableWithEnumT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct StatT : public flatbuffers::NativeTable {
-  typedef Stat TableType;
-  std::string id;
-  i64 val;
-  u16 count;
-  StatT()
-      : val(0),
-        count(0) {
-  }
-};
-
 struct Stat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef StatT NativeTableType;
   enum {
     VT_ID = 4,
     VT_VAL = 6,
@@ -418,9 +339,6 @@ struct Stat FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<u16>(verifier, VT_COUNT) &&
            verifier.EndTable();
   }
-  StatT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(StatT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Stat> Pack(flatbuffers::FlatBufferBuilder &_fbb, const StatT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
 struct StatBuilder {
@@ -471,65 +389,8 @@ inline flatbuffers::Offset<Stat> CreateStatDirect(
       count);
 }
 
-flatbuffers::Offset<Stat> CreateStat(flatbuffers::FlatBufferBuilder &_fbb, const StatT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct MonsterT : public flatbuffers::NativeTable {
-  typedef Monster TableType;
-  flatbuffers::unique_ptr<Vec3> pos;
-  i16 mana;
-  i16 hp;
-  std::string name;
-  std::vector<u8> inventory;
-  Color color;
-  AnyUnion test;
-  std::vector<Test> test4;
-  std::vector<std::string> testarrayofstring;
-  std::vector<flatbuffers::unique_ptr<MonsterT>> testarrayoftables;
-  flatbuffers::unique_ptr<MonsterT> enemy;
-  std::vector<u8> testnestedflatbuffer;
-  flatbuffers::unique_ptr<StatT> testempty;
-  bool testbool;
-  i32 testhashs32_fnv1;
-  u32 testhashu32_fnv1;
-  i64 testhashs64_fnv1;
-  u64 testhashu64_fnv1;
-  i32 testhashs32_fnv1a;
-  Stat *testhashu32_fnv1a;
-  i64 testhashs64_fnv1a;
-  u64 testhashu64_fnv1a;
-  std::vector<bool> testarrayofbools;
-  f32 testf;
-  f32 testf2;
-  f32 testf3;
-  std::vector<std::string> testarrayofstring2;
-  std::vector<Ability> testarrayofsortedstruct;
-  std::vector<u8> flex;
-  std::vector<Test> test5;
-  std::vector<i64> vector_of_longs;
-  std::vector<f64> vector_of_doubles;
-  flatbuffers::unique_ptr<MyGame::InParentNamespaceT> parent_namespace_test;
-  MonsterT()
-      : mana(150),
-        hp(100),
-        color(Color_Blue),
-        testbool(false),
-        testhashs32_fnv1(0),
-        testhashu32_fnv1(0),
-        testhashs64_fnv1(0),
-        testhashu64_fnv1(0),
-        testhashs32_fnv1a(0),
-        testhashu32_fnv1a(0),
-        testhashs64_fnv1a(0),
-        testhashu64_fnv1a(0),
-        testf(3.14159f),
-        testf2(3.0f),
-        testf3(0.0f) {
-  }
-};
-
 /// an example documentation comment: monster object
 struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef MonsterT NativeTableType;
   enum {
     VT_POS = 4,
     VT_MANA = 6,
@@ -853,9 +714,6 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyTable(parent_namespace_test()) &&
            verifier.EndTable();
   }
-  MonsterT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(MonsterT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Monster> Pack(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
 template<> inline const Monster *Monster::test_as<Monster>() const {
@@ -1136,38 +994,7 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
       parent_namespace_test);
 }
 
-flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct TypeAliasesT : public flatbuffers::NativeTable {
-  typedef TypeAliases TableType;
-  i8 i8;
-  u8 u8;
-  i16 i16;
-  u16 u16;
-  i32 i32;
-  u32 u32;
-  i64 i64;
-  u64 u64;
-  f32 f32;
-  f64 f64;
-  std::vector<i8> v8;
-  std::vector<f64> vf64;
-  TypeAliasesT()
-      : i8(0),
-        u8(0),
-        i16(0),
-        u16(0),
-        i32(0),
-        u32(0),
-        i64(0),
-        u64(0),
-        f32(0.0f),
-        f64(0.0) {
-  }
-};
-
 struct TypeAliases FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef TypeAliasesT NativeTableType;
   enum {
     VT_I8 = 4,
     VT_U8 = 6,
@@ -1272,9 +1099,6 @@ struct TypeAliases FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(vf64()) &&
            verifier.EndTable();
   }
-  TypeAliasesT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(TypeAliasesT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<TypeAliases> Pack(flatbuffers::FlatBufferBuilder &_fbb, const TypeAliasesT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
 struct TypeAliasesBuilder {
@@ -1388,303 +1212,13 @@ inline flatbuffers::Offset<TypeAliases> CreateTypeAliasesDirect(
       vf64 ? _fbb.CreateVector<f64>(*vf64) : 0);
 }
 
-flatbuffers::Offset<TypeAliases> CreateTypeAliases(flatbuffers::FlatBufferBuilder &_fbb, const TypeAliasesT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 }  // mod Example
 
-inline InParentNamespaceT *InParentNamespace::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new InParentNamespaceT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void InParentNamespace::UnPackTo(InParentNamespaceT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-}
-
-inline flatbuffers::Offset<InParentNamespace> InParentNamespace::Pack(flatbuffers::FlatBufferBuilder &_fbb, const InParentNamespaceT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateInParentNamespace(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<InParentNamespace> CreateInParentNamespace(flatbuffers::FlatBufferBuilder &_fbb, const InParentNamespaceT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const InParentNamespaceT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  return MyGame::CreateInParentNamespace(
-      _fbb);
-}
-
 mod Example2 {
-
-inline MonsterT *Monster::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new MonsterT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Monster::UnPackTo(MonsterT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-}
-
-inline flatbuffers::Offset<Monster> Monster::Pack(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateMonster(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const MonsterT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  return MyGame::Example2::CreateMonster(
-      _fbb);
-}
 
 }  // mod Example2
 
 mod Example {
-
-inline TestSimpleTableWithEnumT *TestSimpleTableWithEnum::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new TestSimpleTableWithEnumT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void TestSimpleTableWithEnum::UnPackTo(TestSimpleTableWithEnumT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = color(); _o->color = _e; };
-}
-
-inline flatbuffers::Offset<TestSimpleTableWithEnum> TestSimpleTableWithEnum::Pack(flatbuffers::FlatBufferBuilder &_fbb, const TestSimpleTableWithEnumT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateTestSimpleTableWithEnum(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<TestSimpleTableWithEnum> CreateTestSimpleTableWithEnum(flatbuffers::FlatBufferBuilder &_fbb, const TestSimpleTableWithEnumT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const TestSimpleTableWithEnumT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _color = _o->color;
-  return MyGame::Example::CreateTestSimpleTableWithEnum(
-      _fbb,
-      _color);
-}
-
-inline StatT *Stat::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new StatT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Stat::UnPackTo(StatT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = id(); if (_e) _o->id = _e->str(); };
-  { auto _e = val(); _o->val = _e; };
-  { auto _e = count(); _o->count = _e; };
-}
-
-inline flatbuffers::Offset<Stat> Stat::Pack(flatbuffers::FlatBufferBuilder &_fbb, const StatT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateStat(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Stat> CreateStat(flatbuffers::FlatBufferBuilder &_fbb, const StatT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const StatT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _id = _o->id.empty() ? 0 : _fbb.CreateString(_o->id);
-  auto _val = _o->val;
-  auto _count = _o->count;
-  return MyGame::Example::CreateStat(
-      _fbb,
-      _id,
-      _val,
-      _count);
-}
-
-inline MonsterT *Monster::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new MonsterT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Monster::UnPackTo(MonsterT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = pos(); if (_e) _o->pos = flatbuffers::unique_ptr<Vec3>(new Vec3(*_e)); };
-  { auto _e = mana(); _o->mana = _e; };
-  { auto _e = hp(); _o->hp = _e; };
-  { auto _e = name(); if (_e) _o->name = _e->str(); };
-  { auto _e = inventory(); if (_e) { _o->inventory.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->inventory[_i] = _e->Get(_i); } } };
-  { auto _e = color(); _o->color = _e; };
-  { auto _e = test_type(); _o->test.type = _e; };
-  { auto _e = test(); if (_e) _o->test.value = AnyUnion::UnPack(_e, test_type(), _resolver); };
-  { auto _e = test4(); if (_e) { _o->test4.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->test4[_i] = *_e->Get(_i); } } };
-  { auto _e = testarrayofstring(); if (_e) { _o->testarrayofstring.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->testarrayofstring[_i] = _e->Get(_i)->str(); } } };
-  { auto _e = testarrayoftables(); if (_e) { _o->testarrayoftables.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->testarrayoftables[_i] = flatbuffers::unique_ptr<MonsterT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = enemy(); if (_e) _o->enemy = flatbuffers::unique_ptr<MonsterT>(_e->UnPack(_resolver)); };
-  { auto _e = testnestedflatbuffer(); if (_e) { _o->testnestedflatbuffer.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->testnestedflatbuffer[_i] = _e->Get(_i); } } };
-  { auto _e = testempty(); if (_e) _o->testempty = flatbuffers::unique_ptr<StatT>(_e->UnPack(_resolver)); };
-  { auto _e = testbool(); _o->testbool = _e; };
-  { auto _e = testhashs32_fnv1(); _o->testhashs32_fnv1 = _e; };
-  { auto _e = testhashu32_fnv1(); _o->testhashu32_fnv1 = _e; };
-  { auto _e = testhashs64_fnv1(); _o->testhashs64_fnv1 = _e; };
-  { auto _e = testhashu64_fnv1(); _o->testhashu64_fnv1 = _e; };
-  { auto _e = testhashs32_fnv1a(); _o->testhashs32_fnv1a = _e; };
-  { auto _e = testhashu32_fnv1a(); if (_resolver) (*_resolver)(reinterpret_cast<void **>(&_o->testhashu32_fnv1a), static_cast<flatbuffers::hash_value_t>(_e)); else _o->testhashu32_fnv1a = nullptr; };
-  { auto _e = testhashs64_fnv1a(); _o->testhashs64_fnv1a = _e; };
-  { auto _e = testhashu64_fnv1a(); _o->testhashu64_fnv1a = _e; };
-  { auto _e = testarrayofbools(); if (_e) { _o->testarrayofbools.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->testarrayofbools[_i] = _e->Get(_i) != 0; } } };
-  { auto _e = testf(); _o->testf = _e; };
-  { auto _e = testf2(); _o->testf2 = _e; };
-  { auto _e = testf3(); _o->testf3 = _e; };
-  { auto _e = testarrayofstring2(); if (_e) { _o->testarrayofstring2.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->testarrayofstring2[_i] = _e->Get(_i)->str(); } } };
-  { auto _e = testarrayofsortedstruct(); if (_e) { _o->testarrayofsortedstruct.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->testarrayofsortedstruct[_i] = *_e->Get(_i); } } };
-  { auto _e = flex(); if (_e) { _o->flex.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->flex[_i] = _e->Get(_i); } } };
-  { auto _e = test5(); if (_e) { _o->test5.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->test5[_i] = *_e->Get(_i); } } };
-  { auto _e = vector_of_longs(); if (_e) { _o->vector_of_longs.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->vector_of_longs[_i] = _e->Get(_i); } } };
-  { auto _e = vector_of_doubles(); if (_e) { _o->vector_of_doubles.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->vector_of_doubles[_i] = _e->Get(_i); } } };
-  { auto _e = parent_namespace_test(); if (_e) _o->parent_namespace_test = flatbuffers::unique_ptr<MyGame::InParentNamespaceT>(_e->UnPack(_resolver)); };
-}
-
-inline flatbuffers::Offset<Monster> Monster::Pack(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateMonster(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const MonsterT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _pos = _o->pos ? _o->pos.get() : 0;
-  auto _mana = _o->mana;
-  auto _hp = _o->hp;
-  auto _name = _fbb.CreateString(_o->name);
-  auto _inventory = _o->inventory.size() ? _fbb.CreateVector(_o->inventory) : 0;
-  auto _color = _o->color;
-  auto _test_type = _o->test.type;
-  auto _test = _o->test.Pack(_fbb);
-  auto _test4 = _o->test4.size() ? _fbb.CreateVectorOfStructs(_o->test4) : 0;
-  auto _testarrayofstring = _o->testarrayofstring.size() ? _fbb.CreateVectorOfStrings(_o->testarrayofstring) : 0;
-  auto _testarrayoftables = _o->testarrayoftables.size() ? _fbb.CreateVector<flatbuffers::Offset<Monster>> (_o->testarrayoftables.size(), [](size_t i, _VectorArgs *__va) { return CreateMonster(*__va->__fbb, __va->__o->testarrayoftables[i].get(), __va->__rehasher); }, &_va ) : 0;
-  auto _enemy = _o->enemy ? CreateMonster(_fbb, _o->enemy.get(), _rehasher) : 0;
-  auto _testnestedflatbuffer = _o->testnestedflatbuffer.size() ? _fbb.CreateVector(_o->testnestedflatbuffer) : 0;
-  auto _testempty = _o->testempty ? CreateStat(_fbb, _o->testempty.get(), _rehasher) : 0;
-  auto _testbool = _o->testbool;
-  auto _testhashs32_fnv1 = _o->testhashs32_fnv1;
-  auto _testhashu32_fnv1 = _o->testhashu32_fnv1;
-  auto _testhashs64_fnv1 = _o->testhashs64_fnv1;
-  auto _testhashu64_fnv1 = _o->testhashu64_fnv1;
-  auto _testhashs32_fnv1a = _o->testhashs32_fnv1a;
-  auto _testhashu32_fnv1a = _rehasher ? static_cast<u32>((*_rehasher)(_o->testhashu32_fnv1a)) : 0;
-  auto _testhashs64_fnv1a = _o->testhashs64_fnv1a;
-  auto _testhashu64_fnv1a = _o->testhashu64_fnv1a;
-  auto _testarrayofbools = _o->testarrayofbools.size() ? _fbb.CreateVector(_o->testarrayofbools) : 0;
-  auto _testf = _o->testf;
-  auto _testf2 = _o->testf2;
-  auto _testf3 = _o->testf3;
-  auto _testarrayofstring2 = _o->testarrayofstring2.size() ? _fbb.CreateVectorOfStrings(_o->testarrayofstring2) : 0;
-  auto _testarrayofsortedstruct = _o->testarrayofsortedstruct.size() ? _fbb.CreateVectorOfStructs(_o->testarrayofsortedstruct) : 0;
-  auto _flex = _o->flex.size() ? _fbb.CreateVector(_o->flex) : 0;
-  auto _test5 = _o->test5.size() ? _fbb.CreateVectorOfStructs(_o->test5) : 0;
-  auto _vector_of_longs = _o->vector_of_longs.size() ? _fbb.CreateVector(_o->vector_of_longs) : 0;
-  auto _vector_of_doubles = _o->vector_of_doubles.size() ? _fbb.CreateVector(_o->vector_of_doubles) : 0;
-  auto _parent_namespace_test = _o->parent_namespace_test ? CreateInParentNamespace(_fbb, _o->parent_namespace_test.get(), _rehasher) : 0;
-  return MyGame::Example::CreateMonster(
-      _fbb,
-      _pos,
-      _mana,
-      _hp,
-      _name,
-      _inventory,
-      _color,
-      _test_type,
-      _test,
-      _test4,
-      _testarrayofstring,
-      _testarrayoftables,
-      _enemy,
-      _testnestedflatbuffer,
-      _testempty,
-      _testbool,
-      _testhashs32_fnv1,
-      _testhashu32_fnv1,
-      _testhashs64_fnv1,
-      _testhashu64_fnv1,
-      _testhashs32_fnv1a,
-      _testhashu32_fnv1a,
-      _testhashs64_fnv1a,
-      _testhashu64_fnv1a,
-      _testarrayofbools,
-      _testf,
-      _testf2,
-      _testf3,
-      _testarrayofstring2,
-      _testarrayofsortedstruct,
-      _flex,
-      _test5,
-      _vector_of_longs,
-      _vector_of_doubles,
-      _parent_namespace_test);
-}
-
-inline TypeAliasesT *TypeAliases::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new TypeAliasesT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void TypeAliases::UnPackTo(TypeAliasesT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = i8(); _o->i8 = _e; };
-  { auto _e = u8(); _o->u8 = _e; };
-  { auto _e = i16(); _o->i16 = _e; };
-  { auto _e = u16(); _o->u16 = _e; };
-  { auto _e = i32(); _o->i32 = _e; };
-  { auto _e = u32(); _o->u32 = _e; };
-  { auto _e = i64(); _o->i64 = _e; };
-  { auto _e = u64(); _o->u64 = _e; };
-  { auto _e = f32(); _o->f32 = _e; };
-  { auto _e = f64(); _o->f64 = _e; };
-  { auto _e = v8(); if (_e) { _o->v8.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->v8[_i] = _e->Get(_i); } } };
-  { auto _e = vf64(); if (_e) { _o->vf64.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->vf64[_i] = _e->Get(_i); } } };
-}
-
-inline flatbuffers::Offset<TypeAliases> TypeAliases::Pack(flatbuffers::FlatBufferBuilder &_fbb, const TypeAliasesT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateTypeAliases(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<TypeAliases> CreateTypeAliases(flatbuffers::FlatBufferBuilder &_fbb, const TypeAliasesT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const TypeAliasesT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _i8 = _o->i8;
-  auto _u8 = _o->u8;
-  auto _i16 = _o->i16;
-  auto _u16 = _o->u16;
-  auto _i32 = _o->i32;
-  auto _u32 = _o->u32;
-  auto _i64 = _o->i64;
-  auto _u64 = _o->u64;
-  auto _f32 = _o->f32;
-  auto _f64 = _o->f64;
-  auto _v8 = _o->v8.size() ? _fbb.CreateVector(_o->v8) : 0;
-  auto _vf64 = _o->vf64.size() ? _fbb.CreateVector(_o->vf64) : 0;
-  return MyGame::Example::CreateTypeAliases(
-      _fbb,
-      _i8,
-      _u8,
-      _i16,
-      _u16,
-      _i32,
-      _u32,
-      _i64,
-      _u64,
-      _f32,
-      _f64,
-      _v8,
-      _vf64);
-}
 
 inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *obj, Any type) {
   switch (type) {
@@ -1717,84 +1251,6 @@ inline bool VerifyAnyVector(flatbuffers::Verifier &verifier, const flatbuffers::
     }
   }
   return true;
-}
-
-inline void *AnyUnion::UnPack(const void *obj, Any type, const flatbuffers::resolver_function_t *resolver) {
-  switch (type) {
-    case Any_Monster: {
-      auto ptr = reinterpret_cast<const Monster *>(obj);
-      return ptr->UnPack(resolver);
-    }
-    case Any_TestSimpleTableWithEnum: {
-      auto ptr = reinterpret_cast<const TestSimpleTableWithEnum *>(obj);
-      return ptr->UnPack(resolver);
-    }
-    case Any_MyGame_Example2_Monster: {
-      auto ptr = reinterpret_cast<const MyGame::Example2::Monster *>(obj);
-      return ptr->UnPack(resolver);
-    }
-    default: return nullptr;
-  }
-}
-
-inline flatbuffers::Offset<void> AnyUnion::Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher) const {
-  switch (type) {
-    case Any_Monster: {
-      auto ptr = reinterpret_cast<const MonsterT *>(value);
-      return CreateMonster(_fbb, ptr, _rehasher).Union();
-    }
-    case Any_TestSimpleTableWithEnum: {
-      auto ptr = reinterpret_cast<const TestSimpleTableWithEnumT *>(value);
-      return CreateTestSimpleTableWithEnum(_fbb, ptr, _rehasher).Union();
-    }
-    case Any_MyGame_Example2_Monster: {
-      auto ptr = reinterpret_cast<const MyGame::Example2::MonsterT *>(value);
-      return CreateMonster(_fbb, ptr, _rehasher).Union();
-    }
-    default: return 0;
-  }
-}
-
-inline AnyUnion::AnyUnion(const AnyUnion &u) FLATBUFFERS_NOEXCEPT : type(u.type), value(nullptr) {
-  switch (type) {
-    case Any_Monster: {
-      assert(false);  // MonsterT not copyable.
-      break;
-    }
-    case Any_TestSimpleTableWithEnum: {
-      value = new TestSimpleTableWithEnumT(*reinterpret_cast<TestSimpleTableWithEnumT *>(u.value));
-      break;
-    }
-    case Any_MyGame_Example2_Monster: {
-      value = new MyGame::Example2::MonsterT(*reinterpret_cast<MyGame::Example2::MonsterT *>(u.value));
-      break;
-    }
-    default:
-      break;
-  }
-}
-
-inline void AnyUnion::Reset() {
-  switch (type) {
-    case Any_Monster: {
-      auto ptr = reinterpret_cast<MonsterT *>(value);
-      delete ptr;
-      break;
-    }
-    case Any_TestSimpleTableWithEnum: {
-      auto ptr = reinterpret_cast<TestSimpleTableWithEnumT *>(value);
-      delete ptr;
-      break;
-    }
-    case Any_MyGame_Example2_Monster: {
-      auto ptr = reinterpret_cast<MyGame::Example2::MonsterT *>(value);
-      delete ptr;
-      break;
-    }
-    default: break;
-  }
-  value = nullptr;
-  type = Any_NONE;
 }
 
 }  // mod Example
@@ -2139,12 +1595,6 @@ inline void FinishMonsterBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<MyGame::Example::Monster> root) {
   fbb.Finish(root, MonsterIdentifier());
-}
-
-inline flatbuffers::unique_ptr<MonsterT> UnPackMonster(
-    const void *buf,
-    const flatbuffers::resolver_function_t *res = nullptr) {
-  return flatbuffers::unique_ptr<MonsterT>(GetMonster(buf)->UnPack(res));
 }
 
 }  // mod Example
