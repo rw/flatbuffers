@@ -16,6 +16,8 @@
 
 ../flatc --cpp --java --csharp --go --binary --python --js --ts --php --rust --grpc --gen-mutable --reflect-names --gen-object-api --no-includes --cpp-ptr-type flatbuffers::unique_ptr  --no-fb-import -I include_test monster_test.fbs monsterdata_test.json
 ../flatc --cpp --java --csharp --go --binary --python --js --ts --php --rust --gen-mutable --reflect-names --no-fb-import --cpp-ptr-type flatbuffers::unique_ptr  -o namespace_test namespace_test/namespace_test1.fbs namespace_test/namespace_test2.fbs
+cp monster_test_generated.rs ../rust/tests/
+cp -r namespace_test/namespace_test1_generated.rs namespace_test/namespace_test2_generated.rs ../rust/tests/namespace_test/
 ../flatc --cpp --js --ts --php --gen-mutable --reflect-names --gen-object-api --cpp-ptr-type flatbuffers::unique_ptr -o union_vector ./union_vector/union_vector.fbs
 ../flatc -b --schema --bfbs-comments -I include_test monster_test.fbs
 ../flatc --jsonschema --schema -I include_test monster_test.fbs

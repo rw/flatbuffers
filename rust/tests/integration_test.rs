@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+//mod MyGame;
 //#include "flatbuffers/flatbuffers.h"
 //#include "flatbuffers/idl.h"
 //#include "flatbuffers/minireflect.h"
