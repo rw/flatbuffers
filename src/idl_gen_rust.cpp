@@ -900,19 +900,19 @@ class RustGenerator : public BaseGenerator {
         auto suffix = *it != enum_def.vals.vec.back() ? "," : "";
         code_ += "    \"" + Name(ev) + "\"" + suffix;
       }
-      code_ += "]";
+      code_ += "];";
       code_ += "";
 
-      code_ += "inline const char *EnumName{{ENUM_NAME}}({{ENUM_NAME}} e) {";
+      code_ += "fn EnumName{{ENUM_NAME}}(e: {{ENUM_NAME}}) -> &'static str {";
 
-      code_ += "  const size_t index = static_cast<int>(e)\\";
+      code_ += "  let index: usize = e as usize\\";
       if (enum_def.vals.vec.front()->value) {
         auto vals = GetEnumValUse(enum_def, *enum_def.vals.vec.front());
-        code_ += " - static_cast<int>(" + vals + ")\\";
+        code_ += " - " + vals + " as usize\\";
       }
       code_ += ";";
 
-      code_ += "  return EnumNames{{ENUM_NAME}}()[index];";
+      code_ += "  EnumNames{{ENUM_NAME}}[index]";
       code_ += "}";
       code_ += "";
     }
