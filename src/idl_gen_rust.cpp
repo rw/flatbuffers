@@ -2424,8 +2424,8 @@ class RustGenerator : public BaseGenerator {
 
       // Generate a comparison function for this field if it is a key.
       if (field.key) {
-        code_ += "  bool KeyCompareLessThan(const {{STRUCT_NAME}} *o) const {";
-        code_ += "    return {{FIELD_NAME}}() < o->{{FIELD_NAME}}();";
+        code_ += "  fn KeyCompareLessThan(o: &{{STRUCT_NAME}}) -> bool {";
+        code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
         code_ += "  }";
         auto type = GenTypeBasic(field.value.type, false);
         if (parser_.opts.scoped_enums && field.value.type.enum_def &&
