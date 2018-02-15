@@ -55,17 +55,17 @@ impl TableInFirstNSBuilder {
   void add_foo_struct(const NamespaceA::NamespaceB::StructInNestedNS *foo_struct) {
     fbb_.AddStruct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
-  explicit TableInFirstNSBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
+  fn TableInFirstNSBuilder(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {
+    self.fbb_ = _fbb;
+    self.start_ = _fbb.StartTable();
   }
-  TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
-  flatbuffers::Offset<TableInFirstNS> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<TableInFirstNS>(end);
-    return o;
+  // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<TableInFirstNS> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<TableInFirstNS>;
+    o
   }
-};
+}
 
 inline flatbuffers::Offset<TableInFirstNS> CreateTableInFirstNS(
     flatbuffers::FlatBufferBuilder &_fbb,
@@ -121,17 +121,17 @@ impl TableInCBuilder {
   void add_refer_to_a2(flatbuffers::Offset<NamespaceA::SecondTableInA> refer_to_a2) {
     fbb_.AddOffset(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
-  explicit TableInCBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
+  fn TableInCBuilder(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {
+    self.fbb_ = _fbb;
+    self.start_ = _fbb.StartTable();
   }
-  TableInCBuilder &operator=(const TableInCBuilder &);
-  flatbuffers::Offset<TableInC> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<TableInC>(end);
-    return o;
+  // TableInCBuilder &operator=(const TableInCBuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<TableInC> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<TableInC>;
+    o
   }
-};
+}
 
 inline flatbuffers::Offset<TableInC> CreateTableInC(
     flatbuffers::FlatBufferBuilder &_fbb,
@@ -173,17 +173,17 @@ impl SecondTableInABuilder {
   void add_refer_to_c(flatbuffers::Offset<NamespaceC::TableInC> refer_to_c) {
     fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
-  explicit SecondTableInABuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
+  fn SecondTableInABuilder(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {
+    self.fbb_ = _fbb;
+    self.start_ = _fbb.StartTable();
   }
-  SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  flatbuffers::Offset<SecondTableInA> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<SecondTableInA>(end);
-    return o;
+  // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<SecondTableInA> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<SecondTableInA>;
+    o
   }
-};
+}
 
 inline flatbuffers::Offset<SecondTableInA> CreateSecondTableInA(
     flatbuffers::FlatBufferBuilder &_fbb,

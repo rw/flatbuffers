@@ -87,17 +87,17 @@ impl TableInNestedNSBuilder {
   void add_foo(i32 foo) {
     fbb_.AddElement<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
-  explicit TableInNestedNSBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
+  fn TableInNestedNSBuilder(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {
+    self.fbb_ = _fbb;
+    self.start_ = _fbb.StartTable();
   }
-  TableInNestedNSBuilder &operator=(const TableInNestedNSBuilder &);
-  flatbuffers::Offset<TableInNestedNS> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<TableInNestedNS>(end);
-    return o;
+  // TableInNestedNSBuilder &operator=(const TableInNestedNSBuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<TableInNestedNS> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<TableInNestedNS>;
+    o
   }
-};
+}
 
 inline flatbuffers::Offset<TableInNestedNS> CreateTableInNestedNS(
     flatbuffers::FlatBufferBuilder &_fbb,
