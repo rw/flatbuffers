@@ -2434,11 +2434,9 @@ class RustGenerator : public BaseGenerator {
         }
 
         code_.SetValue("KEY_TYPE", type);
-        code_ += "  int KeyCompareWithValue({{KEY_TYPE}} val) const {";
-        code_ += "    const auto key = {{FIELD_NAME}}();";
-        code_ +=
-            "    return static_cast<int>(key > val) - static_cast<int>(key < "
-            "val);";
+        code_ += "  fn KeyCompareWithValue(val: {{KEY_TYPE}}) -> isize {";
+        code_ += "    let key = {{FIELD_NAME}}();";
+        code_ += "    (key > val) - (key < val)";
         code_ += "  }";
       }
     }

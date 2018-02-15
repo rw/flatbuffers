@@ -213,12 +213,12 @@ impl Ability {
   fn mutate_id(&mut self, _id: u32) {
     flatbuffers::WriteScalar(&self.id_, _id);
   }
-  bool KeyCompareLessThan(const Ability *o) const {
-    return id() < o->id();
+  fn KeyCompareLessThan(o: &Ability) -> bool {
+    self.id() < o.id()
   }
-  int KeyCompareWithValue(u32 val) const {
-    const auto key = id();
-    return static_cast<int>(key > val) - static_cast<int>(key < val);
+  fn KeyCompareWithValue(val: u32) -> isize {
+    let key = id();
+    (key > val) - (key < val)
   }
   fn distance(&self) -> u32  {
     flatbuffers::EndianScalar(self.distance_)
