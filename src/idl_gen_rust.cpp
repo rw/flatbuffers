@@ -1787,21 +1787,21 @@ class RustGenerator : public BaseGenerator {
 
     // Builder constructor
     code_ +=
-        "  explicit {{STRUCT_NAME}}Builder(flatbuffers::FlatBufferBuilder "
-        "&_fbb)";
-    code_ += "        : fbb_(_fbb) {";
-    code_ += "    start_ = fbb_.StartTable();";
+        "  fn {{STRUCT_NAME}}Builder"
+        "(&mut self, _fbb: &mut flatbuffers::FlatBufferBuilder) {";
+    code_ += "    self.fbb_ = _fbb;";
+    code_ += "    self.start_ = _fbb.StartTable();";
     code_ += "  }";
 
     // Assignment operator;
     code_ +=
-        "  {{STRUCT_NAME}}Builder &operator="
+        "  // {{STRUCT_NAME}}Builder &operator="
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  flatbuffers::Offset<{{STRUCT_NAME}}> Finish() {";
-    code_ += "    const auto end = fbb_.EndTable(start_);";
-    code_ += "    auto o = flatbuffers::Offset<{{STRUCT_NAME}}>(end);";
+    code_ += "  fn finish(&mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
+    code_ += "    let end = self.fbb_.EndTable(self.start_);";
+    code_ += "    let o = end as flatbuffers::Offset<{{STRUCT_NAME}}>;";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -1812,9 +1812,9 @@ class RustGenerator : public BaseGenerator {
         code_ += "    fbb_.Required(o, {{STRUCT_NAME}}::{{OFFSET_NAME}});";
       }
     }
-    code_ += "    return o;";
+    code_ += "    o";
     code_ += "  }";
-    code_ += "};";
+    code_ += "}";
     code_ += "";
 
     // Generate a convenient CreateX function that uses the above builder
