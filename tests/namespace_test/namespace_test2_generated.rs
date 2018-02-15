@@ -5,19 +5,19 @@ extern crate flatbuffers;
 
 #include "namespace_test1_generated.rs"
 
-namespace NamespaceA {
+mod NamespaceA {
 
 struct TableInFirstNS;
 
-}  // namespace NamespaceA
+}  // mod NamespaceA
 
-namespace NamespaceC {
+mod NamespaceC {
 
 struct TableInC;
 
-}  // namespace NamespaceC
+}  // mod NamespaceC
 
-namespace NamespaceA {
+mod NamespaceA {
 
 struct SecondTableInA;
 
@@ -91,9 +91,9 @@ inline flatbuffers::Offset<TableInFirstNS> CreateTableInFirstNS(
   return builder_.Finish();
 }
 
-}  // namespace NamespaceA
+}  // mod NamespaceA
 
-namespace NamespaceC {
+mod NamespaceC {
 
 struct TableInC FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
@@ -153,9 +153,9 @@ inline flatbuffers::Offset<TableInC> CreateTableInC(
   return builder_.Finish();
 }
 
-}  // namespace NamespaceC
+}  // mod NamespaceC
 
-namespace NamespaceA {
+mod NamespaceA {
 
 struct SecondTableInA FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
@@ -201,25 +201,25 @@ inline flatbuffers::Offset<SecondTableInA> CreateSecondTableInA(
   return builder_.Finish();
 }
 
-}  // namespace NamespaceA
+}  // mod NamespaceA
 
-namespace NamespaceC {
+mod NamespaceC {
 
-}  // namespace NamespaceC
+}  // mod NamespaceC
 
-namespace NamespaceA {
+mod NamespaceA {
 
 inline flatbuffers::TypeTable *TableInFirstNSTypeTable();
 
-}  // namespace NamespaceA
+}  // mod NamespaceA
 
-namespace NamespaceC {
+mod NamespaceC {
 
 inline flatbuffers::TypeTable *TableInCTypeTable();
 
-}  // namespace NamespaceC
+}  // mod NamespaceC
 
-namespace NamespaceA {
+mod NamespaceA {
 
 inline flatbuffers::TypeTable *SecondTableInATypeTable();
 
@@ -245,9 +245,9 @@ inline flatbuffers::TypeTable *TableInFirstNSTypeTable() {
   return &tt;
 }
 
-}  // namespace NamespaceA
+}  // mod NamespaceA
 
-namespace NamespaceC {
+mod NamespaceC {
 
 inline flatbuffers::TypeTable *TableInCTypeTable() {
   static flatbuffers::TypeCode type_codes[] = {
@@ -268,9 +268,9 @@ inline flatbuffers::TypeTable *TableInCTypeTable() {
   return &tt;
 }
 
-}  // namespace NamespaceC
+}  // mod NamespaceC
 
-namespace NamespaceA {
+mod NamespaceA {
 
 inline flatbuffers::TypeTable *SecondTableInATypeTable() {
   static flatbuffers::TypeCode type_codes[] = {
@@ -288,5 +288,5 @@ inline flatbuffers::TypeTable *SecondTableInATypeTable() {
   return &tt;
 }
 
-}  // namespace NamespaceA
+}  // mod NamespaceA
 
