@@ -1509,7 +1509,7 @@ class RustGenerator : public BaseGenerator {
       if (is_scalar) {
         accessor = "GetField::<";
       } else if (is_struct) {
-        accessor = "GetStruct<";
+        accessor = "GetStruct::<";
       } else {
         accessor = "GetPointer::<";
       }

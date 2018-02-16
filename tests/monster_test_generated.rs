@@ -452,11 +452,11 @@ impl Monster /* private flatbuffers::Table */ {
     const VT_PARENT_NAMESPACE_TEST: isize = 72;
 
   fn pos() -> &Vec3  {
-    self.GetStruct<&Vec3>(VT_POS)
+    self.GetStruct::<&Vec3>(VT_POS)
   }
   fn mutable_pos(&mut self) -> &mut Vec3  {
     /* TODO: are there non-reference choices here? */
-    &mut GetStruct<&mut Vec3 >(VT_POS)
+    &mut GetStruct::<&mut Vec3 >(VT_POS)
   }
   fn mana() -> i16  {
     self.GetField::<i16>(VT_MANA, 150)
