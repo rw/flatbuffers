@@ -408,7 +408,7 @@ fn CreateStatDirect(
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
   return MyGame::Example::CreateStat(
       _fbb,
-      id ? _fbb.CreateString(id) : 0,
+      if id { _fbb.CreateString(id) } else { 0 },
       val,
       count);
 }
@@ -1009,7 +1009,7 @@ fn CreateMonsterDirect(
       pos,
       mana,
       hp,
-      name ? _fbb.CreateString(name) : 0,
+      if name { _fbb.CreateString(name) } else { 0 },
       inventory ? _fbb.CreateVector<u8>(*inventory) : 0,
       color,
       test_type,
