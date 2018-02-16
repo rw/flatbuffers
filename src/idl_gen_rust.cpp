@@ -1537,7 +1537,7 @@ class RustGenerator : public BaseGenerator {
         auto u = field.value.type.enum_def;
 
         code_ +=
-            "  template<typename T> "
+            "  // TODO(?) template<typename T> "
             "const T *{{NULLABLE_EXT}}{{FIELD_NAME}}_as() const;";
 
         for (auto u_it = u->vals.vec.begin(); u_it != u->vals.vec.end();
@@ -1551,16 +1551,16 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue(
               "U_ELEMENT_TYPE",
               WrapInNameSpace(u->defined_namespace, GetEnumValUse(*u, ev)));
-          code_.SetValue("U_FIELD_TYPE", "const " + full_struct_name + " *");
+          code_.SetValue("U_FIELD_TYPE", "&" + full_struct_name);
           code_.SetValue("U_FIELD_NAME", Name(field) + "_as_" + Name(ev));
           code_.SetValue("U_NULLABLE", NullableExtension());
 
           // `const Type *union_name_asType() const` accessor.
-          code_ += "  {{U_FIELD_TYPE}}{{U_NULLABLE}}{{U_FIELD_NAME}}() const {";
+          code_ += "  fn {{U_NULLABLE}}{{U_FIELD_NAME}}() -> {{U_FIELD_TYPE}} {";
           code_ +=
-              "    return {{U_GET_TYPE}}() == {{U_ELEMENT_TYPE}} ? "
-              "static_cast<{{U_FIELD_TYPE}}>({{FIELD_NAME}}()) "
-              ": nullptr;";
+              "    if {{U_GET_TYPE}}() == {{U_ELEMENT_TYPE}} { "
+              "static_cast::<{{U_FIELD_TYPE}}>({{FIELD_NAME}}()) "
+              "} else { nullptr }";
           code_ += "  }";
         }
       }
