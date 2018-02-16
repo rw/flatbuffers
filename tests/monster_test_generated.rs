@@ -758,18 +758,24 @@ impl Monster /* private flatbuffers::Table */ {
   }
 }
 
-template<> inline const Monster *Monster::test_as<Monster>() const {
-  return test_as_Monster();
-}
-
-template<> inline const TestSimpleTableWithEnum *Monster::test_as<TestSimpleTableWithEnum>() const {
-  return test_as_TestSimpleTableWithEnum();
-}
-
-template<> inline const MyGame::Example2::Monster *Monster::test_as<MyGame::Example2::Monster>() const {
-  return test_as_MyGame_Example2_Monster();
-}
-
+//TODO: inject these functions into impl for type
+//#[inline]
+//fn Monster_MEMBER_test_as_X_Monster_X() -> &Monster {
+//  return test_as_Monster();
+//}
+//
+//TODO: inject these functions into impl for type
+//#[inline]
+//fn Monster_MEMBER_test_as_X_TestSimpleTableWithEnum_X() -> &TestSimpleTableWithEnum {
+//  return test_as_TestSimpleTableWithEnum();
+//}
+//
+//TODO: inject these functions into impl for type
+//#[inline]
+//fn Monster_MEMBER_test_as_X_MyGame::Example2::Monster_X() -> &MyGame::Example2::Monster {
+//  return test_as_MyGame_Example2_Monster();
+//}
+//
 struct MonsterBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
