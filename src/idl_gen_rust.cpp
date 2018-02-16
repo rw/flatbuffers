@@ -1852,10 +1852,9 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a CreateXDirect function with vector types as parameters
     if (has_string_or_vector_fields) {
-      code_ +=
-          "inline flatbuffers::Offset<{{STRUCT_NAME}}> "
-          "Create{{STRUCT_NAME}}Direct(";
-      code_ += "    flatbuffers::FlatBufferBuilder &_fbb\\";
+      code_ += "#[inline]";
+      code_ += "fn Create{{STRUCT_NAME}}Direct(";
+      code_ += "    _fbb: &mut flatbuffers::FlatBufferBuilder\\";
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
         const auto &field = **it;
@@ -1867,7 +1866,7 @@ class RustGenerator : public BaseGenerator {
           struct_def.defined_namespace->GetFullyQualifiedName("Create");
       code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
 
-      code_ += ") {";
+      code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
       code_ += "  return {{CREATE_NAME}}{{STRUCT_NAME}}(";
       code_ += "      _fbb\\";
       for (auto it = struct_def.fields.vec.begin();
