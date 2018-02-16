@@ -519,12 +519,12 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut void >(VT_TEST)
   }
-  fn test4() -> &flatbuffers::Vector<const Test *>  {
-    self.GetPointer::<&flatbuffers::Vector<const Test *>>(VT_TEST4)
+  fn test4() -> &flatbuffers::Vector<&Test>  {
+    self.GetPointer::<&flatbuffers::Vector<&Test>>(VT_TEST4)
   }
-  fn mutable_test4(&mut self) -> &mut flatbuffers::Vector<const Test *>  {
+  fn mutable_test4(&mut self) -> &mut flatbuffers::Vector<&Test>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<const Test *> >(VT_TEST4)
+    &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(VT_TEST4)
   }
   fn testarrayofstring() -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
     self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(VT_TESTARRAYOFSTRING)
@@ -652,12 +652,12 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(VT_TESTARRAYOFSTRING2)
   }
-  fn testarrayofsortedstruct() -> &flatbuffers::Vector<const Ability *>  {
-    self.GetPointer::<&flatbuffers::Vector<const Ability *>>(VT_TESTARRAYOFSORTEDSTRUCT)
+  fn testarrayofsortedstruct() -> &flatbuffers::Vector<&Ability>  {
+    self.GetPointer::<&flatbuffers::Vector<&Ability>>(VT_TESTARRAYOFSORTEDSTRUCT)
   }
-  fn mutable_testarrayofsortedstruct(&mut self) -> &mut flatbuffers::Vector<const Ability *>  {
+  fn mutable_testarrayofsortedstruct(&mut self) -> &mut flatbuffers::Vector<&Ability>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<const Ability *> >(VT_TESTARRAYOFSORTEDSTRUCT)
+    &mut GetPointer::<&mut flatbuffers::Vector<&Ability> >(VT_TESTARRAYOFSORTEDSTRUCT)
   }
   fn flex() -> &flatbuffers::Vector<u8>  {
     self.GetPointer::<&flatbuffers::Vector<u8>>(VT_FLEX)
@@ -670,12 +670,12 @@ impl Monster /* private flatbuffers::Table */ {
     auto v = flex();
     return flexbuffers::GetRoot(v->Data(), v->size());
   }
-  fn test5() -> &flatbuffers::Vector<const Test *>  {
-    self.GetPointer::<&flatbuffers::Vector<const Test *>>(VT_TEST5)
+  fn test5() -> &flatbuffers::Vector<&Test>  {
+    self.GetPointer::<&flatbuffers::Vector<&Test>>(VT_TEST5)
   }
-  fn mutable_test5(&mut self) -> &mut flatbuffers::Vector<const Test *>  {
+  fn mutable_test5(&mut self) -> &mut flatbuffers::Vector<&Test>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<const Test *> >(VT_TEST5)
+    &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(VT_TEST5)
   }
   fn vector_of_longs() -> &flatbuffers::Vector<i64>  {
     self.GetPointer::<&flatbuffers::Vector<i64>>(VT_VECTOR_OF_LONGS)
@@ -775,7 +775,7 @@ struct MonsterBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl MonsterBuilder {
-  fn add_pos(pos: const Vec3 *) {
+  fn add_pos(pos: &Vec3) {
     fbb_.AddStruct(Monster::VT_POS, pos);
   }
   fn add_mana(mana: i16 ) {
@@ -799,7 +799,7 @@ impl MonsterBuilder {
   fn add_test(test: flatbuffers::Offset<void> ) {
     fbb_.AddOffset(Monster::VT_TEST, test);
   }
-  fn add_test4(test4: flatbuffers::Offset<flatbuffers::Vector<const Test *>> ) {
+  fn add_test4(test4: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
     fbb_.AddOffset(Monster::VT_TEST4, test4);
   }
   fn add_testarrayofstring(testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
@@ -859,13 +859,13 @@ impl MonsterBuilder {
   fn add_testarrayofstring2(testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
   }
-  fn add_testarrayofsortedstruct(testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<const Ability *>> ) {
+  fn add_testarrayofsortedstruct(testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<&Ability>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct);
   }
   fn add_flex(flex: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
     fbb_.AddOffset(Monster::VT_FLEX, flex);
   }
-  fn add_test5(test5: flatbuffers::Offset<flatbuffers::Vector<const Test *>> ) {
+  fn add_test5(test5: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
     fbb_.AddOffset(Monster::VT_TEST5, test5);
   }
   fn add_vector_of_longs(vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>> ) {
@@ -895,7 +895,7 @@ impl MonsterBuilder {
 #[inline]
 fn CreateMonster(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    pos: const Vec3 * /* = 0 */,
+    pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
     name: flatbuffers::Offset<flatbuffers::String>  /* = 0 */,
@@ -903,7 +903,7 @@ fn CreateMonster(
     color: Color  /* = Color_Blue */,
     test_type: Any  /* = Any_NONE */,
     test: flatbuffers::Offset<void>  /* = 0 */,
-    test4: flatbuffers::Offset<flatbuffers::Vector<const Test *>>  /* = 0 */,
+    test4: flatbuffers::Offset<flatbuffers::Vector<&Test>>  /* = 0 */,
     testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
     testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>>  /* = 0 */,
     enemy: flatbuffers::Offset<Monster>  /* = 0 */,
@@ -923,9 +923,9 @@ fn CreateMonster(
     testf2: f32  /* = 3.0f */,
     testf3: f32  /* = 0.0f */,
     testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
-    testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<const Ability *>>  /* = 0 */,
+    testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<&Ability>>  /* = 0 */,
     flex: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
-    test5: flatbuffers::Offset<flatbuffers::Vector<const Test *>>  /* = 0 */,
+    test5: flatbuffers::Offset<flatbuffers::Vector<&Test>>  /* = 0 */,
     vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>>  /* = 0 */,
     vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */,
     parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
@@ -970,7 +970,7 @@ fn CreateMonster(
 #[inline]
 fn CreateMonsterDirect(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    pos: const Vec3 * /* = 0 */,
+    pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
     name: const_char_string_ptr /* = nullptr */,

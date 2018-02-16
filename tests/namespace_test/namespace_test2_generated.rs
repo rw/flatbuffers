@@ -54,7 +54,7 @@ impl TableInFirstNSBuilder {
   fn add_foo_enum(foo_enum: NamespaceA::NamespaceB::EnumInNestedNS ) {
     fbb_.AddElement::<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum as i8, 0);
   }
-  fn add_foo_struct(foo_struct: const NamespaceA::NamespaceB::StructInNestedNS *) {
+  fn add_foo_struct(foo_struct: &NamespaceA::NamespaceB::StructInNestedNS) {
     fbb_.AddStruct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInFirstNSBuilder {
@@ -76,7 +76,7 @@ fn CreateTableInFirstNS(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
     foo_table: flatbuffers::Offset<NamespaceA::NamespaceB::TableInNestedNS>  /* = 0 */,
     foo_enum: NamespaceA::NamespaceB::EnumInNestedNS  /* = NamespaceA::NamespaceB::EnumInNestedNS_A */,
-    foo_struct: const NamespaceA::NamespaceB::StructInNestedNS * /* = 0 */) -> flatbuffers::Offset<TableInFirstNS> {
+    foo_struct: &NamespaceA::NamespaceB::StructInNestedNS /* = 0 */) -> flatbuffers::Offset<TableInFirstNS> {
   let mut builder = TableInFirstNSBuilder::new(_fbb);
   builder_.add_foo_struct(foo_struct);
   builder_.add_foo_table(foo_table);
