@@ -1608,7 +1608,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("CPP_NAME", TranslateNameSpace(qualified_name));
 
         code_ += "  fn {{FIELD_NAME}}_nested_root() -> &{{CPP_NAME}}{";
-        code_ += "    return flatbuffers::GetRoot<{{CPP_NAME}}>({{FIELD_NAME}}().Data());";
+        code_ += "    return flatbuffers::GetRoot::<{{CPP_NAME}}>({{FIELD_NAME}}().Data());";
         code_ += "  }";
       }
 
