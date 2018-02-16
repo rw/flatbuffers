@@ -27,11 +27,11 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
     SetField::<i8>(VT_FOO_ENUM, _foo_enum as i8, 0)
   }
   fn foo_struct() -> &NamespaceA::NamespaceB::StructInNestedNS  {
-    self.GetStruct<&NamespaceA::NamespaceB::StructInNestedNS>(VT_FOO_STRUCT)
+    self.GetStruct::<&NamespaceA::NamespaceB::StructInNestedNS>(VT_FOO_STRUCT)
   }
   fn mutable_foo_struct(&mut self) -> &mut NamespaceA::NamespaceB::StructInNestedNS  {
     /* TODO: are there non-reference choices here? */
-    &mut GetStruct<&mut NamespaceA::NamespaceB::StructInNestedNS >(VT_FOO_STRUCT)
+    &mut GetStruct::<&mut NamespaceA::NamespaceB::StructInNestedNS >(VT_FOO_STRUCT)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
