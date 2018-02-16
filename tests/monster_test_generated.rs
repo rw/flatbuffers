@@ -505,15 +505,15 @@ impl Monster /* private flatbuffers::Table */ {
   fn test() -> &void  {
     self.GetPointer::<&void>(VT_TEST)
   }
-  template<typename T> const T *test_as() const;
-  const Monster *test_as_Monster() const {
-    return test_type() == Any_Monster ? static_cast<const Monster *>(test()) : nullptr;
+  // TODO(?) template<typename T> const T *test_as() const;
+  fn test_as_Monster() -> &Monster {
+    if test_type() == Any_Monster { static_cast::<&Monster>(test()) } else { nullptr }
   }
-  const TestSimpleTableWithEnum *test_as_TestSimpleTableWithEnum() const {
-    return test_type() == Any_TestSimpleTableWithEnum ? static_cast<const TestSimpleTableWithEnum *>(test()) : nullptr;
+  fn test_as_TestSimpleTableWithEnum() -> &TestSimpleTableWithEnum {
+    if test_type() == Any_TestSimpleTableWithEnum { static_cast::<&TestSimpleTableWithEnum>(test()) } else { nullptr }
   }
-  const MyGame::Example2::Monster *test_as_MyGame_Example2_Monster() const {
-    return test_type() == Any_MyGame_Example2_Monster ? static_cast<const MyGame::Example2::Monster *>(test()) : nullptr;
+  fn test_as_MyGame_Example2_Monster() -> &MyGame::Example2::Monster {
+    if test_type() == Any_MyGame_Example2_Monster { static_cast::<&MyGame::Example2::Monster>(test()) } else { nullptr }
   }
   fn mutable_test(&mut self) -> &mut void  {
     /* TODO: are there non-reference choices here? */
