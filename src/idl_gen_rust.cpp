@@ -1579,19 +1579,20 @@ class RustGenerator : public BaseGenerator {
               "  fn mutate_{{FIELD_NAME}}({{FIELD_NAME}}_: "
               "{{FIELD_TYPE}}) -> bool {";
           code_ +=
-              "    return {{SET_FN}}({{OFFSET_NAME}}, {{FIELD_VALUE}}, "
-              "{{DEFAULT_VALUE}});";
+              "    {{SET_FN}}({{OFFSET_NAME}}, {{FIELD_VALUE}}, "
+              "{{DEFAULT_VALUE}})";
           code_ += "  }";
         } else {
-          auto postptr = " *" + NullableExtension();
+          auto postptr = " " + NullableExtension();
           auto type =
-              GenTypeGet(field.value.type, " ", "", postptr.c_str(), true);
+              GenTypeGet(field.value.type, " ", "&mut ", postptr.c_str(), true);
           auto underlying = accessor + type + ">(" + offset_str + ")";
           code_.SetValue("FIELD_TYPE", type);
           code_.SetValue("FIELD_VALUE",
                          GenUnderlyingCast(field, true, underlying));
 
-          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> &mut {{FIELD_TYPE}} {";
+          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> {{FIELD_TYPE}} {";
+          code_ += "    /* TODO: are there non-reference choices here? */";
           code_ += "    &mut {{FIELD_VALUE}}";
           code_ += "  }";
         }
