@@ -1707,18 +1707,19 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue(
             "U_ELEMENT_TYPE",
             WrapInNameSpace(u->defined_namespace, GetEnumValUse(*u, ev)));
-        code_.SetValue("U_FIELD_TYPE", "const " + full_struct_name + " *");
+        code_.SetValue("U_FIELD_TYPE", "&" + full_struct_name + "");
         code_.SetValue("U_ELEMENT_NAME", full_struct_name);
         code_.SetValue("U_FIELD_NAME", Name(field) + "_as_" + Name(ev));
 
         // `template<> const T *union_name_as<T>() const` accessor.
+        code_ += "//TODO: inject these functions into impl for type";
+        code_ += "//#[inline]";
         code_ +=
-            "template<> "
-            "inline {{U_FIELD_TYPE}}{{STRUCT_NAME}}::{{FIELD_NAME}}_as"
-            "<{{U_ELEMENT_NAME}}>() const {";
-        code_ += "  return {{U_FIELD_NAME}}();";
-        code_ += "}";
-        code_ += "";
+            "//fn {{STRUCT_NAME}}_MEMBER_{{FIELD_NAME}}_as"
+            "_X_{{U_ELEMENT_NAME}}_X() -> {{U_FIELD_TYPE}} {";
+        code_ += "//  return {{U_FIELD_NAME}}();";
+        code_ += "//}";
+        code_ += "//";
       }
     }
 
