@@ -1278,7 +1278,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("PRE", prefix);
     code_.SetValue("PARAM_NAME", Name(field));
     if (direct && field.value.type.base_type == BASE_TYPE_STRING) {
-      code_.SetValue("PARAM_TYPE", "const char *");
+      code_.SetValue("PARAM_TYPE", "const_char_string_ptr");
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else if (direct && field.value.type.base_type == BASE_TYPE_VECTOR) {
       const auto vtype = field.value.type.VectorType();
