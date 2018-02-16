@@ -1625,17 +1625,17 @@ class RustGenerator : public BaseGenerator {
       if (field.key) {
         const bool is_string = (field.value.type.base_type == BASE_TYPE_STRING);
 
-        code_ += "  fn KeyCompareLessThan(const {{STRUCT_NAME}} *o) -> bool {";
+        code_ += "  fn KeyCompareLessThan(o: &{{STRUCT_NAME}}) -> bool {";
         if (is_string) {
-          code_ += "    return *{{FIELD_NAME}}() < *o->{{FIELD_NAME}}();";
+          code_ += "    return *{{FIELD_NAME}}() < *o.{{FIELD_NAME}}();";
         } else {
-          code_ += "    return {{FIELD_NAME}}() < o->{{FIELD_NAME}}();";
+          code_ += "    return {{FIELD_NAME}}() < o.{{FIELD_NAME}}();";
         }
         code_ += "  }";
 
         if (is_string) {
-          code_ += "  fn KeyCompareWithValue(const char *val) -> isize {";
-          code_ += "    return strcmp({{FIELD_NAME}}()->c_str(), val);";
+          code_ += "  fn KeyCompareWithValue(val: &const_char) -> isize {";
+          code_ += "    return strcmp({{FIELD_NAME}}().c_str(), val);";
           code_ += "  }";
         } else {
           auto type = GenTypeBasic(field.value.type, false);
@@ -1645,8 +1645,8 @@ class RustGenerator : public BaseGenerator {
           }
 
           code_.SetValue("KEY_TYPE", type);
-          code_ += "  fn KeyCompareWithValue({{KEY_TYPE}} val) -> isize {";
-          code_ += "    const auto key = {{FIELD_NAME}}();";
+          code_ += "  fn KeyCompareWithValue(val: {{KEY_TYPE}}) -> isize {";
+          code_ += "    let key = {{FIELD_NAME}}();";
           code_ += "    if (key < val) {";
           code_ += "      return -1;";
           code_ += "    } else if (key > val) {";

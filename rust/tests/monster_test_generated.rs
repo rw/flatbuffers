@@ -477,11 +477,11 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut flatbuffers::String >(VT_NAME)
   }
-  fn KeyCompareLessThan(const Monster *o) -> bool {
-    return *name() < *o->name();
+  fn KeyCompareLessThan(o: &Monster) -> bool {
+    return *name() < *o.name();
   }
-  fn KeyCompareWithValue(const char *val) -> isize {
-    return strcmp(name()->c_str(), val);
+  fn KeyCompareWithValue(val: &const_char) -> isize {
+    return strcmp(name().c_str(), val);
   }
   fn inventory() -> &flatbuffers::Vector<u8>  {
     self.GetPointer::<&flatbuffers::Vector<u8>>(VT_INVENTORY)
