@@ -440,7 +440,7 @@ class RustGenerator : public BaseGenerator {
       }
       case BASE_TYPE_VECTOR: {
         const auto type_name = GenTypeWire(type.VectorType(), "", false);
-        return "flatbuffers::Vector::<" + type_name + ">";
+        return "flatbuffers::Vector<" + type_name + ">";
       }
       case BASE_TYPE_STRUCT: {
         return WrapInNameSpace(*type.struct_def);
@@ -458,7 +458,7 @@ class RustGenerator : public BaseGenerator {
     if (IsScalar(type.base_type)) {
       return GenTypeBasic(type, user_facing_type) + postfix;
     } else if (IsStruct(type)) {
-      return "const " + GenTypePointer(type) + " *";
+      return "&" + GenTypePointer(type);
     } else {
       return "flatbuffers::Offset<" + GenTypePointer(type) + ">" + postfix;
     }
