@@ -477,7 +477,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string NullableExtension() {
-    return parser_.opts.gen_nullable ? " _Nullable " : "";
+    return parser_.opts.gen_nullable ? " /* TODO _Nullable */ " : "";
   }
 
   static std::string NativeName(const std::string &name, const StructDef *sd,
@@ -1511,25 +1511,25 @@ class RustGenerator : public BaseGenerator {
       } else if (is_struct) {
         accessor = "GetStruct<";
       } else {
-        accessor = "GetPointer<";
+        accessor = "GetPointer::<";
       }
       auto offset_str = GenFieldOffsetName(field);
       auto offset_type =
-          GenTypeGet(field.value.type, "", "const ", " *", false);
+          GenTypeGet(field.value.type, "", "&", "", false);
 
       auto call = accessor + offset_type + ">(" + offset_str;
       // Default value as second arg for non-pointer types.
       if (is_scalar) { call += ", " + GenDefaultConstant(field); }
       call += ")";
 
-      std::string afterptr = " *" + NullableExtension();
+      std::string afterptr = " " + NullableExtension();
       GenComment(field.doc_comment, "  ");
-      code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "const ",
+      code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "&",
                                               afterptr.c_str(), true));
       code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
-      code_ += "  fn {{FIELD_NAME}}() -> &{{FIELD_TYPE}} {";
+      code_ += "  fn {{FIELD_NAME}}() -> {{FIELD_TYPE}} {";
       code_ += "    self.{{FIELD_VALUE}}";
       code_ += "  }";
 

@@ -66,7 +66,7 @@ impl flatbuffers::Table for TableInNestedNS {}
 impl TableInNestedNS /* private flatbuffers::Table */ {
     const VT_FOO: isize = 4;
 
-  fn foo() -> &i32  {
+  fn foo() -> i32  {
     self.GetField::<i32>(VT_FOO, 0)
   }
   fn mutate_foo(foo_: i32) -> bool {
