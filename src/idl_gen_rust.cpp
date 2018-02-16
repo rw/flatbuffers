@@ -1614,10 +1614,10 @@ class RustGenerator : public BaseGenerator {
 
       if (field.flexbuffer) {
         code_ +=
-            "  flexbuffers::Reference {{FIELD_NAME}}_flexbuffer_root()"
-            " const {";
-        code_ += "    auto v = {{FIELD_NAME}}();";
-        code_ += "    return flexbuffers::GetRoot(v->Data(), v->size());";
+            "  fn {{FIELD_NAME}}_flexbuffer_root()"
+            " -> flexbuffers::Reference {";
+        code_ += "    let v = {{FIELD_NAME}}();";
+        code_ += "    return flexbuffers::GetRoot(v.Data(), v.size());";
         code_ += "  }";
       }
 
