@@ -403,7 +403,7 @@ fn CreateStat(
 #[inline]
 fn CreateStatDirect(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    id: const char * /* = nullptr */,
+    id: const_char_string_ptr /* = nullptr */,
     val: i64  /* = 0 */,
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
   return MyGame::Example::CreateStat(
@@ -973,7 +973,7 @@ fn CreateMonsterDirect(
     pos: const Vec3 * /* = 0 */,
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
-    name: const char * /* = nullptr */,
+    name: const_char_string_ptr /* = nullptr */,
     inventory: const std::vector<u8> * /* = nullptr */,
     color: Color  /* = Color_Blue */,
     test_type: Any  /* = Any_NONE */,
