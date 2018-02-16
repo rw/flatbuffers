@@ -1877,8 +1877,8 @@ class RustGenerator : public BaseGenerator {
 
           if (field.value.type.base_type == BASE_TYPE_STRING) {
             code_ +=
-                ",\n      {{FIELD_NAME}} ? "
-                "_fbb.CreateString({{FIELD_NAME}}) : 0\\";
+                ",\n      if {{FIELD_NAME}} { "
+                "_fbb.CreateString({{FIELD_NAME}}) } else { 0 }\\";
           } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
             code_ += ",\n      {{FIELD_NAME}} ? \\";
             const auto vtype = field.value.type.VectorType();
