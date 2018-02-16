@@ -1253,7 +1253,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string GenDefaultConstant(const FieldDef &field) {
     return field.value.type.base_type == BASE_TYPE_FLOAT
-               ? field.value.constant + "f"
+               ? field.value.constant + ""
                : field.value.constant;
   }
 
