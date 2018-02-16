@@ -440,7 +440,7 @@ class RustGenerator : public BaseGenerator {
       }
       case BASE_TYPE_VECTOR: {
         const auto type_name = GenTypeWire(type.VectorType(), "", false);
-        return "flatbuffers::Vector<" + type_name + ">";
+        return "flatbuffers::Vector::<" + type_name + ">";
       }
       case BASE_TYPE_STRUCT: {
         return WrapInNameSpace(*type.struct_def);
