@@ -628,22 +628,22 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<bool> >(VT_TESTARRAYOFBOOLS)
   }
   fn testf() -> f32  {
-    self.GetField::<f32>(VT_TESTF, 3.14159f)
+    self.GetField::<f32>(VT_TESTF, 3.14159)
   }
   fn mutate_testf(testf_: f32) -> bool {
-    SetField::<f32>(VT_TESTF, _testf, 3.14159f)
+    SetField::<f32>(VT_TESTF, _testf, 3.14159)
   }
   fn testf2() -> f32  {
-    self.GetField::<f32>(VT_TESTF2, 3.0f)
+    self.GetField::<f32>(VT_TESTF2, 3.0)
   }
   fn mutate_testf2(testf2_: f32) -> bool {
-    SetField::<f32>(VT_TESTF2, _testf2, 3.0f)
+    SetField::<f32>(VT_TESTF2, _testf2, 3.0)
   }
   fn testf3() -> f32  {
-    self.GetField::<f32>(VT_TESTF3, 0.0f)
+    self.GetField::<f32>(VT_TESTF3, 0.0)
   }
   fn mutate_testf3(testf3_: f32) -> bool {
-    SetField::<f32>(VT_TESTF3, _testf3, 0.0f)
+    SetField::<f32>(VT_TESTF3, _testf3, 0.0)
   }
   fn testarrayofstring2() -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
     self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(VT_TESTARRAYOFSTRING2)
@@ -848,13 +848,13 @@ impl MonsterBuilder {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools);
   }
   fn add_testf(testf: f32 ) {
-    fbb_.AddElement::<f32>(Monster::VT_TESTF, testf, 3.14159f);
+    fbb_.AddElement::<f32>(Monster::VT_TESTF, testf, 3.14159);
   }
   fn add_testf2(testf2: f32 ) {
-    fbb_.AddElement::<f32>(Monster::VT_TESTF2, testf2, 3.0f);
+    fbb_.AddElement::<f32>(Monster::VT_TESTF2, testf2, 3.0);
   }
   fn add_testf3(testf3: f32 ) {
-    fbb_.AddElement::<f32>(Monster::VT_TESTF3, testf3, 0.0f);
+    fbb_.AddElement::<f32>(Monster::VT_TESTF3, testf3, 0.0);
   }
   fn add_testarrayofstring2(testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
     fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
@@ -919,9 +919,9 @@ fn CreateMonster(
     testhashs64_fnv1a: i64  /* = 0 */,
     testhashu64_fnv1a: u64  /* = 0 */,
     testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<bool>>  /* = 0 */,
-    testf: f32  /* = 3.14159f */,
-    testf2: f32  /* = 3.0f */,
-    testf3: f32  /* = 0.0f */,
+    testf: f32  /* = 3.14159 */,
+    testf2: f32  /* = 3.0 */,
+    testf3: f32  /* = 0.0 */,
     testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
     testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<&Ability>>  /* = 0 */,
     flex: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
@@ -994,9 +994,9 @@ fn CreateMonsterDirect(
     testhashs64_fnv1a: i64  /* = 0 */,
     testhashu64_fnv1a: u64  /* = 0 */,
     testarrayofbools: const std::vector<bool> * /* = nullptr */,
-    testf: f32  /* = 3.14159f */,
-    testf2: f32  /* = 3.0f */,
-    testf3: f32  /* = 0.0f */,
+    testf: f32  /* = 3.14159 */,
+    testf2: f32  /* = 3.0 */,
+    testf3: f32  /* = 0.0 */,
     testarrayofstring2: const std::vector<flatbuffers::Offset<flatbuffers::String>> * /* = nullptr */,
     testarrayofsortedstruct: const std::vector<Ability> * /* = nullptr */,
     flex: const std::vector<u8> * /* = nullptr */,
@@ -1106,10 +1106,10 @@ impl TypeAliases /* private flatbuffers::Table */ {
     SetField::<u64>(VT_U64, _u64, 0)
   }
   fn f32() -> f32  {
-    self.GetField::<f32>(VT_F32, 0.0f)
+    self.GetField::<f32>(VT_F32, 0.0)
   }
   fn mutate_f32(f32_: f32) -> bool {
-    SetField::<f32>(VT_F32, _f32, 0.0f)
+    SetField::<f32>(VT_F32, _f32, 0.0)
   }
   fn f64() -> f64  {
     self.GetField::<f64>(VT_F64, 0.0)
@@ -1181,7 +1181,7 @@ impl TypeAliasesBuilder {
     fbb_.AddElement::<u64>(TypeAliases::VT_U64, u64, 0);
   }
   fn add_f32(f32: f32 ) {
-    fbb_.AddElement::<f32>(TypeAliases::VT_F32, f32, 0.0f);
+    fbb_.AddElement::<f32>(TypeAliases::VT_F32, f32, 0.0);
   }
   fn add_f64(f64: f64 ) {
     fbb_.AddElement::<f64>(TypeAliases::VT_F64, f64, 0.0);
@@ -1217,7 +1217,7 @@ fn CreateTypeAliases(
     u32: u32  /* = 0 */,
     i64: i64  /* = 0 */,
     u64: u64  /* = 0 */,
-    f32: f32  /* = 0.0f */,
+    f32: f32  /* = 0.0 */,
     f64: f64  /* = 0.0 */,
     v8: flatbuffers::Offset<flatbuffers::Vector<i8>>  /* = 0 */,
     vf64: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */) -> flatbuffers::Offset<TypeAliases> {
@@ -1248,7 +1248,7 @@ fn CreateTypeAliasesDirect(
     u32: u32  /* = 0 */,
     i64: i64  /* = 0 */,
     u64: u64  /* = 0 */,
-    f32: f32  /* = 0.0f */,
+    f32: f32  /* = 0.0 */,
     f64: f64  /* = 0.0 */,
     v8: const std::vector<i8> * /* = nullptr */,
     vf64: const std::vector<f64> * /* = nullptr */) -> flatbuffers::Offset<TypeAliases> {
