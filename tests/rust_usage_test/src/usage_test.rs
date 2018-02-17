@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//extern crate rust_usage_test;
+//mod generated_code;
+use MyGame::Example;
+
 //mod MyGame;
 //#include "flatbuffers/flatbuffers.h"
 //#include "flatbuffers/idl.h"

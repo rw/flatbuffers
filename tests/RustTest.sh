@@ -55,7 +55,7 @@
 
 
 
-cd ../rust
+cd ./rust_usage_test
 cargo test
 TEST_RESULT=$?
 #rm -rf ${go_path}/{pkg,src}
