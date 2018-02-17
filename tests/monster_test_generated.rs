@@ -1289,15 +1289,15 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> 
       return true;
     }
     Any_Monster => {
-      auto ptr = reinterpret_cast<const Monster *>(obj);
+      let ptr = reinterpret_cast::<&Monster>(obj);
       return verifier.VerifyTable(ptr);
     }
     Any_TestSimpleTableWithEnum => {
-      auto ptr = reinterpret_cast<const TestSimpleTableWithEnum *>(obj);
+      let ptr = reinterpret_cast::<&TestSimpleTableWithEnum>(obj);
       return verifier.VerifyTable(ptr);
     }
     Any_MyGame_Example2_Monster => {
-      auto ptr = reinterpret_cast<const MyGame::Example2::Monster *>(obj);
+      let ptr = reinterpret_cast::<&MyGame::Example2::Monster>(obj);
       return verifier.VerifyTable(ptr);
     }
     _ => { return false; }
