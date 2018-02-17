@@ -5,7 +5,7 @@ extern crate flatbuffers;
 
 #include "namespace_test1_generated.rs"
 
-mod NamespaceA {
+pub mod NamespaceA {
 
 impl flatbuffers::Table for TableInFirstNS {}
 impl TableInFirstNS /* private flatbuffers::Table */ {
@@ -84,9 +84,9 @@ fn CreateTableInFirstNS(
   builder_.Finish()
 }
 
-}  // mod NamespaceA
+}  // pub mod NamespaceA
 
-mod NamespaceC {
+pub mod NamespaceC {
 
 impl flatbuffers::Table for TableInC {}
 impl TableInC /* private flatbuffers::Table */ {
@@ -153,9 +153,9 @@ fn CreateTableInC(
   builder_.Finish()
 }
 
-}  // mod NamespaceC
+}  // pub mod NamespaceC
 
-mod NamespaceA {
+pub mod NamespaceA {
 
 impl flatbuffers::Table for SecondTableInA {}
 impl SecondTableInA /* private flatbuffers::Table */ {
@@ -207,27 +207,27 @@ fn CreateSecondTableInA(
   builder_.Finish()
 }
 
-}  // mod NamespaceA
+}  // pub mod NamespaceA
 
-mod NamespaceC {
+pub mod NamespaceC {
 
-}  // mod NamespaceC
+}  // pub mod NamespaceC
 
-mod NamespaceA {
+pub mod NamespaceA {
 
 #[inline]
 fn TableInFirstNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-}  // mod NamespaceA
+}  // pub mod NamespaceA
 
-mod NamespaceC {
+pub mod NamespaceC {
 
 #[inline]
 fn TableInCTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-}  // mod NamespaceC
+}  // pub mod NamespaceC
 
-mod NamespaceA {
+pub mod NamespaceA {
 
 #[inline]
 fn SecondTableInATypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
@@ -257,9 +257,9 @@ fn TableInFirstNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-}  // mod NamespaceA
+}  // pub mod NamespaceA
 
-mod NamespaceC {
+pub mod NamespaceC {
 
 #[inline]
 fn TableInCTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
@@ -283,9 +283,9 @@ fn TableInCTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-}  // mod NamespaceC
+}  // pub mod NamespaceC
 
-mod NamespaceA {
+pub mod NamespaceA {
 
 #[inline]
 fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
@@ -306,5 +306,5 @@ fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-}  // mod NamespaceA
+}  // pub mod NamespaceA
 
