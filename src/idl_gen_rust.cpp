@@ -1068,12 +1068,13 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
     code_ += "";
 
-    code_ += "inline " + UnionVectorVerifySignature(enum_def) + " {";
-    code_ += "  if (!values || !types) return !values && !types;";
-    code_ += "  if (values->size() != types->size()) return false;";
-    code_ += "  for (flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {";
+    code_ += "#[inline]";
+    code_ += UnionVectorVerifySignature(enum_def) + " {";
+    code_ += "  if (!values || !types) { return !values && !types; }";
+    code_ += "  if (values.size() != types.size()) { return false; }";
+    code_ += "  for i in (0 as flatbuffers::uoffset_t)..values.size() {";
     code_ += "    if (!Verify" + Name(enum_def) + "(";
-    code_ += "        verifier,  values->Get(i), types->GetEnum<" +
+    code_ += "        verifier,  values.Get(i), types.GetEnum<" +
              Name(enum_def) + ">(i))) {";
     code_ += "      return false;";
     code_ += "    }";

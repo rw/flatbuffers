@@ -1304,12 +1304,13 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> 
   }
 }
 
-inline fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vector<flatbuffers::Offset<void>>, types: &flatbuffers::Vector<uint8_t>) -> bool {
-  if (!values || !types) return !values && !types;
-  if (values->size() != types->size()) return false;
-  for (flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {
+#[inline]
+fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vector<flatbuffers::Offset<void>>, types: &flatbuffers::Vector<uint8_t>) -> bool {
+  if (!values || !types) { return !values && !types; }
+  if (values.size() != types.size()) { return false; }
+  for i in (0 as flatbuffers::uoffset_t)..values.size() {
     if (!VerifyAny(
-        verifier,  values->Get(i), types->GetEnum<Any>(i))) {
+        verifier,  values.Get(i), types.GetEnum<Any>(i))) {
       return false;
     }
   }
