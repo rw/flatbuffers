@@ -215,21 +215,26 @@ mod NamespaceC {
 
 mod NamespaceA {
 
-inline flatbuffers::TypeTable *TableInFirstNSTypeTable();
+#[inline]
+fn TableInFirstNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
 }  // mod NamespaceA
 
 mod NamespaceC {
 
-inline flatbuffers::TypeTable *TableInCTypeTable();
+#[inline]
+fn TableInCTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
 }  // mod NamespaceC
 
 mod NamespaceA {
 
-inline flatbuffers::TypeTable *SecondTableInATypeTable();
+#[inline]
+fn SecondTableInATypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *TableInFirstNSTypeTable() {
+#[inline]
+fn TableInFirstNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
     { flatbuffers::ET_CHAR, 0, 1 },
@@ -249,13 +254,16 @@ inline flatbuffers::TypeTable *TableInFirstNSTypeTable() {
     flatbuffers::ST_TABLE, 3, type_codes, type_refs, nullptr, names
   };
   return &tt;
+  */
 }
 
 }  // mod NamespaceA
 
 mod NamespaceC {
 
-inline flatbuffers::TypeTable *TableInCTypeTable() {
+#[inline]
+fn TableInCTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
     { flatbuffers::ET_SEQUENCE, 0, 1 }
@@ -272,13 +280,16 @@ inline flatbuffers::TypeTable *TableInCTypeTable() {
     flatbuffers::ST_TABLE, 2, type_codes, type_refs, nullptr, names
   };
   return &tt;
+  */
 }
 
 }  // mod NamespaceC
 
 mod NamespaceA {
 
-inline flatbuffers::TypeTable *SecondTableInATypeTable() {
+#[inline]
+fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 }
   };
@@ -292,6 +303,7 @@ inline flatbuffers::TypeTable *SecondTableInATypeTable() {
     flatbuffers::ST_TABLE, 1, type_codes, type_refs, nullptr, names
   };
   return &tt;
+  */
 }
 
 }  // mod NamespaceA

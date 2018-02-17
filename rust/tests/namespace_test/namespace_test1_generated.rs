@@ -110,11 +110,15 @@ fn CreateTableInNestedNS(
   builder_.Finish()
 }
 
-inline flatbuffers::TypeTable *TableInNestedNSTypeTable();
+#[inline]
+fn TableInNestedNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *StructInNestedNSTypeTable();
+#[inline]
+fn StructInNestedNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *EnumInNestedNSTypeTable() {
+#[inline]
+fn EnumInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, 0 },
     { flatbuffers::ET_CHAR, 0, 0 },
@@ -132,9 +136,12 @@ inline flatbuffers::TypeTable *EnumInNestedNSTypeTable() {
     flatbuffers::ST_ENUM, 3, type_codes, type_refs, nullptr, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *TableInNestedNSTypeTable() {
+#[inline]
+fn TableInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_INT, 0, -1 }
   };
@@ -145,9 +152,12 @@ inline flatbuffers::TypeTable *TableInNestedNSTypeTable() {
     flatbuffers::ST_TABLE, 1, type_codes, nullptr, nullptr, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *StructInNestedNSTypeTable() {
+#[inline]
+fn StructInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_INT, 0, -1 },
     { flatbuffers::ET_INT, 0, -1 }
@@ -161,6 +171,7 @@ inline flatbuffers::TypeTable *StructInNestedNSTypeTable() {
     flatbuffers::ST_STRUCT, 2, type_codes, nullptr, values, names
   };
   return &tt;
+  */
 }
 
 }  // mod NamespaceB
