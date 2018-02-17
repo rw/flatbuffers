@@ -205,184 +205,200 @@ class RustGenerator : public BaseGenerator {
     //  }
     //}
 
-    // Generate code for all the enum declarations.
-    for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
+    // Generate all code in their namespaces, once, because Rust does not
+    // permit re-opening modules. TODO: O(n**2) -> O(n) with a dictionary.
+    for (auto it = parser_.namespaces_.begin(); it != parser_.namespaces_.end();
          ++it) {
-      const auto &enum_def = **it;
-      if (!enum_def.generated) {
-        SetNameSpace(enum_def.defined_namespace);
-        GenEnum(enum_def);
-      }
-    }
+      const auto &ns = *it;
 
-    // Generate code for all structs, then all tables.
-    for (auto it = parser_.structs_.vec.begin();
-         it != parser_.structs_.vec.end(); ++it) {
-      const auto &struct_def = **it;
-      if (struct_def.fixed && !struct_def.generated) {
-        SetNameSpace(struct_def.defined_namespace);
-        GenStruct(struct_def);
-      }
-    }
-    for (auto it = parser_.structs_.vec.begin();
-         it != parser_.structs_.vec.end(); ++it) {
-      const auto &struct_def = **it;
-      if (!struct_def.fixed && !struct_def.generated) {
-        SetNameSpace(struct_def.defined_namespace);
-        GenTable(struct_def);
-      }
-    }
-    for (auto it = parser_.structs_.vec.begin();
-         it != parser_.structs_.vec.end(); ++it) {
-      const auto &struct_def = **it;
-      if (!struct_def.fixed && !struct_def.generated) {
-        SetNameSpace(struct_def.defined_namespace);
-        GenTablePost(struct_def);
-      }
-    }
-
-    // Generate code for union verifiers.
-    for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
-         ++it) {
-      const auto &enum_def = **it;
-      if (enum_def.is_union && !enum_def.generated) {
-        SetNameSpace(enum_def.defined_namespace);
-        GenUnionPost(enum_def);
-      }
-    }
-
-    // Generate code for mini reflection.
-    if (parser_.opts.mini_reflect != IDLOptions::kNone) {
-      // To break cyclic dependencies, first pre-declare all tables/structs.
-      for (auto it = parser_.structs_.vec.begin();
-           it != parser_.structs_.vec.end(); ++it) {
-        const auto &struct_def = **it;
-        if (!struct_def.generated) {
-          SetNameSpace(struct_def.defined_namespace);
-          GenMiniReflectPre(&struct_def);
-        }
-      }
-      // Then the unions/enums that may refer to them.
+      // Generate code for all the enum declarations.
       for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
            ++it) {
         const auto &enum_def = **it;
+        if (enum_def.defined_namespace != ns) { continue; }
         if (!enum_def.generated) {
           SetNameSpace(enum_def.defined_namespace);
-          GenMiniReflect(nullptr, &enum_def);
+          GenEnum(enum_def);
         }
       }
-      // Then the full tables/structs.
+
+      // Generate code for all structs, then all tables.
       for (auto it = parser_.structs_.vec.begin();
            it != parser_.structs_.vec.end(); ++it) {
         const auto &struct_def = **it;
-        if (!struct_def.generated) {
+        if (struct_def.defined_namespace != ns) { continue; }
+        if (struct_def.fixed && !struct_def.generated) {
           SetNameSpace(struct_def.defined_namespace);
-          GenMiniReflect(&struct_def, nullptr);
+          GenStruct(struct_def);
         }
       }
+      for (auto it = parser_.structs_.vec.begin();
+           it != parser_.structs_.vec.end(); ++it) {
+        const auto &struct_def = **it;
+        if (struct_def.defined_namespace != ns) { continue; }
+        if (!struct_def.fixed && !struct_def.generated) {
+          SetNameSpace(struct_def.defined_namespace);
+          GenTable(struct_def);
+        }
+      }
+      for (auto it = parser_.structs_.vec.begin();
+           it != parser_.structs_.vec.end(); ++it) {
+        const auto &struct_def = **it;
+        if (struct_def.defined_namespace != ns) { continue; }
+        if (!struct_def.fixed && !struct_def.generated) {
+          SetNameSpace(struct_def.defined_namespace);
+          GenTablePost(struct_def);
+        }
+      }
+
+      // Generate code for union verifiers.
+      for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
+           ++it) {
+        const auto &enum_def = **it;
+        if (enum_def.defined_namespace != ns) { continue; }
+        if (enum_def.is_union && !enum_def.generated) {
+          SetNameSpace(enum_def.defined_namespace);
+          GenUnionPost(enum_def);
+        }
+      }
+
+      // Generate code for mini reflection.
+      if (parser_.opts.mini_reflect != IDLOptions::kNone) {
+        // To break cyclic dependencies, first pre-declare all tables/structs.
+        for (auto it = parser_.structs_.vec.begin();
+             it != parser_.structs_.vec.end(); ++it) {
+          const auto &struct_def = **it;
+          if (struct_def.defined_namespace != ns) { continue; }
+          if (!struct_def.generated) {
+            SetNameSpace(struct_def.defined_namespace);
+            GenMiniReflectPre(&struct_def);
+          }
+        }
+        // Then the unions/enums that may refer to them.
+        for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
+             ++it) {
+          const auto &enum_def = **it;
+          if (enum_def.defined_namespace != ns) { continue; }
+          if (!enum_def.generated) {
+            SetNameSpace(enum_def.defined_namespace);
+            GenMiniReflect(nullptr, &enum_def);
+          }
+        }
+        // Then the full tables/structs.
+        for (auto it = parser_.structs_.vec.begin();
+             it != parser_.structs_.vec.end(); ++it) {
+          const auto &struct_def = **it;
+          if (struct_def.defined_namespace != ns) { continue; }
+          if (!struct_def.generated) {
+            SetNameSpace(struct_def.defined_namespace);
+            GenMiniReflect(&struct_def, nullptr);
+          }
+        }
+      }
+
+      // Generate convenient global helper functions:
+      if (parser_.root_struct_def_) {
+        auto &struct_def = *parser_.root_struct_def_;
+        if (struct_def.defined_namespace != ns) { continue; }
+        SetNameSpace(struct_def.defined_namespace);
+        auto name = Name(struct_def);
+        auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
+        auto cpp_name = TranslateNameSpace(qualified_name);
+
+        code_.SetValue("STRUCT_NAME", name);
+        code_.SetValue("CPP_NAME", cpp_name);
+        code_.SetValue("NULLABLE_EXT", NullableExtension());
+
+        // The root datatype accessor:
+        code_ += "#[inline]";
+        code_ +=
+            "fn Get{{STRUCT_NAME}}(buf: &Vec<u8>)"
+            " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
+        code_ += "  return flatbuffers::GetRoot::<{{CPP_NAME}}>(buf);";
+        code_ += "}";
+        code_ += "";
+
+        if (parser_.opts.mutable_buffer) {
+          code_ += "#[inline]";
+          code_ += "fn GetMutable{{STRUCT_NAME}}(buf: &Vec<u8>) -> &{{STRUCT_NAME}} {";
+          code_ += "  return flatbuffers::GetMutableRoot::<{{STRUCT_NAME}}>(buf);";
+          code_ += "}";
+          code_ += "";
+        }
+
+        if (parser_.file_identifier_.length()) {
+          // Return the identifier
+          code_ += "#[inline]";
+          code_ += "fn {{STRUCT_NAME}}Identifier() -> &const_char{";
+          code_ += "  return \"" + parser_.file_identifier_ + "\";";
+          code_ += "}";
+          code_ += "";
+
+          // Check if a buffer has the identifier.
+          code_ += "#[inline]";
+          code_ += "fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &Vec<u8>)"
+                   " -> bool {";
+          code_ += "  return flatbuffers::BufferHasIdentifier(";
+          code_ += "      buf, {{STRUCT_NAME}}Identifier());";
+          code_ += "}";
+          code_ += "";
+        }
+
+        // The root verifier.
+        if (parser_.file_identifier_.length()) {
+          code_.SetValue("ID", name + "Identifier()");
+        } else {
+          code_.SetValue("ID", "nullptr");
+        }
+
+        code_ += "#[inline]";
+        code_ += "fn Verify{{STRUCT_NAME}}Buffer(";
+        code_ += "    verifier: &flatbuffers::Verifier) -> bool {";
+        code_ += "  return verifier.VerifyBuffer::<{{CPP_NAME}}>({{ID}});";
+        code_ += "}";
+        code_ += "";
+
+        if (parser_.file_extension_.length()) {
+          // Return the extension
+          code_ += "#[inline]";
+          code_ += "fn {{STRUCT_NAME}}Extension() -> &const_char {";
+          code_ += "  return \"" + parser_.file_extension_ + "\";";
+          code_ += "}";
+          code_ += "";
+        }
+
+        // Finish a buffer with a given root object:
+        code_ += "#[inline]";
+        code_ += "fn Finish{{STRUCT_NAME}}Buffer(";
+        code_ += "    fbb: &mut flatbuffers::FlatBufferBuilder,";
+        code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}>) {";
+        if (parser_.file_identifier_.length())
+          code_ += "  fbb.Finish(root, {{STRUCT_NAME}}Identifier());";
+        else
+          code_ += "  fbb.Finish(root);";
+        code_ += "}";
+        code_ += "";
+
+        //if (parser_.opts.generate_object_based_api) {
+        //  // A convenient root unpack function.
+        //  auto native_name =
+        //      NativeName(WrapInNameSpace(struct_def), &struct_def, parser_.opts);
+        //  code_.SetValue("UNPACK_RETURN",
+        //                 GenTypeNativePtr(native_name, nullptr, false));
+        //  code_.SetValue("UNPACK_TYPE",
+        //                 GenTypeNativePtr(native_name, nullptr, true));
+
+        //  code_ += "inline {{UNPACK_RETURN}} UnPack{{STRUCT_NAME}}(";
+        //  code_ += "    const void *buf,";
+        //  code_ += "    const flatbuffers::resolver_function_t *res = nullptr) {";
+        //  code_ += "  return {{UNPACK_TYPE}}\\";
+        //  code_ += "(Get{{STRUCT_NAME}}(buf)->UnPack(res));";
+        //  code_ += "}";
+        //  code_ += "";
+        //}
+      }
+
     }
-
-    // Generate convenient global helper functions:
-    if (parser_.root_struct_def_) {
-      auto &struct_def = *parser_.root_struct_def_;
-      SetNameSpace(struct_def.defined_namespace);
-      auto name = Name(struct_def);
-      auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
-      auto cpp_name = TranslateNameSpace(qualified_name);
-
-      code_.SetValue("STRUCT_NAME", name);
-      code_.SetValue("CPP_NAME", cpp_name);
-      code_.SetValue("NULLABLE_EXT", NullableExtension());
-
-      // The root datatype accessor:
-      code_ += "#[inline]";
-      code_ +=
-          "fn Get{{STRUCT_NAME}}(buf: &Vec<u8>)"
-          " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
-      code_ += "  return flatbuffers::GetRoot::<{{CPP_NAME}}>(buf);";
-      code_ += "}";
-      code_ += "";
-
-      if (parser_.opts.mutable_buffer) {
-        code_ += "#[inline]";
-        code_ += "fn GetMutable{{STRUCT_NAME}}(buf: &Vec<u8>) -> &{{STRUCT_NAME}} {";
-        code_ += "  return flatbuffers::GetMutableRoot::<{{STRUCT_NAME}}>(buf);";
-        code_ += "}";
-        code_ += "";
-      }
-
-      if (parser_.file_identifier_.length()) {
-        // Return the identifier
-        code_ += "#[inline]";
-        code_ += "fn {{STRUCT_NAME}}Identifier() -> &const_char{";
-        code_ += "  return \"" + parser_.file_identifier_ + "\";";
-        code_ += "}";
-        code_ += "";
-
-        // Check if a buffer has the identifier.
-        code_ += "#[inline]";
-        code_ += "fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &Vec<u8>)"
-                 " -> bool {";
-        code_ += "  return flatbuffers::BufferHasIdentifier(";
-        code_ += "      buf, {{STRUCT_NAME}}Identifier());";
-        code_ += "}";
-        code_ += "";
-      }
-
-      // The root verifier.
-      if (parser_.file_identifier_.length()) {
-        code_.SetValue("ID", name + "Identifier()");
-      } else {
-        code_.SetValue("ID", "nullptr");
-      }
-
-      code_ += "#[inline]";
-      code_ += "fn Verify{{STRUCT_NAME}}Buffer(";
-      code_ += "    verifier: &flatbuffers::Verifier) -> bool {";
-      code_ += "  return verifier.VerifyBuffer::<{{CPP_NAME}}>({{ID}});";
-      code_ += "}";
-      code_ += "";
-
-      if (parser_.file_extension_.length()) {
-        // Return the extension
-        code_ += "#[inline]";
-        code_ += "fn {{STRUCT_NAME}}Extension() -> &const_char {";
-        code_ += "  return \"" + parser_.file_extension_ + "\";";
-        code_ += "}";
-        code_ += "";
-      }
-
-      // Finish a buffer with a given root object:
-      code_ += "#[inline]";
-      code_ += "fn Finish{{STRUCT_NAME}}Buffer(";
-      code_ += "    fbb: &mut flatbuffers::FlatBufferBuilder,";
-      code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}>) {";
-      if (parser_.file_identifier_.length())
-        code_ += "  fbb.Finish(root, {{STRUCT_NAME}}Identifier());";
-      else
-        code_ += "  fbb.Finish(root);";
-      code_ += "}";
-      code_ += "";
-
-      //if (parser_.opts.generate_object_based_api) {
-      //  // A convenient root unpack function.
-      //  auto native_name =
-      //      NativeName(WrapInNameSpace(struct_def), &struct_def, parser_.opts);
-      //  code_.SetValue("UNPACK_RETURN",
-      //                 GenTypeNativePtr(native_name, nullptr, false));
-      //  code_.SetValue("UNPACK_TYPE",
-      //                 GenTypeNativePtr(native_name, nullptr, true));
-
-      //  code_ += "inline {{UNPACK_RETURN}} UnPack{{STRUCT_NAME}}(";
-      //  code_ += "    const void *buf,";
-      //  code_ += "    const flatbuffers::resolver_function_t *res = nullptr) {";
-      //  code_ += "  return {{UNPACK_TYPE}}\\";
-      //  code_ += "(Get{{STRUCT_NAME}}(buf)->UnPack(res));";
-      //  code_ += "}";
-      //  code_ += "";
-      //}
-    }
-
     if (cur_name_space_) SetNameSpace(nullptr);
 
     const auto file_path = GeneratedFileName(path_, file_name_);

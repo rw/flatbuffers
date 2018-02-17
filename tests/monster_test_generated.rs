@@ -4,6 +4,105 @@
 extern crate flatbuffers;
 
 pub mod MyGame {
+
+impl flatbuffers::Table for InParentNamespace {}
+impl InParentNamespace /* private flatbuffers::Table */ {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+    return VerifyTableStart(verifier) &&
+           verifier.EndTable();
+  }
+}
+
+struct InParentNamespaceBuilder {
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl InParentNamespaceBuilder {
+  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> InParentNamespaceBuilder {
+    InParentNamespaceBuilder {
+      fbb_: _fbb,
+      start_: _fbb.StartTable(),
+    }
+  }
+  // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<InParentNamespace> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<InParentNamespace>;
+    o
+  }
+}
+
+#[inline]
+fn CreateInParentNamespace(
+    _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace> {
+  let mut builder = InParentNamespaceBuilder::new(_fbb);
+  builder_.Finish()
+}
+
+#[inline]
+fn InParentNamespaceTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
+
+#[inline]
+fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
+  };
+  return &tt;
+  */
+}
+
+pub mod Example2 {
+
+impl flatbuffers::Table for Monster {}
+impl Monster /* private flatbuffers::Table */ {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+    return VerifyTableStart(verifier) &&
+           verifier.EndTable();
+  }
+}
+
+struct MonsterBuilder {
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl MonsterBuilder {
+  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
+    MonsterBuilder {
+      fbb_: _fbb,
+      start_: _fbb.StartTable(),
+    }
+  }
+  // MonsterBuilder &operator=(const MonsterBuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<Monster> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<Monster>;
+    o
+  }
+}
+
+#[inline]
+fn CreateMonster(
+    _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<Monster> {
+  let mut builder = MonsterBuilder::new(_fbb);
+  builder_.Finish()
+}
+
+#[inline]
+fn MonsterTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
+
+#[inline]
+fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
+  };
+  return &tt;
+  */
+}
+
+}  // pub mod Example2
+
 pub mod Example {
 
 enum Color {
@@ -199,82 +298,6 @@ impl Ability {
   }
 }
 // STRUCT_END(Ability, 8);
-
-}  // pub mod Example
-
-impl flatbuffers::Table for InParentNamespace {}
-impl InParentNamespace /* private flatbuffers::Table */ {
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
-           verifier.EndTable();
-  }
-}
-
-struct InParentNamespaceBuilder {
-  fbb_: &flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
-}
-impl InParentNamespaceBuilder {
-  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> InParentNamespaceBuilder {
-    InParentNamespaceBuilder {
-      fbb_: _fbb,
-      start_: _fbb.StartTable(),
-    }
-  }
-  // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
-  fn finish(&mut self) -> flatbuffers::Offset<InParentNamespace> {
-    let end = self.fbb_.EndTable(self.start_);
-    let o = end as flatbuffers::Offset<InParentNamespace>;
-    o
-  }
-}
-
-#[inline]
-fn CreateInParentNamespace(
-    _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace> {
-  let mut builder = InParentNamespaceBuilder::new(_fbb);
-  builder_.Finish()
-}
-
-pub mod Example2 {
-
-impl flatbuffers::Table for Monster {}
-impl Monster /* private flatbuffers::Table */ {
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
-           verifier.EndTable();
-  }
-}
-
-struct MonsterBuilder {
-  fbb_: &flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
-}
-impl MonsterBuilder {
-  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
-    MonsterBuilder {
-      fbb_: _fbb,
-      start_: _fbb.StartTable(),
-    }
-  }
-  // MonsterBuilder &operator=(const MonsterBuilder &);
-  fn finish(&mut self) -> flatbuffers::Offset<Monster> {
-    let end = self.fbb_.EndTable(self.start_);
-    let o = end as flatbuffers::Offset<Monster>;
-    o
-  }
-}
-
-#[inline]
-fn CreateMonster(
-    _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<Monster> {
-  let mut builder = MonsterBuilder::new(_fbb);
-  builder_.Finish()
-}
-
-}  // pub mod Example2
-
-pub mod Example {
 
 impl flatbuffers::Table for TestSimpleTableWithEnum {}
 impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
@@ -1274,14 +1297,6 @@ fn CreateTypeAliasesDirect(
       if vf64 { _fbb.CreateVector::<f64>(*vf64) } else { 0 });
 }
 
-}  // pub mod Example
-
-pub mod Example2 {
-
-}  // pub mod Example2
-
-pub mod Example {
-
 #[inline]
 fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> bool {
   match type_ {
@@ -1316,20 +1331,6 @@ fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vecto
   }
   return true;
 }
-
-}  // pub mod Example
-
-#[inline]
-fn InParentNamespaceTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-pub mod Example2 {
-
-#[inline]
-fn MonsterTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-}  // pub mod Example2
-
-pub mod Example {
 
 #[inline]
 fn TestTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
@@ -1402,34 +1403,6 @@ fn AnyTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   return &tt;
   */
 }
-
-}  // pub mod Example
-
-#[inline]
-fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
-  /* disable type table for now
-  static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
-  };
-  return &tt;
-  */
-}
-
-pub mod Example2 {
-
-#[inline]
-fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
-  /* disable type table for now
-  static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
-  };
-  return &tt;
-  */
-}
-
-}  // pub mod Example2
-
-pub mod Example {
 
 #[inline]
 fn TestTypeTable() -> &/*mut?*/flatbuffers::TypeTable {

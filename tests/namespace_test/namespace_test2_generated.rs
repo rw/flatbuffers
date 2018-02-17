@@ -84,6 +84,106 @@ fn CreateTableInFirstNS(
   builder_.Finish()
 }
 
+impl flatbuffers::Table for SecondTableInA {}
+impl SecondTableInA /* private flatbuffers::Table */ {
+    const VT_REFER_TO_C: isize = 4;
+
+  fn refer_to_c() -> &NamespaceC::TableInC  {
+    self.GetPointer::<&NamespaceC::TableInC>(VT_REFER_TO_C)
+  }
+  fn mutable_refer_to_c(&mut self) -> &mut NamespaceC::TableInC  {
+    /* TODO: are there non-reference choices here? */
+    &mut GetPointer::<&mut NamespaceC::TableInC >(VT_REFER_TO_C)
+  }
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_REFER_TO_C) &&
+           verifier.VerifyTable(refer_to_c()) &&
+           verifier.EndTable();
+  }
+}
+
+struct SecondTableInABuilder {
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl SecondTableInABuilder {
+  fn add_refer_to_c(refer_to_c: flatbuffers::Offset<NamespaceC::TableInC> ) {
+    fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
+  }
+  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder {
+    SecondTableInABuilder {
+      fbb_: _fbb,
+      start_: _fbb.StartTable(),
+    }
+  }
+  // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<SecondTableInA> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<SecondTableInA>;
+    o
+  }
+}
+
+#[inline]
+fn CreateSecondTableInA(
+    _fbb: &mut flatbuffers::FlatBufferBuilder,
+    refer_to_c: flatbuffers::Offset<NamespaceC::TableInC>  /* = 0 */) -> flatbuffers::Offset<SecondTableInA> {
+  let mut builder = SecondTableInABuilder::new(_fbb);
+  builder_.add_refer_to_c(refer_to_c);
+  builder_.Finish()
+}
+
+#[inline]
+fn TableInFirstNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
+
+#[inline]
+fn SecondTableInATypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
+
+#[inline]
+fn TableInFirstNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_SEQUENCE, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 1 },
+    { flatbuffers::ET_SEQUENCE, 0, 2 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    NamespaceA::NamespaceB::TableInNestedNSTypeTable,
+    NamespaceA::NamespaceB::EnumInNestedNSTypeTable,
+    NamespaceA::NamespaceB::StructInNestedNSTypeTable
+  };
+  static const char *names[] = {
+    "foo_table",
+    "foo_enum",
+    "foo_struct"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 3, type_codes, type_refs, nullptr, names
+  };
+  return &tt;
+  */
+}
+
+#[inline]
+fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_SEQUENCE, 0, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    NamespaceC::TableInCTypeTable
+  };
+  static const char *names[] = {
+    "refer_to_c"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 1, type_codes, type_refs, nullptr, names
+  };
+  return &tt;
+  */
+}
+
 }  // pub mod NamespaceA
 
 pub mod NamespaceC {
@@ -153,113 +253,8 @@ fn CreateTableInC(
   builder_.Finish()
 }
 
-}  // pub mod NamespaceC
-
-pub mod NamespaceA {
-
-impl flatbuffers::Table for SecondTableInA {}
-impl SecondTableInA /* private flatbuffers::Table */ {
-    const VT_REFER_TO_C: isize = 4;
-
-  fn refer_to_c() -> &NamespaceC::TableInC  {
-    self.GetPointer::<&NamespaceC::TableInC>(VT_REFER_TO_C)
-  }
-  fn mutable_refer_to_c(&mut self) -> &mut NamespaceC::TableInC  {
-    /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut NamespaceC::TableInC >(VT_REFER_TO_C)
-  }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_REFER_TO_C) &&
-           verifier.VerifyTable(refer_to_c()) &&
-           verifier.EndTable();
-  }
-}
-
-struct SecondTableInABuilder {
-  fbb_: &flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
-}
-impl SecondTableInABuilder {
-  fn add_refer_to_c(refer_to_c: flatbuffers::Offset<NamespaceC::TableInC> ) {
-    fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
-  }
-  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder {
-    SecondTableInABuilder {
-      fbb_: _fbb,
-      start_: _fbb.StartTable(),
-    }
-  }
-  // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  fn finish(&mut self) -> flatbuffers::Offset<SecondTableInA> {
-    let end = self.fbb_.EndTable(self.start_);
-    let o = end as flatbuffers::Offset<SecondTableInA>;
-    o
-  }
-}
-
-#[inline]
-fn CreateSecondTableInA(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
-    refer_to_c: flatbuffers::Offset<NamespaceC::TableInC>  /* = 0 */) -> flatbuffers::Offset<SecondTableInA> {
-  let mut builder = SecondTableInABuilder::new(_fbb);
-  builder_.add_refer_to_c(refer_to_c);
-  builder_.Finish()
-}
-
-}  // pub mod NamespaceA
-
-pub mod NamespaceC {
-
-}  // pub mod NamespaceC
-
-pub mod NamespaceA {
-
-#[inline]
-fn TableInFirstNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-}  // pub mod NamespaceA
-
-pub mod NamespaceC {
-
 #[inline]
 fn TableInCTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-}  // pub mod NamespaceC
-
-pub mod NamespaceA {
-
-#[inline]
-fn SecondTableInATypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn TableInFirstNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
-  /* disable type table for now
-  static flatbuffers::TypeCode type_codes[] = {
-    { flatbuffers::ET_SEQUENCE, 0, 0 },
-    { flatbuffers::ET_CHAR, 0, 1 },
-    { flatbuffers::ET_SEQUENCE, 0, 2 }
-  };
-  static flatbuffers::TypeFunction type_refs[] = {
-    NamespaceA::NamespaceB::TableInNestedNSTypeTable,
-    NamespaceA::NamespaceB::EnumInNestedNSTypeTable,
-    NamespaceA::NamespaceB::StructInNestedNSTypeTable
-  };
-  static const char *names[] = {
-    "foo_table",
-    "foo_enum",
-    "foo_struct"
-  };
-  static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 3, type_codes, type_refs, nullptr, names
-  };
-  return &tt;
-  */
-}
-
-}  // pub mod NamespaceA
-
-pub mod NamespaceC {
 
 #[inline]
 fn TableInCTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
@@ -284,27 +279,4 @@ fn TableInCTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 }
 
 }  // pub mod NamespaceC
-
-pub mod NamespaceA {
-
-#[inline]
-fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
-  /* disable type table for now
-  static flatbuffers::TypeCode type_codes[] = {
-    { flatbuffers::ET_SEQUENCE, 0, 0 }
-  };
-  static flatbuffers::TypeFunction type_refs[] = {
-    NamespaceC::TableInCTypeTable
-  };
-  static const char *names[] = {
-    "refer_to_c"
-  };
-  static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 1, type_codes, type_refs, nullptr, names
-  };
-  return &tt;
-  */
-}
-
-}  // pub mod NamespaceA
 
