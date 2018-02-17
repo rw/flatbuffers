@@ -1901,12 +1901,12 @@ class RustGenerator : public BaseGenerator {
       }
 
       // Need to call "Create" with the struct namespace.
-      const auto qualified_create_name =
-          struct_def.defined_namespace->GetFullyQualifiedName("Create");
-      code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
+      //const auto qualified_create_name =
+      //    struct_def.defined_namespace->GetFullyQualifiedName("Create");
+      //code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
 
       code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
-      code_ += "  return {{CREATE_NAME}}{{STRUCT_NAME}}(";
+      code_ += "  return Create{{STRUCT_NAME}}(";
       code_ += "      _fbb\\";
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {

@@ -6,6 +6,7 @@ extern crate flatbuffers;
 pub mod MyGame {
   extern crate flatbuffers;
 
+struct InParentNamespace {}
 impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
@@ -53,6 +54,7 @@ fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 pub mod Example2 {
   extern crate flatbuffers;
 
+struct Monster {}
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
@@ -296,6 +298,7 @@ impl Ability {
 }
 // STRUCT_END(Ability, 8);
 
+struct TestSimpleTableWithEnum {}
 impl flatbuffers::Table for TestSimpleTableWithEnum {}
 impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
     const VT_COLOR: isize = 4;
@@ -344,6 +347,7 @@ fn CreateTestSimpleTableWithEnum(
   builder_.Finish()
 }
 
+struct Stat {}
 impl flatbuffers::Table for Stat {}
 impl Stat /* private flatbuffers::Table */ {
     const VT_ID: isize = 4;
@@ -426,7 +430,7 @@ fn CreateStatDirect(
     id: const_char_string_ptr /* = nullptr */,
     val: i64  /* = 0 */,
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
-  return MyGame::Example::CreateStat(
+  return CreateStat(
       _fbb,
       if id { _fbb.CreateString(id) } else { 0 },
       val,
@@ -434,6 +438,7 @@ fn CreateStatDirect(
 }
 
 /// an example documentation comment: monster object
+struct Monster {}
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
     const VT_POS: isize = 4;
@@ -1030,7 +1035,7 @@ fn CreateMonsterDirect(
     vector_of_longs: Option<std::vector<i64>> /* = nullptr */,
     vector_of_doubles: Option<std::vector<f64>> /* = nullptr */,
     parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
-  return MyGame::Example::CreateMonster(
+  return CreateMonster(
       _fbb,
       pos,
       mana,
@@ -1068,6 +1073,7 @@ fn CreateMonsterDirect(
       parent_namespace_test);
 }
 
+struct TypeAliases {}
 impl flatbuffers::Table for TypeAliases {}
 impl TypeAliases /* private flatbuffers::Table */ {
     const VT_I8_: isize = 4;
@@ -1278,7 +1284,7 @@ fn CreateTypeAliasesDirect(
     f64_: f64  /* = 0.0 */,
     v8: Option<std::vector<i8>> /* = nullptr */,
     vf64: Option<std::vector<f64>> /* = nullptr */) -> flatbuffers::Offset<TypeAliases> {
-  return MyGame::Example::CreateTypeAliases(
+  return CreateTypeAliases(
       _fbb,
       i8_,
       u8_,
