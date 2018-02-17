@@ -1319,31 +1319,42 @@ fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vecto
 
 }  // mod Example
 
-inline flatbuffers::TypeTable *InParentNamespaceTypeTable();
+#[inline]
+fn InParentNamespaceTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
 mod Example2 {
 
-inline flatbuffers::TypeTable *MonsterTypeTable();
+#[inline]
+fn MonsterTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
 }  // mod Example2
 
 mod Example {
 
-inline flatbuffers::TypeTable *TestTypeTable();
+#[inline]
+fn TestTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *TestSimpleTableWithEnumTypeTable();
+#[inline]
+fn TestSimpleTableWithEnumTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *Vec3TypeTable();
+#[inline]
+fn Vec3TypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *AbilityTypeTable();
+#[inline]
+fn AbilityTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *StatTypeTable();
+#[inline]
+fn StatTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *MonsterTypeTable();
+#[inline]
+fn MonsterTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *TypeAliasesTypeTable();
+#[inline]
+fn TypeAliasesTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-inline flatbuffers::TypeTable *ColorTypeTable() {
+#[inline]
+fn ColorTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, 0 },
     { flatbuffers::ET_CHAR, 0, 0 },
@@ -1362,9 +1373,12 @@ inline flatbuffers::TypeTable *ColorTypeTable() {
     flatbuffers::ST_ENUM, 3, type_codes, type_refs, values, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *AnyTypeTable() {
+#[inline]
+fn AnyTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, -1 },
     { flatbuffers::ET_SEQUENCE, 0, 0 },
@@ -1386,31 +1400,40 @@ inline flatbuffers::TypeTable *AnyTypeTable() {
     flatbuffers::ST_UNION, 4, type_codes, type_refs, nullptr, names
   };
   return &tt;
+  */
 }
 
 }  // mod Example
 
-inline flatbuffers::TypeTable *InParentNamespaceTypeTable() {
+#[inline]
+fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeTable tt = {
     flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
   };
   return &tt;
+  */
 }
 
 mod Example2 {
 
-inline flatbuffers::TypeTable *MonsterTypeTable() {
+#[inline]
+fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeTable tt = {
     flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
   };
   return &tt;
+  */
 }
 
 }  // mod Example2
 
 mod Example {
 
-inline flatbuffers::TypeTable *TestTypeTable() {
+#[inline]
+fn TestTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SHORT, 0, -1 },
     { flatbuffers::ET_CHAR, 0, -1 }
@@ -1424,9 +1447,12 @@ inline flatbuffers::TypeTable *TestTypeTable() {
     flatbuffers::ST_STRUCT, 2, type_codes, nullptr, values, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *TestSimpleTableWithEnumTypeTable() {
+#[inline]
+fn TestSimpleTableWithEnumTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, 0 }
   };
@@ -1440,9 +1466,12 @@ inline flatbuffers::TypeTable *TestSimpleTableWithEnumTypeTable() {
     flatbuffers::ST_TABLE, 1, type_codes, type_refs, nullptr, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *Vec3TypeTable() {
+#[inline]
+fn Vec3TypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_FLOAT, 0, -1 },
     { flatbuffers::ET_FLOAT, 0, -1 },
@@ -1468,9 +1497,12 @@ inline flatbuffers::TypeTable *Vec3TypeTable() {
     flatbuffers::ST_STRUCT, 6, type_codes, type_refs, values, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *AbilityTypeTable() {
+#[inline]
+fn AbilityTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_UINT, 0, -1 },
     { flatbuffers::ET_UINT, 0, -1 }
@@ -1484,9 +1516,12 @@ inline flatbuffers::TypeTable *AbilityTypeTable() {
     flatbuffers::ST_STRUCT, 2, type_codes, nullptr, values, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *StatTypeTable() {
+#[inline]
+fn StatTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_STRING, 0, -1 },
     { flatbuffers::ET_LONG, 0, -1 },
@@ -1501,9 +1536,12 @@ inline flatbuffers::TypeTable *StatTypeTable() {
     flatbuffers::ST_TABLE, 3, type_codes, nullptr, nullptr, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *MonsterTypeTable() {
+#[inline]
+fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
     { flatbuffers::ET_SHORT, 0, -1 },
@@ -1592,9 +1630,12 @@ inline flatbuffers::TypeTable *MonsterTypeTable() {
     flatbuffers::ST_TABLE, 35, type_codes, type_refs, nullptr, names
   };
   return &tt;
+  */
 }
 
-inline flatbuffers::TypeTable *TypeAliasesTypeTable() {
+#[inline]
+fn TypeAliasesTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, -1 },
     { flatbuffers::ET_UCHAR, 0, -1 },
@@ -1627,6 +1668,7 @@ inline flatbuffers::TypeTable *TypeAliasesTypeTable() {
     flatbuffers::ST_TABLE, 12, type_codes, nullptr, nullptr, names
   };
   return &tt;
+  */
 }
 
 inline const MyGame::Example::Monster *GetMonster(const void *buf) {

@@ -677,7 +677,8 @@ class RustGenerator : public BaseGenerator {
 
   void GenMiniReflectPre(const StructDef *struct_def) {
     code_.SetValue("NAME", struct_def->name);
-    code_ += "inline flatbuffers::TypeTable *{{NAME}}TypeTable();";
+    code_ += "#[inline]";
+    code_ += "fn {{NAME}}TypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}";
     code_ += "";
   }
 
@@ -773,7 +774,9 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("REFS", rs);
     code_.SetValue("NAMES", ns);
     code_.SetValue("VALUES", vs);
-    code_ += "inline flatbuffers::TypeTable *{{NAME}}TypeTable() {";
+    code_ += "#[inline]";
+    code_ += "fn {{NAME}}TypeTable() -> &/*mut?*/flatbuffers::TypeTable {";
+    code_ += "  /* disable type table for now";
     if (num_fields) {
       code_ += "  static flatbuffers::TypeCode type_codes[] = {";
       code_ += "    {{TYPES}}";
@@ -802,6 +805,7 @@ class RustGenerator : public BaseGenerator {
              (has_names ? "names" : "nullptr");
     code_ += "  };";
     code_ += "  return &tt;";
+    code_ += "  */";
     code_ += "}";
     code_ += "";
   }
