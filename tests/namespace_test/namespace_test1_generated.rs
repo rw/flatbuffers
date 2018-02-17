@@ -3,8 +3,8 @@
 
 extern crate flatbuffers;
 
-mod NamespaceA {
-mod NamespaceB {
+pub mod NamespaceA {
+pub mod NamespaceB {
 
 enum EnumInNestedNS {
   EnumInNestedNS_A = 0,
@@ -174,6 +174,6 @@ fn StructInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-}  // mod NamespaceB
-}  // mod NamespaceA
+}  // pub mod NamespaceB
+}  // pub mod NamespaceA
 

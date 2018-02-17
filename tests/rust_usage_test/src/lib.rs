@@ -1,3 +1,5 @@
+pub mod monster_test_generated;
+
 #[cfg(test)]
 mod tests {
     #[test]

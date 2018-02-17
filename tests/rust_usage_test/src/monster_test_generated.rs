@@ -3,8 +3,8 @@
 
 extern crate flatbuffers;
 
-mod MyGame {
-mod Example {
+pub mod MyGame {
+pub mod Example {
 
 enum Color {
   Color_Red = 1,
@@ -200,7 +200,7 @@ impl Ability {
 }
 // STRUCT_END(Ability, 8);
 
-}  // mod Example
+}  // pub mod Example
 
 impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
@@ -236,7 +236,7 @@ fn CreateInParentNamespace(
   builder_.Finish()
 }
 
-mod Example2 {
+pub mod Example2 {
 
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
@@ -272,9 +272,9 @@ fn CreateMonster(
   builder_.Finish()
 }
 
-}  // mod Example2
+}  // pub mod Example2
 
-mod Example {
+pub mod Example {
 
 impl flatbuffers::Table for TestSimpleTableWithEnum {}
 impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
@@ -1274,13 +1274,13 @@ fn CreateTypeAliasesDirect(
       if vf64 { _fbb.CreateVector::<f64>(*vf64) } else { 0 });
 }
 
-}  // mod Example
+}  // pub mod Example
 
-mod Example2 {
+pub mod Example2 {
 
-}  // mod Example2
+}  // pub mod Example2
 
-mod Example {
+pub mod Example {
 
 #[inline]
 fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> bool {
@@ -1317,19 +1317,19 @@ fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vecto
   return true;
 }
 
-}  // mod Example
+}  // pub mod Example
 
 #[inline]
 fn InParentNamespaceTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-mod Example2 {
+pub mod Example2 {
 
 #[inline]
 fn MonsterTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
-}  // mod Example2
+}  // pub mod Example2
 
-mod Example {
+pub mod Example {
 
 #[inline]
 fn TestTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
@@ -1403,7 +1403,7 @@ fn AnyTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-}  // mod Example
+}  // pub mod Example
 
 #[inline]
 fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
@@ -1415,7 +1415,7 @@ fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-mod Example2 {
+pub mod Example2 {
 
 #[inline]
 fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
@@ -1427,9 +1427,9 @@ fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-}  // mod Example2
+}  // pub mod Example2
 
-mod Example {
+pub mod Example {
 
 #[inline]
 fn TestTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
@@ -1710,6 +1710,6 @@ fn FinishMonsterBuffer(
   fbb.Finish(root, MonsterIdentifier());
 }
 
-}  // mod Example
-}  // mod MyGame
+}  // pub mod Example
+}  // pub mod MyGame
 

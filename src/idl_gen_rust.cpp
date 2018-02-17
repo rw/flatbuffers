@@ -2488,14 +2488,14 @@ class RustGenerator : public BaseGenerator {
     // Close cur_name_space in reverse order to reach the common prefix.
     // In the previous example, D then C are closed.
     for (size_t j = old_size; j > common_prefix_size; --j) {
-      code_ += "}  // mod " + cur_name_space_->components[j - 1];
+      code_ += "}  // pub mod " + cur_name_space_->components[j - 1];
     }
     if (old_size != common_prefix_size) { code_ += ""; }
 
     // open namespace parts to reach the ns namespace
     // in the previous example, E, then F, then G are opened
     for (auto j = common_prefix_size; j != new_size; ++j) {
-      code_ += "mod " + ns->components[j] + " {";
+      code_ += "pub mod " + ns->components[j] + " {";
     }
     if (new_size != common_prefix_size) { code_ += ""; }
 

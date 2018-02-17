@@ -1,4 +1,11 @@
 [[package]]
+name = "flatbuffers"
+version = "0.1.0"
+
+[[package]]
 name = "rust_usage_test"
 version = "0.1.0"
+dependencies = [
+ "flatbuffers 0.1.0",
+]
 
