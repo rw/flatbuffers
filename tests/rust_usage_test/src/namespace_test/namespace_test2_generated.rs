@@ -6,6 +6,7 @@ extern crate flatbuffers;
 #include "namespace_test1_generated.rs"
 
 pub mod NamespaceA {
+  extern crate flatbuffers;
 
 impl flatbuffers::Table for TableInFirstNS {}
 impl TableInFirstNS /* private flatbuffers::Table */ {
@@ -135,12 +136,6 @@ fn CreateSecondTableInA(
 }
 
 #[inline]
-fn TableInFirstNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn SecondTableInATypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
 fn TableInFirstNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -187,6 +182,7 @@ fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 }  // pub mod NamespaceA
 
 pub mod NamespaceC {
+  extern crate flatbuffers;
 
 impl flatbuffers::Table for TableInC {}
 impl TableInC /* private flatbuffers::Table */ {
@@ -252,9 +248,6 @@ fn CreateTableInC(
   builder_.add_refer_to_a1(refer_to_a1);
   builder_.Finish()
 }
-
-#[inline]
-fn TableInCTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
 #[inline]
 fn TableInCTypeTable() -> &/*mut?*/flatbuffers::TypeTable {

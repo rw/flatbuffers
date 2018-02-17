@@ -1,1 +1,1 @@
-pub trait Table {}
+//pub trait Table {}
