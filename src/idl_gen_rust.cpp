@@ -133,6 +133,16 @@ class RustGenerator : public BaseGenerator {
                                "while",
                                "xor",
                                "xor_eq",
+                               "u8",
+                               "i8",
+                               "u16",
+                               "i16",
+                               "u32",
+                               "i32",
+                               "u64",
+                               "i64",
+                               "f32",
+                               "f64",
                                nullptr };
     for (auto kw = keywords; *kw; kw++) keywords_.insert(*kw);
   }
@@ -695,10 +705,10 @@ class RustGenerator : public BaseGenerator {
   }
 
   void GenMiniReflectPre(const StructDef *struct_def) {
-    code_.SetValue("NAME", struct_def->name);
-    code_ += "#[inline]";
-    code_ += "fn {{NAME}}TypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}";
-    code_ += "";
+    //code_.SetValue("NAME", struct_def->name);
+    //code_ += "#[inline]";
+    //code_ += "fn {{NAME}}TypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}";
+    //code_ += "";
   }
 
   void GenMiniReflect(const StructDef *struct_def, const EnumDef *enum_def) {
@@ -2512,6 +2522,7 @@ class RustGenerator : public BaseGenerator {
     // in the previous example, E, then F, then G are opened
     for (auto j = common_prefix_size; j != new_size; ++j) {
       code_ += "pub mod " + ns->components[j] + " {";
+      code_ += "  extern crate flatbuffers;";
     }
     if (new_size != common_prefix_size) { code_ += ""; }
 

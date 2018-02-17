@@ -4,7 +4,54 @@
 extern crate flatbuffers;
 
 pub mod MyGame {
+  extern crate flatbuffers;
+
+impl flatbuffers::Table for InParentNamespace {}
+impl InParentNamespace /* private flatbuffers::Table */ {
+  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+    return VerifyTableStart(verifier) &&
+           verifier.EndTable();
+  }
+}
+
+struct InParentNamespaceBuilder {
+  fbb_: &flatbuffers::FlatBufferBuilder,
+  start_: flatbuffers::uoffset_t,
+}
+impl InParentNamespaceBuilder {
+  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> InParentNamespaceBuilder {
+    InParentNamespaceBuilder {
+      fbb_: _fbb,
+      start_: _fbb.StartTable(),
+    }
+  }
+  // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
+  fn finish(&mut self) -> flatbuffers::Offset<InParentNamespace> {
+    let end = self.fbb_.EndTable(self.start_);
+    let o = end as flatbuffers::Offset<InParentNamespace>;
+    o
+  }
+}
+
+#[inline]
+fn CreateInParentNamespace(
+    _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace> {
+  let mut builder = InParentNamespaceBuilder::new(_fbb);
+  builder_.Finish()
+}
+
+#[inline]
+fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+  /* disable type table for now
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
+  };
+  return &tt;
+  */
+}
+
 pub mod Example2 {
+  extern crate flatbuffers;
 
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
@@ -41,9 +88,6 @@ fn CreateMonster(
 }
 
 #[inline]
-fn MonsterTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
 fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeTable tt = {
@@ -56,6 +100,7 @@ fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 }  // pub mod Example2
 
 pub mod Example {
+  extern crate flatbuffers;
 
 enum Color {
   Color_Red = 1,
@@ -1025,78 +1070,78 @@ fn CreateMonsterDirect(
 
 impl flatbuffers::Table for TypeAliases {}
 impl TypeAliases /* private flatbuffers::Table */ {
-    const VT_I8: isize = 4;
-    const VT_U8: isize = 6;
-    const VT_I16: isize = 8;
-    const VT_U16: isize = 10;
-    const VT_I32: isize = 12;
-    const VT_U32: isize = 14;
-    const VT_I64: isize = 16;
-    const VT_U64: isize = 18;
-    const VT_F32: isize = 20;
-    const VT_F64: isize = 22;
+    const VT_I8_: isize = 4;
+    const VT_U8_: isize = 6;
+    const VT_I16_: isize = 8;
+    const VT_U16_: isize = 10;
+    const VT_I32_: isize = 12;
+    const VT_U32_: isize = 14;
+    const VT_I64_: isize = 16;
+    const VT_U64_: isize = 18;
+    const VT_F32_: isize = 20;
+    const VT_F64_: isize = 22;
     const VT_V8: isize = 24;
     const VT_VF64: isize = 26;
 
-  fn i8() -> i8  {
-    self.GetField::<i8>(VT_I8, 0)
+  fn i8_() -> i8  {
+    self.GetField::<i8>(VT_I8_, 0)
   }
-  fn mutate_i8(i8_: i8) -> bool {
-    SetField::<i8>(VT_I8, _i8, 0)
+  fn mutate_i8_(i8__: i8) -> bool {
+    SetField::<i8>(VT_I8_, _i8_, 0)
   }
-  fn u8() -> u8  {
-    self.GetField::<u8>(VT_U8, 0)
+  fn u8_() -> u8  {
+    self.GetField::<u8>(VT_U8_, 0)
   }
-  fn mutate_u8(u8_: u8) -> bool {
-    SetField::<u8>(VT_U8, _u8, 0)
+  fn mutate_u8_(u8__: u8) -> bool {
+    SetField::<u8>(VT_U8_, _u8_, 0)
   }
-  fn i16() -> i16  {
-    self.GetField::<i16>(VT_I16, 0)
+  fn i16_() -> i16  {
+    self.GetField::<i16>(VT_I16_, 0)
   }
-  fn mutate_i16(i16_: i16) -> bool {
-    SetField::<i16>(VT_I16, _i16, 0)
+  fn mutate_i16_(i16__: i16) -> bool {
+    SetField::<i16>(VT_I16_, _i16_, 0)
   }
-  fn u16() -> u16  {
-    self.GetField::<u16>(VT_U16, 0)
+  fn u16_() -> u16  {
+    self.GetField::<u16>(VT_U16_, 0)
   }
-  fn mutate_u16(u16_: u16) -> bool {
-    SetField::<u16>(VT_U16, _u16, 0)
+  fn mutate_u16_(u16__: u16) -> bool {
+    SetField::<u16>(VT_U16_, _u16_, 0)
   }
-  fn i32() -> i32  {
-    self.GetField::<i32>(VT_I32, 0)
+  fn i32_() -> i32  {
+    self.GetField::<i32>(VT_I32_, 0)
   }
-  fn mutate_i32(i32_: i32) -> bool {
-    SetField::<i32>(VT_I32, _i32, 0)
+  fn mutate_i32_(i32__: i32) -> bool {
+    SetField::<i32>(VT_I32_, _i32_, 0)
   }
-  fn u32() -> u32  {
-    self.GetField::<u32>(VT_U32, 0)
+  fn u32_() -> u32  {
+    self.GetField::<u32>(VT_U32_, 0)
   }
-  fn mutate_u32(u32_: u32) -> bool {
-    SetField::<u32>(VT_U32, _u32, 0)
+  fn mutate_u32_(u32__: u32) -> bool {
+    SetField::<u32>(VT_U32_, _u32_, 0)
   }
-  fn i64() -> i64  {
-    self.GetField::<i64>(VT_I64, 0)
+  fn i64_() -> i64  {
+    self.GetField::<i64>(VT_I64_, 0)
   }
-  fn mutate_i64(i64_: i64) -> bool {
-    SetField::<i64>(VT_I64, _i64, 0)
+  fn mutate_i64_(i64__: i64) -> bool {
+    SetField::<i64>(VT_I64_, _i64_, 0)
   }
-  fn u64() -> u64  {
-    self.GetField::<u64>(VT_U64, 0)
+  fn u64_() -> u64  {
+    self.GetField::<u64>(VT_U64_, 0)
   }
-  fn mutate_u64(u64_: u64) -> bool {
-    SetField::<u64>(VT_U64, _u64, 0)
+  fn mutate_u64_(u64__: u64) -> bool {
+    SetField::<u64>(VT_U64_, _u64_, 0)
   }
-  fn f32() -> f32  {
-    self.GetField::<f32>(VT_F32, 0.0)
+  fn f32_() -> f32  {
+    self.GetField::<f32>(VT_F32_, 0.0)
   }
-  fn mutate_f32(f32_: f32) -> bool {
-    SetField::<f32>(VT_F32, _f32, 0.0)
+  fn mutate_f32_(f32__: f32) -> bool {
+    SetField::<f32>(VT_F32_, _f32_, 0.0)
   }
-  fn f64() -> f64  {
-    self.GetField::<f64>(VT_F64, 0.0)
+  fn f64_() -> f64  {
+    self.GetField::<f64>(VT_F64_, 0.0)
   }
-  fn mutate_f64(f64_: f64) -> bool {
-    SetField::<f64>(VT_F64, _f64, 0.0)
+  fn mutate_f64_(f64__: f64) -> bool {
+    SetField::<f64>(VT_F64_, _f64_, 0.0)
   }
   fn v8() -> &flatbuffers::Vector<i8>  {
     self.GetPointer::<&flatbuffers::Vector<i8>>(VT_V8)
@@ -1114,16 +1159,16 @@ impl TypeAliases /* private flatbuffers::Table */ {
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
-           VerifyField::<i8>(verifier, VT_I8) &&
-           VerifyField::<u8>(verifier, VT_U8) &&
-           VerifyField::<i16>(verifier, VT_I16) &&
-           VerifyField::<u16>(verifier, VT_U16) &&
-           VerifyField::<i32>(verifier, VT_I32) &&
-           VerifyField::<u32>(verifier, VT_U32) &&
-           VerifyField::<i64>(verifier, VT_I64) &&
-           VerifyField::<u64>(verifier, VT_U64) &&
-           VerifyField::<f32>(verifier, VT_F32) &&
-           VerifyField::<f64>(verifier, VT_F64) &&
+           VerifyField::<i8>(verifier, VT_I8_) &&
+           VerifyField::<u8>(verifier, VT_U8_) &&
+           VerifyField::<i16>(verifier, VT_I16_) &&
+           VerifyField::<u16>(verifier, VT_U16_) &&
+           VerifyField::<i32>(verifier, VT_I32_) &&
+           VerifyField::<u32>(verifier, VT_U32_) &&
+           VerifyField::<i64>(verifier, VT_I64_) &&
+           VerifyField::<u64>(verifier, VT_U64_) &&
+           VerifyField::<f32>(verifier, VT_F32_) &&
+           VerifyField::<f64>(verifier, VT_F64_) &&
            VerifyOffset(verifier, VT_V8) &&
            verifier.Verify(v8()) &&
            VerifyOffset(verifier, VT_VF64) &&
@@ -1137,35 +1182,35 @@ struct TypeAliasesBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TypeAliasesBuilder {
-  fn add_i8(i8: i8 ) {
-    fbb_.AddElement::<i8>(TypeAliases::VT_I8, i8, 0);
+  fn add_i8_(i8_: i8 ) {
+    fbb_.AddElement::<i8>(TypeAliases::VT_I8_, i8_, 0);
   }
-  fn add_u8(u8: u8 ) {
-    fbb_.AddElement::<u8>(TypeAliases::VT_U8, u8, 0);
+  fn add_u8_(u8_: u8 ) {
+    fbb_.AddElement::<u8>(TypeAliases::VT_U8_, u8_, 0);
   }
-  fn add_i16(i16: i16 ) {
-    fbb_.AddElement::<i16>(TypeAliases::VT_I16, i16, 0);
+  fn add_i16_(i16_: i16 ) {
+    fbb_.AddElement::<i16>(TypeAliases::VT_I16_, i16_, 0);
   }
-  fn add_u16(u16: u16 ) {
-    fbb_.AddElement::<u16>(TypeAliases::VT_U16, u16, 0);
+  fn add_u16_(u16_: u16 ) {
+    fbb_.AddElement::<u16>(TypeAliases::VT_U16_, u16_, 0);
   }
-  fn add_i32(i32: i32 ) {
-    fbb_.AddElement::<i32>(TypeAliases::VT_I32, i32, 0);
+  fn add_i32_(i32_: i32 ) {
+    fbb_.AddElement::<i32>(TypeAliases::VT_I32_, i32_, 0);
   }
-  fn add_u32(u32: u32 ) {
-    fbb_.AddElement::<u32>(TypeAliases::VT_U32, u32, 0);
+  fn add_u32_(u32_: u32 ) {
+    fbb_.AddElement::<u32>(TypeAliases::VT_U32_, u32_, 0);
   }
-  fn add_i64(i64: i64 ) {
-    fbb_.AddElement::<i64>(TypeAliases::VT_I64, i64, 0);
+  fn add_i64_(i64_: i64 ) {
+    fbb_.AddElement::<i64>(TypeAliases::VT_I64_, i64_, 0);
   }
-  fn add_u64(u64: u64 ) {
-    fbb_.AddElement::<u64>(TypeAliases::VT_U64, u64, 0);
+  fn add_u64_(u64_: u64 ) {
+    fbb_.AddElement::<u64>(TypeAliases::VT_U64_, u64_, 0);
   }
-  fn add_f32(f32: f32 ) {
-    fbb_.AddElement::<f32>(TypeAliases::VT_F32, f32, 0.0);
+  fn add_f32_(f32_: f32 ) {
+    fbb_.AddElement::<f32>(TypeAliases::VT_F32_, f32_, 0.0);
   }
-  fn add_f64(f64: f64 ) {
-    fbb_.AddElement::<f64>(TypeAliases::VT_F64, f64, 0.0);
+  fn add_f64_(f64_: f64 ) {
+    fbb_.AddElement::<f64>(TypeAliases::VT_F64_, f64_, 0.0);
   }
   fn add_v8(v8: flatbuffers::Offset<flatbuffers::Vector<i8>> ) {
     fbb_.AddOffset(TypeAliases::VT_V8, v8);
@@ -1190,61 +1235,61 @@ impl TypeAliasesBuilder {
 #[inline]
 fn CreateTypeAliases(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    i8: i8  /* = 0 */,
-    u8: u8  /* = 0 */,
-    i16: i16  /* = 0 */,
-    u16: u16  /* = 0 */,
-    i32: i32  /* = 0 */,
-    u32: u32  /* = 0 */,
-    i64: i64  /* = 0 */,
-    u64: u64  /* = 0 */,
-    f32: f32  /* = 0.0 */,
-    f64: f64  /* = 0.0 */,
+    i8_: i8  /* = 0 */,
+    u8_: u8  /* = 0 */,
+    i16_: i16  /* = 0 */,
+    u16_: u16  /* = 0 */,
+    i32_: i32  /* = 0 */,
+    u32_: u32  /* = 0 */,
+    i64_: i64  /* = 0 */,
+    u64_: u64  /* = 0 */,
+    f32_: f32  /* = 0.0 */,
+    f64_: f64  /* = 0.0 */,
     v8: flatbuffers::Offset<flatbuffers::Vector<i8>>  /* = 0 */,
     vf64: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */) -> flatbuffers::Offset<TypeAliases> {
   let mut builder = TypeAliasesBuilder::new(_fbb);
-  builder_.add_f64(f64);
-  builder_.add_u64(u64);
-  builder_.add_i64(i64);
+  builder_.add_f64_(f64_);
+  builder_.add_u64_(u64_);
+  builder_.add_i64_(i64_);
   builder_.add_vf64(vf64);
   builder_.add_v8(v8);
-  builder_.add_f32(f32);
-  builder_.add_u32(u32);
-  builder_.add_i32(i32);
-  builder_.add_u16(u16);
-  builder_.add_i16(i16);
-  builder_.add_u8(u8);
-  builder_.add_i8(i8);
+  builder_.add_f32_(f32_);
+  builder_.add_u32_(u32_);
+  builder_.add_i32_(i32_);
+  builder_.add_u16_(u16_);
+  builder_.add_i16_(i16_);
+  builder_.add_u8_(u8_);
+  builder_.add_i8_(i8_);
   builder_.Finish()
 }
 
 #[inline]
 fn CreateTypeAliasesDirect(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    i8: i8  /* = 0 */,
-    u8: u8  /* = 0 */,
-    i16: i16  /* = 0 */,
-    u16: u16  /* = 0 */,
-    i32: i32  /* = 0 */,
-    u32: u32  /* = 0 */,
-    i64: i64  /* = 0 */,
-    u64: u64  /* = 0 */,
-    f32: f32  /* = 0.0 */,
-    f64: f64  /* = 0.0 */,
+    i8_: i8  /* = 0 */,
+    u8_: u8  /* = 0 */,
+    i16_: i16  /* = 0 */,
+    u16_: u16  /* = 0 */,
+    i32_: i32  /* = 0 */,
+    u32_: u32  /* = 0 */,
+    i64_: i64  /* = 0 */,
+    u64_: u64  /* = 0 */,
+    f32_: f32  /* = 0.0 */,
+    f64_: f64  /* = 0.0 */,
     v8: Option<std::vector<i8>> /* = nullptr */,
     vf64: Option<std::vector<f64>> /* = nullptr */) -> flatbuffers::Offset<TypeAliases> {
   return MyGame::Example::CreateTypeAliases(
       _fbb,
-      i8,
-      u8,
-      i16,
-      u16,
-      i32,
-      u32,
-      i64,
-      u64,
-      f32,
-      f64,
+      i8_,
+      u8_,
+      i16_,
+      u16_,
+      i32_,
+      u32_,
+      i64_,
+      u64_,
+      f32_,
+      f64_,
       if v8 { _fbb.CreateVector::<i8>(*v8) } else { 0 },
       if vf64 { _fbb.CreateVector::<f64>(*vf64) } else { 0 });
 }
@@ -1283,27 +1328,6 @@ fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vecto
   }
   return true;
 }
-
-#[inline]
-fn TestTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn TestSimpleTableWithEnumTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn Vec3TypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn AbilityTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn StatTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn MonsterTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn TypeAliasesTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
 #[inline]
 fn ColorTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
@@ -1576,16 +1600,16 @@ fn TypeAliasesTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
     { flatbuffers::ET_DOUBLE, 1, -1 }
   };
   static const char *names[] = {
-    "i8",
-    "u8",
-    "i16",
-    "u16",
-    "i32",
-    "u32",
-    "i64",
-    "u64",
-    "f32",
-    "f64",
+    "i8_",
+    "u8_",
+    "i16_",
+    "u16_",
+    "i32_",
+    "u32_",
+    "i64_",
+    "u64_",
+    "f32_",
+    "f64_",
     "v8",
     "vf64"
   };

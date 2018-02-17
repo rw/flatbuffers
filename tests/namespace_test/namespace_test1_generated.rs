@@ -4,7 +4,9 @@
 extern crate flatbuffers;
 
 pub mod NamespaceA {
+  extern crate flatbuffers;
 pub mod NamespaceB {
+  extern crate flatbuffers;
 
 enum EnumInNestedNS {
   EnumInNestedNS_A = 0,
@@ -109,12 +111,6 @@ fn CreateTableInNestedNS(
   builder_.add_foo(foo);
   builder_.Finish()
 }
-
-#[inline]
-fn TableInNestedNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
-
-#[inline]
-fn StructInNestedNSTypeTable() -> &/*mut?*/ flatbuffers::TypeTable {}
 
 #[inline]
 fn EnumInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
