@@ -1,4 +1,4 @@
 [package]
 name = "flatbuffers"
 version = "0.1.0"
-authors = ["Robert Winslow <me@rwinslow.com>", "FlatBuffers Maintainers <wvo@google.com>"]
+authors = ["Robert Winslow <me@rwinslow.com>", "FlatBuffers Maintainers"]
