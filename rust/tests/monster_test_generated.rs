@@ -1284,23 +1284,23 @@ mod Example {
 
 #[inline]
 fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> bool {
-  switch (type_) {
-    case Any_NONE: {
+  match type_ {
+    Any_NONE => {
       return true;
     }
-    case Any_Monster: {
+    Any_Monster => {
       auto ptr = reinterpret_cast<const Monster *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Any_TestSimpleTableWithEnum: {
+    Any_TestSimpleTableWithEnum => {
       auto ptr = reinterpret_cast<const TestSimpleTableWithEnum *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Any_MyGame_Example2_Monster: {
+    Any_MyGame_Example2_Monster => {
       auto ptr = reinterpret_cast<const MyGame::Example2::Monster *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    default: return false;
+    _ => { return false; }
   }
 }
 
