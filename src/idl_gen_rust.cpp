@@ -1499,6 +1499,7 @@ class RustGenerator : public BaseGenerator {
     GenComment(struct_def.doc_comment);
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
+    code_ += "struct {{STRUCT_NAME}} {}";
     code_ += "impl flatbuffers::Table for {{STRUCT_NAME}} {}";
     code_ += "impl {{STRUCT_NAME}} /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
