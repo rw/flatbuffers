@@ -1885,10 +1885,10 @@ class RustGenerator : public BaseGenerator {
             const auto vtype = field.value.type.VectorType();
             if (IsStruct(vtype)) {
               const auto type = WrapInNameSpace(*vtype.struct_def);
-              code_ += "_fbb.CreateVectorOfStructs<" + type + ">\\";
+              code_ += "_fbb.CreateVectorOfStructs::<" + type + ">\\";
             } else {
               const auto type = GenTypeWire(vtype, "", false);
-              code_ += "_fbb.CreateVector<" + type + ">\\";
+              code_ += "_fbb.CreateVector::<" + type + ">\\";
             }
             code_ += "(*{{FIELD_NAME}}) } else { 0 }\\";
           } else {
