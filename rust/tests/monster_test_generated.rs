@@ -1282,8 +1282,9 @@ mod Example2 {
 
 mod Example {
 
-inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *obj, Any type) {
-  switch (type) {
+#[inline]
+fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> bool {
+  switch (type_) {
     case Any_NONE: {
       return true;
     }
@@ -1303,7 +1304,7 @@ inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *obj, Any type
   }
 }
 
-inline bool VerifyAnyVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types) {
+inline fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vector<flatbuffers::Offset<void>>, types: &flatbuffers::Vector<uint8_t>) -> bool {
   if (!values || !types) return !values && !types;
   if (values->size() != types->size()) return false;
   for (flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {
@@ -1639,14 +1640,16 @@ inline const char *MonsterIdentifier() {
   return "MONS";
 }
 
-inline bool MonsterBufferHasIdentifier(const void *buf) {
+#[inline]
+fn MonsterBufferHasIdentifier(buf: &Vec<u8>) -> bool {
   return flatbuffers::BufferHasIdentifier(
       buf, MonsterIdentifier());
 }
 
-inline bool VerifyMonsterBuffer(
-    flatbuffers::Verifier &verifier) {
-  return verifier.VerifyBuffer<MyGame::Example::Monster>(MonsterIdentifier());
+#[inline]
+fn VerifyMonsterBuffer(
+    verifier: &flatbuffers::Verifier) -> bool {
+  return verifier.VerifyBuffer::<MyGame::Example::Monster>(MonsterIdentifier());
 }
 
 inline const char *MonsterExtension() {

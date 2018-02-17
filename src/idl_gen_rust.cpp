@@ -319,8 +319,9 @@ class RustGenerator : public BaseGenerator {
         code_ += "";
 
         // Check if a buffer has the identifier.
-        code_ += "inline \\";
-        code_ += "bool {{STRUCT_NAME}}BufferHasIdentifier(const void *buf) {";
+        code_ += "#[inline]";
+        code_ += "fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &Vec<u8>)"
+                 " -> bool {";
         code_ += "  return flatbuffers::BufferHasIdentifier(";
         code_ += "      buf, {{STRUCT_NAME}}Identifier());";
         code_ += "}";
@@ -334,9 +335,10 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("ID", "nullptr");
       }
 
-      code_ += "inline bool Verify{{STRUCT_NAME}}Buffer(";
-      code_ += "    flatbuffers::Verifier &verifier) {";
-      code_ += "  return verifier.VerifyBuffer<{{CPP_NAME}}>({{ID}});";
+      code_ += "#[inline]";
+      code_ += "fn Verify{{STRUCT_NAME}}Buffer(";
+      code_ += "    verifier: &flatbuffers::Verifier) -> bool {";
+      code_ += "  return verifier.VerifyBuffer::<{{CPP_NAME}}>({{ID}});";
       code_ += "}";
       code_ += "";
 
@@ -611,16 +613,16 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string UnionVerifySignature(const EnumDef &enum_def) {
-    return "bool Verify" + Name(enum_def) +
-           "(flatbuffers::Verifier &verifier, const void *obj, " +
-           Name(enum_def) + " type)";
+    return "fn Verify" + Name(enum_def) +
+           "(verifier: &flatbuffers::Verifier, obj: &const_void, " +
+           "type_: " + Name(enum_def) + ") -> bool";
   }
 
   std::string UnionVectorVerifySignature(const EnumDef &enum_def) {
-    return "bool Verify" + Name(enum_def) + "Vector" +
-           "(flatbuffers::Verifier &verifier, " +
-           "const flatbuffers::Vector<flatbuffers::Offset<void>> *values, " +
-           "const flatbuffers::Vector<uint8_t> *types)";
+    return "fn Verify" + Name(enum_def) + "Vector" +
+           "(verifier: &flatbuffers::Verifier, " +
+           "values: &flatbuffers::Vector<flatbuffers::Offset<void>>, " +
+           "types: &flatbuffers::Vector<uint8_t>) -> bool";
   }
 
   std::string UnionUnPackSignature(const EnumDef &enum_def, bool inclass) {
@@ -1028,8 +1030,9 @@ class RustGenerator : public BaseGenerator {
     // on the wrong type.
     code_.SetValue("ENUM_NAME", Name(enum_def));
 
-    code_ += "inline " + UnionVerifySignature(enum_def) + " {";
-    code_ += "  switch (type) {";
+    code_ += "#[inline]";
+    code_ += UnionVerifySignature(enum_def) + " {";
+    code_ += "  switch (type_) {";
     for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
          ++it) {
       const auto &ev = **it;
