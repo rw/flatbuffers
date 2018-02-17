@@ -2385,14 +2385,14 @@ class RustGenerator : public BaseGenerator {
       const auto member_name = Name(field) + "_";
       const auto arg_name = "_" + Name(field);
       const auto arg_type =
-          GenTypeGet(field.value.type, ": ", "&", ": ", true);
+          GenTypeGet(field.value.type, "", "&", "", true);
 
       if (it != struct_def.fields.vec.begin()) {
         arg_list += ", ";
         //init_list += ";\n      ";
       }
+      arg_list += arg_name + ": ";
       arg_list += arg_type;
-      arg_list += arg_name;
       init_list += "      self." + member_name;
       if (IsScalar(field.value.type.base_type)) {
         auto type = GenUnderlyingCast(field, false, arg_name);
