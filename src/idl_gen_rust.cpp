@@ -1881,7 +1881,7 @@ class RustGenerator : public BaseGenerator {
                 ",\n      if {{FIELD_NAME}} { "
                 "_fbb.CreateString({{FIELD_NAME}}) } else { 0 }\\";
           } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-            code_ += ",\n      {{FIELD_NAME}} ? \\";
+            code_ += ",\n      if {{FIELD_NAME}} { \\";
             const auto vtype = field.value.type.VectorType();
             if (IsStruct(vtype)) {
               const auto type = WrapInNameSpace(*vtype.struct_def);
@@ -1890,7 +1890,7 @@ class RustGenerator : public BaseGenerator {
               const auto type = GenTypeWire(vtype, "", false);
               code_ += "_fbb.CreateVector<" + type + ">\\";
             }
-            code_ += "(*{{FIELD_NAME}}) : 0\\";
+            code_ += "(*{{FIELD_NAME}}) } else { 0 }\\";
           } else {
             code_ += ",\n      {{FIELD_NAME}}\\";
           }
