@@ -1288,7 +1288,7 @@ class RustGenerator : public BaseGenerator {
       } else {
         type = GenTypeWire(vtype, "", false);
       }
-      code_.SetValue("PARAM_TYPE", "const std::vector<" + type + "> *");
+      code_.SetValue("PARAM_TYPE", "Option<std::vector<" + type + ">>");
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else {
       code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", true));
