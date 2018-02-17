@@ -1671,15 +1671,18 @@ fn TypeAliasesTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
   */
 }
 
-inline const MyGame::Example::Monster *GetMonster(const void *buf) {
-  return flatbuffers::GetRoot<MyGame::Example::Monster>(buf);
+#[inline]
+fn GetMonster(buf: &Vec<u8>) -> &MyGame::Example::Monster  {
+  return flatbuffers::GetRoot::<MyGame::Example::Monster>(buf);
 }
 
-inline Monster *GetMutableMonster(void *buf) {
-  return flatbuffers::GetMutableRoot<Monster>(buf);
+#[inline]
+fn GetMutableMonster(buf: &Vec<u8>) -> &Monster {
+  return flatbuffers::GetMutableRoot::<Monster>(buf);
 }
 
-inline const char *MonsterIdentifier() {
+#[inline]
+fn const char *MonsterIdentifier() {
   return "MONS";
 }
 
@@ -1695,11 +1698,13 @@ fn VerifyMonsterBuffer(
   return verifier.VerifyBuffer::<MyGame::Example::Monster>(MonsterIdentifier());
 }
 
-inline const char *MonsterExtension() {
+#[inline]
+fn const char *MonsterExtension() {
   return "mon";
 }
 
-inline void FinishMonsterBuffer(
+#[inline]
+fn void FinishMonsterBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
     flatbuffers::Offset<MyGame::Example::Monster> root) {
   fbb.Finish(root, MonsterIdentifier());

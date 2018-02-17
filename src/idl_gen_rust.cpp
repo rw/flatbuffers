@@ -295,25 +295,26 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
       // The root datatype accessor:
-      code_ += "inline \\";
+      code_ += "#[inline]";
       code_ +=
-          "const {{CPP_NAME}} *{{NULLABLE_EXT}}Get{{STRUCT_NAME}}(const void "
-          "*buf) {";
-      code_ += "  return flatbuffers::GetRoot<{{CPP_NAME}}>(buf);";
+          "fn Get{{STRUCT_NAME}}(buf: &Vec<u8>)"
+          " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
+      code_ += "  return flatbuffers::GetRoot::<{{CPP_NAME}}>(buf);";
       code_ += "}";
       code_ += "";
 
       if (parser_.opts.mutable_buffer) {
-        code_ += "inline \\";
-        code_ += "{{STRUCT_NAME}} *GetMutable{{STRUCT_NAME}}(void *buf) {";
-        code_ += "  return flatbuffers::GetMutableRoot<{{STRUCT_NAME}}>(buf);";
+        code_ += "#[inline]";
+        code_ += "fn GetMutable{{STRUCT_NAME}}(buf: &Vec<u8>) -> &{{STRUCT_NAME}} {";
+        code_ += "  return flatbuffers::GetMutableRoot::<{{STRUCT_NAME}}>(buf);";
         code_ += "}";
         code_ += "";
       }
 
       if (parser_.file_identifier_.length()) {
         // Return the identifier
-        code_ += "inline const char *{{STRUCT_NAME}}Identifier() {";
+        code_ += "#[inline]";
+        code_ += "fn const char *{{STRUCT_NAME}}Identifier() {";
         code_ += "  return \"" + parser_.file_identifier_ + "\";";
         code_ += "}";
         code_ += "";
@@ -344,14 +345,16 @@ class RustGenerator : public BaseGenerator {
 
       if (parser_.file_extension_.length()) {
         // Return the extension
-        code_ += "inline const char *{{STRUCT_NAME}}Extension() {";
+        code_ += "#[inline]";
+        code_ += "fn const char *{{STRUCT_NAME}}Extension() {";
         code_ += "  return \"" + parser_.file_extension_ + "\";";
         code_ += "}";
         code_ += "";
       }
 
       // Finish a buffer with a given root object:
-      code_ += "inline void Finish{{STRUCT_NAME}}Buffer(";
+      code_ += "#[inline]";
+      code_ += "fn void Finish{{STRUCT_NAME}}Buffer(";
       code_ += "    flatbuffers::FlatBufferBuilder &fbb,";
       code_ += "    flatbuffers::Offset<{{CPP_NAME}}> root) {";
       if (parser_.file_identifier_.length())
