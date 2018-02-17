@@ -1032,7 +1032,7 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "#[inline]";
     code_ += UnionVerifySignature(enum_def) + " {";
-    code_ += "  switch (type_) {";
+    code_ += "  match type_ {";
     for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
          ++it) {
       const auto &ev = **it;
@@ -1040,7 +1040,7 @@ class RustGenerator : public BaseGenerator {
 
       if (ev.value) {
         code_.SetValue("TYPE", GetUnionElement(ev, true, true));
-        code_ += "    case {{LABEL}}: {";
+        code_ += "    {{LABEL}} => {";
         auto getptr =
             "      auto ptr = reinterpret_cast<const {{TYPE}} *>(obj);";
         if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
@@ -1058,12 +1058,12 @@ class RustGenerator : public BaseGenerator {
         }
         code_ += "    }";
       } else {
-        code_ += "    case {{LABEL}}: {";
+        code_ += "    {{LABEL}} => {";
         code_ += "      return true;";  // "NONE" enum value.
         code_ += "    }";
       }
     }
-    code_ += "    default: return false;";
+    code_ += "    _ => { return false; }";
     code_ += "  }";
     code_ += "}";
     code_ += "";
