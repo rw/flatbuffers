@@ -1682,7 +1682,7 @@ fn GetMutableMonster(buf: &Vec<u8>) -> &Monster {
 }
 
 #[inline]
-fn const char *MonsterIdentifier() {
+fn MonsterIdentifier() -> &const_char{
   return "MONS";
 }
 
@@ -1699,14 +1699,14 @@ fn VerifyMonsterBuffer(
 }
 
 #[inline]
-fn const char *MonsterExtension() {
+fn MonsterExtension() -> &const_char {
   return "mon";
 }
 
 #[inline]
-fn void FinishMonsterBuffer(
-    flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<MyGame::Example::Monster> root) {
+fn FinishMonsterBuffer(
+    fbb: &mut flatbuffers::FlatBufferBuilder,
+    root: flatbuffers::Offset<MyGame::Example::Monster>) {
   fbb.Finish(root, MonsterIdentifier());
 }
 

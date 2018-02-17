@@ -314,7 +314,7 @@ class RustGenerator : public BaseGenerator {
       if (parser_.file_identifier_.length()) {
         // Return the identifier
         code_ += "#[inline]";
-        code_ += "fn const char *{{STRUCT_NAME}}Identifier() {";
+        code_ += "fn {{STRUCT_NAME}}Identifier() -> &const_char{";
         code_ += "  return \"" + parser_.file_identifier_ + "\";";
         code_ += "}";
         code_ += "";
@@ -346,7 +346,7 @@ class RustGenerator : public BaseGenerator {
       if (parser_.file_extension_.length()) {
         // Return the extension
         code_ += "#[inline]";
-        code_ += "fn const char *{{STRUCT_NAME}}Extension() {";
+        code_ += "fn {{STRUCT_NAME}}Extension() -> &const_char {";
         code_ += "  return \"" + parser_.file_extension_ + "\";";
         code_ += "}";
         code_ += "";
@@ -354,9 +354,9 @@ class RustGenerator : public BaseGenerator {
 
       // Finish a buffer with a given root object:
       code_ += "#[inline]";
-      code_ += "fn void Finish{{STRUCT_NAME}}Buffer(";
-      code_ += "    flatbuffers::FlatBufferBuilder &fbb,";
-      code_ += "    flatbuffers::Offset<{{CPP_NAME}}> root) {";
+      code_ += "fn Finish{{STRUCT_NAME}}Buffer(";
+      code_ += "    fbb: &mut flatbuffers::FlatBufferBuilder,";
+      code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}>) {";
       if (parser_.file_identifier_.length())
         code_ += "  fbb.Finish(root, {{STRUCT_NAME}}Identifier());";
       else
