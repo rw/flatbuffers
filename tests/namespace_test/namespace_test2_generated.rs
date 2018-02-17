@@ -8,6 +8,7 @@ extern crate flatbuffers;
 pub mod NamespaceA {
   extern crate flatbuffers;
 
+struct TableInFirstNS {}
 impl flatbuffers::Table for TableInFirstNS {}
 impl TableInFirstNS /* private flatbuffers::Table */ {
     const VT_FOO_TABLE: isize = 4;
@@ -85,6 +86,7 @@ fn CreateTableInFirstNS(
   builder_.Finish()
 }
 
+struct SecondTableInA {}
 impl flatbuffers::Table for SecondTableInA {}
 impl SecondTableInA /* private flatbuffers::Table */ {
     const VT_REFER_TO_C: isize = 4;
@@ -184,6 +186,7 @@ fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 pub mod NamespaceC {
   extern crate flatbuffers;
 
+struct TableInC {}
 impl flatbuffers::Table for TableInC {}
 impl TableInC /* private flatbuffers::Table */ {
     const VT_REFER_TO_A1: isize = 4;
