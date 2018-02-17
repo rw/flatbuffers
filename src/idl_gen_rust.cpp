@@ -1288,6 +1288,41 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
   }
 
+  std::string GetRelativeNamespaceTraversal(const Namespace src,
+                                            const Namespace dst) const {
+    // calculate the path needed to reference dst from src.
+    // example: f(A::B::C, A::B::C) -> n/a
+    // example: f(A::B::C, A::B)    -> super::
+    // example: f(A::B::C, A::B::D) -> super::D
+    // example: f(A::B::C, A)       -> super::super::
+    // example: f(A::B::C, D)       -> super::super::super::D
+    // example: f(A::B::C, D::E)    -> super::super::super::D::E
+    // example: f(A, D::E)          -> super::D::E
+    // does not include leaf object (typically a struct type).
+    //
+    size_t i = 0;
+    std::stringstream stream;
+
+    auto s = src.components.begin();
+    auto d = dst.components.begin();
+    while(true) {
+      if (s == src.components.end()) { break; }
+      if (d == dst.components.end()) { break; }
+      if (*s != *d) { break; }
+      s++;
+      d++;
+      i++;
+    }
+
+    for (; s != src.components.end(); s++) {
+      stream << "super::";
+    }
+    for (; d != dst.components.end(); d++) {
+      stream << *d + "::";
+    }
+    return stream.str();
+  }
+
   std::string GenDefaultConstant(const FieldDef &field) {
     return field.value.type.base_type == BASE_TYPE_FLOAT
                ? field.value.constant + ""
