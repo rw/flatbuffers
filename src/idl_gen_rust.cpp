@@ -1288,8 +1288,8 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
   }
 
-  std::string GetRelativeNamespaceTraversal(const Namespace src,
-                                            const Namespace dst) const {
+  std::string GetRelativeNamespaceTraversal(const Namespace &src,
+                                            const Namespace &dst) const {
     // calculate the path needed to reference dst from src.
     // example: f(A::B::C, A::B::C) -> n/a
     // example: f(A::B::C, A::B)    -> super::
@@ -1936,9 +1936,9 @@ class RustGenerator : public BaseGenerator {
       }
 
       // Need to call "Create" with the struct namespace.
-      //const auto qualified_create_name =
-      //    struct_def.defined_namespace->GetFullyQualifiedName("Create");
-      //code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
+      const auto qualified_create_name =
+          struct_def.defined_namespace->GetFullyQualifiedName("Create");
+      code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
 
       code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
       code_ += "  return Create{{STRUCT_NAME}}(";
