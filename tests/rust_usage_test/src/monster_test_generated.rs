@@ -10,7 +10,7 @@ struct InParentNamespace {}
 impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            verifier.EndTable();
   }
 }
@@ -38,7 +38,7 @@ impl InParentNamespaceBuilder {
 fn CreateInParentNamespace(
     _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace> {
   let mut builder = InParentNamespaceBuilder::new(_fbb);
-  builder_.Finish()
+  builder.Finish()
 }
 
 #[inline]
@@ -59,7 +59,7 @@ struct Monster {}
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            verifier.EndTable();
   }
 }
@@ -87,7 +87,7 @@ impl MonsterBuilder {
 fn CreateMonster(
     _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<Monster> {
   let mut builder = MonsterBuilder::new(_fbb);
-  builder_.Finish()
+  builder.Finish()
 }
 
 #[inline]
@@ -313,7 +313,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
     SetField::<i8>(VT_COLOR, _color as i8, 2)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            VerifyField::<i8>(verifier, VT_COLOR) &&
            verifier.EndTable();
   }
@@ -346,8 +346,8 @@ fn CreateTestSimpleTableWithEnum(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
     color: Color  /* = Color_Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
-  builder_.add_color(color);
-  builder_.Finish()
+  builder.add_color(color);
+  builder.Finish()
 }
 
 struct Stat {}
@@ -380,7 +380,7 @@ impl Stat /* private flatbuffers::Table */ {
     SetField::<u16>(VT_COUNT, _count, 0)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_ID) &&
            verifier.Verify(id()) &&
            VerifyField::<i64>(verifier, VT_VAL) &&
@@ -424,10 +424,10 @@ fn CreateStat(
     val: i64  /* = 0 */,
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
   let mut builder = StatBuilder::new(_fbb);
-  builder_.add_val(val);
-  builder_.add_id(id);
-  builder_.add_count(count);
-  builder_.Finish()
+  builder.add_val(val);
+  builder.add_id(id);
+  builder.add_count(count);
+  builder.Finish()
 }
 
 #[inline]
@@ -764,7 +764,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut super::InParentNamespace >(VT_PARENT_NAMESPACE_TEST)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            VerifyField::<Vec3>(verifier, VT_POS) &&
            VerifyField::<i16>(verifier, VT_MANA) &&
            VerifyField::<i16>(verifier, VT_HP) &&
@@ -1001,41 +1001,41 @@ fn CreateMonster(
     vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */,
     parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
   let mut builder = MonsterBuilder::new(_fbb);
-  builder_.add_testhashu64_fnv1a(testhashu64_fnv1a);
-  builder_.add_testhashs64_fnv1a(testhashs64_fnv1a);
-  builder_.add_testhashu64_fnv1(testhashu64_fnv1);
-  builder_.add_testhashs64_fnv1(testhashs64_fnv1);
-  builder_.add_parent_namespace_test(parent_namespace_test);
-  builder_.add_vector_of_doubles(vector_of_doubles);
-  builder_.add_vector_of_longs(vector_of_longs);
-  builder_.add_test5(test5);
-  builder_.add_flex(flex);
-  builder_.add_testarrayofsortedstruct(testarrayofsortedstruct);
-  builder_.add_testarrayofstring2(testarrayofstring2);
-  builder_.add_testf3(testf3);
-  builder_.add_testf2(testf2);
-  builder_.add_testf(testf);
-  builder_.add_testarrayofbools(testarrayofbools);
-  builder_.add_testhashu32_fnv1a(testhashu32_fnv1a);
-  builder_.add_testhashs32_fnv1a(testhashs32_fnv1a);
-  builder_.add_testhashu32_fnv1(testhashu32_fnv1);
-  builder_.add_testhashs32_fnv1(testhashs32_fnv1);
-  builder_.add_testempty(testempty);
-  builder_.add_testnestedflatbuffer(testnestedflatbuffer);
-  builder_.add_enemy(enemy);
-  builder_.add_testarrayoftables(testarrayoftables);
-  builder_.add_testarrayofstring(testarrayofstring);
-  builder_.add_test4(test4);
-  builder_.add_test(test);
-  builder_.add_inventory(inventory);
-  builder_.add_name(name);
-  builder_.add_pos(pos);
-  builder_.add_hp(hp);
-  builder_.add_mana(mana);
-  builder_.add_testbool(testbool);
-  builder_.add_test_type(test_type);
-  builder_.add_color(color);
-  builder_.Finish()
+  builder.add_testhashu64_fnv1a(testhashu64_fnv1a);
+  builder.add_testhashs64_fnv1a(testhashs64_fnv1a);
+  builder.add_testhashu64_fnv1(testhashu64_fnv1);
+  builder.add_testhashs64_fnv1(testhashs64_fnv1);
+  builder.add_parent_namespace_test(parent_namespace_test);
+  builder.add_vector_of_doubles(vector_of_doubles);
+  builder.add_vector_of_longs(vector_of_longs);
+  builder.add_test5(test5);
+  builder.add_flex(flex);
+  builder.add_testarrayofsortedstruct(testarrayofsortedstruct);
+  builder.add_testarrayofstring2(testarrayofstring2);
+  builder.add_testf3(testf3);
+  builder.add_testf2(testf2);
+  builder.add_testf(testf);
+  builder.add_testarrayofbools(testarrayofbools);
+  builder.add_testhashu32_fnv1a(testhashu32_fnv1a);
+  builder.add_testhashs32_fnv1a(testhashs32_fnv1a);
+  builder.add_testhashu32_fnv1(testhashu32_fnv1);
+  builder.add_testhashs32_fnv1(testhashs32_fnv1);
+  builder.add_testempty(testempty);
+  builder.add_testnestedflatbuffer(testnestedflatbuffer);
+  builder.add_enemy(enemy);
+  builder.add_testarrayoftables(testarrayoftables);
+  builder.add_testarrayofstring(testarrayofstring);
+  builder.add_test4(test4);
+  builder.add_test(test);
+  builder.add_inventory(inventory);
+  builder.add_name(name);
+  builder.add_pos(pos);
+  builder.add_hp(hp);
+  builder.add_mana(mana);
+  builder.add_testbool(testbool);
+  builder.add_test_type(test_type);
+  builder.add_color(color);
+  builder.Finish()
 }
 
 #[inline]
@@ -1216,7 +1216,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<f64> >(VT_VF64)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            VerifyField::<i8>(verifier, VT_I8_) &&
            VerifyField::<u8>(verifier, VT_U8_) &&
            VerifyField::<i16>(verifier, VT_I16_) &&
@@ -1306,19 +1306,19 @@ fn CreateTypeAliases(
     v8: flatbuffers::Offset<flatbuffers::Vector<i8>>  /* = 0 */,
     vf64: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */) -> flatbuffers::Offset<TypeAliases> {
   let mut builder = TypeAliasesBuilder::new(_fbb);
-  builder_.add_f64_(f64_);
-  builder_.add_u64_(u64_);
-  builder_.add_i64_(i64_);
-  builder_.add_vf64(vf64);
-  builder_.add_v8(v8);
-  builder_.add_f32_(f32_);
-  builder_.add_u32_(u32_);
-  builder_.add_i32_(i32_);
-  builder_.add_u16_(u16_);
-  builder_.add_i16_(i16_);
-  builder_.add_u8_(u8_);
-  builder_.add_i8_(i8_);
-  builder_.Finish()
+  builder.add_f64_(f64_);
+  builder.add_u64_(u64_);
+  builder.add_i64_(i64_);
+  builder.add_vf64(vf64);
+  builder.add_v8(v8);
+  builder.add_f32_(f32_);
+  builder.add_u32_(u32_);
+  builder.add_i32_(i32_);
+  builder.add_u16_(u16_);
+  builder.add_i16_(i16_);
+  builder.add_u8_(u8_);
+  builder.add_i8_(i8_);
+  builder.Finish()
 }
 
 #[inline]

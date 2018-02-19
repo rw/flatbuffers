@@ -39,7 +39,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
     &mut GetStruct::<&mut NamespaceB::StructInNestedNS >(VT_FOO_STRUCT)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_FOO_TABLE) &&
            verifier.VerifyTable(foo_table()) &&
            VerifyField::<i8>(verifier, VT_FOO_ENUM) &&
@@ -83,10 +83,10 @@ fn CreateTableInFirstNS(
     foo_enum: NamespaceA::NamespaceB::EnumInNestedNS  /* = NamespaceA::NamespaceB::EnumInNestedNS_A */,
     foo_struct: &NamespaceB::StructInNestedNS /* = 0 */) -> flatbuffers::Offset<TableInFirstNS> {
   let mut builder = TableInFirstNSBuilder::new(_fbb);
-  builder_.add_foo_struct(foo_struct);
-  builder_.add_foo_table(foo_table);
-  builder_.add_foo_enum(foo_enum);
-  builder_.Finish()
+  builder.add_foo_struct(foo_struct);
+  builder.add_foo_table(foo_table);
+  builder.add_foo_enum(foo_enum);
+  builder.Finish()
 }
 
 struct SecondTableInA {}
@@ -103,7 +103,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut super::NamespaceC::TableInC >(VT_REFER_TO_C)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_C) &&
            verifier.VerifyTable(refer_to_c()) &&
            verifier.EndTable();
@@ -137,8 +137,8 @@ fn CreateSecondTableInA(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
     refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC>  /* = 0 */) -> flatbuffers::Offset<SecondTableInA> {
   let mut builder = SecondTableInABuilder::new(_fbb);
-  builder_.add_refer_to_c(refer_to_c);
-  builder_.Finish()
+  builder.add_refer_to_c(refer_to_c);
+  builder.Finish()
 }
 
 #[inline]
@@ -214,7 +214,7 @@ impl TableInC /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut super::NamespaceA::SecondTableInA >(VT_REFER_TO_A2)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
-    return VerifyTableStart(verifier) &&
+    return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_A1) &&
            verifier.VerifyTable(refer_to_a1()) &&
            VerifyOffset(verifier, VT_REFER_TO_A2) &&
@@ -254,9 +254,9 @@ fn CreateTableInC(
     refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS>  /* = 0 */,
     refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA>  /* = 0 */) -> flatbuffers::Offset<TableInC> {
   let mut builder = TableInCBuilder::new(_fbb);
-  builder_.add_refer_to_a2(refer_to_a2);
-  builder_.add_refer_to_a1(refer_to_a1);
-  builder_.Finish()
+  builder.add_refer_to_a2(refer_to_a2);
+  builder.add_refer_to_a1(refer_to_a1);
+  builder.Finish()
 }
 
 #[inline]
