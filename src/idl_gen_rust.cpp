@@ -672,7 +672,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string UnionVerifySignature(const EnumDef &enum_def) {
     return "fn Verify" + Name(enum_def) +
-           "(verifier: &flatbuffers::Verifier, obj: &const_void, " +
+           "(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, " +
            "type_: " + Name(enum_def) + ") -> bool";
   }
 
