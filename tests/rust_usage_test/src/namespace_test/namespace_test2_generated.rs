@@ -53,14 +53,14 @@ struct TableInFirstNSBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TableInFirstNSBuilder {
-  fn add_foo_table(foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS> ) {
-    fbb_.AddOffset(TableInFirstNS::VT_FOO_TABLE, foo_table);
+  fn add_foo_table(&mut self, foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS> ) {
+    self.fbb_.AddOffset(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
-  fn add_foo_enum(foo_enum: NamespaceA::NamespaceB::EnumInNestedNS ) {
-    fbb_.AddElement::<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum as i8, 0);
+  fn add_foo_enum(&mut self, foo_enum: NamespaceA::NamespaceB::EnumInNestedNS ) {
+    self.fbb_.AddElement::<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum as i8, 0);
   }
-  fn add_foo_struct(foo_struct: &NamespaceB::StructInNestedNS) {
-    fbb_.AddStruct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
+  fn add_foo_struct(&mut self, foo_struct: &NamespaceB::StructInNestedNS) {
+    self.fbb_.AddStruct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInFirstNSBuilder {
     TableInFirstNSBuilder {
@@ -115,8 +115,8 @@ struct SecondTableInABuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl SecondTableInABuilder {
-  fn add_refer_to_c(refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC> ) {
-    fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
+  fn add_refer_to_c(&mut self, refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC> ) {
+    self.fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder {
     SecondTableInABuilder {
@@ -228,11 +228,11 @@ struct TableInCBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TableInCBuilder {
-  fn add_refer_to_a1(refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS> ) {
-    fbb_.AddOffset(TableInC::VT_REFER_TO_A1, refer_to_a1);
+  fn add_refer_to_a1(&mut self, refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS> ) {
+    self.fbb_.AddOffset(TableInC::VT_REFER_TO_A1, refer_to_a1);
   }
-  fn add_refer_to_a2(refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA> ) {
-    fbb_.AddOffset(TableInC::VT_REFER_TO_A2, refer_to_a2);
+  fn add_refer_to_a2(&mut self, refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA> ) {
+    self.fbb_.AddOffset(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInCBuilder {
     TableInCBuilder {

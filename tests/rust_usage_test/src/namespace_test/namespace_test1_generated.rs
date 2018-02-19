@@ -87,8 +87,8 @@ struct TableInNestedNSBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TableInNestedNSBuilder {
-  fn add_foo(foo: i32 ) {
-    fbb_.AddElement::<i32>(TableInNestedNS::VT_FOO, foo, 0);
+  fn add_foo(&mut self, foo: i32 ) {
+    self.fbb_.AddElement::<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInNestedNSBuilder {
     TableInNestedNSBuilder {

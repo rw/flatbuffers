@@ -1881,8 +1881,8 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("ADD_FN", "AddOffset");
         }
 
-        code_ += "  fn add_{{FIELD_NAME}}({{FIELD_NAME}}: {{FIELD_TYPE}}) {";
-        code_ += "    fbb_.{{ADD_FN}}(\\";
+        code_ += "  fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
+        code_ += "    self.fbb_.{{ADD_FN}}(\\";
         if (is_scalar) {
           code_ += "{{ADD_OFFSET}}, {{ADD_NAME}}, {{ADD_VALUE}});";
         } else {
