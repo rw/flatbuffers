@@ -47,7 +47,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
            verifier.VerifyTable(self.foo_table()) &&
            flatbuffers::verify_field::<i8>(verifier, self.VT_FOO_ENUM) &&
            flatbuffers::verify_field::<NamespaceB::StructInNestedNS>(verifier, self.VT_FOO_STRUCT) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -68,12 +68,12 @@ impl<'a> TableInFirstNSBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInFirstNSBuilder {
     TableInFirstNSBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TableInFirstNS> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<TableInFirstNS>;
     o
   }
@@ -109,7 +109,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_offset(verifier, self.VT_REFER_TO_C) &&
            verifier.VerifyTable(self.refer_to_c()) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -124,12 +124,12 @@ impl<'a> SecondTableInABuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder {
     SecondTableInABuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<SecondTableInA> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<SecondTableInA>;
     o
   }
@@ -225,7 +225,7 @@ impl TableInC /* private flatbuffers::Table */ {
            verifier.VerifyTable(self.refer_to_a1()) &&
            flatbuffers::verify_offset(verifier, self.VT_REFER_TO_A2) &&
            verifier.VerifyTable(self.refer_to_a2()) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -243,12 +243,12 @@ impl<'a> TableInCBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInCBuilder {
     TableInCBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TableInC> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<TableInC>;
     o
   }

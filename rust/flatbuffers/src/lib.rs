@@ -2,8 +2,20 @@ use std::marker::PhantomData;
 
 pub trait Table {}
 pub struct Verifier {}
+impl Verifier {
+    pub fn end_table(&mut self) -> bool {
+        false
+    }
+}
 pub struct TypeTable {}
 pub struct FlatBufferBuilder {}
+impl FlatBufferBuilder {
+    pub fn start_table(&mut self) -> usize {
+        0
+    }
+    pub fn end_table(&mut self) {
+    }
+}
 pub type uoffset_t = usize;
 pub type String = i32;
 pub type Void<'a> = &'a [u8];

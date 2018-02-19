@@ -84,7 +84,7 @@ impl TableInNestedNS /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_field::<i32>(verifier, self.VT_FOO) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -99,12 +99,12 @@ impl<'a> TableInNestedNSBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInNestedNSBuilder {
     TableInNestedNSBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // TableInNestedNSBuilder &operator=(const TableInNestedNSBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TableInNestedNS> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<TableInNestedNS>;
     o
   }
