@@ -1766,7 +1766,7 @@ class RustGenerator : public BaseGenerator {
     // Generate a verifier function that can check a buffer from an untrusted
     // source will never cause reads outside the buffer.
     code_ += "  fn Verify(verifier: &flatbuffers::Verifier) -> bool {";
-    code_ += "    return VerifyTableStart(verifier)\\";
+    code_ += "    return flatbuffers::verify_table_start(verifier)\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
@@ -1947,11 +1947,11 @@ class RustGenerator : public BaseGenerator {
         if (!field.deprecated && (!struct_def.sortbysize ||
                                   size == SizeOf(field.value.type.base_type))) {
           code_.SetValue("FIELD_NAME", Name(field));
-          code_ += "  builder_.add_{{FIELD_NAME}}({{FIELD_NAME}});";
+          code_ += "  builder.add_{{FIELD_NAME}}({{FIELD_NAME}});";
         }
       }
     }
-    code_ += "  builder_.Finish()";
+    code_ += "  builder.Finish()";
     code_ += "}";
     code_ += "";
 
