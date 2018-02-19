@@ -680,7 +680,7 @@ class RustGenerator : public BaseGenerator {
     return "fn Verify" + Name(enum_def) + "Vector" +
            "(verifier: &flatbuffers::Verifier, " +
            "values: &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Void>>, " +
-           "types: &flatbuffers::Vector<uint8_t>) -> bool";
+           "types: &flatbuffers::Vector<u8>) -> bool";
   }
 
   std::string UnionUnPackSignature(const EnumDef &enum_def, bool inclass) {
@@ -2212,9 +2212,9 @@ class RustGenerator : public BaseGenerator {
           }
           case BASE_TYPE_UTYPE: {
             value = StripUnionType(value);
-            code += "_fbb.CreateVector<uint8_t>(" + value +
+            code += "_fbb.CreateVector<u8>(" + value +
                     ".size(), [](size_t i, _VectorArgs *__va) { "
-                    "return static_cast<uint8_t>(__va->_" +
+                    "return static_cast<u8>(__va->_" +
                     value + "[i].type); }, &_va)";
             break;
           }

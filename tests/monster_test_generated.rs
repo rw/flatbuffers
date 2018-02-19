@@ -1375,7 +1375,7 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, type_: A
 }
 
 #[inline]
-fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Void>>, types: &flatbuffers::Vector<uint8_t>) -> bool {
+fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Void>>, types: &flatbuffers::Vector<u8>) -> bool {
   if (!values || !types) { return !values && !types; }
   if (values.size() != types.size()) { return false; }
   for i in (0 as flatbuffers::uoffset_t)..values.size() {
