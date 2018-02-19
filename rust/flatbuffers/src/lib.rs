@@ -5,6 +5,7 @@ pub struct Verifier {}
 pub struct TypeTable {}
 pub struct FlatBufferBuilder {}
 pub type uoffset_t = usize;
+pub type String = str;
 pub struct Offset<T> {
     _o: isize,
     phantom: PhantomData<T>,

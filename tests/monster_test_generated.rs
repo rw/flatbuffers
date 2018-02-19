@@ -320,8 +320,8 @@ struct TestSimpleTableWithEnumBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TestSimpleTableWithEnumBuilder {
-  fn add_color(color: Color ) {
-    fbb_.AddElement::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
+  fn add_color(&mut self, color: Color ) {
+    self.fbb_.AddElement::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TestSimpleTableWithEnumBuilder {
     TestSimpleTableWithEnumBuilder {
@@ -390,14 +390,14 @@ struct StatBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl StatBuilder {
-  fn add_id(id: flatbuffers::Offset<flatbuffers::String> ) {
-    fbb_.AddOffset(Stat::VT_ID, id);
+  fn add_id(&mut self, id: flatbuffers::Offset<flatbuffers::String> ) {
+    self.fbb_.AddOffset(Stat::VT_ID, id);
   }
-  fn add_val(val: i64 ) {
-    fbb_.AddElement::<i64>(Stat::VT_VAL, val, 0);
+  fn add_val(&mut self, val: i64 ) {
+    self.fbb_.AddElement::<i64>(Stat::VT_VAL, val, 0);
   }
-  fn add_count(count: u16 ) {
-    fbb_.AddElement::<u16>(Stat::VT_COUNT, count, 0);
+  fn add_count(&mut self, count: u16 ) {
+    self.fbb_.AddElement::<u16>(Stat::VT_COUNT, count, 0);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> StatBuilder {
     StatBuilder {
@@ -842,107 +842,107 @@ struct MonsterBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl MonsterBuilder {
-  fn add_pos(pos: &Vec3) {
-    fbb_.AddStruct(Monster::VT_POS, pos);
+  fn add_pos(&mut self, pos: &Vec3) {
+    self.fbb_.AddStruct(Monster::VT_POS, pos);
   }
-  fn add_mana(mana: i16 ) {
-    fbb_.AddElement::<i16>(Monster::VT_MANA, mana, 150);
+  fn add_mana(&mut self, mana: i16 ) {
+    self.fbb_.AddElement::<i16>(Monster::VT_MANA, mana, 150);
   }
-  fn add_hp(hp: i16 ) {
-    fbb_.AddElement::<i16>(Monster::VT_HP, hp, 100);
+  fn add_hp(&mut self, hp: i16 ) {
+    self.fbb_.AddElement::<i16>(Monster::VT_HP, hp, 100);
   }
-  fn add_name(name: flatbuffers::Offset<flatbuffers::String> ) {
-    fbb_.AddOffset(Monster::VT_NAME, name);
+  fn add_name(&mut self, name: flatbuffers::Offset<flatbuffers::String> ) {
+    self.fbb_.AddOffset(Monster::VT_NAME, name);
   }
-  fn add_inventory(inventory: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
-    fbb_.AddOffset(Monster::VT_INVENTORY, inventory);
+  fn add_inventory(&mut self, inventory: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
+    self.fbb_.AddOffset(Monster::VT_INVENTORY, inventory);
   }
-  fn add_color(color: Color ) {
-    fbb_.AddElement::<i8>(Monster::VT_COLOR, color as i8, 8);
+  fn add_color(&mut self, color: Color ) {
+    self.fbb_.AddElement::<i8>(Monster::VT_COLOR, color as i8, 8);
   }
-  fn add_test_type(test_type: Any ) {
-    fbb_.AddElement::<u8>(Monster::VT_TEST_TYPE, test_type as u8, 0);
+  fn add_test_type(&mut self, test_type: Any ) {
+    self.fbb_.AddElement::<u8>(Monster::VT_TEST_TYPE, test_type as u8, 0);
   }
-  fn add_test(test: flatbuffers::Offset<void> ) {
-    fbb_.AddOffset(Monster::VT_TEST, test);
+  fn add_test(&mut self, test: flatbuffers::Offset<void> ) {
+    self.fbb_.AddOffset(Monster::VT_TEST, test);
   }
-  fn add_test4(test4: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
-    fbb_.AddOffset(Monster::VT_TEST4, test4);
+  fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
+    self.fbb_.AddOffset(Monster::VT_TEST4, test4);
   }
-  fn add_testarrayofstring(testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
-    fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
+  fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
+    self.fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
   }
-  fn add_testarrayoftables(testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>> ) {
-    fbb_.AddOffset(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
+  fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>> ) {
+    self.fbb_.AddOffset(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
   }
-  fn add_enemy(enemy: flatbuffers::Offset<Monster> ) {
-    fbb_.AddOffset(Monster::VT_ENEMY, enemy);
+  fn add_enemy(&mut self, enemy: flatbuffers::Offset<Monster> ) {
+    self.fbb_.AddOffset(Monster::VT_ENEMY, enemy);
   }
-  fn add_testnestedflatbuffer(testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
-    fbb_.AddOffset(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer);
+  fn add_testnestedflatbuffer(&mut self, testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
+    self.fbb_.AddOffset(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer);
   }
-  fn add_testempty(testempty: flatbuffers::Offset<Stat> ) {
-    fbb_.AddOffset(Monster::VT_TESTEMPTY, testempty);
+  fn add_testempty(&mut self, testempty: flatbuffers::Offset<Stat> ) {
+    self.fbb_.AddOffset(Monster::VT_TESTEMPTY, testempty);
   }
-  fn add_testbool(testbool: bool ) {
-    fbb_.AddElement::<bool>(Monster::VT_TESTBOOL, testbool as bool, 0);
+  fn add_testbool(&mut self, testbool: bool ) {
+    self.fbb_.AddElement::<bool>(Monster::VT_TESTBOOL, testbool as bool, 0);
   }
-  fn add_testhashs32_fnv1(testhashs32_fnv1: i32 ) {
-    fbb_.AddElement::<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, 0);
+  fn add_testhashs32_fnv1(&mut self, testhashs32_fnv1: i32 ) {
+    self.fbb_.AddElement::<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, 0);
   }
-  fn add_testhashu32_fnv1(testhashu32_fnv1: u32 ) {
-    fbb_.AddElement::<u32>(Monster::VT_TESTHASHU32_FNV1, testhashu32_fnv1, 0);
+  fn add_testhashu32_fnv1(&mut self, testhashu32_fnv1: u32 ) {
+    self.fbb_.AddElement::<u32>(Monster::VT_TESTHASHU32_FNV1, testhashu32_fnv1, 0);
   }
-  fn add_testhashs64_fnv1(testhashs64_fnv1: i64 ) {
-    fbb_.AddElement::<i64>(Monster::VT_TESTHASHS64_FNV1, testhashs64_fnv1, 0);
+  fn add_testhashs64_fnv1(&mut self, testhashs64_fnv1: i64 ) {
+    self.fbb_.AddElement::<i64>(Monster::VT_TESTHASHS64_FNV1, testhashs64_fnv1, 0);
   }
-  fn add_testhashu64_fnv1(testhashu64_fnv1: u64 ) {
-    fbb_.AddElement::<u64>(Monster::VT_TESTHASHU64_FNV1, testhashu64_fnv1, 0);
+  fn add_testhashu64_fnv1(&mut self, testhashu64_fnv1: u64 ) {
+    self.fbb_.AddElement::<u64>(Monster::VT_TESTHASHU64_FNV1, testhashu64_fnv1, 0);
   }
-  fn add_testhashs32_fnv1a(testhashs32_fnv1a: i32 ) {
-    fbb_.AddElement::<i32>(Monster::VT_TESTHASHS32_FNV1A, testhashs32_fnv1a, 0);
+  fn add_testhashs32_fnv1a(&mut self, testhashs32_fnv1a: i32 ) {
+    self.fbb_.AddElement::<i32>(Monster::VT_TESTHASHS32_FNV1A, testhashs32_fnv1a, 0);
   }
-  fn add_testhashu32_fnv1a(testhashu32_fnv1a: u32 ) {
-    fbb_.AddElement::<u32>(Monster::VT_TESTHASHU32_FNV1A, testhashu32_fnv1a, 0);
+  fn add_testhashu32_fnv1a(&mut self, testhashu32_fnv1a: u32 ) {
+    self.fbb_.AddElement::<u32>(Monster::VT_TESTHASHU32_FNV1A, testhashu32_fnv1a, 0);
   }
-  fn add_testhashs64_fnv1a(testhashs64_fnv1a: i64 ) {
-    fbb_.AddElement::<i64>(Monster::VT_TESTHASHS64_FNV1A, testhashs64_fnv1a, 0);
+  fn add_testhashs64_fnv1a(&mut self, testhashs64_fnv1a: i64 ) {
+    self.fbb_.AddElement::<i64>(Monster::VT_TESTHASHS64_FNV1A, testhashs64_fnv1a, 0);
   }
-  fn add_testhashu64_fnv1a(testhashu64_fnv1a: u64 ) {
-    fbb_.AddElement::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, 0);
+  fn add_testhashu64_fnv1a(&mut self, testhashu64_fnv1a: u64 ) {
+    self.fbb_.AddElement::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, 0);
   }
-  fn add_testarrayofbools(testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<bool>> ) {
-    fbb_.AddOffset(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools);
+  fn add_testarrayofbools(&mut self, testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<bool>> ) {
+    self.fbb_.AddOffset(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools);
   }
-  fn add_testf(testf: f32 ) {
-    fbb_.AddElement::<f32>(Monster::VT_TESTF, testf, 3.14159);
+  fn add_testf(&mut self, testf: f32 ) {
+    self.fbb_.AddElement::<f32>(Monster::VT_TESTF, testf, 3.14159);
   }
-  fn add_testf2(testf2: f32 ) {
-    fbb_.AddElement::<f32>(Monster::VT_TESTF2, testf2, 3.0);
+  fn add_testf2(&mut self, testf2: f32 ) {
+    self.fbb_.AddElement::<f32>(Monster::VT_TESTF2, testf2, 3.0);
   }
-  fn add_testf3(testf3: f32 ) {
-    fbb_.AddElement::<f32>(Monster::VT_TESTF3, testf3, 0.0);
+  fn add_testf3(&mut self, testf3: f32 ) {
+    self.fbb_.AddElement::<f32>(Monster::VT_TESTF3, testf3, 0.0);
   }
-  fn add_testarrayofstring2(testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
-    fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
+  fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
+    self.fbb_.AddOffset(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
   }
-  fn add_testarrayofsortedstruct(testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<&Ability>> ) {
-    fbb_.AddOffset(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct);
+  fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<&Ability>> ) {
+    self.fbb_.AddOffset(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct);
   }
-  fn add_flex(flex: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
-    fbb_.AddOffset(Monster::VT_FLEX, flex);
+  fn add_flex(&mut self, flex: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
+    self.fbb_.AddOffset(Monster::VT_FLEX, flex);
   }
-  fn add_test5(test5: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
-    fbb_.AddOffset(Monster::VT_TEST5, test5);
+  fn add_test5(&mut self, test5: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
+    self.fbb_.AddOffset(Monster::VT_TEST5, test5);
   }
-  fn add_vector_of_longs(vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>> ) {
-    fbb_.AddOffset(Monster::VT_VECTOR_OF_LONGS, vector_of_longs);
+  fn add_vector_of_longs(&mut self, vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>> ) {
+    self.fbb_.AddOffset(Monster::VT_VECTOR_OF_LONGS, vector_of_longs);
   }
-  fn add_vector_of_doubles(vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
-    fbb_.AddOffset(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
+  fn add_vector_of_doubles(&mut self, vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
+    self.fbb_.AddOffset(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
   }
-  fn add_parent_namespace_test(parent_namespace_test: flatbuffers::Offset<super::InParentNamespace> ) {
-    fbb_.AddOffset(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
+  fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::Offset<super::InParentNamespace> ) {
+    self.fbb_.AddOffset(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
     MonsterBuilder {
@@ -1236,41 +1236,41 @@ struct TypeAliasesBuilder {
   start_: flatbuffers::uoffset_t,
 }
 impl TypeAliasesBuilder {
-  fn add_i8_(i8_: i8 ) {
-    fbb_.AddElement::<i8>(TypeAliases::VT_I8_, i8_, 0);
+  fn add_i8_(&mut self, i8_: i8 ) {
+    self.fbb_.AddElement::<i8>(TypeAliases::VT_I8_, i8_, 0);
   }
-  fn add_u8_(u8_: u8 ) {
-    fbb_.AddElement::<u8>(TypeAliases::VT_U8_, u8_, 0);
+  fn add_u8_(&mut self, u8_: u8 ) {
+    self.fbb_.AddElement::<u8>(TypeAliases::VT_U8_, u8_, 0);
   }
-  fn add_i16_(i16_: i16 ) {
-    fbb_.AddElement::<i16>(TypeAliases::VT_I16_, i16_, 0);
+  fn add_i16_(&mut self, i16_: i16 ) {
+    self.fbb_.AddElement::<i16>(TypeAliases::VT_I16_, i16_, 0);
   }
-  fn add_u16_(u16_: u16 ) {
-    fbb_.AddElement::<u16>(TypeAliases::VT_U16_, u16_, 0);
+  fn add_u16_(&mut self, u16_: u16 ) {
+    self.fbb_.AddElement::<u16>(TypeAliases::VT_U16_, u16_, 0);
   }
-  fn add_i32_(i32_: i32 ) {
-    fbb_.AddElement::<i32>(TypeAliases::VT_I32_, i32_, 0);
+  fn add_i32_(&mut self, i32_: i32 ) {
+    self.fbb_.AddElement::<i32>(TypeAliases::VT_I32_, i32_, 0);
   }
-  fn add_u32_(u32_: u32 ) {
-    fbb_.AddElement::<u32>(TypeAliases::VT_U32_, u32_, 0);
+  fn add_u32_(&mut self, u32_: u32 ) {
+    self.fbb_.AddElement::<u32>(TypeAliases::VT_U32_, u32_, 0);
   }
-  fn add_i64_(i64_: i64 ) {
-    fbb_.AddElement::<i64>(TypeAliases::VT_I64_, i64_, 0);
+  fn add_i64_(&mut self, i64_: i64 ) {
+    self.fbb_.AddElement::<i64>(TypeAliases::VT_I64_, i64_, 0);
   }
-  fn add_u64_(u64_: u64 ) {
-    fbb_.AddElement::<u64>(TypeAliases::VT_U64_, u64_, 0);
+  fn add_u64_(&mut self, u64_: u64 ) {
+    self.fbb_.AddElement::<u64>(TypeAliases::VT_U64_, u64_, 0);
   }
-  fn add_f32_(f32_: f32 ) {
-    fbb_.AddElement::<f32>(TypeAliases::VT_F32_, f32_, 0.0);
+  fn add_f32_(&mut self, f32_: f32 ) {
+    self.fbb_.AddElement::<f32>(TypeAliases::VT_F32_, f32_, 0.0);
   }
-  fn add_f64_(f64_: f64 ) {
-    fbb_.AddElement::<f64>(TypeAliases::VT_F64_, f64_, 0.0);
+  fn add_f64_(&mut self, f64_: f64 ) {
+    self.fbb_.AddElement::<f64>(TypeAliases::VT_F64_, f64_, 0.0);
   }
-  fn add_v8(v8: flatbuffers::Offset<flatbuffers::Vector<i8>> ) {
-    fbb_.AddOffset(TypeAliases::VT_V8, v8);
+  fn add_v8(&mut self, v8: flatbuffers::Offset<flatbuffers::Vector<i8>> ) {
+    self.fbb_.AddOffset(TypeAliases::VT_V8, v8);
   }
-  fn add_vf64(vf64: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
-    fbb_.AddOffset(TypeAliases::VT_VF64, vf64);
+  fn add_vf64(&mut self, vf64: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
+    self.fbb_.AddOffset(TypeAliases::VT_VF64, vf64);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TypeAliasesBuilder {
     TypeAliasesBuilder {
