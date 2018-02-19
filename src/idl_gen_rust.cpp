@@ -185,11 +185,12 @@ class RustGenerator : public BaseGenerator {
     code_ += "// " + std::string(FlatBuffersGeneratedWarning()) + "\n\n";
 
     if (parser_.opts.gen_nullable) {
-      code_ += "#pragma clang system_header\n\n";
+      code_ += "//TODO #pragma clang system_header\n\n";
     }
 
-    code_ += "extern crate flatbuffers;";
+    //code_ += "extern crate flatbuffers;";
     if (parser_.uses_flexbuffers_) {
+      //code_ += "use self::flatbuffers::flexbuffers;";
       //code_ += "#include \"flatbuffers/flexbuffers.h\"";
     }
     code_ += "";
@@ -2560,6 +2561,7 @@ class RustGenerator : public BaseGenerator {
     for (auto j = common_prefix_size; j != new_size; ++j) {
       code_ += "pub mod " + ns->components[j] + " {";
       code_ += "  extern crate flatbuffers;";
+      code_ += "  use self::flatbuffers::flexbuffers;";
     }
     if (new_size != common_prefix_size) { code_ += ""; }
 
