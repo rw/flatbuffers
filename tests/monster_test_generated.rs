@@ -1359,15 +1359,15 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, type_: A
       return true;
     }
     Any::Monster => {
-      let ptr = reinterpret_cast::<&Monster>(obj);
+      let ptr = obj as &Monster;
       return verifier.VerifyTable(ptr);
     }
     Any::TestSimpleTableWithEnum => {
-      let ptr = reinterpret_cast::<&TestSimpleTableWithEnum>(obj);
+      let ptr = obj as &TestSimpleTableWithEnum;
       return verifier.VerifyTable(ptr);
     }
     Any::MyGame_Example2_Monster => {
-      let ptr = reinterpret_cast::<&super::Example2::Monster>(obj);
+      let ptr = obj as &super::Example2::Monster;
       return verifier.VerifyTable(ptr);
     }
     _ => { return false; }
