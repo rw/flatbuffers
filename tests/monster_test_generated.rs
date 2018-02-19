@@ -109,15 +109,13 @@ pub mod Example {
 enum Color {
   Red = 1,
   Green = 2,
-  Blue = 8,
-  NONE = 0,
-  ANY = 11
+  Blue = 8
 }
 
 const EnumValuesColor:[Color; 3] = [
-  Color_Red,
-  Color_Green,
-  Color_Blue
+  Color::Red,
+  Color::Green,
+  Color::Blue
 ];
 
 const EnumNamesColor:[&'static str; 8] = [
@@ -132,7 +130,7 @@ const EnumNamesColor:[&'static str; 8] = [
 ];
 
 fn EnumNameColor(e: Color) -> &'static str {
-  let index: usize = e as usize - Color_Red as usize;
+  let index: usize = e as usize - Color::Red as usize;
   EnumNamesColor[index]
 }
 
@@ -140,16 +138,14 @@ enum Any {
   NONE = 0,
   Monster = 1,
   TestSimpleTableWithEnum = 2,
-  MyGame_Example2_Monster = 3,
-  MIN = NONE,
-  MAX = MyGame_Example2_Monster
+  MyGame_Example2_Monster = 3
 }
 
 const EnumValuesAny:[Any; 4] = [
-  Any_NONE,
-  Any_Monster,
-  Any_TestSimpleTableWithEnum,
-  Any_MyGame_Example2_Monster
+  Any::NONE,
+  Any::Monster,
+  Any::TestSimpleTableWithEnum,
+  Any::MyGame_Example2_Monster
 ];
 
 const EnumNamesAny:[&'static str; 4] = [
@@ -344,7 +340,7 @@ impl TestSimpleTableWithEnumBuilder {
 #[inline]
 fn CreateTestSimpleTableWithEnum(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    color: Color  /* = Color_Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
+    color: Color  /* = Color::Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
   builder.add_color(color);
   builder.Finish()
@@ -546,13 +542,13 @@ impl Monster /* private flatbuffers::Table */ {
   }
   // TODO(?) template<typename T> const T *test_as() const;
   // TODO: fn test_as_Monster() -> &Monster {
-// TODO:     if test_type() == Any_Monster { static_cast::<&Monster>(test()) } else { nullptr }
+// TODO:     if test_type() == Any::Monster { static_cast::<&Monster>(test()) } else { nullptr }
 // TODO:   }
   // TODO: fn test_as_TestSimpleTableWithEnum() -> &TestSimpleTableWithEnum {
-// TODO:     if test_type() == Any_TestSimpleTableWithEnum { static_cast::<&TestSimpleTableWithEnum>(test()) } else { nullptr }
+// TODO:     if test_type() == Any::TestSimpleTableWithEnum { static_cast::<&TestSimpleTableWithEnum>(test()) } else { nullptr }
 // TODO:   }
   // TODO: fn test_as_MyGame_Example2_Monster() -> &super::Example2::Monster {
-// TODO:     if test_type() == Any_MyGame_Example2_Monster { static_cast::<&super::Example2::Monster>(test()) } else { nullptr }
+// TODO:     if test_type() == Any::MyGame_Example2_Monster { static_cast::<&super::Example2::Monster>(test()) } else { nullptr }
 // TODO:   }
   fn mutable_test(&mut self) -> &mut void  {
     /* TODO: are there non-reference choices here? */
@@ -971,8 +967,8 @@ fn CreateMonster(
     hp: i16  /* = 100 */,
     name: flatbuffers::Offset<flatbuffers::String>  /* = 0 */,
     inventory: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
-    color: Color  /* = Color_Blue */,
-    test_type: Any  /* = Any_NONE */,
+    color: Color  /* = Color::Blue */,
+    test_type: Any  /* = Any::NONE */,
     test: flatbuffers::Offset<void>  /* = 0 */,
     test4: flatbuffers::Offset<flatbuffers::Vector<&Test>>  /* = 0 */,
     testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
@@ -1046,8 +1042,8 @@ fn CreateMonsterDirect(
     hp: i16  /* = 100 */,
     name: const_char_string_ptr /* = nullptr */,
     inventory: Option<Vector<u8>> /* = nullptr */,
-    color: Color  /* = Color_Blue */,
-    test_type: Any  /* = Any_NONE */,
+    color: Color  /* = Color::Blue */,
+    test_type: Any  /* = Any::NONE */,
     test: flatbuffers::Offset<void>  /* = 0 */,
     test4: Option<Vector<Test>> /* = nullptr */,
     testarrayofstring: Option<Vector<flatbuffers::Offset<flatbuffers::String>>> /* = nullptr */,
@@ -1355,18 +1351,18 @@ fn CreateTypeAliasesDirect(
 #[inline]
 fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> bool {
   match type_ {
-    Any_NONE => {
+    Any::NONE => {
       return true;
     }
-    Any_Monster => {
+    Any::Monster => {
       let ptr = reinterpret_cast::<&Monster>(obj);
       return verifier.VerifyTable(ptr);
     }
-    Any_TestSimpleTableWithEnum => {
+    Any::TestSimpleTableWithEnum => {
       let ptr = reinterpret_cast::<&TestSimpleTableWithEnum>(obj);
       return verifier.VerifyTable(ptr);
     }
-    Any_MyGame_Example2_Monster => {
+    Any::MyGame_Example2_Monster => {
       let ptr = reinterpret_cast::<&super::Example2::Monster>(obj);
       return verifier.VerifyTable(ptr);
     }

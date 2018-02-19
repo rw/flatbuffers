@@ -12,15 +12,13 @@ pub mod NamespaceB {
 enum EnumInNestedNS {
   A = 0,
   B = 1,
-  C = 2,
-  MIN = A,
-  MAX = C
+  C = 2
 }
 
 const EnumValuesEnumInNestedNS:[EnumInNestedNS; 3] = [
-  EnumInNestedNS_A,
-  EnumInNestedNS_B,
-  EnumInNestedNS_C
+  EnumInNestedNS::A,
+  EnumInNestedNS::B,
+  EnumInNestedNS::C
 ];
 
 const EnumNamesEnumInNestedNS:[&'static str; 3] = [
