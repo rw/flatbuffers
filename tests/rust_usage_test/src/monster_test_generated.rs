@@ -539,9 +539,9 @@ impl Monster /* private flatbuffers::Table */ {
   fn mutate_test_type(&mut self, test_type_: Any) -> bool {
     flatbuffers::set_field::<u8>(self.VT_TEST_TYPE, test_type_ as u8, 0)
   }
-  fn test(&self) -> &void  {
+  fn test(&self) -> &flatbuffers::Void  {
     // yo
-    flatbuffers::get_pointer::<&void>(self.VT_TEST)
+    flatbuffers::get_pointer::<&flatbuffers::Void>(self.VT_TEST)
   }
   // TODO(?) template<typename T> const T *test_as() const;
   // TODO: fn test_as_Monster() -> &Monster {
@@ -553,9 +553,9 @@ impl Monster /* private flatbuffers::Table */ {
   // TODO: fn test_as_MyGame_Example2_Monster() -> &super::Example2::Monster {
 // TODO:     if test_type() == Any::MyGame_Example2_Monster { static_cast::<&super::Example2::Monster>(test()) } else { nullptr }
 // TODO:   }
-  fn mutable_test(&mut self) -> &mut void  {
+  fn mutable_test(&mut self) -> &mut flatbuffers::Void  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer::<&mut void >(self.VT_TEST)
+    &mut flatbuffers::get_pointer::<&mut flatbuffers::Void >(self.VT_TEST)
   }
   fn test4(&self) -> &flatbuffers::Vector<&Test>  {
     // yo
@@ -866,7 +866,7 @@ impl MonsterBuilder {
   fn add_test_type(&mut self, test_type: Any ) {
     self.fbb_.AddElement::<u8>(Monster::VT_TEST_TYPE, test_type as u8, 0);
   }
-  fn add_test(&mut self, test: flatbuffers::Offset<void> ) {
+  fn add_test(&mut self, test: flatbuffers::Offset<flatbuffers::Void> ) {
     self.fbb_.AddOffset(Monster::VT_TEST, test);
   }
   fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
@@ -972,7 +972,7 @@ fn CreateMonster(
     inventory: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
     color: Color  /* = Color::Blue */,
     test_type: Any  /* = Any::NONE */,
-    test: flatbuffers::Offset<void>  /* = 0 */,
+    test: flatbuffers::Offset<flatbuffers::Void>  /* = 0 */,
     test4: flatbuffers::Offset<flatbuffers::Vector<&Test>>  /* = 0 */,
     testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
     testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>>  /* = 0 */,
@@ -1047,7 +1047,7 @@ fn CreateMonsterDirect(
     inventory: Option<Vector<u8>> /* = nullptr */,
     color: Color  /* = Color::Blue */,
     test_type: Any  /* = Any::NONE */,
-    test: flatbuffers::Offset<void>  /* = 0 */,
+    test: flatbuffers::Offset<flatbuffers::Void>  /* = 0 */,
     test4: Option<Vector<Test>> /* = nullptr */,
     testarrayofstring: Option<Vector<flatbuffers::Offset<flatbuffers::String>>> /* = nullptr */,
     testarrayoftables: Option<Vector<flatbuffers::Offset<Monster>>> /* = nullptr */,

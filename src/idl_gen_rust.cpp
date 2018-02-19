@@ -495,7 +495,7 @@ class RustGenerator : public BaseGenerator {
       }
       case BASE_TYPE_UNION:
       // fall through
-      default: { return "void"; }
+      default: { return "flatbuffers::Void"; }
     }
   }
 
