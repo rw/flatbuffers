@@ -657,8 +657,8 @@ class RustGenerator : public BaseGenerator {
                               bool native_type = false) {
     if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
       auto name = actual_type ? ev.union_type.struct_def->name : Name(ev);
-      return wrap ? WrapInNameSpace(ev.union_type.struct_def->defined_namespace,
-                                    name)
+      return wrap ? WrapInRelativeNameSpace(
+          ev.union_type.struct_def->defined_namespace, name)
                   : name;
     } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
       return actual_type ? (native_type ? "std::string" : "flatbuffers::String")
