@@ -346,7 +346,7 @@ class RustGenerator : public BaseGenerator {
         if (parser_.opts.mutable_buffer) {
           code_ += "#[inline]";
           code_ += "fn GetMutable{{STRUCT_NAME}}(buf: &Vec<u8>) -> &{{STRUCT_NAME}} {";
-          code_ += "  return flatbuffers::GetMutableRoot::<{{STRUCT_NAME}}>(buf);";
+          code_ += "  return flatbuffers::get_mutable_root::<{{STRUCT_NAME}}>(buf);";
           code_ += "}";
           code_ += "";
         }
