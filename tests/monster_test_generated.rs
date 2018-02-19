@@ -958,7 +958,7 @@ impl MonsterBuilder {
   fn finish(&mut self) -> flatbuffers::Offset<Monster> {
     let end = self.fbb_.EndTable(self.start_);
     let o = end as flatbuffers::Offset<Monster>;
-    fbb_.Required(o, Monster::VT_NAME);
+    self.fbb_.Required(o, Monster::VT_NAME);
     o
   }
 }
