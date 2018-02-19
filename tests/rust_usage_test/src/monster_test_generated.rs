@@ -1353,7 +1353,7 @@ fn CreateTypeAliasesDirect(
 }
 
 #[inline]
-fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> bool {
+fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, type_: Any) -> bool {
   match type_ {
     Any::NONE => {
       return true;
