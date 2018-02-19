@@ -2594,6 +2594,7 @@ class RustGenerator : public BaseGenerator {
     // in the previous example, E, then F, then G are opened
     for (auto j = common_prefix_size; j != new_size; ++j) {
       code_ += "pub mod " + ns->components[j] + " {";
+      code_ += "  #[allow(unreachable_code)]";
       code_ += "  extern crate flatbuffers;";
       code_ += "  #[allow(unused_imports)]";
       code_ += "  use self::flatbuffers::flexbuffers;";
