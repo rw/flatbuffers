@@ -2386,7 +2386,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   static void PaddingDefinition(int bits, std::string *code_ptr, int *id) {
-    *code_ptr += "padding" + NumToString((*id)++) + "__: u" + \
+    *code_ptr += "  padding" + NumToString((*id)++) + "__: u" + \
                  NumToString(bits) + ",";
   }
 
@@ -2440,7 +2440,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a default constructor.
     code_ += "  fn Reset(&mut self) {";
-    code_ += "    memset(this, 0, size_of({{STRUCT_NAME}}));";
+    code_ += "    //memset(this, 0, size_of({{STRUCT_NAME}}));";
     code_ += "  }";
 
     // Generate a constructor that takes all fields as arguments.

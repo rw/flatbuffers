@@ -165,12 +165,12 @@ fn EnumNameAny(e: Any) -> &'static str {
 pub struct Test {
   a_: i16,
   b_: i8,
-padding0__: u8,
+  padding0__: u8,
 } // pub struct Test
 
 impl Test {
   fn Reset(&mut self) {
-    memset(this, 0, size_of(Test));
+    //memset(this, 0, size_of(Test));
   }
   fn init(&mut self, _a: i16, _b: i8) {
       self.a_ = flatbuffers::EndianScalar(_a);
@@ -198,17 +198,17 @@ pub struct Vec3 {
   x_: f32,
   y_: f32,
   z_: f32,
-padding0__: u32,
+  padding0__: u32,
   test1_: f64,
   test2_: i8,
-padding1__: u8,
+  padding1__: u8,
   test3_: Test,
-padding2__: u16,
+  padding2__: u16,
 } // pub struct Vec3
 
 impl Vec3 {
   fn Reset(&mut self) {
-    memset(this, 0, size_of(Vec3));
+    //memset(this, 0, size_of(Vec3));
   }
   fn init(&mut self, _x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &Test) {
       self.x_ = flatbuffers::EndianScalar(_x);
@@ -267,7 +267,7 @@ pub struct Ability {
 
 impl Ability {
   fn Reset(&mut self) {
-    memset(this, 0, size_of(Ability));
+    //memset(this, 0, size_of(Ability));
   }
   fn init(&mut self, _id: u32, _distance: u32) {
       self.id_ = flatbuffers::EndianScalar(_id);

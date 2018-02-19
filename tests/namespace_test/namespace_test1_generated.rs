@@ -41,7 +41,7 @@ pub struct StructInNestedNS {
 
 impl StructInNestedNS {
   fn Reset(&mut self) {
-    memset(this, 0, size_of(StructInNestedNS));
+    //memset(this, 0, size_of(StructInNestedNS));
   }
   fn init(&mut self, _a: i32, _b: i32) {
       self.a_ = flatbuffers::EndianScalar(_a);
