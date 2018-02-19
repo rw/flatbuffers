@@ -377,8 +377,8 @@ impl Stat /* private flatbuffers::Table */ {
   }
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyOffset(verifier, VT_ID) &&
-           verifier.Verify(id()) &&
+           flatbuffers::verify_offset(verifier, self.VT_ID) &&
+           verifier.Verify(self.id()) &&
            flatbuffers::verify_field::<i64>(verifier, self.VT_VAL) &&
            flatbuffers::verify_field::<u16>(verifier, self.VT_COUNT) &&
            verifier.EndTable();
@@ -764,28 +764,28 @@ impl Monster /* private flatbuffers::Table */ {
            flatbuffers::verify_field::<Vec3>(verifier, self.VT_POS) &&
            flatbuffers::verify_field::<i16>(verifier, self.VT_MANA) &&
            flatbuffers::verify_field::<i16>(verifier, self.VT_HP) &&
-           VerifyOffsetRequired(verifier, VT_NAME) &&
-           verifier.Verify(name()) &&
-           VerifyOffset(verifier, VT_INVENTORY) &&
-           verifier.Verify(inventory()) &&
+           flatbuffers::verify_offsetRequired(verifier, self.VT_NAME) &&
+           verifier.Verify(self.name()) &&
+           flatbuffers::verify_offset(verifier, self.VT_INVENTORY) &&
+           verifier.Verify(self.inventory()) &&
            flatbuffers::verify_field::<i8>(verifier, self.VT_COLOR) &&
            flatbuffers::verify_field::<u8>(verifier, self.VT_TEST_TYPE) &&
-           VerifyOffset(verifier, VT_TEST) &&
-           VerifyAny(verifier, test(), test_type()) &&
-           VerifyOffset(verifier, VT_TEST4) &&
-           verifier.Verify(test4()) &&
-           VerifyOffset(verifier, VT_TESTARRAYOFSTRING) &&
-           verifier.Verify(testarrayofstring()) &&
-           verifier.VerifyVectorOfStrings(testarrayofstring()) &&
-           VerifyOffset(verifier, VT_TESTARRAYOFTABLES) &&
-           verifier.Verify(testarrayoftables()) &&
-           verifier.VerifyVectorOfTables(testarrayoftables()) &&
-           VerifyOffset(verifier, VT_ENEMY) &&
-           verifier.VerifyTable(enemy()) &&
-           VerifyOffset(verifier, VT_TESTNESTEDFLATBUFFER) &&
-           verifier.Verify(testnestedflatbuffer()) &&
-           VerifyOffset(verifier, VT_TESTEMPTY) &&
-           verifier.VerifyTable(testempty()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TEST) &&
+           VerifyAny(verifier, self.test(), self.test_type()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TEST4) &&
+           verifier.Verify(self.test4()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TESTARRAYOFSTRING) &&
+           verifier.Verify(self.testarrayofstring()) &&
+           verifier.VerifyVectorOfStrings(self.testarrayofstring()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TESTARRAYOFTABLES) &&
+           verifier.Verify(self.testarrayoftables()) &&
+           verifier.VerifyVectorOfTables(self.testarrayoftables()) &&
+           flatbuffers::verify_offset(verifier, self.VT_ENEMY) &&
+           verifier.VerifyTable(self.enemy()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TESTNESTEDFLATBUFFER) &&
+           verifier.Verify(self.testnestedflatbuffer()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TESTEMPTY) &&
+           verifier.VerifyTable(self.testempty()) &&
            flatbuffers::verify_field::<bool>(verifier, self.VT_TESTBOOL) &&
            flatbuffers::verify_field::<i32>(verifier, self.VT_TESTHASHS32_FNV1) &&
            flatbuffers::verify_field::<u32>(verifier, self.VT_TESTHASHU32_FNV1) &&
@@ -795,26 +795,26 @@ impl Monster /* private flatbuffers::Table */ {
            flatbuffers::verify_field::<u32>(verifier, self.VT_TESTHASHU32_FNV1A) &&
            flatbuffers::verify_field::<i64>(verifier, self.VT_TESTHASHS64_FNV1A) &&
            flatbuffers::verify_field::<u64>(verifier, self.VT_TESTHASHU64_FNV1A) &&
-           VerifyOffset(verifier, VT_TESTARRAYOFBOOLS) &&
-           verifier.Verify(testarrayofbools()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TESTARRAYOFBOOLS) &&
+           verifier.Verify(self.testarrayofbools()) &&
            flatbuffers::verify_field::<f32>(verifier, self.VT_TESTF) &&
            flatbuffers::verify_field::<f32>(verifier, self.VT_TESTF2) &&
            flatbuffers::verify_field::<f32>(verifier, self.VT_TESTF3) &&
-           VerifyOffset(verifier, VT_TESTARRAYOFSTRING2) &&
-           verifier.Verify(testarrayofstring2()) &&
-           verifier.VerifyVectorOfStrings(testarrayofstring2()) &&
-           VerifyOffset(verifier, VT_TESTARRAYOFSORTEDSTRUCT) &&
-           verifier.Verify(testarrayofsortedstruct()) &&
-           VerifyOffset(verifier, VT_FLEX) &&
-           verifier.Verify(flex()) &&
-           VerifyOffset(verifier, VT_TEST5) &&
-           verifier.Verify(test5()) &&
-           VerifyOffset(verifier, VT_VECTOR_OF_LONGS) &&
-           verifier.Verify(vector_of_longs()) &&
-           VerifyOffset(verifier, VT_VECTOR_OF_DOUBLES) &&
-           verifier.Verify(vector_of_doubles()) &&
-           VerifyOffset(verifier, VT_PARENT_NAMESPACE_TEST) &&
-           verifier.VerifyTable(parent_namespace_test()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TESTARRAYOFSTRING2) &&
+           verifier.Verify(self.testarrayofstring2()) &&
+           verifier.VerifyVectorOfStrings(self.testarrayofstring2()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TESTARRAYOFSORTEDSTRUCT) &&
+           verifier.Verify(self.testarrayofsortedstruct()) &&
+           flatbuffers::verify_offset(verifier, self.VT_FLEX) &&
+           verifier.Verify(self.flex()) &&
+           flatbuffers::verify_offset(verifier, self.VT_TEST5) &&
+           verifier.Verify(self.test5()) &&
+           flatbuffers::verify_offset(verifier, self.VT_VECTOR_OF_LONGS) &&
+           verifier.Verify(self.vector_of_longs()) &&
+           flatbuffers::verify_offset(verifier, self.VT_VECTOR_OF_DOUBLES) &&
+           verifier.Verify(self.vector_of_doubles()) &&
+           flatbuffers::verify_offset(verifier, self.VT_PARENT_NAMESPACE_TEST) &&
+           verifier.VerifyTable(self.parent_namespace_test()) &&
            verifier.EndTable();
   }
 }
@@ -1223,10 +1223,10 @@ impl TypeAliases /* private flatbuffers::Table */ {
            flatbuffers::verify_field::<u64>(verifier, self.VT_U64_) &&
            flatbuffers::verify_field::<f32>(verifier, self.VT_F32_) &&
            flatbuffers::verify_field::<f64>(verifier, self.VT_F64_) &&
-           VerifyOffset(verifier, VT_V8) &&
-           verifier.Verify(v8()) &&
-           VerifyOffset(verifier, VT_VF64) &&
-           verifier.Verify(vf64()) &&
+           flatbuffers::verify_offset(verifier, self.VT_V8) &&
+           verifier.Verify(self.v8()) &&
+           flatbuffers::verify_offset(verifier, self.VT_VF64) &&
+           verifier.Verify(self.vf64()) &&
            verifier.EndTable();
   }
 }
