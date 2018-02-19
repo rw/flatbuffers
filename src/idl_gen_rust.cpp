@@ -1610,11 +1610,11 @@ class RustGenerator : public BaseGenerator {
       // Call a different accessor for pointers, that indirects.
       std::string accessor = "";
       if (is_scalar) {
-        accessor = "GetField::<";
+        accessor = "flatbuffers::get_field::<";
       } else if (is_struct) {
-        accessor = "GetStruct::<";
+        accessor = "flatbuffers::get_struct::<";
       } else {
-        accessor = "GetPointer::<";
+        accessor = "flatbuffers::get_pointer::<";
       }
       auto offset_str = "self." + GenFieldOffsetName(field);
       auto offset_type =
@@ -1634,7 +1634,7 @@ class RustGenerator : public BaseGenerator {
 
       code_ += "  fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
       code_ += "    // yo";
-      code_ += "    self.{{FIELD_VALUE}}";
+      code_ += "    {{FIELD_VALUE}}";
       code_ += "  }";
 
       if (field.value.type.base_type == BASE_TYPE_UNION) {
