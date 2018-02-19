@@ -53,7 +53,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
 
 pub struct TableInFirstNSBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> TableInFirstNSBuilder<'a> {
   fn add_foo_table(&mut self, foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS> ) {
@@ -115,7 +115,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
 
 pub struct SecondTableInABuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> SecondTableInABuilder<'a> {
   fn add_refer_to_c(&mut self, refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC> ) {
@@ -231,7 +231,7 @@ impl TableInC /* private flatbuffers::Table */ {
 
 pub struct TableInCBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> TableInCBuilder<'a> {
   fn add_refer_to_a1(&mut self, refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS> ) {

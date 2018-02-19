@@ -20,7 +20,7 @@ impl InParentNamespace /* private flatbuffers::Table */ {
 
 pub struct InParentNamespaceBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> InParentNamespaceBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> InParentNamespaceBuilder {
@@ -72,7 +72,7 @@ impl Monster /* private flatbuffers::Table */ {
 
 pub struct MonsterBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> MonsterBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
@@ -326,7 +326,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
 
 pub struct TestSimpleTableWithEnumBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> TestSimpleTableWithEnumBuilder<'a> {
   fn add_color(&mut self, color: Color ) {
@@ -396,7 +396,7 @@ impl Stat /* private flatbuffers::Table */ {
 
 pub struct StatBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> StatBuilder<'a> {
   fn add_id(&mut self, id: flatbuffers::Offset<flatbuffers::String> ) {
@@ -849,7 +849,7 @@ impl Monster /* private flatbuffers::Table */ {
 //
 pub struct MonsterBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> MonsterBuilder<'a> {
   fn add_pos(&mut self, pos: &Vec3) {
@@ -1243,7 +1243,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
 
 pub struct TypeAliasesBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> TypeAliasesBuilder<'a> {
   fn add_i8_(&mut self, i8_: i8 ) {
@@ -1384,7 +1384,7 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, type_: A
 fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Void>>, types: &flatbuffers::Vector<u8>) -> bool {
   if !values || !types { return !values && !types; }
   if values.size() != types.size() { return false; }
-  for i in (0 as flatbuffers::uoffset_t)..values.size() {
+  for i in (0 as flatbuffers::UOffsetT)..values.size() {
     if !VerifyAny(
         verifier,  values.Get(i), types.GetEnum::<Any>(i)) {
       return false;

@@ -90,7 +90,7 @@ impl TableInNestedNS /* private flatbuffers::Table */ {
 
 pub struct TableInNestedNSBuilder<'a> {
   fbb_: &'a flatbuffers::FlatBufferBuilder,
-  start_: flatbuffers::uoffset_t,
+  start_: flatbuffers::UOffsetT,
 }
 impl<'a> TableInNestedNSBuilder<'a> {
   fn add_foo(&mut self, foo: i32 ) {
