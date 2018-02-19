@@ -354,7 +354,7 @@ class RustGenerator : public BaseGenerator {
         if (parser_.file_identifier_.length()) {
           // Return the identifier
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}Identifier() -> &const_char{";
+          code_ += "fn {{STRUCT_NAME}}Identifier() -> &str {";
           code_ += "  return \"" + parser_.file_identifier_ + "\";";
           code_ += "}";
           code_ += "";
@@ -386,7 +386,7 @@ class RustGenerator : public BaseGenerator {
         if (parser_.file_extension_.length()) {
           // Return the extension
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}Extension() -> &const_char {";
+          code_ += "fn {{STRUCT_NAME}}Extension() -> &str {";
           code_ += "  return \"" + parser_.file_extension_ + "\";";
           code_ += "}";
           code_ += "";
@@ -1380,7 +1380,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("PRE", prefix);
     code_.SetValue("PARAM_NAME", Name(field));
     if (direct && field.value.type.base_type == BASE_TYPE_STRING) {
-      code_.SetValue("PARAM_TYPE", "const_char_string_ptr");
+      code_.SetValue("PARAM_TYPE", "&str");
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else if (direct && field.value.type.base_type == BASE_TYPE_VECTOR) {
       const auto vtype = field.value.type.VectorType();
@@ -1740,7 +1740,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "  }";
 
         if (is_string) {
-          code_ += "  fn KeyCompareWithValue(&self, val: &const_char) -> isize {";
+          code_ += "  fn KeyCompareWithValue(&self, val: &str) -> isize {";
           code_ += "    return strcmp(self.{{FIELD_NAME}}().c_str(), val);";
           code_ += "  }";
         } else {

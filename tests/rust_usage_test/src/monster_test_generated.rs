@@ -429,7 +429,7 @@ fn CreateStat(
 #[inline]
 fn CreateStatDirect(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    id: const_char_string_ptr /* = nullptr */,
+    id: &str /* = nullptr */,
     val: i64  /* = 0 */,
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
   return CreateStat(
@@ -511,7 +511,7 @@ impl Monster /* private flatbuffers::Table */ {
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
     return *self.name() < *o.name();
   }
-  fn KeyCompareWithValue(&self, val: &const_char) -> isize {
+  fn KeyCompareWithValue(&self, val: &str) -> isize {
     return strcmp(self.name().c_str(), val);
   }
   fn inventory(&self) -> &flatbuffers::Vector<u8>  {
@@ -1040,7 +1040,7 @@ fn CreateMonsterDirect(
     pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
-    name: const_char_string_ptr /* = nullptr */,
+    name: &str /* = nullptr */,
     inventory: Option<Vector<u8>> /* = nullptr */,
     color: Color  /* = Color::Blue */,
     test_type: Any  /* = Any::NONE */,
@@ -1685,7 +1685,7 @@ fn GetMutableMonster(buf: &Vec<u8>) -> &Monster {
 }
 
 #[inline]
-fn MonsterIdentifier() -> &const_char{
+fn MonsterIdentifier() -> &str {
   return "MONS";
 }
 
@@ -1702,7 +1702,7 @@ fn VerifyMonsterBuffer(
 }
 
 #[inline]
-fn MonsterExtension() -> &const_char {
+fn MonsterExtension() -> &str {
   return "mon";
 }
 
