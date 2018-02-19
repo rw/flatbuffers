@@ -354,7 +354,7 @@ class RustGenerator : public BaseGenerator {
         if (parser_.file_identifier_.length()) {
           // Return the identifier
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}Identifier() -> &str {";
+          code_ += "fn {{STRUCT_NAME}}Identifier() -> &'static str {";
           code_ += "  return \"" + parser_.file_identifier_ + "\";";
           code_ += "}";
           code_ += "";
@@ -386,7 +386,7 @@ class RustGenerator : public BaseGenerator {
         if (parser_.file_extension_.length()) {
           // Return the extension
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}Extension() -> &str {";
+          code_ += "fn {{STRUCT_NAME}}Extension() -> &'static str {";
           code_ += "  return \"" + parser_.file_extension_ + "\";";
           code_ += "}";
           code_ += "";
@@ -833,7 +833,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("NAMES", ns);
     code_.SetValue("VALUES", vs);
     code_ += "#[inline]";
-    code_ += "fn {{NAME}}TypeTable() -> &/*mut?*/flatbuffers::TypeTable {";
+    code_ += "fn {{NAME}}TypeTable() -> /*&mut?*/flatbuffers::TypeTable {";
     code_ += "  /* disable type table for now";
     if (num_fields) {
       code_ += "  static flatbuffers::TypeCode type_codes[] = {";
@@ -1846,13 +1846,13 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("STRUCT_NAME", Name(struct_def));
 
     // Generate a builder struct:
-    code_ += "pub struct {{STRUCT_NAME}}Builder {";
-    code_ += "  fbb_: &flatbuffers::FlatBufferBuilder,";
+    code_ += "pub struct {{STRUCT_NAME}}Builder<'a> {";
+    code_ += "  fbb_: &'a flatbuffers::FlatBufferBuilder,";
     code_ += "  start_: flatbuffers::uoffset_t,";
     code_ += "}";
 
     // Generate builder functions:
-    code_ += "impl {{STRUCT_NAME}}Builder {";
+    code_ += "impl<'a> {{STRUCT_NAME}}Builder<'a> {";
     bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {

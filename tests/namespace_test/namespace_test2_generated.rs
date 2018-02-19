@@ -51,11 +51,11 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
   }
 }
 
-pub struct TableInFirstNSBuilder {
-  fbb_: &flatbuffers::FlatBufferBuilder,
+pub struct TableInFirstNSBuilder<'a> {
+  fbb_: &'a flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
-impl TableInFirstNSBuilder {
+impl<'a> TableInFirstNSBuilder<'a> {
   fn add_foo_table(&mut self, foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS> ) {
     self.fbb_.AddOffset(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
@@ -113,11 +113,11 @@ impl SecondTableInA /* private flatbuffers::Table */ {
   }
 }
 
-pub struct SecondTableInABuilder {
-  fbb_: &flatbuffers::FlatBufferBuilder,
+pub struct SecondTableInABuilder<'a> {
+  fbb_: &'a flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
-impl SecondTableInABuilder {
+impl<'a> SecondTableInABuilder<'a> {
   fn add_refer_to_c(&mut self, refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC> ) {
     self.fbb_.AddOffset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
@@ -145,7 +145,7 @@ fn CreateSecondTableInA(
 }
 
 #[inline]
-fn TableInFirstNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+fn TableInFirstNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
@@ -170,7 +170,7 @@ fn TableInFirstNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+fn SecondTableInATypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 }
@@ -229,11 +229,11 @@ impl TableInC /* private flatbuffers::Table */ {
   }
 }
 
-pub struct TableInCBuilder {
-  fbb_: &flatbuffers::FlatBufferBuilder,
+pub struct TableInCBuilder<'a> {
+  fbb_: &'a flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
-impl TableInCBuilder {
+impl<'a> TableInCBuilder<'a> {
   fn add_refer_to_a1(&mut self, refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS> ) {
     self.fbb_.AddOffset(TableInC::VT_REFER_TO_A1, refer_to_a1);
   }
@@ -266,7 +266,7 @@ fn CreateTableInC(
 }
 
 #[inline]
-fn TableInCTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+fn TableInCTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
