@@ -14,7 +14,7 @@ impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -26,12 +26,12 @@ impl<'a> InParentNamespaceBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> InParentNamespaceBuilder {
     InParentNamespaceBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<InParentNamespace> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<InParentNamespace>;
     o
   }
@@ -66,7 +66,7 @@ impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -78,12 +78,12 @@ impl<'a> MonsterBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
     MonsterBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<Monster> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<Monster>;
     o
   }
@@ -320,7 +320,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_field::<i8>(verifier, self.VT_COLOR) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -335,12 +335,12 @@ impl<'a> TestSimpleTableWithEnumBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TestSimpleTableWithEnumBuilder {
     TestSimpleTableWithEnumBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<TestSimpleTableWithEnum>;
     o
   }
@@ -390,7 +390,7 @@ impl Stat /* private flatbuffers::Table */ {
            verifier.Verify(self.id()) &&
            flatbuffers::verify_field::<i64>(verifier, self.VT_VAL) &&
            flatbuffers::verify_field::<u16>(verifier, self.VT_COUNT) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -411,12 +411,12 @@ impl<'a> StatBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> StatBuilder {
     StatBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // StatBuilder &operator=(const StatBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<Stat> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<Stat>;
     o
   }
@@ -825,7 +825,7 @@ impl Monster /* private flatbuffers::Table */ {
            verifier.Verify(self.vector_of_doubles()) &&
            flatbuffers::verify_offset(verifier, self.VT_PARENT_NAMESPACE_TEST) &&
            verifier.VerifyTable(self.parent_namespace_test()) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -957,12 +957,12 @@ impl<'a> MonsterBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
     MonsterBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<Monster> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<Monster>;
     self.fbb_.Required(o, Monster::VT_NAME);
     o
@@ -1237,7 +1237,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
            verifier.Verify(self.v8()) &&
            flatbuffers::verify_offset(verifier, self.VT_VF64) &&
            verifier.Verify(self.vf64()) &&
-           verifier.EndTable();
+           verifier.end_table();
   }
 }
 
@@ -1285,12 +1285,12 @@ impl<'a> TypeAliasesBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TypeAliasesBuilder {
     TypeAliasesBuilder {
       fbb_: _fbb,
-      start_: _fbb.StartTable(),
+      start_: _fbb.start_table(),
     }
   }
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TypeAliases> {
-    let end = self.fbb_.EndTable(self.start_);
+    let end = self.fbb_.end_table(self.start_);
     let o = end as flatbuffers::Offset<TypeAliases>;
     o
   }

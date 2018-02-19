@@ -1779,7 +1779,7 @@ class RustGenerator : public BaseGenerator {
       GenVerifyCall(field, " &&\n           ");
     }
 
-    code_ += " &&\n           verifier.EndTable();";
+    code_ += " &&\n           verifier.end_table();";
     code_ += "  }";
 
     //if (parser_.opts.generate_object_based_api) {
@@ -1903,7 +1903,7 @@ class RustGenerator : public BaseGenerator {
         "{{STRUCT_NAME}}Builder {";
     code_ += "    {{STRUCT_NAME}}Builder {";
     code_ += "      fbb_: _fbb,";
-    code_ += "      start_: _fbb.StartTable(),";
+    code_ += "      start_: _fbb.start_table(),";
     code_ += "    }";
     code_ += "  }";
 
@@ -1914,7 +1914,7 @@ class RustGenerator : public BaseGenerator {
 
     // Finish() function.
     code_ += "  fn finish(&mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
-    code_ += "    let end = self.fbb_.EndTable(self.start_);";
+    code_ += "    let end = self.fbb_.end_table(self.start_);";
     code_ += "    let o = end as flatbuffers::Offset<{{STRUCT_NAME}}>;";
 
     for (auto it = struct_def.fields.vec.begin();
