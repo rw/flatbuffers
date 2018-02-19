@@ -65,7 +65,7 @@ impl StructInNestedNS {
 }
 // STRUCT_END(StructInNestedNS, 8);
 
-struct TableInNestedNS {}
+pub struct TableInNestedNS {}
 impl flatbuffers::Table for TableInNestedNS {}
 impl TableInNestedNS /* private flatbuffers::Table */ {
     const VT_FOO: isize = 4;
@@ -84,7 +84,7 @@ impl TableInNestedNS /* private flatbuffers::Table */ {
   }
 }
 
-struct TableInNestedNSBuilder {
+pub struct TableInNestedNSBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }

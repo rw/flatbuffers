@@ -1480,7 +1480,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("NATIVE_NAME", native_name);
 
     // Generate a C++ object that can hold an unpacked version of this table.
-    code_ += "struct {{NATIVE_NAME}} : public flatbuffers::NativeTable {";
+    code_ += "pub struct {{NATIVE_NAME}} : public flatbuffers::NativeTable {";
     code_ += "  typedef {{STRUCT_NAME}} TableType;";
     GenFullyQualifiedNameGetter(struct_def, native_name);
     for (auto it = struct_def.fields.vec.begin();
@@ -1565,7 +1565,7 @@ class RustGenerator : public BaseGenerator {
     GenComment(struct_def.doc_comment);
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
-    code_ += "struct {{STRUCT_NAME}} {}";
+    code_ += "pub struct {{STRUCT_NAME}} {}";
     code_ += "impl flatbuffers::Table for {{STRUCT_NAME}} {}";
     code_ += "impl {{STRUCT_NAME}} /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
@@ -1846,7 +1846,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("STRUCT_NAME", Name(struct_def));
 
     // Generate a builder struct:
-    code_ += "struct {{STRUCT_NAME}}Builder {";
+    code_ += "pub struct {{STRUCT_NAME}}Builder {";
     code_ += "  fbb_: &flatbuffers::FlatBufferBuilder,";
     code_ += "  start_: flatbuffers::uoffset_t,";
     code_ += "}";

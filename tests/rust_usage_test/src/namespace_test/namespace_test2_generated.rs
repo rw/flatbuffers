@@ -9,7 +9,7 @@ pub mod NamespaceA {
   use self::flatbuffers::flexbuffers;
   use std::cmp::Ordering;
 
-struct TableInFirstNS {}
+pub struct TableInFirstNS {}
 impl flatbuffers::Table for TableInFirstNS {}
 impl TableInFirstNS /* private flatbuffers::Table */ {
     const VT_FOO_TABLE: isize = 4;
@@ -49,7 +49,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
   }
 }
 
-struct TableInFirstNSBuilder {
+pub struct TableInFirstNSBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
@@ -90,7 +90,7 @@ fn CreateTableInFirstNS(
   builder.Finish()
 }
 
-struct SecondTableInA {}
+pub struct SecondTableInA {}
 impl flatbuffers::Table for SecondTableInA {}
 impl SecondTableInA /* private flatbuffers::Table */ {
     const VT_REFER_TO_C: isize = 4;
@@ -111,7 +111,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
   }
 }
 
-struct SecondTableInABuilder {
+pub struct SecondTableInABuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
@@ -193,7 +193,7 @@ pub mod NamespaceC {
   use self::flatbuffers::flexbuffers;
   use std::cmp::Ordering;
 
-struct TableInC {}
+pub struct TableInC {}
 impl flatbuffers::Table for TableInC {}
 impl TableInC /* private flatbuffers::Table */ {
     const VT_REFER_TO_A1: isize = 4;
@@ -225,7 +225,7 @@ impl TableInC /* private flatbuffers::Table */ {
   }
 }
 
-struct TableInCBuilder {
+pub struct TableInCBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
