@@ -1616,7 +1616,7 @@ class RustGenerator : public BaseGenerator {
       } else {
         accessor = "GetPointer::<";
       }
-      auto offset_str = GenFieldOffsetName(field);
+      auto offset_str = "self." + GenFieldOffsetName(field);
       auto offset_type =
           GenTypeGet(field.value.type, "", "&", "", false);
 
@@ -1632,7 +1632,7 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
-      code_ += "  fn {{FIELD_NAME}}() -> {{FIELD_TYPE}} {";
+      code_ += "  fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
       code_ += "    // yo";
       code_ += "    self.{{FIELD_VALUE}}";
       code_ += "  }";
@@ -1672,15 +1672,15 @@ class RustGenerator : public BaseGenerator {
       if (parser_.opts.mutable_buffer) {
         if (is_scalar) {
           const auto type = GenTypeWire(field.value.type, "", false);
-          code_.SetValue("SET_FN", "SetField::<" + type + ">");
+          code_.SetValue("SET_FN", "flatbuffers::set_field::<" + type + ">");
           code_.SetValue("OFFSET_NAME", offset_str);
           code_.SetValue("FIELD_TYPE", GenTypeBasic(field.value.type, true));
           code_.SetValue("FIELD_VALUE",
-                         GenUnderlyingCast(field, false, "_" + Name(field)));
+                         GenUnderlyingCast(field, false, Name(field) + "_"));
           code_.SetValue("DEFAULT_VALUE", GenDefaultConstant(field));
 
           code_ +=
-              "  fn mutate_{{FIELD_NAME}}({{FIELD_NAME}}_: "
+              "  fn mutate_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}_: "
               "{{FIELD_TYPE}}) -> bool {";
           code_ +=
               "    {{SET_FN}}({{OFFSET_NAME}}, {{FIELD_VALUE}}, "

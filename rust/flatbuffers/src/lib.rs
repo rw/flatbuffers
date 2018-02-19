@@ -18,6 +18,9 @@ pub fn endian_scalar<T>(_: T) -> ! {
 pub fn write_scalar<S, T>(_: S, _: T) -> ! {
     unimplemented!()
 }
+pub fn set_field<T>(_: isize, _: T, _: isize) -> ! {
+    unimplemented!()
+}
 pub mod flexbuffers {
     pub struct Reference {}
 }
