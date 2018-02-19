@@ -44,21 +44,21 @@ impl StructInNestedNS {
     //memset(this, 0, size_of(StructInNestedNS));
   }
   fn init(&mut self, _a: i32, _b: i32) {
-      self.a_ = flatbuffers::EndianScalar(_a);
-      self.b_ = flatbuffers::EndianScalar(_b);
+      self.a_ = flatbuffers::endian_scalar(_a);
+      self.b_ = flatbuffers::endian_scalar(_b);
 
   }
   fn a(&self) -> i32  {
-    flatbuffers::EndianScalar(self.a_)
+    flatbuffers::endian_scalar(self.a_)
   }
   fn mutate_a(&mut self, _a: i32) {
-    flatbuffers::WriteScalar(&self.a_, _a);
+    flatbuffers::write_scalar(&self.a_, _a);
   }
   fn b(&self) -> i32  {
-    flatbuffers::EndianScalar(self.b_)
+    flatbuffers::endian_scalar(self.b_)
   }
   fn mutate_b(&mut self, _b: i32) {
-    flatbuffers::WriteScalar(&self.b_, _b);
+    flatbuffers::write_scalar(&self.b_, _b);
   }
 }
 // STRUCT_END(StructInNestedNS, 8);

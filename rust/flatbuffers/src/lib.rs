@@ -6,13 +6,16 @@ pub struct TypeTable {}
 pub struct FlatBufferBuilder {}
 pub type uoffset_t = usize;
 pub struct Offset<T> {
-    o: isize,
+    _o: isize,
     phantom: PhantomData<T>,
 }
 pub fn verify_table_start(_: &Verifier) -> ! {
     unimplemented!()
 }
-pub fn EndianScalar<T>(x: T) -> ! {
+pub fn endian_scalar<T>(_: T) -> ! {
+    unimplemented!()
+}
+pub fn write_scalar<S, T>(_: S, _: T) -> ! {
     unimplemented!()
 }
 pub mod flexbuffers {

@@ -173,21 +173,21 @@ impl Test {
     //memset(this, 0, size_of(Test));
   }
   fn init(&mut self, _a: i16, _b: i8) {
-      self.a_ = flatbuffers::EndianScalar(_a);
-      self.b_ = flatbuffers::EndianScalar(_b);
+      self.a_ = flatbuffers::endian_scalar(_a);
+      self.b_ = flatbuffers::endian_scalar(_b);
 
   }
   fn a(&self) -> i16  {
-    flatbuffers::EndianScalar(self.a_)
+    flatbuffers::endian_scalar(self.a_)
   }
   fn mutate_a(&mut self, _a: i16) {
-    flatbuffers::WriteScalar(&self.a_, _a);
+    flatbuffers::write_scalar(&self.a_, _a);
   }
   fn b(&self) -> i8  {
-    flatbuffers::EndianScalar(self.b_)
+    flatbuffers::endian_scalar(self.b_)
   }
   fn mutate_b(&mut self, _b: i8) {
-    flatbuffers::WriteScalar(&self.b_, _b);
+    flatbuffers::write_scalar(&self.b_, _b);
   }
 }
 // STRUCT_END(Test, 4);
@@ -211,43 +211,43 @@ impl Vec3 {
     //memset(this, 0, size_of(Vec3));
   }
   fn init(&mut self, _x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &Test) {
-      self.x_ = flatbuffers::EndianScalar(_x);
-      self.y_ = flatbuffers::EndianScalar(_y);
-      self.z_ = flatbuffers::EndianScalar(_z);
-      self.test1_ = flatbuffers::EndianScalar(_test1);
-      self.test2_ = flatbuffers::EndianScalar(_test2 as i8);
+      self.x_ = flatbuffers::endian_scalar(_x);
+      self.y_ = flatbuffers::endian_scalar(_y);
+      self.z_ = flatbuffers::endian_scalar(_z);
+      self.test1_ = flatbuffers::endian_scalar(_test1);
+      self.test2_ = flatbuffers::endian_scalar(_test2 as i8);
       self.test3_ = _test3;
 
   }
   fn x(&self) -> f32  {
-    flatbuffers::EndianScalar(self.x_)
+    flatbuffers::endian_scalar(self.x_)
   }
   fn mutate_x(&mut self, _x: f32) {
-    flatbuffers::WriteScalar(&self.x_, _x);
+    flatbuffers::write_scalar(&self.x_, _x);
   }
   fn y(&self) -> f32  {
-    flatbuffers::EndianScalar(self.y_)
+    flatbuffers::endian_scalar(self.y_)
   }
   fn mutate_y(&mut self, _y: f32) {
-    flatbuffers::WriteScalar(&self.y_, _y);
+    flatbuffers::write_scalar(&self.y_, _y);
   }
   fn z(&self) -> f32  {
-    flatbuffers::EndianScalar(self.z_)
+    flatbuffers::endian_scalar(self.z_)
   }
   fn mutate_z(&mut self, _z: f32) {
-    flatbuffers::WriteScalar(&self.z_, _z);
+    flatbuffers::write_scalar(&self.z_, _z);
   }
   fn test1(&self) -> f64  {
-    flatbuffers::EndianScalar(self.test1_)
+    flatbuffers::endian_scalar(self.test1_)
   }
   fn mutate_test1(&mut self, _test1: f64) {
-    flatbuffers::WriteScalar(&self.test1_, _test1);
+    flatbuffers::write_scalar(&self.test1_, _test1);
   }
   fn test2(&self) -> Color  {
-    flatbuffers::EndianScalar(self.test2_) as Color
+    flatbuffers::endian_scalar(self.test2_) as Color
   }
   fn mutate_test2(&mut self, _test2: Color) {
-    flatbuffers::WriteScalar(&self.test2_, _test2 as i8);
+    flatbuffers::write_scalar(&self.test2_, _test2 as i8);
   }
   fn test3(&self) -> &Test {
     self.test3_
@@ -270,15 +270,15 @@ impl Ability {
     //memset(this, 0, size_of(Ability));
   }
   fn init(&mut self, _id: u32, _distance: u32) {
-      self.id_ = flatbuffers::EndianScalar(_id);
-      self.distance_ = flatbuffers::EndianScalar(_distance);
+      self.id_ = flatbuffers::endian_scalar(_id);
+      self.distance_ = flatbuffers::endian_scalar(_distance);
 
   }
   fn id(&self) -> u32  {
-    flatbuffers::EndianScalar(self.id_)
+    flatbuffers::endian_scalar(self.id_)
   }
   fn mutate_id(&mut self, _id: u32) {
-    flatbuffers::WriteScalar(&self.id_, _id);
+    flatbuffers::write_scalar(&self.id_, _id);
   }
   fn KeyCompareLessThan(o: &Ability) -> bool {
     self.id() < o.id()
@@ -288,10 +288,10 @@ impl Ability {
     (key > val) - (key < val)
   }
   fn distance(&self) -> u32  {
-    flatbuffers::EndianScalar(self.distance_)
+    flatbuffers::endian_scalar(self.distance_)
   }
   fn mutate_distance(&mut self, _distance: u32) {
-    flatbuffers::WriteScalar(&self.distance_, _distance);
+    flatbuffers::write_scalar(&self.distance_, _distance);
   }
 }
 // STRUCT_END(Ability, 8);

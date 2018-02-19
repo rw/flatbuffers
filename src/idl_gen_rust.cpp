@@ -2464,7 +2464,7 @@ class RustGenerator : public BaseGenerator {
       init_list += "      self." + member_name;
       if (IsScalar(field.value.type.base_type)) {
         auto type = GenUnderlyingCast(field, false, arg_name);
-        init_list += " = flatbuffers::EndianScalar(" + type + ");\n";
+        init_list += " = flatbuffers::endian_scalar(" + type + ");\n";
       } else {
         init_list += " = " + arg_name + ";\n";
       }
@@ -2490,7 +2490,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
 
     // Generate accessor methods of the form:
-    // type name() const { return flatbuffers::EndianScalar(name_); }
+    // type name() const { return flatbuffers::endian_scalar(name_); }
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
@@ -2499,7 +2499,7 @@ class RustGenerator : public BaseGenerator {
       auto is_scalar = IsScalar(field.value.type.base_type);
       auto member = "self." + Name(field) + "_";
       auto value =
-          is_scalar ? "flatbuffers::EndianScalar(" + member + ")" : member;
+          is_scalar ? "flatbuffers::endian_scalar(" + member + ")" : member;
 
       code_.SetValue("FIELD_NAME", Name(field));
       code_.SetValue("FIELD_TYPE", field_type);
@@ -2520,7 +2520,7 @@ class RustGenerator : public BaseGenerator {
 
           code_ += "  fn mutate_{{FIELD_NAME}}(&mut self, _{{FIELD_NAME}}: {{ARG}}) {";
           code_ +=
-              "    flatbuffers::WriteScalar(&self.{{FIELD_NAME}}_, "
+              "    flatbuffers::write_scalar(&self.{{FIELD_NAME}}_, "
               "{{FIELD_VALUE}});";
           code_ += "  }";
         } else {
