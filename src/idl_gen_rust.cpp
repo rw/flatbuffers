@@ -339,7 +339,7 @@ class RustGenerator : public BaseGenerator {
         code_ +=
             "fn Get{{STRUCT_NAME}}(buf: &Vec<u8>)"
             " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
-        code_ += "  return flatbuffers::GetRoot::<{{CPP_NAME}}>(buf);";
+        code_ += "  return flatbuffers::get_root::<{{CPP_NAME}}>(buf);";
         code_ += "}";
         code_ += "";
 
@@ -1714,7 +1714,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("CPP_NAME", nested->constant);
 
         code_ += "  fn {{FIELD_NAME}}_nested_root() -> &{{CPP_NAME}}{";
-        code_ += "    return flatbuffers::GetRoot::<{{CPP_NAME}}>({{FIELD_NAME}}().Data());";
+        code_ += "    return flatbuffers::get_root::<{{CPP_NAME}}>({{FIELD_NAME}}().Data());";
         code_ += "  }";
       }
 
@@ -1723,7 +1723,7 @@ class RustGenerator : public BaseGenerator {
             "  fn {{FIELD_NAME}}_flexbuffer_root()"
             " -> flexbuffers::Reference {";
         code_ += "    let v = {{FIELD_NAME}}();";
-        code_ += "    return flexbuffers::GetRoot(v.Data(), v.size());";
+        code_ += "    return flexbuffers::get_root(v.Data(), v.size());";
         code_ += "  }";
       }
 

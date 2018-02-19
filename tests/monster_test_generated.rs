@@ -600,7 +600,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut flatbuffers::get_pointer::<&mut flatbuffers::Vector<u8> >(self.VT_TESTNESTEDFLATBUFFER)
   }
   fn testnestedflatbuffer_nested_root() -> &Monster{
-    return flatbuffers::GetRoot::<Monster>(testnestedflatbuffer().Data());
+    return flatbuffers::get_root::<Monster>(testnestedflatbuffer().Data());
   }
   fn testempty(&self) -> &Stat  {
     // yo
@@ -728,7 +728,7 @@ impl Monster /* private flatbuffers::Table */ {
   }
   fn flex_flexbuffer_root() -> flexbuffers::Reference {
     let v = flex();
-    return flexbuffers::GetRoot(v.Data(), v.size());
+    return flexbuffers::get_root(v.Data(), v.size());
   }
   fn test5(&self) -> &flatbuffers::Vector<&Test>  {
     // yo
@@ -1679,7 +1679,7 @@ fn TypeAliasesTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn GetMonster(buf: &Vec<u8>) -> &Monster  {
-  return flatbuffers::GetRoot::<Monster>(buf);
+  return flatbuffers::get_root::<Monster>(buf);
 }
 
 #[inline]
