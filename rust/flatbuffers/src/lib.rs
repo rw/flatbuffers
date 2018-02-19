@@ -38,6 +38,9 @@ pub fn verify_offset_required(_: &Verifier, _: isize) -> ! {
 pub fn get_root<T>(_: isize) -> ! {
     unimplemented!()
 }
+pub fn get_mutable_root<T>(_: isize) -> ! {
+    unimplemented!()
+}
 pub fn get_struct<T>(_: isize) -> ! {
     unimplemented!()
 }
