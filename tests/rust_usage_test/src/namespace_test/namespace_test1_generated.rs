@@ -88,11 +88,11 @@ impl TableInNestedNS /* private flatbuffers::Table */ {
   }
 }
 
-pub struct TableInNestedNSBuilder {
-  fbb_: &flatbuffers::FlatBufferBuilder,
+pub struct TableInNestedNSBuilder<'a> {
+  fbb_: &'a flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
-impl TableInNestedNSBuilder {
+impl<'a> TableInNestedNSBuilder<'a> {
   fn add_foo(&mut self, foo: i32 ) {
     self.fbb_.AddElement::<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
@@ -120,7 +120,7 @@ fn CreateTableInNestedNS(
 }
 
 #[inline]
-fn EnumInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+fn EnumInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, 0 },
@@ -143,7 +143,7 @@ fn EnumInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn TableInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+fn TableInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_INT, 0, -1 }
@@ -159,7 +159,7 @@ fn TableInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn StructInNestedNSTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
+fn StructInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_INT, 0, -1 },
