@@ -306,6 +306,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
     const VT_COLOR: isize = 4;
 
   fn color() -> Color  {
+    // yo
     self.GetField::<i8>(VT_COLOR, 2) as Color
   }
   fn mutate_color(color_: Color) -> bool {
@@ -357,6 +358,7 @@ impl Stat /* private flatbuffers::Table */ {
     const VT_COUNT: isize = 8;
 
   fn id() -> &flatbuffers::String  {
+    // yo
     self.GetPointer::<&flatbuffers::String>(VT_ID)
   }
   fn mutable_id(&mut self) -> &mut flatbuffers::String  {
@@ -364,12 +366,14 @@ impl Stat /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::String >(VT_ID)
   }
   fn val() -> i64  {
+    // yo
     self.GetField::<i64>(VT_VAL, 0)
   }
   fn mutate_val(val_: i64) -> bool {
     SetField::<i64>(VT_VAL, _val, 0)
   }
   fn count() -> u16  {
+    // yo
     self.GetField::<u16>(VT_COUNT, 0)
   }
   fn mutate_count(count_: u16) -> bool {
@@ -479,6 +483,7 @@ impl Monster /* private flatbuffers::Table */ {
     const VT_PARENT_NAMESPACE_TEST: isize = 72;
 
   fn pos() -> &Vec3  {
+    // yo
     self.GetStruct::<&Vec3>(VT_POS)
   }
   fn mutable_pos(&mut self) -> &mut Vec3  {
@@ -486,18 +491,21 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetStruct::<&mut Vec3 >(VT_POS)
   }
   fn mana() -> i16  {
+    // yo
     self.GetField::<i16>(VT_MANA, 150)
   }
   fn mutate_mana(mana_: i16) -> bool {
     SetField::<i16>(VT_MANA, _mana, 150)
   }
   fn hp() -> i16  {
+    // yo
     self.GetField::<i16>(VT_HP, 100)
   }
   fn mutate_hp(hp_: i16) -> bool {
     SetField::<i16>(VT_HP, _hp, 100)
   }
   fn name() -> &flatbuffers::String  {
+    // yo
     self.GetPointer::<&flatbuffers::String>(VT_NAME)
   }
   fn mutable_name(&mut self) -> &mut flatbuffers::String  {
@@ -511,6 +519,7 @@ impl Monster /* private flatbuffers::Table */ {
     return strcmp(name().c_str(), val);
   }
   fn inventory() -> &flatbuffers::Vector<u8>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<u8>>(VT_INVENTORY)
   }
   fn mutable_inventory(&mut self) -> &mut flatbuffers::Vector<u8>  {
@@ -518,18 +527,21 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<u8> >(VT_INVENTORY)
   }
   fn color() -> Color  {
+    // yo
     self.GetField::<i8>(VT_COLOR, 8) as Color
   }
   fn mutate_color(color_: Color) -> bool {
     SetField::<i8>(VT_COLOR, _color as i8, 8)
   }
   fn test_type() -> Any  {
+    // yo
     self.GetField::<u8>(VT_TEST_TYPE, 0) as Any
   }
   fn mutate_test_type(test_type_: Any) -> bool {
     SetField::<u8>(VT_TEST_TYPE, _test_type as u8, 0)
   }
   fn test() -> &void  {
+    // yo
     self.GetPointer::<&void>(VT_TEST)
   }
   // TODO(?) template<typename T> const T *test_as() const;
@@ -547,6 +559,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut void >(VT_TEST)
   }
   fn test4() -> &flatbuffers::Vector<&Test>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<&Test>>(VT_TEST4)
   }
   fn mutable_test4(&mut self) -> &mut flatbuffers::Vector<&Test>  {
@@ -554,6 +567,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(VT_TEST4)
   }
   fn testarrayofstring() -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(VT_TESTARRAYOFSTRING)
   }
   fn mutable_testarrayofstring(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
@@ -563,6 +577,7 @@ impl Monster /* private flatbuffers::Table */ {
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
   fn testarrayoftables() -> &flatbuffers::Vector<flatbuffers::Offset<Monster>>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<Monster>>>(VT_TESTARRAYOFTABLES)
   }
   fn mutable_testarrayoftables(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<Monster>>  {
@@ -570,6 +585,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<Monster>> >(VT_TESTARRAYOFTABLES)
   }
   fn enemy() -> &Monster  {
+    // yo
     self.GetPointer::<&Monster>(VT_ENEMY)
   }
   fn mutable_enemy(&mut self) -> &mut Monster  {
@@ -577,6 +593,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut Monster >(VT_ENEMY)
   }
   fn testnestedflatbuffer() -> &flatbuffers::Vector<u8>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<u8>>(VT_TESTNESTEDFLATBUFFER)
   }
   fn mutable_testnestedflatbuffer(&mut self) -> &mut flatbuffers::Vector<u8>  {
@@ -587,6 +604,7 @@ impl Monster /* private flatbuffers::Table */ {
     return flatbuffers::GetRoot::<Monster>(testnestedflatbuffer().Data());
   }
   fn testempty() -> &Stat  {
+    // yo
     self.GetPointer::<&Stat>(VT_TESTEMPTY)
   }
   fn mutable_testempty(&mut self) -> &mut Stat  {
@@ -594,60 +612,70 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut Stat >(VT_TESTEMPTY)
   }
   fn testbool() -> bool  {
+    // yo
     self.GetField::<bool>(VT_TESTBOOL, 0) != 0
   }
   fn mutate_testbool(testbool_: bool) -> bool {
     SetField::<bool>(VT_TESTBOOL, _testbool as bool, 0)
   }
   fn testhashs32_fnv1() -> i32  {
+    // yo
     self.GetField::<i32>(VT_TESTHASHS32_FNV1, 0)
   }
   fn mutate_testhashs32_fnv1(testhashs32_fnv1_: i32) -> bool {
     SetField::<i32>(VT_TESTHASHS32_FNV1, _testhashs32_fnv1, 0)
   }
   fn testhashu32_fnv1() -> u32  {
+    // yo
     self.GetField::<u32>(VT_TESTHASHU32_FNV1, 0)
   }
   fn mutate_testhashu32_fnv1(testhashu32_fnv1_: u32) -> bool {
     SetField::<u32>(VT_TESTHASHU32_FNV1, _testhashu32_fnv1, 0)
   }
   fn testhashs64_fnv1() -> i64  {
+    // yo
     self.GetField::<i64>(VT_TESTHASHS64_FNV1, 0)
   }
   fn mutate_testhashs64_fnv1(testhashs64_fnv1_: i64) -> bool {
     SetField::<i64>(VT_TESTHASHS64_FNV1, _testhashs64_fnv1, 0)
   }
   fn testhashu64_fnv1() -> u64  {
+    // yo
     self.GetField::<u64>(VT_TESTHASHU64_FNV1, 0)
   }
   fn mutate_testhashu64_fnv1(testhashu64_fnv1_: u64) -> bool {
     SetField::<u64>(VT_TESTHASHU64_FNV1, _testhashu64_fnv1, 0)
   }
   fn testhashs32_fnv1a() -> i32  {
+    // yo
     self.GetField::<i32>(VT_TESTHASHS32_FNV1A, 0)
   }
   fn mutate_testhashs32_fnv1a(testhashs32_fnv1a_: i32) -> bool {
     SetField::<i32>(VT_TESTHASHS32_FNV1A, _testhashs32_fnv1a, 0)
   }
   fn testhashu32_fnv1a() -> u32  {
+    // yo
     self.GetField::<u32>(VT_TESTHASHU32_FNV1A, 0)
   }
   fn mutate_testhashu32_fnv1a(testhashu32_fnv1a_: u32) -> bool {
     SetField::<u32>(VT_TESTHASHU32_FNV1A, _testhashu32_fnv1a, 0)
   }
   fn testhashs64_fnv1a() -> i64  {
+    // yo
     self.GetField::<i64>(VT_TESTHASHS64_FNV1A, 0)
   }
   fn mutate_testhashs64_fnv1a(testhashs64_fnv1a_: i64) -> bool {
     SetField::<i64>(VT_TESTHASHS64_FNV1A, _testhashs64_fnv1a, 0)
   }
   fn testhashu64_fnv1a() -> u64  {
+    // yo
     self.GetField::<u64>(VT_TESTHASHU64_FNV1A, 0)
   }
   fn mutate_testhashu64_fnv1a(testhashu64_fnv1a_: u64) -> bool {
     SetField::<u64>(VT_TESTHASHU64_FNV1A, _testhashu64_fnv1a, 0)
   }
   fn testarrayofbools() -> &flatbuffers::Vector<bool>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<bool>>(VT_TESTARRAYOFBOOLS)
   }
   fn mutable_testarrayofbools(&mut self) -> &mut flatbuffers::Vector<bool>  {
@@ -655,24 +683,28 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<bool> >(VT_TESTARRAYOFBOOLS)
   }
   fn testf() -> f32  {
+    // yo
     self.GetField::<f32>(VT_TESTF, 3.14159)
   }
   fn mutate_testf(testf_: f32) -> bool {
     SetField::<f32>(VT_TESTF, _testf, 3.14159)
   }
   fn testf2() -> f32  {
+    // yo
     self.GetField::<f32>(VT_TESTF2, 3.0)
   }
   fn mutate_testf2(testf2_: f32) -> bool {
     SetField::<f32>(VT_TESTF2, _testf2, 3.0)
   }
   fn testf3() -> f32  {
+    // yo
     self.GetField::<f32>(VT_TESTF3, 0.0)
   }
   fn mutate_testf3(testf3_: f32) -> bool {
     SetField::<f32>(VT_TESTF3, _testf3, 0.0)
   }
   fn testarrayofstring2() -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(VT_TESTARRAYOFSTRING2)
   }
   fn mutable_testarrayofstring2(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
@@ -680,6 +712,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(VT_TESTARRAYOFSTRING2)
   }
   fn testarrayofsortedstruct() -> &flatbuffers::Vector<&Ability>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<&Ability>>(VT_TESTARRAYOFSORTEDSTRUCT)
   }
   fn mutable_testarrayofsortedstruct(&mut self) -> &mut flatbuffers::Vector<&Ability>  {
@@ -687,6 +720,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<&Ability> >(VT_TESTARRAYOFSORTEDSTRUCT)
   }
   fn flex() -> &flatbuffers::Vector<u8>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<u8>>(VT_FLEX)
   }
   fn mutable_flex(&mut self) -> &mut flatbuffers::Vector<u8>  {
@@ -698,6 +732,7 @@ impl Monster /* private flatbuffers::Table */ {
     return flexbuffers::GetRoot(v.Data(), v.size());
   }
   fn test5() -> &flatbuffers::Vector<&Test>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<&Test>>(VT_TEST5)
   }
   fn mutable_test5(&mut self) -> &mut flatbuffers::Vector<&Test>  {
@@ -705,6 +740,7 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(VT_TEST5)
   }
   fn vector_of_longs() -> &flatbuffers::Vector<i64>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<i64>>(VT_VECTOR_OF_LONGS)
   }
   fn mutable_vector_of_longs(&mut self) -> &mut flatbuffers::Vector<i64>  {
@@ -712,18 +748,20 @@ impl Monster /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<i64> >(VT_VECTOR_OF_LONGS)
   }
   fn vector_of_doubles() -> &flatbuffers::Vector<f64>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<f64>>(VT_VECTOR_OF_DOUBLES)
   }
   fn mutable_vector_of_doubles(&mut self) -> &mut flatbuffers::Vector<f64>  {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut flatbuffers::Vector<f64> >(VT_VECTOR_OF_DOUBLES)
   }
-  fn parent_namespace_test() -> &MyGame::InParentNamespace  {
-    self.GetPointer::<&MyGame::InParentNamespace>(VT_PARENT_NAMESPACE_TEST)
+  fn parent_namespace_test() -> &super::InParentNamespace  {
+    // yo
+    self.GetPointer::<&super::InParentNamespace>(VT_PARENT_NAMESPACE_TEST)
   }
-  fn mutable_parent_namespace_test(&mut self) -> &mut MyGame::InParentNamespace  {
+  fn mutable_parent_namespace_test(&mut self) -> &mut super::InParentNamespace  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut MyGame::InParentNamespace >(VT_PARENT_NAMESPACE_TEST)
+    &mut GetPointer::<&mut super::InParentNamespace >(VT_PARENT_NAMESPACE_TEST)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return VerifyTableStart(verifier) &&
@@ -907,7 +945,7 @@ impl MonsterBuilder {
   fn add_vector_of_doubles(vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
     fbb_.AddOffset(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
   }
-  fn add_parent_namespace_test(parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace> ) {
+  fn add_parent_namespace_test(parent_namespace_test: flatbuffers::Offset<super::InParentNamespace> ) {
     fbb_.AddOffset(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
@@ -961,7 +999,7 @@ fn CreateMonster(
     test5: flatbuffers::Offset<flatbuffers::Vector<&Test>>  /* = 0 */,
     vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>>  /* = 0 */,
     vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */,
-    parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
+    parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder_.add_testhashu64_fnv1a(testhashu64_fnv1a);
   builder_.add_testhashs64_fnv1a(testhashs64_fnv1a);
@@ -1036,7 +1074,7 @@ fn CreateMonsterDirect(
     test5: Option<std::vector<Test>> /* = nullptr */,
     vector_of_longs: Option<std::vector<i64>> /* = nullptr */,
     vector_of_doubles: Option<std::vector<f64>> /* = nullptr */,
-    parent_namespace_test: flatbuffers::Offset<MyGame::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
+    parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
   return CreateMonster(
       _fbb,
       pos,
@@ -1092,66 +1130,77 @@ impl TypeAliases /* private flatbuffers::Table */ {
     const VT_VF64: isize = 26;
 
   fn i8_() -> i8  {
+    // yo
     self.GetField::<i8>(VT_I8_, 0)
   }
   fn mutate_i8_(i8__: i8) -> bool {
     SetField::<i8>(VT_I8_, _i8_, 0)
   }
   fn u8_() -> u8  {
+    // yo
     self.GetField::<u8>(VT_U8_, 0)
   }
   fn mutate_u8_(u8__: u8) -> bool {
     SetField::<u8>(VT_U8_, _u8_, 0)
   }
   fn i16_() -> i16  {
+    // yo
     self.GetField::<i16>(VT_I16_, 0)
   }
   fn mutate_i16_(i16__: i16) -> bool {
     SetField::<i16>(VT_I16_, _i16_, 0)
   }
   fn u16_() -> u16  {
+    // yo
     self.GetField::<u16>(VT_U16_, 0)
   }
   fn mutate_u16_(u16__: u16) -> bool {
     SetField::<u16>(VT_U16_, _u16_, 0)
   }
   fn i32_() -> i32  {
+    // yo
     self.GetField::<i32>(VT_I32_, 0)
   }
   fn mutate_i32_(i32__: i32) -> bool {
     SetField::<i32>(VT_I32_, _i32_, 0)
   }
   fn u32_() -> u32  {
+    // yo
     self.GetField::<u32>(VT_U32_, 0)
   }
   fn mutate_u32_(u32__: u32) -> bool {
     SetField::<u32>(VT_U32_, _u32_, 0)
   }
   fn i64_() -> i64  {
+    // yo
     self.GetField::<i64>(VT_I64_, 0)
   }
   fn mutate_i64_(i64__: i64) -> bool {
     SetField::<i64>(VT_I64_, _i64_, 0)
   }
   fn u64_() -> u64  {
+    // yo
     self.GetField::<u64>(VT_U64_, 0)
   }
   fn mutate_u64_(u64__: u64) -> bool {
     SetField::<u64>(VT_U64_, _u64_, 0)
   }
   fn f32_() -> f32  {
+    // yo
     self.GetField::<f32>(VT_F32_, 0.0)
   }
   fn mutate_f32_(f32__: f32) -> bool {
     SetField::<f32>(VT_F32_, _f32_, 0.0)
   }
   fn f64_() -> f64  {
+    // yo
     self.GetField::<f64>(VT_F64_, 0.0)
   }
   fn mutate_f64_(f64__: f64) -> bool {
     SetField::<f64>(VT_F64_, _f64_, 0.0)
   }
   fn v8() -> &flatbuffers::Vector<i8>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<i8>>(VT_V8)
   }
   fn mutable_v8(&mut self) -> &mut flatbuffers::Vector<i8>  {
@@ -1159,6 +1208,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
     &mut GetPointer::<&mut flatbuffers::Vector<i8> >(VT_V8)
   }
   fn vf64() -> &flatbuffers::Vector<f64>  {
+    // yo
     self.GetPointer::<&flatbuffers::Vector<f64>>(VT_VF64)
   }
   fn mutable_vf64(&mut self) -> &mut flatbuffers::Vector<f64>  {
