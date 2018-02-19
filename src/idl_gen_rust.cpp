@@ -2420,9 +2420,9 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       code_.SetValue("FIELD_TYPE",
-                     GenTypeGet(field.value.type, ": ", "", ": ", false));
+                     GenTypeGet(field.value.type, "", "", "", false));
       code_.SetValue("FIELD_NAME", Name(field));
-      code_ += "  {{FIELD_TYPE}}{{FIELD_NAME}}_,";
+      code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
       if (field.padding) {
         std::string padding;

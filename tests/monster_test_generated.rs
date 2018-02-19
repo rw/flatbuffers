@@ -163,8 +163,8 @@ fn EnumNameAny(e: Any) -> &'static str {
 // MANUALLY_ALIGNED_STRUCT(2)
 #[repr(C, packed)]
 pub struct Test {
-  i16: a_,
-  i8: b_,
+  a_: i16,
+  b_: i8,
   u8: padding0__,
 } // pub struct Test
 
@@ -195,14 +195,14 @@ impl Test {
 // MANUALLY_ALIGNED_STRUCT(16)
 #[repr(C, packed)]
 pub struct Vec3 {
-  f32: x_,
-  f32: y_,
-  f32: z_,
+  x_: f32,
+  y_: f32,
+  z_: f32,
   u32: padding0__,
-  f64: test1_,
-  i8: test2_,
+  test1_: f64,
+  test2_: i8,
   u8: padding1__,
-  Test: test3_,
+  test3_: Test,
   u16: padding2__,
 } // pub struct Vec3
 
@@ -261,8 +261,8 @@ impl Vec3 {
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
 pub struct Ability {
-  u32: id_,
-  u32: distance_,
+  id_: u32,
+  distance_: u32,
 } // pub struct Ability
 
 impl Ability {
