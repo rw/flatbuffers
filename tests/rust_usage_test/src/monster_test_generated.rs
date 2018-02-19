@@ -1695,7 +1695,7 @@ fn MonsterIdentifier() -> &str {
 
 #[inline]
 fn MonsterBufferHasIdentifier(buf: &Vec<u8>) -> bool {
-  return flatbuffers::BufferHasIdentifier(
+  return flatbuffers::buffer_has_identifier(
       buf, MonsterIdentifier());
 }
 

@@ -363,7 +363,7 @@ class RustGenerator : public BaseGenerator {
           code_ += "#[inline]";
           code_ += "fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &Vec<u8>)"
                    " -> bool {";
-          code_ += "  return flatbuffers::BufferHasIdentifier(";
+          code_ += "  return flatbuffers::buffer_has_identifier(";
           code_ += "      buf, {{STRUCT_NAME}}Identifier());";
           code_ += "}";
           code_ += "";
