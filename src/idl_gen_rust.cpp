@@ -679,7 +679,7 @@ class RustGenerator : public BaseGenerator {
   std::string UnionVectorVerifySignature(const EnumDef &enum_def) {
     return "fn Verify" + Name(enum_def) + "Vector" +
            "(verifier: &flatbuffers::Verifier, " +
-           "values: &flatbuffers::Vector<flatbuffers::Offset<void>>, " +
+           "values: &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Void>>, " +
            "types: &flatbuffers::Vector<uint8_t>) -> bool";
   }
 
@@ -691,7 +691,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string UnionPackSignature(const EnumDef &enum_def, bool inclass) {
-    return "flatbuffers::Offset<void> " +
+    return "flatbuffers::Offset<flatbuffers::Void> " +
            (inclass ? "" : Name(enum_def) + "Union::") +
            "Pack(flatbuffers::FlatBufferBuilder &_fbb, " +
            "const flatbuffers::rehasher_function_t *_rehasher" +
@@ -2203,7 +2203,7 @@ class RustGenerator : public BaseGenerator {
           case BASE_TYPE_UNION: {
             code +=
                 "_fbb.CreateVector<flatbuffers::"
-                "Offset<void>>(" +
+                "Offset<flatbuffers::Void>>(" +
                 value +
                 ".size(), [](size_t i, _VectorArgs *__va) { "
                 "return __va->_" +
