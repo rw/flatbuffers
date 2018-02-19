@@ -7,7 +7,7 @@ pub mod MyGame {
   use self::flatbuffers::flexbuffers;
   use std::cmp::Ordering;
 
-struct InParentNamespace {}
+pub struct InParentNamespace {}
 impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
@@ -16,7 +16,7 @@ impl InParentNamespace /* private flatbuffers::Table */ {
   }
 }
 
-struct InParentNamespaceBuilder {
+pub struct InParentNamespaceBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
@@ -57,7 +57,7 @@ pub mod Example2 {
   use self::flatbuffers::flexbuffers;
   use std::cmp::Ordering;
 
-struct Monster {}
+pub struct Monster {}
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
@@ -66,7 +66,7 @@ impl Monster /* private flatbuffers::Table */ {
   }
 }
 
-struct MonsterBuilder {
+pub struct MonsterBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
@@ -299,7 +299,7 @@ impl Ability {
 }
 // STRUCT_END(Ability, 8);
 
-struct TestSimpleTableWithEnum {}
+pub struct TestSimpleTableWithEnum {}
 impl flatbuffers::Table for TestSimpleTableWithEnum {}
 impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
     const VT_COLOR: isize = 4;
@@ -318,7 +318,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
   }
 }
 
-struct TestSimpleTableWithEnumBuilder {
+pub struct TestSimpleTableWithEnumBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
@@ -349,7 +349,7 @@ fn CreateTestSimpleTableWithEnum(
   builder.Finish()
 }
 
-struct Stat {}
+pub struct Stat {}
 impl flatbuffers::Table for Stat {}
 impl Stat /* private flatbuffers::Table */ {
     const VT_ID: isize = 4;
@@ -388,7 +388,7 @@ impl Stat /* private flatbuffers::Table */ {
   }
 }
 
-struct StatBuilder {
+pub struct StatBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
@@ -443,7 +443,7 @@ fn CreateStatDirect(
 }
 
 /// an example documentation comment: monster object
-struct Monster {}
+pub struct Monster {}
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
     const VT_POS: isize = 4;
@@ -841,7 +841,7 @@ impl Monster /* private flatbuffers::Table */ {
 //  return test_as_MyGame_Example2_Monster();
 //}
 //
-struct MonsterBuilder {
+pub struct MonsterBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
@@ -1113,7 +1113,7 @@ fn CreateMonsterDirect(
       parent_namespace_test);
 }
 
-struct TypeAliases {}
+pub struct TypeAliases {}
 impl flatbuffers::Table for TypeAliases {}
 impl TypeAliases /* private flatbuffers::Table */ {
     const VT_I8_: isize = 4;
@@ -1235,7 +1235,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
   }
 }
 
-struct TypeAliasesBuilder {
+pub struct TypeAliasesBuilder {
   fbb_: &flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::uoffset_t,
 }
