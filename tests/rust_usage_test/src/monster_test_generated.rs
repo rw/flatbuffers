@@ -301,12 +301,12 @@ impl flatbuffers::Table for TestSimpleTableWithEnum {}
 impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
     const VT_COLOR: isize = 4;
 
-  fn color() -> Color  {
+  fn color(&self) -> Color  {
     // yo
-    self.GetField::<i8>(VT_COLOR, 2) as Color
+    self.GetField::<i8>(self.VT_COLOR, 2) as Color
   }
-  fn mutate_color(color_: Color) -> bool {
-    SetField::<i8>(VT_COLOR, _color as i8, 2)
+  fn mutate_color(&mut self, color_: Color) -> bool {
+    flatbuffers::set_field::<i8>(self.VT_COLOR, color_ as i8, 2)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -353,27 +353,27 @@ impl Stat /* private flatbuffers::Table */ {
     const VT_VAL: isize = 6;
     const VT_COUNT: isize = 8;
 
-  fn id() -> &flatbuffers::String  {
+  fn id(&self) -> &flatbuffers::String  {
     // yo
-    self.GetPointer::<&flatbuffers::String>(VT_ID)
+    self.GetPointer::<&flatbuffers::String>(self.VT_ID)
   }
   fn mutable_id(&mut self) -> &mut flatbuffers::String  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::String >(VT_ID)
+    &mut GetPointer::<&mut flatbuffers::String >(self.VT_ID)
   }
-  fn val() -> i64  {
+  fn val(&self) -> i64  {
     // yo
-    self.GetField::<i64>(VT_VAL, 0)
+    self.GetField::<i64>(self.VT_VAL, 0)
   }
-  fn mutate_val(val_: i64) -> bool {
-    SetField::<i64>(VT_VAL, _val, 0)
+  fn mutate_val(&mut self, val_: i64) -> bool {
+    flatbuffers::set_field::<i64>(self.VT_VAL, val_, 0)
   }
-  fn count() -> u16  {
+  fn count(&self) -> u16  {
     // yo
-    self.GetField::<u16>(VT_COUNT, 0)
+    self.GetField::<u16>(self.VT_COUNT, 0)
   }
-  fn mutate_count(count_: u16) -> bool {
-    SetField::<u16>(VT_COUNT, _count, 0)
+  fn mutate_count(&mut self, count_: u16) -> bool {
+    flatbuffers::set_field::<u16>(self.VT_COUNT, count_, 0)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -478,35 +478,35 @@ impl Monster /* private flatbuffers::Table */ {
     const VT_VECTOR_OF_DOUBLES: isize = 70;
     const VT_PARENT_NAMESPACE_TEST: isize = 72;
 
-  fn pos() -> &Vec3  {
+  fn pos(&self) -> &Vec3  {
     // yo
-    self.GetStruct::<&Vec3>(VT_POS)
+    self.GetStruct::<&Vec3>(self.VT_POS)
   }
   fn mutable_pos(&mut self) -> &mut Vec3  {
     /* TODO: are there non-reference choices here? */
-    &mut GetStruct::<&mut Vec3 >(VT_POS)
+    &mut GetStruct::<&mut Vec3 >(self.VT_POS)
   }
-  fn mana() -> i16  {
+  fn mana(&self) -> i16  {
     // yo
-    self.GetField::<i16>(VT_MANA, 150)
+    self.GetField::<i16>(self.VT_MANA, 150)
   }
-  fn mutate_mana(mana_: i16) -> bool {
-    SetField::<i16>(VT_MANA, _mana, 150)
+  fn mutate_mana(&mut self, mana_: i16) -> bool {
+    flatbuffers::set_field::<i16>(self.VT_MANA, mana_, 150)
   }
-  fn hp() -> i16  {
+  fn hp(&self) -> i16  {
     // yo
-    self.GetField::<i16>(VT_HP, 100)
+    self.GetField::<i16>(self.VT_HP, 100)
   }
-  fn mutate_hp(hp_: i16) -> bool {
-    SetField::<i16>(VT_HP, _hp, 100)
+  fn mutate_hp(&mut self, hp_: i16) -> bool {
+    flatbuffers::set_field::<i16>(self.VT_HP, hp_, 100)
   }
-  fn name() -> &flatbuffers::String  {
+  fn name(&self) -> &flatbuffers::String  {
     // yo
-    self.GetPointer::<&flatbuffers::String>(VT_NAME)
+    self.GetPointer::<&flatbuffers::String>(self.VT_NAME)
   }
   fn mutable_name(&mut self) -> &mut flatbuffers::String  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::String >(VT_NAME)
+    &mut GetPointer::<&mut flatbuffers::String >(self.VT_NAME)
   }
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
     return *self.name() < *o.name();
@@ -514,31 +514,31 @@ impl Monster /* private flatbuffers::Table */ {
   fn KeyCompareWithValue(&self, val: &const_char) -> isize {
     return strcmp(self.name().c_str(), val);
   }
-  fn inventory() -> &flatbuffers::Vector<u8>  {
+  fn inventory(&self) -> &flatbuffers::Vector<u8>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<u8>>(VT_INVENTORY)
+    self.GetPointer::<&flatbuffers::Vector<u8>>(self.VT_INVENTORY)
   }
   fn mutable_inventory(&mut self) -> &mut flatbuffers::Vector<u8>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<u8> >(VT_INVENTORY)
+    &mut GetPointer::<&mut flatbuffers::Vector<u8> >(self.VT_INVENTORY)
   }
-  fn color() -> Color  {
+  fn color(&self) -> Color  {
     // yo
-    self.GetField::<i8>(VT_COLOR, 8) as Color
+    self.GetField::<i8>(self.VT_COLOR, 8) as Color
   }
-  fn mutate_color(color_: Color) -> bool {
-    SetField::<i8>(VT_COLOR, _color as i8, 8)
+  fn mutate_color(&mut self, color_: Color) -> bool {
+    flatbuffers::set_field::<i8>(self.VT_COLOR, color_ as i8, 8)
   }
-  fn test_type() -> Any  {
+  fn test_type(&self) -> Any  {
     // yo
-    self.GetField::<u8>(VT_TEST_TYPE, 0) as Any
+    self.GetField::<u8>(self.VT_TEST_TYPE, 0) as Any
   }
-  fn mutate_test_type(test_type_: Any) -> bool {
-    SetField::<u8>(VT_TEST_TYPE, _test_type as u8, 0)
+  fn mutate_test_type(&mut self, test_type_: Any) -> bool {
+    flatbuffers::set_field::<u8>(self.VT_TEST_TYPE, test_type_ as u8, 0)
   }
-  fn test() -> &void  {
+  fn test(&self) -> &void  {
     // yo
-    self.GetPointer::<&void>(VT_TEST)
+    self.GetPointer::<&void>(self.VT_TEST)
   }
   // TODO(?) template<typename T> const T *test_as() const;
   // TODO: fn test_as_Monster() -> &Monster {
@@ -552,212 +552,212 @@ impl Monster /* private flatbuffers::Table */ {
 // TODO:   }
   fn mutable_test(&mut self) -> &mut void  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut void >(VT_TEST)
+    &mut GetPointer::<&mut void >(self.VT_TEST)
   }
-  fn test4() -> &flatbuffers::Vector<&Test>  {
+  fn test4(&self) -> &flatbuffers::Vector<&Test>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<&Test>>(VT_TEST4)
+    self.GetPointer::<&flatbuffers::Vector<&Test>>(self.VT_TEST4)
   }
   fn mutable_test4(&mut self) -> &mut flatbuffers::Vector<&Test>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(VT_TEST4)
+    &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(self.VT_TEST4)
   }
-  fn testarrayofstring() -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+  fn testarrayofstring(&self) -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(VT_TESTARRAYOFSTRING)
+    self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(self.VT_TESTARRAYOFSTRING)
   }
   fn mutable_testarrayofstring(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(VT_TESTARRAYOFSTRING)
+    &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(self.VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
-  fn testarrayoftables() -> &flatbuffers::Vector<flatbuffers::Offset<Monster>>  {
+  fn testarrayoftables(&self) -> &flatbuffers::Vector<flatbuffers::Offset<Monster>>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<Monster>>>(VT_TESTARRAYOFTABLES)
+    self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<Monster>>>(self.VT_TESTARRAYOFTABLES)
   }
   fn mutable_testarrayoftables(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<Monster>>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<Monster>> >(VT_TESTARRAYOFTABLES)
+    &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<Monster>> >(self.VT_TESTARRAYOFTABLES)
   }
-  fn enemy() -> &Monster  {
+  fn enemy(&self) -> &Monster  {
     // yo
-    self.GetPointer::<&Monster>(VT_ENEMY)
+    self.GetPointer::<&Monster>(self.VT_ENEMY)
   }
   fn mutable_enemy(&mut self) -> &mut Monster  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut Monster >(VT_ENEMY)
+    &mut GetPointer::<&mut Monster >(self.VT_ENEMY)
   }
-  fn testnestedflatbuffer() -> &flatbuffers::Vector<u8>  {
+  fn testnestedflatbuffer(&self) -> &flatbuffers::Vector<u8>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<u8>>(VT_TESTNESTEDFLATBUFFER)
+    self.GetPointer::<&flatbuffers::Vector<u8>>(self.VT_TESTNESTEDFLATBUFFER)
   }
   fn mutable_testnestedflatbuffer(&mut self) -> &mut flatbuffers::Vector<u8>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<u8> >(VT_TESTNESTEDFLATBUFFER)
+    &mut GetPointer::<&mut flatbuffers::Vector<u8> >(self.VT_TESTNESTEDFLATBUFFER)
   }
   fn testnestedflatbuffer_nested_root() -> &Monster{
     return flatbuffers::GetRoot::<Monster>(testnestedflatbuffer().Data());
   }
-  fn testempty() -> &Stat  {
+  fn testempty(&self) -> &Stat  {
     // yo
-    self.GetPointer::<&Stat>(VT_TESTEMPTY)
+    self.GetPointer::<&Stat>(self.VT_TESTEMPTY)
   }
   fn mutable_testempty(&mut self) -> &mut Stat  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut Stat >(VT_TESTEMPTY)
+    &mut GetPointer::<&mut Stat >(self.VT_TESTEMPTY)
   }
-  fn testbool() -> bool  {
+  fn testbool(&self) -> bool  {
     // yo
-    self.GetField::<bool>(VT_TESTBOOL, 0) != 0
+    self.GetField::<bool>(self.VT_TESTBOOL, 0) != 0
   }
-  fn mutate_testbool(testbool_: bool) -> bool {
-    SetField::<bool>(VT_TESTBOOL, _testbool as bool, 0)
+  fn mutate_testbool(&mut self, testbool_: bool) -> bool {
+    flatbuffers::set_field::<bool>(self.VT_TESTBOOL, testbool_ as bool, 0)
   }
-  fn testhashs32_fnv1() -> i32  {
+  fn testhashs32_fnv1(&self) -> i32  {
     // yo
-    self.GetField::<i32>(VT_TESTHASHS32_FNV1, 0)
+    self.GetField::<i32>(self.VT_TESTHASHS32_FNV1, 0)
   }
-  fn mutate_testhashs32_fnv1(testhashs32_fnv1_: i32) -> bool {
-    SetField::<i32>(VT_TESTHASHS32_FNV1, _testhashs32_fnv1, 0)
+  fn mutate_testhashs32_fnv1(&mut self, testhashs32_fnv1_: i32) -> bool {
+    flatbuffers::set_field::<i32>(self.VT_TESTHASHS32_FNV1, testhashs32_fnv1_, 0)
   }
-  fn testhashu32_fnv1() -> u32  {
+  fn testhashu32_fnv1(&self) -> u32  {
     // yo
-    self.GetField::<u32>(VT_TESTHASHU32_FNV1, 0)
+    self.GetField::<u32>(self.VT_TESTHASHU32_FNV1, 0)
   }
-  fn mutate_testhashu32_fnv1(testhashu32_fnv1_: u32) -> bool {
-    SetField::<u32>(VT_TESTHASHU32_FNV1, _testhashu32_fnv1, 0)
+  fn mutate_testhashu32_fnv1(&mut self, testhashu32_fnv1_: u32) -> bool {
+    flatbuffers::set_field::<u32>(self.VT_TESTHASHU32_FNV1, testhashu32_fnv1_, 0)
   }
-  fn testhashs64_fnv1() -> i64  {
+  fn testhashs64_fnv1(&self) -> i64  {
     // yo
-    self.GetField::<i64>(VT_TESTHASHS64_FNV1, 0)
+    self.GetField::<i64>(self.VT_TESTHASHS64_FNV1, 0)
   }
-  fn mutate_testhashs64_fnv1(testhashs64_fnv1_: i64) -> bool {
-    SetField::<i64>(VT_TESTHASHS64_FNV1, _testhashs64_fnv1, 0)
+  fn mutate_testhashs64_fnv1(&mut self, testhashs64_fnv1_: i64) -> bool {
+    flatbuffers::set_field::<i64>(self.VT_TESTHASHS64_FNV1, testhashs64_fnv1_, 0)
   }
-  fn testhashu64_fnv1() -> u64  {
+  fn testhashu64_fnv1(&self) -> u64  {
     // yo
-    self.GetField::<u64>(VT_TESTHASHU64_FNV1, 0)
+    self.GetField::<u64>(self.VT_TESTHASHU64_FNV1, 0)
   }
-  fn mutate_testhashu64_fnv1(testhashu64_fnv1_: u64) -> bool {
-    SetField::<u64>(VT_TESTHASHU64_FNV1, _testhashu64_fnv1, 0)
+  fn mutate_testhashu64_fnv1(&mut self, testhashu64_fnv1_: u64) -> bool {
+    flatbuffers::set_field::<u64>(self.VT_TESTHASHU64_FNV1, testhashu64_fnv1_, 0)
   }
-  fn testhashs32_fnv1a() -> i32  {
+  fn testhashs32_fnv1a(&self) -> i32  {
     // yo
-    self.GetField::<i32>(VT_TESTHASHS32_FNV1A, 0)
+    self.GetField::<i32>(self.VT_TESTHASHS32_FNV1A, 0)
   }
-  fn mutate_testhashs32_fnv1a(testhashs32_fnv1a_: i32) -> bool {
-    SetField::<i32>(VT_TESTHASHS32_FNV1A, _testhashs32_fnv1a, 0)
+  fn mutate_testhashs32_fnv1a(&mut self, testhashs32_fnv1a_: i32) -> bool {
+    flatbuffers::set_field::<i32>(self.VT_TESTHASHS32_FNV1A, testhashs32_fnv1a_, 0)
   }
-  fn testhashu32_fnv1a() -> u32  {
+  fn testhashu32_fnv1a(&self) -> u32  {
     // yo
-    self.GetField::<u32>(VT_TESTHASHU32_FNV1A, 0)
+    self.GetField::<u32>(self.VT_TESTHASHU32_FNV1A, 0)
   }
-  fn mutate_testhashu32_fnv1a(testhashu32_fnv1a_: u32) -> bool {
-    SetField::<u32>(VT_TESTHASHU32_FNV1A, _testhashu32_fnv1a, 0)
+  fn mutate_testhashu32_fnv1a(&mut self, testhashu32_fnv1a_: u32) -> bool {
+    flatbuffers::set_field::<u32>(self.VT_TESTHASHU32_FNV1A, testhashu32_fnv1a_, 0)
   }
-  fn testhashs64_fnv1a() -> i64  {
+  fn testhashs64_fnv1a(&self) -> i64  {
     // yo
-    self.GetField::<i64>(VT_TESTHASHS64_FNV1A, 0)
+    self.GetField::<i64>(self.VT_TESTHASHS64_FNV1A, 0)
   }
-  fn mutate_testhashs64_fnv1a(testhashs64_fnv1a_: i64) -> bool {
-    SetField::<i64>(VT_TESTHASHS64_FNV1A, _testhashs64_fnv1a, 0)
+  fn mutate_testhashs64_fnv1a(&mut self, testhashs64_fnv1a_: i64) -> bool {
+    flatbuffers::set_field::<i64>(self.VT_TESTHASHS64_FNV1A, testhashs64_fnv1a_, 0)
   }
-  fn testhashu64_fnv1a() -> u64  {
+  fn testhashu64_fnv1a(&self) -> u64  {
     // yo
-    self.GetField::<u64>(VT_TESTHASHU64_FNV1A, 0)
+    self.GetField::<u64>(self.VT_TESTHASHU64_FNV1A, 0)
   }
-  fn mutate_testhashu64_fnv1a(testhashu64_fnv1a_: u64) -> bool {
-    SetField::<u64>(VT_TESTHASHU64_FNV1A, _testhashu64_fnv1a, 0)
+  fn mutate_testhashu64_fnv1a(&mut self, testhashu64_fnv1a_: u64) -> bool {
+    flatbuffers::set_field::<u64>(self.VT_TESTHASHU64_FNV1A, testhashu64_fnv1a_, 0)
   }
-  fn testarrayofbools() -> &flatbuffers::Vector<bool>  {
+  fn testarrayofbools(&self) -> &flatbuffers::Vector<bool>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<bool>>(VT_TESTARRAYOFBOOLS)
+    self.GetPointer::<&flatbuffers::Vector<bool>>(self.VT_TESTARRAYOFBOOLS)
   }
   fn mutable_testarrayofbools(&mut self) -> &mut flatbuffers::Vector<bool>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<bool> >(VT_TESTARRAYOFBOOLS)
+    &mut GetPointer::<&mut flatbuffers::Vector<bool> >(self.VT_TESTARRAYOFBOOLS)
   }
-  fn testf() -> f32  {
+  fn testf(&self) -> f32  {
     // yo
-    self.GetField::<f32>(VT_TESTF, 3.14159)
+    self.GetField::<f32>(self.VT_TESTF, 3.14159)
   }
-  fn mutate_testf(testf_: f32) -> bool {
-    SetField::<f32>(VT_TESTF, _testf, 3.14159)
+  fn mutate_testf(&mut self, testf_: f32) -> bool {
+    flatbuffers::set_field::<f32>(self.VT_TESTF, testf_, 3.14159)
   }
-  fn testf2() -> f32  {
+  fn testf2(&self) -> f32  {
     // yo
-    self.GetField::<f32>(VT_TESTF2, 3.0)
+    self.GetField::<f32>(self.VT_TESTF2, 3.0)
   }
-  fn mutate_testf2(testf2_: f32) -> bool {
-    SetField::<f32>(VT_TESTF2, _testf2, 3.0)
+  fn mutate_testf2(&mut self, testf2_: f32) -> bool {
+    flatbuffers::set_field::<f32>(self.VT_TESTF2, testf2_, 3.0)
   }
-  fn testf3() -> f32  {
+  fn testf3(&self) -> f32  {
     // yo
-    self.GetField::<f32>(VT_TESTF3, 0.0)
+    self.GetField::<f32>(self.VT_TESTF3, 0.0)
   }
-  fn mutate_testf3(testf3_: f32) -> bool {
-    SetField::<f32>(VT_TESTF3, _testf3, 0.0)
+  fn mutate_testf3(&mut self, testf3_: f32) -> bool {
+    flatbuffers::set_field::<f32>(self.VT_TESTF3, testf3_, 0.0)
   }
-  fn testarrayofstring2() -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+  fn testarrayofstring2(&self) -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(VT_TESTARRAYOFSTRING2)
+    self.GetPointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(self.VT_TESTARRAYOFSTRING2)
   }
   fn mutable_testarrayofstring2(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(VT_TESTARRAYOFSTRING2)
+    &mut GetPointer::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(self.VT_TESTARRAYOFSTRING2)
   }
-  fn testarrayofsortedstruct() -> &flatbuffers::Vector<&Ability>  {
+  fn testarrayofsortedstruct(&self) -> &flatbuffers::Vector<&Ability>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<&Ability>>(VT_TESTARRAYOFSORTEDSTRUCT)
+    self.GetPointer::<&flatbuffers::Vector<&Ability>>(self.VT_TESTARRAYOFSORTEDSTRUCT)
   }
   fn mutable_testarrayofsortedstruct(&mut self) -> &mut flatbuffers::Vector<&Ability>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<&Ability> >(VT_TESTARRAYOFSORTEDSTRUCT)
+    &mut GetPointer::<&mut flatbuffers::Vector<&Ability> >(self.VT_TESTARRAYOFSORTEDSTRUCT)
   }
-  fn flex() -> &flatbuffers::Vector<u8>  {
+  fn flex(&self) -> &flatbuffers::Vector<u8>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<u8>>(VT_FLEX)
+    self.GetPointer::<&flatbuffers::Vector<u8>>(self.VT_FLEX)
   }
   fn mutable_flex(&mut self) -> &mut flatbuffers::Vector<u8>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<u8> >(VT_FLEX)
+    &mut GetPointer::<&mut flatbuffers::Vector<u8> >(self.VT_FLEX)
   }
   fn flex_flexbuffer_root() -> flexbuffers::Reference {
     let v = flex();
     return flexbuffers::GetRoot(v.Data(), v.size());
   }
-  fn test5() -> &flatbuffers::Vector<&Test>  {
+  fn test5(&self) -> &flatbuffers::Vector<&Test>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<&Test>>(VT_TEST5)
+    self.GetPointer::<&flatbuffers::Vector<&Test>>(self.VT_TEST5)
   }
   fn mutable_test5(&mut self) -> &mut flatbuffers::Vector<&Test>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(VT_TEST5)
+    &mut GetPointer::<&mut flatbuffers::Vector<&Test> >(self.VT_TEST5)
   }
-  fn vector_of_longs() -> &flatbuffers::Vector<i64>  {
+  fn vector_of_longs(&self) -> &flatbuffers::Vector<i64>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<i64>>(VT_VECTOR_OF_LONGS)
+    self.GetPointer::<&flatbuffers::Vector<i64>>(self.VT_VECTOR_OF_LONGS)
   }
   fn mutable_vector_of_longs(&mut self) -> &mut flatbuffers::Vector<i64>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<i64> >(VT_VECTOR_OF_LONGS)
+    &mut GetPointer::<&mut flatbuffers::Vector<i64> >(self.VT_VECTOR_OF_LONGS)
   }
-  fn vector_of_doubles() -> &flatbuffers::Vector<f64>  {
+  fn vector_of_doubles(&self) -> &flatbuffers::Vector<f64>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<f64>>(VT_VECTOR_OF_DOUBLES)
+    self.GetPointer::<&flatbuffers::Vector<f64>>(self.VT_VECTOR_OF_DOUBLES)
   }
   fn mutable_vector_of_doubles(&mut self) -> &mut flatbuffers::Vector<f64>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<f64> >(VT_VECTOR_OF_DOUBLES)
+    &mut GetPointer::<&mut flatbuffers::Vector<f64> >(self.VT_VECTOR_OF_DOUBLES)
   }
-  fn parent_namespace_test() -> &super::InParentNamespace  {
+  fn parent_namespace_test(&self) -> &super::InParentNamespace  {
     // yo
-    self.GetPointer::<&super::InParentNamespace>(VT_PARENT_NAMESPACE_TEST)
+    self.GetPointer::<&super::InParentNamespace>(self.VT_PARENT_NAMESPACE_TEST)
   }
   fn mutable_parent_namespace_test(&mut self) -> &mut super::InParentNamespace  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut super::InParentNamespace >(VT_PARENT_NAMESPACE_TEST)
+    &mut GetPointer::<&mut super::InParentNamespace >(self.VT_PARENT_NAMESPACE_TEST)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -1125,91 +1125,91 @@ impl TypeAliases /* private flatbuffers::Table */ {
     const VT_V8: isize = 24;
     const VT_VF64: isize = 26;
 
-  fn i8_() -> i8  {
+  fn i8_(&self) -> i8  {
     // yo
-    self.GetField::<i8>(VT_I8_, 0)
+    self.GetField::<i8>(self.VT_I8_, 0)
   }
-  fn mutate_i8_(i8__: i8) -> bool {
-    SetField::<i8>(VT_I8_, _i8_, 0)
+  fn mutate_i8_(&mut self, i8__: i8) -> bool {
+    flatbuffers::set_field::<i8>(self.VT_I8_, i8__, 0)
   }
-  fn u8_() -> u8  {
+  fn u8_(&self) -> u8  {
     // yo
-    self.GetField::<u8>(VT_U8_, 0)
+    self.GetField::<u8>(self.VT_U8_, 0)
   }
-  fn mutate_u8_(u8__: u8) -> bool {
-    SetField::<u8>(VT_U8_, _u8_, 0)
+  fn mutate_u8_(&mut self, u8__: u8) -> bool {
+    flatbuffers::set_field::<u8>(self.VT_U8_, u8__, 0)
   }
-  fn i16_() -> i16  {
+  fn i16_(&self) -> i16  {
     // yo
-    self.GetField::<i16>(VT_I16_, 0)
+    self.GetField::<i16>(self.VT_I16_, 0)
   }
-  fn mutate_i16_(i16__: i16) -> bool {
-    SetField::<i16>(VT_I16_, _i16_, 0)
+  fn mutate_i16_(&mut self, i16__: i16) -> bool {
+    flatbuffers::set_field::<i16>(self.VT_I16_, i16__, 0)
   }
-  fn u16_() -> u16  {
+  fn u16_(&self) -> u16  {
     // yo
-    self.GetField::<u16>(VT_U16_, 0)
+    self.GetField::<u16>(self.VT_U16_, 0)
   }
-  fn mutate_u16_(u16__: u16) -> bool {
-    SetField::<u16>(VT_U16_, _u16_, 0)
+  fn mutate_u16_(&mut self, u16__: u16) -> bool {
+    flatbuffers::set_field::<u16>(self.VT_U16_, u16__, 0)
   }
-  fn i32_() -> i32  {
+  fn i32_(&self) -> i32  {
     // yo
-    self.GetField::<i32>(VT_I32_, 0)
+    self.GetField::<i32>(self.VT_I32_, 0)
   }
-  fn mutate_i32_(i32__: i32) -> bool {
-    SetField::<i32>(VT_I32_, _i32_, 0)
+  fn mutate_i32_(&mut self, i32__: i32) -> bool {
+    flatbuffers::set_field::<i32>(self.VT_I32_, i32__, 0)
   }
-  fn u32_() -> u32  {
+  fn u32_(&self) -> u32  {
     // yo
-    self.GetField::<u32>(VT_U32_, 0)
+    self.GetField::<u32>(self.VT_U32_, 0)
   }
-  fn mutate_u32_(u32__: u32) -> bool {
-    SetField::<u32>(VT_U32_, _u32_, 0)
+  fn mutate_u32_(&mut self, u32__: u32) -> bool {
+    flatbuffers::set_field::<u32>(self.VT_U32_, u32__, 0)
   }
-  fn i64_() -> i64  {
+  fn i64_(&self) -> i64  {
     // yo
-    self.GetField::<i64>(VT_I64_, 0)
+    self.GetField::<i64>(self.VT_I64_, 0)
   }
-  fn mutate_i64_(i64__: i64) -> bool {
-    SetField::<i64>(VT_I64_, _i64_, 0)
+  fn mutate_i64_(&mut self, i64__: i64) -> bool {
+    flatbuffers::set_field::<i64>(self.VT_I64_, i64__, 0)
   }
-  fn u64_() -> u64  {
+  fn u64_(&self) -> u64  {
     // yo
-    self.GetField::<u64>(VT_U64_, 0)
+    self.GetField::<u64>(self.VT_U64_, 0)
   }
-  fn mutate_u64_(u64__: u64) -> bool {
-    SetField::<u64>(VT_U64_, _u64_, 0)
+  fn mutate_u64_(&mut self, u64__: u64) -> bool {
+    flatbuffers::set_field::<u64>(self.VT_U64_, u64__, 0)
   }
-  fn f32_() -> f32  {
+  fn f32_(&self) -> f32  {
     // yo
-    self.GetField::<f32>(VT_F32_, 0.0)
+    self.GetField::<f32>(self.VT_F32_, 0.0)
   }
-  fn mutate_f32_(f32__: f32) -> bool {
-    SetField::<f32>(VT_F32_, _f32_, 0.0)
+  fn mutate_f32_(&mut self, f32__: f32) -> bool {
+    flatbuffers::set_field::<f32>(self.VT_F32_, f32__, 0.0)
   }
-  fn f64_() -> f64  {
+  fn f64_(&self) -> f64  {
     // yo
-    self.GetField::<f64>(VT_F64_, 0.0)
+    self.GetField::<f64>(self.VT_F64_, 0.0)
   }
-  fn mutate_f64_(f64__: f64) -> bool {
-    SetField::<f64>(VT_F64_, _f64_, 0.0)
+  fn mutate_f64_(&mut self, f64__: f64) -> bool {
+    flatbuffers::set_field::<f64>(self.VT_F64_, f64__, 0.0)
   }
-  fn v8() -> &flatbuffers::Vector<i8>  {
+  fn v8(&self) -> &flatbuffers::Vector<i8>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<i8>>(VT_V8)
+    self.GetPointer::<&flatbuffers::Vector<i8>>(self.VT_V8)
   }
   fn mutable_v8(&mut self) -> &mut flatbuffers::Vector<i8>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<i8> >(VT_V8)
+    &mut GetPointer::<&mut flatbuffers::Vector<i8> >(self.VT_V8)
   }
-  fn vf64() -> &flatbuffers::Vector<f64>  {
+  fn vf64(&self) -> &flatbuffers::Vector<f64>  {
     // yo
-    self.GetPointer::<&flatbuffers::Vector<f64>>(VT_VF64)
+    self.GetPointer::<&flatbuffers::Vector<f64>>(self.VT_VF64)
   }
   fn mutable_vf64(&mut self) -> &mut flatbuffers::Vector<f64>  {
     /* TODO: are there non-reference choices here? */
-    &mut GetPointer::<&mut flatbuffers::Vector<f64> >(VT_VF64)
+    &mut GetPointer::<&mut flatbuffers::Vector<f64> >(self.VT_VF64)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&

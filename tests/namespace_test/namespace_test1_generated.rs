@@ -68,12 +68,12 @@ impl flatbuffers::Table for TableInNestedNS {}
 impl TableInNestedNS /* private flatbuffers::Table */ {
     const VT_FOO: isize = 4;
 
-  fn foo() -> i32  {
+  fn foo(&self) -> i32  {
     // yo
-    self.GetField::<i32>(VT_FOO, 0)
+    self.GetField::<i32>(self.VT_FOO, 0)
   }
-  fn mutate_foo(foo_: i32) -> bool {
-    SetField::<i32>(VT_FOO, _foo, 0)
+  fn mutate_foo(&mut self, foo_: i32) -> bool {
+    flatbuffers::set_field::<i32>(self.VT_FOO, foo_, 0)
   }
   fn Verify(verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
