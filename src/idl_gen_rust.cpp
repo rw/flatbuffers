@@ -1677,8 +1677,9 @@ class RustGenerator : public BaseGenerator {
             parser_.current_namespace_->GetFullyQualifiedName(nested->constant);
         auto nested_root = parser_.LookupStruct(qualified_name);
         assert(nested_root);  // Guaranteed to exist by parser.
-        (void)nested_root;
-        code_.SetValue("CPP_NAME", TranslateNameSpace(qualified_name));
+        (void)nested_root; // TODO what
+        //code_.SetValue("CPP_NAME", TranslateNameSpace(qualified_name));
+        code_.SetValue("CPP_NAME", nested->constant);
 
         code_ += "  fn {{FIELD_NAME}}_nested_root() -> &{{CPP_NAME}}{";
         code_ += "    return flatbuffers::GetRoot::<{{CPP_NAME}}>({{FIELD_NAME}}().Data());";

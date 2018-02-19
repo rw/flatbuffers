@@ -581,8 +581,8 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut flatbuffers::Vector<u8> >(VT_TESTNESTEDFLATBUFFER)
   }
-  fn testnestedflatbuffer_nested_root() -> &MyGame::Example::Monster{
-    return flatbuffers::GetRoot::<MyGame::Example::Monster>(testnestedflatbuffer().Data());
+  fn testnestedflatbuffer_nested_root() -> &Monster{
+    return flatbuffers::GetRoot::<Monster>(testnestedflatbuffer().Data());
   }
   fn testempty() -> &Stat  {
     self.GetPointer::<&Stat>(VT_TESTEMPTY)
