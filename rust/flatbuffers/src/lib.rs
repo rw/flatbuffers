@@ -5,7 +5,7 @@ pub struct Verifier {}
 pub struct TypeTable {}
 pub struct FlatBufferBuilder {}
 pub type uoffset_t = usize;
-pub type String = str;
+pub type String = i32;
 pub type Void<'a> = &'a [u8];
 pub struct Vector<T>  {
     phantom: PhantomData<T>,
