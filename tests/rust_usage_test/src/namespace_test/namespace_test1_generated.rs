@@ -4,11 +4,15 @@
 
 pub mod NamespaceA {
   extern crate flatbuffers;
+  #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
+  #[allow(unused_imports)]
   use std::cmp::Ordering;
 pub mod NamespaceB {
   extern crate flatbuffers;
+  #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
+  #[allow(unused_imports)]
   use std::cmp::Ordering;
 
 enum EnumInNestedNS {

@@ -2595,7 +2595,9 @@ class RustGenerator : public BaseGenerator {
     for (auto j = common_prefix_size; j != new_size; ++j) {
       code_ += "pub mod " + ns->components[j] + " {";
       code_ += "  extern crate flatbuffers;";
+      code_ += "  #[allow(unused_imports)]";
       code_ += "  use self::flatbuffers::flexbuffers;";
+      code_ += "  #[allow(unused_imports)]";
       code_ += "  use std::cmp::Ordering;";
     }
     if (new_size != common_prefix_size) { code_ += ""; }
