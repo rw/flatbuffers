@@ -13,7 +13,11 @@ impl FlatBufferBuilder {
     pub fn start_table(&mut self) -> usize {
         0
     }
-    pub fn end_table<T>(&mut self, _: T) {
+    pub fn end_table<T>(&mut self, _: T) -> usize {
+        0
+    }
+    pub fn finish<T>(&mut self) -> usize {
+        0
     }
 }
 pub type UOffsetT = usize;
@@ -23,9 +27,19 @@ pub struct Vector<T>  {
     phantom: PhantomData<T>,
 }
 pub struct Offset<T> {
-    _o: isize,
+    _o: usize,
     phantom: PhantomData<T>,
 }
+
+impl<T> Offset<T> {
+    pub fn new(o: usize) -> Self {
+        Offset {
+            _o: o,
+            phantom: PhantomData,
+        }
+    }
+}
+
 pub fn verify_table_start(_: &Verifier) -> bool {
     false
 }

@@ -398,9 +398,9 @@ class RustGenerator : public BaseGenerator {
         code_ += "    fbb: &mut flatbuffers::FlatBufferBuilder,";
         code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}>) {";
         if (parser_.file_identifier_.length())
-          code_ += "  fbb.Finish(root, {{STRUCT_NAME}}Identifier());";
+          code_ += "  fbb.finish(root, {{STRUCT_NAME}}Identifier());";
         else
-          code_ += "  fbb.Finish(root);";
+          code_ += "  fbb.finish(root);";
         code_ += "}";
         code_ += "";
 
@@ -834,6 +834,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("VALUES", vs);
     code_ += "#[inline]";
     code_ += "fn {{NAME}}TypeTable() -> /*&mut?*/flatbuffers::TypeTable {";
+    code_ += "  return flatbuffers::TypeTable{};";
     code_ += "  /* disable type table for now";
     if (num_fields) {
       code_ += "  static flatbuffers::TypeCode type_codes[] = {";
@@ -1915,7 +1916,7 @@ class RustGenerator : public BaseGenerator {
     // Finish() function.
     code_ += "  fn finish(&mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
     code_ += "    let end = self.fbb_.end_table(self.start_);";
-    code_ += "    let o = end as flatbuffers::Offset<{{STRUCT_NAME}}>;";
+    code_ += "    let o = flatbuffers::Offset::<{{STRUCT_NAME}}>::new(end);";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -1956,7 +1957,7 @@ class RustGenerator : public BaseGenerator {
         }
       }
     }
-    code_ += "  builder.Finish()";
+    code_ += "  builder.finish()";
     code_ += "}";
     code_ += "";
 
