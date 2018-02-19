@@ -5,9 +5,11 @@
 pub mod NamespaceA {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
+  use std::cmp::Ordering;
 pub mod NamespaceB {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
+  use std::cmp::Ordering;
 
 enum EnumInNestedNS {
   A = 0,
