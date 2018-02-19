@@ -21,6 +21,9 @@ pub fn write_scalar<S, T>(_: S, _: T) -> ! {
 pub fn set_field<T>(_: isize, _: T, _: isize) -> ! {
     unimplemented!()
 }
+pub fn verify_field(_: &Verifier, _: isize) -> ! {
+    unimplemented!()
+}
 pub mod flexbuffers {
     pub struct Reference {}
 }
