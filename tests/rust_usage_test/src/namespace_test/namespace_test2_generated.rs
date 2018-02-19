@@ -5,6 +5,7 @@
 #include "namespace_test1_generated.rs"
 
 pub mod NamespaceA {
+  #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
@@ -191,6 +192,7 @@ fn SecondTableInATypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }  // pub mod NamespaceA
 
 pub mod NamespaceC {
+  #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;

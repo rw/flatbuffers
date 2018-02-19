@@ -3,6 +3,7 @@
 
 
 pub mod MyGame {
+  #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
@@ -55,6 +56,7 @@ fn InParentNamespaceTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 pub mod Example2 {
+  #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
@@ -109,6 +111,7 @@ fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }  // pub mod Example2
 
 pub mod Example {
+  #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;

@@ -3,12 +3,14 @@
 
 
 pub mod NamespaceA {
+  #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 pub mod NamespaceB {
+  #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
