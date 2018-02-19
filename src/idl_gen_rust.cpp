@@ -1496,7 +1496,7 @@ class RustGenerator : public BaseGenerator {
   // Generate the code to call the appropriate Verify function(s) for a field.
   void GenVerifyCall(const FieldDef &field, const char *prefix) {
     code_.SetValue("PRE", prefix);
-    code_.SetValue("NAME", Name(field));
+    code_.SetValue("NAME", "self." + Name(field));
     code_.SetValue("REQUIRED", field.required ? "Required" : "");
     code_.SetValue("SIZE", GenTypeSize(field.value.type));
     code_.SetValue("OFFSET", GenFieldOffsetName(field));
@@ -1504,7 +1504,8 @@ class RustGenerator : public BaseGenerator {
       code_ += "{{PRE}}flatbuffers::verify_field{{REQUIRED}}::<{{SIZE}}>"
                "(verifier, self.{{OFFSET}})\\";
     } else {
-      code_ += "{{PRE}}VerifyOffset{{REQUIRED}}(verifier, {{OFFSET}})\\";
+      code_ += "{{PRE}}flatbuffers::verify_offset{{REQUIRED}}"
+               "(verifier, self.{{OFFSET}})\\";
     }
 
     switch (field.value.type.base_type) {

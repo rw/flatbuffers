@@ -25,6 +25,9 @@ pub fn set_field<T>(_: isize, _: T, _: isize) -> ! {
 pub fn verify_field(_: &Verifier, _: isize) -> ! {
     unimplemented!()
 }
+pub fn verify_offset(_: &Verifier, _: isize) -> ! {
+    unimplemented!()
+}
 pub fn get_struct<T>(_: isize) -> ! {
     unimplemented!()
 }

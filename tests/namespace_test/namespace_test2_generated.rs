@@ -40,8 +40,8 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
   }
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyOffset(verifier, VT_FOO_TABLE) &&
-           verifier.VerifyTable(foo_table()) &&
+           flatbuffers::verify_offset(verifier, self.VT_FOO_TABLE) &&
+           verifier.VerifyTable(self.foo_table()) &&
            flatbuffers::verify_field::<i8>(verifier, self.VT_FOO_ENUM) &&
            flatbuffers::verify_field::<NamespaceB::StructInNestedNS>(verifier, self.VT_FOO_STRUCT) &&
            verifier.EndTable();
@@ -104,8 +104,8 @@ impl SecondTableInA /* private flatbuffers::Table */ {
   }
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyOffset(verifier, VT_REFER_TO_C) &&
-           verifier.VerifyTable(refer_to_c()) &&
+           flatbuffers::verify_offset(verifier, self.VT_REFER_TO_C) &&
+           verifier.VerifyTable(self.refer_to_c()) &&
            verifier.EndTable();
   }
 }
@@ -215,10 +215,10 @@ impl TableInC /* private flatbuffers::Table */ {
   }
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyOffset(verifier, VT_REFER_TO_A1) &&
-           verifier.VerifyTable(refer_to_a1()) &&
-           VerifyOffset(verifier, VT_REFER_TO_A2) &&
-           verifier.VerifyTable(refer_to_a2()) &&
+           flatbuffers::verify_offset(verifier, self.VT_REFER_TO_A1) &&
+           verifier.VerifyTable(self.refer_to_a1()) &&
+           flatbuffers::verify_offset(verifier, self.VT_REFER_TO_A2) &&
+           verifier.VerifyTable(self.refer_to_a2()) &&
            verifier.EndTable();
   }
 }
