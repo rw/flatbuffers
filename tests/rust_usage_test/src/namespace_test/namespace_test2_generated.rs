@@ -7,6 +7,7 @@
 pub mod NamespaceA {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
+  use std::cmp::Ordering;
 
 struct TableInFirstNS {}
 impl flatbuffers::Table for TableInFirstNS {}
@@ -190,6 +191,7 @@ fn SecondTableInATypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 pub mod NamespaceC {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
+  use std::cmp::Ordering;
 
 struct TableInC {}
 impl flatbuffers::Table for TableInC {}

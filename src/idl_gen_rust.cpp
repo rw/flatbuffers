@@ -1740,8 +1740,8 @@ class RustGenerator : public BaseGenerator {
         code_ += "  }";
 
         if (is_string) {
-          code_ += "  fn KeyCompareWithValue(&self, val: &str) -> isize {";
-          code_ += "    return strcmp(self.{{FIELD_NAME}}().c_str(), val);";
+          code_ += "  fn KeyCompareWithValue(&self, val: &str) -> Ordering {";
+          code_ += "    self.{{FIELD_NAME}}().cmp(val)";
           code_ += "  }";
         } else {
           auto type = GenTypeBasic(field.value.type, false);
@@ -2593,6 +2593,7 @@ class RustGenerator : public BaseGenerator {
       code_ += "pub mod " + ns->components[j] + " {";
       code_ += "  extern crate flatbuffers;";
       code_ += "  use self::flatbuffers::flexbuffers;";
+      code_ += "  use std::cmp::Ordering;";
     }
     if (new_size != common_prefix_size) { code_ += ""; }
 

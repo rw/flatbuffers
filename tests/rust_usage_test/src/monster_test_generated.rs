@@ -5,6 +5,7 @@
 pub mod MyGame {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
+  use std::cmp::Ordering;
 
 struct InParentNamespace {}
 impl flatbuffers::Table for InParentNamespace {}
@@ -54,6 +55,7 @@ fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 pub mod Example2 {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
+  use std::cmp::Ordering;
 
 struct Monster {}
 impl flatbuffers::Table for Monster {}
@@ -105,6 +107,7 @@ fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 pub mod Example {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
+  use std::cmp::Ordering;
 
 enum Color {
   Red = 1,
@@ -511,8 +514,8 @@ impl Monster /* private flatbuffers::Table */ {
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
     return *self.name() < *o.name();
   }
-  fn KeyCompareWithValue(&self, val: &str) -> isize {
-    return strcmp(self.name().c_str(), val);
+  fn KeyCompareWithValue(&self, val: &str) -> Ordering {
+    self.name().cmp(val)
   }
   fn inventory(&self) -> &flatbuffers::Vector<u8>  {
     // yo
