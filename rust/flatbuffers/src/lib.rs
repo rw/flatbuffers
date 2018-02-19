@@ -50,6 +50,9 @@ pub fn get_field<T>(_: isize) -> ! {
 pub fn get_pointer<T>(_: isize) -> ! {
     unimplemented!()
 }
+pub fn buffer_has_identifier<S, T>(_: S, _: T) -> ! {
+    unimplemented!()
+}
 pub mod flexbuffers {
     pub struct Reference {}
 pub fn get_root<T>(_: isize) -> ! {
