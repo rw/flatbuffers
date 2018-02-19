@@ -1105,7 +1105,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("TYPE", GetUnionElement(ev, true, true));
         code_ += "    {{LABEL}} => {";
         auto getptr =
-            "      let ptr = reinterpret_cast::<&{{TYPE}}>(obj);";
+            "      let ptr = obj as &{{TYPE}};";
         if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
           if (ev.union_type.struct_def->fixed) {
             code_ += "      return true;";
