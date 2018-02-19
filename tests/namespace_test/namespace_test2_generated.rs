@@ -38,12 +38,12 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetStruct::<&mut NamespaceB::StructInNestedNS >(self.VT_FOO_STRUCT)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_FOO_TABLE) &&
            verifier.VerifyTable(foo_table()) &&
-           VerifyField::<i8>(verifier, VT_FOO_ENUM) &&
-           VerifyField::<NamespaceB::StructInNestedNS>(verifier, VT_FOO_STRUCT) &&
+           flatbuffers::verify_field::<i8>(verifier, self.VT_FOO_ENUM) &&
+           flatbuffers::verify_field::<NamespaceB::StructInNestedNS>(verifier, self.VT_FOO_STRUCT) &&
            verifier.EndTable();
   }
 }
@@ -102,7 +102,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut super::NamespaceC::TableInC >(self.VT_REFER_TO_C)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_C) &&
            verifier.VerifyTable(refer_to_c()) &&
@@ -213,7 +213,7 @@ impl TableInC /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut super::NamespaceA::SecondTableInA >(self.VT_REFER_TO_A2)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_REFER_TO_A1) &&
            verifier.VerifyTable(refer_to_a1()) &&

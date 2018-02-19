@@ -1501,8 +1501,8 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("SIZE", GenTypeSize(field.value.type));
     code_.SetValue("OFFSET", GenFieldOffsetName(field));
     if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type)) {
-      code_ +=
-          "{{PRE}}VerifyField{{REQUIRED}}::<{{SIZE}}>(verifier, {{OFFSET}})\\";
+      code_ += "{{PRE}}flatbuffers::verify_field{{REQUIRED}}::<{{SIZE}}>"
+               "(verifier, self.{{OFFSET}})\\";
     } else {
       code_ += "{{PRE}}VerifyOffset{{REQUIRED}}(verifier, {{OFFSET}})\\";
     }
@@ -1766,7 +1766,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a verifier function that can check a buffer from an untrusted
     // source will never cause reads outside the buffer.
-    code_ += "  fn Verify(verifier: &flatbuffers::Verifier) -> bool {";
+    code_ += "  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {";
     code_ += "    return flatbuffers::verify_table_start(verifier)\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {

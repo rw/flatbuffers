@@ -75,9 +75,9 @@ impl TableInNestedNS /* private flatbuffers::Table */ {
   fn mutate_foo(&mut self, foo_: i32) -> bool {
     flatbuffers::set_field::<i32>(self.VT_FOO, foo_, 0)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyField::<i32>(verifier, VT_FOO) &&
+           flatbuffers::verify_field::<i32>(verifier, self.VT_FOO) &&
            verifier.EndTable();
   }
 }

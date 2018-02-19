@@ -9,7 +9,7 @@ pub mod MyGame {
 struct InParentNamespace {}
 impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            verifier.EndTable();
   }
@@ -58,7 +58,7 @@ pub mod Example2 {
 struct Monster {}
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            verifier.EndTable();
   }
@@ -308,9 +308,9 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
   fn mutate_color(&mut self, color_: Color) -> bool {
     flatbuffers::set_field::<i8>(self.VT_COLOR, color_ as i8, 2)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyField::<i8>(verifier, VT_COLOR) &&
+           flatbuffers::verify_field::<i8>(verifier, self.VT_COLOR) &&
            verifier.EndTable();
   }
 }
@@ -375,12 +375,12 @@ impl Stat /* private flatbuffers::Table */ {
   fn mutate_count(&mut self, count_: u16) -> bool {
     flatbuffers::set_field::<u16>(self.VT_COUNT, count_, 0)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            VerifyOffset(verifier, VT_ID) &&
            verifier.Verify(id()) &&
-           VerifyField::<i64>(verifier, VT_VAL) &&
-           VerifyField::<u16>(verifier, VT_COUNT) &&
+           flatbuffers::verify_field::<i64>(verifier, self.VT_VAL) &&
+           flatbuffers::verify_field::<u16>(verifier, self.VT_COUNT) &&
            verifier.EndTable();
   }
 }
@@ -759,17 +759,17 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut super::InParentNamespace >(self.VT_PARENT_NAMESPACE_TEST)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyField::<Vec3>(verifier, VT_POS) &&
-           VerifyField::<i16>(verifier, VT_MANA) &&
-           VerifyField::<i16>(verifier, VT_HP) &&
+           flatbuffers::verify_field::<Vec3>(verifier, self.VT_POS) &&
+           flatbuffers::verify_field::<i16>(verifier, self.VT_MANA) &&
+           flatbuffers::verify_field::<i16>(verifier, self.VT_HP) &&
            VerifyOffsetRequired(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            VerifyOffset(verifier, VT_INVENTORY) &&
            verifier.Verify(inventory()) &&
-           VerifyField::<i8>(verifier, VT_COLOR) &&
-           VerifyField::<u8>(verifier, VT_TEST_TYPE) &&
+           flatbuffers::verify_field::<i8>(verifier, self.VT_COLOR) &&
+           flatbuffers::verify_field::<u8>(verifier, self.VT_TEST_TYPE) &&
            VerifyOffset(verifier, VT_TEST) &&
            VerifyAny(verifier, test(), test_type()) &&
            VerifyOffset(verifier, VT_TEST4) &&
@@ -786,20 +786,20 @@ impl Monster /* private flatbuffers::Table */ {
            verifier.Verify(testnestedflatbuffer()) &&
            VerifyOffset(verifier, VT_TESTEMPTY) &&
            verifier.VerifyTable(testempty()) &&
-           VerifyField::<bool>(verifier, VT_TESTBOOL) &&
-           VerifyField::<i32>(verifier, VT_TESTHASHS32_FNV1) &&
-           VerifyField::<u32>(verifier, VT_TESTHASHU32_FNV1) &&
-           VerifyField::<i64>(verifier, VT_TESTHASHS64_FNV1) &&
-           VerifyField::<u64>(verifier, VT_TESTHASHU64_FNV1) &&
-           VerifyField::<i32>(verifier, VT_TESTHASHS32_FNV1A) &&
-           VerifyField::<u32>(verifier, VT_TESTHASHU32_FNV1A) &&
-           VerifyField::<i64>(verifier, VT_TESTHASHS64_FNV1A) &&
-           VerifyField::<u64>(verifier, VT_TESTHASHU64_FNV1A) &&
+           flatbuffers::verify_field::<bool>(verifier, self.VT_TESTBOOL) &&
+           flatbuffers::verify_field::<i32>(verifier, self.VT_TESTHASHS32_FNV1) &&
+           flatbuffers::verify_field::<u32>(verifier, self.VT_TESTHASHU32_FNV1) &&
+           flatbuffers::verify_field::<i64>(verifier, self.VT_TESTHASHS64_FNV1) &&
+           flatbuffers::verify_field::<u64>(verifier, self.VT_TESTHASHU64_FNV1) &&
+           flatbuffers::verify_field::<i32>(verifier, self.VT_TESTHASHS32_FNV1A) &&
+           flatbuffers::verify_field::<u32>(verifier, self.VT_TESTHASHU32_FNV1A) &&
+           flatbuffers::verify_field::<i64>(verifier, self.VT_TESTHASHS64_FNV1A) &&
+           flatbuffers::verify_field::<u64>(verifier, self.VT_TESTHASHU64_FNV1A) &&
            VerifyOffset(verifier, VT_TESTARRAYOFBOOLS) &&
            verifier.Verify(testarrayofbools()) &&
-           VerifyField::<f32>(verifier, VT_TESTF) &&
-           VerifyField::<f32>(verifier, VT_TESTF2) &&
-           VerifyField::<f32>(verifier, VT_TESTF3) &&
+           flatbuffers::verify_field::<f32>(verifier, self.VT_TESTF) &&
+           flatbuffers::verify_field::<f32>(verifier, self.VT_TESTF2) &&
+           flatbuffers::verify_field::<f32>(verifier, self.VT_TESTF3) &&
            VerifyOffset(verifier, VT_TESTARRAYOFSTRING2) &&
            verifier.Verify(testarrayofstring2()) &&
            verifier.VerifyVectorOfStrings(testarrayofstring2()) &&
@@ -1211,18 +1211,18 @@ impl TypeAliases /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut flatbuffers::Vector<f64> >(self.VT_VF64)
   }
-  fn Verify(verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           VerifyField::<i8>(verifier, VT_I8_) &&
-           VerifyField::<u8>(verifier, VT_U8_) &&
-           VerifyField::<i16>(verifier, VT_I16_) &&
-           VerifyField::<u16>(verifier, VT_U16_) &&
-           VerifyField::<i32>(verifier, VT_I32_) &&
-           VerifyField::<u32>(verifier, VT_U32_) &&
-           VerifyField::<i64>(verifier, VT_I64_) &&
-           VerifyField::<u64>(verifier, VT_U64_) &&
-           VerifyField::<f32>(verifier, VT_F32_) &&
-           VerifyField::<f64>(verifier, VT_F64_) &&
+           flatbuffers::verify_field::<i8>(verifier, self.VT_I8_) &&
+           flatbuffers::verify_field::<u8>(verifier, self.VT_U8_) &&
+           flatbuffers::verify_field::<i16>(verifier, self.VT_I16_) &&
+           flatbuffers::verify_field::<u16>(verifier, self.VT_U16_) &&
+           flatbuffers::verify_field::<i32>(verifier, self.VT_I32_) &&
+           flatbuffers::verify_field::<u32>(verifier, self.VT_U32_) &&
+           flatbuffers::verify_field::<i64>(verifier, self.VT_I64_) &&
+           flatbuffers::verify_field::<u64>(verifier, self.VT_U64_) &&
+           flatbuffers::verify_field::<f32>(verifier, self.VT_F32_) &&
+           flatbuffers::verify_field::<f64>(verifier, self.VT_F64_) &&
            VerifyOffset(verifier, VT_V8) &&
            verifier.Verify(v8()) &&
            VerifyOffset(verifier, VT_VF64) &&
