@@ -1711,10 +1711,13 @@ class RustGenerator : public BaseGenerator {
         assert(nested_root);  // Guaranteed to exist by parser.
         (void)nested_root; // TODO what
         //code_.SetValue("CPP_NAME", TranslateNameSpace(qualified_name));
-        code_.SetValue("CPP_NAME", nested->constant);
+        code_.SetValue("CPP_NAME", GetRelativeNamespaceTraversal(
+              parser_.current_namespace_, nested_root->defined_namespace) +
+            nested->constant);
 
-        code_ += "  fn {{FIELD_NAME}}_nested_root() -> &{{CPP_NAME}}{";
-        code_ += "    return flatbuffers::get_root::<{{CPP_NAME}}>({{FIELD_NAME}}().Data());";
+        code_ += "//TODO: mutable nested root";
+        code_ += "  fn {{FIELD_NAME}}_nested_root(&self) -> &{{CPP_NAME}}{";
+        code_ += "    return flatbuffers::get_root::<{{CPP_NAME}}>(self.{{FIELD_NAME}}().Data());";
         code_ += "  }";
       }
 

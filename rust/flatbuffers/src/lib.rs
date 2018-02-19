@@ -46,4 +46,7 @@ pub fn get_pointer<T>(_: isize) -> ! {
 }
 pub mod flexbuffers {
     pub struct Reference {}
+pub fn get_root<T>(_: isize) -> ! {
+    unimplemented!()
+}
 }

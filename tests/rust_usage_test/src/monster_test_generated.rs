@@ -599,8 +599,8 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer::<&mut flatbuffers::Vector<u8> >(self.VT_TESTNESTEDFLATBUFFER)
   }
-  fn testnestedflatbuffer_nested_root() -> &Monster{
-    return flatbuffers::get_root::<Monster>(testnestedflatbuffer().Data());
+  fn testnestedflatbuffer_nested_root(&self) -> &Monster{
+    return flatbuffers::get_root::<Monster>(self.testnestedflatbuffer().Data());
   }
   fn testempty(&self) -> &Stat  {
     // yo
