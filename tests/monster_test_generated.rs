@@ -33,7 +33,7 @@ impl<'a> InParentNamespaceBuilder<'a> {
   // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<InParentNamespace> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<InParentNamespace>;
+    let o = flatbuffers::Offset::<InParentNamespace>::new(end);
     o
   }
 }
@@ -42,11 +42,12 @@ impl<'a> InParentNamespaceBuilder<'a> {
 fn CreateInParentNamespace(
     _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace> {
   let mut builder = InParentNamespaceBuilder::new(_fbb);
-  builder.Finish()
+  builder.finish()
 }
 
 #[inline]
 fn InParentNamespaceTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeTable tt = {
     flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
@@ -86,7 +87,7 @@ impl<'a> MonsterBuilder<'a> {
   // MonsterBuilder &operator=(const MonsterBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<Monster> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<Monster>;
+    let o = flatbuffers::Offset::<Monster>::new(end);
     o
   }
 }
@@ -95,11 +96,12 @@ impl<'a> MonsterBuilder<'a> {
 fn CreateMonster(
     _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<Monster> {
   let mut builder = MonsterBuilder::new(_fbb);
-  builder.Finish()
+  builder.finish()
 }
 
 #[inline]
 fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeTable tt = {
     flatbuffers::ST_TABLE, 0, nullptr, nullptr, nullptr, nullptr
@@ -344,7 +346,7 @@ impl<'a> TestSimpleTableWithEnumBuilder<'a> {
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<TestSimpleTableWithEnum>;
+    let o = flatbuffers::Offset::<TestSimpleTableWithEnum>::new(end);
     o
   }
 }
@@ -355,7 +357,7 @@ fn CreateTestSimpleTableWithEnum(
     color: Color  /* = Color::Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
   builder.add_color(color);
-  builder.Finish()
+  builder.finish()
 }
 
 pub struct Stat {}
@@ -420,7 +422,7 @@ impl<'a> StatBuilder<'a> {
   // StatBuilder &operator=(const StatBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<Stat> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<Stat>;
+    let o = flatbuffers::Offset::<Stat>::new(end);
     o
   }
 }
@@ -435,7 +437,7 @@ fn CreateStat(
   builder.add_val(val);
   builder.add_id(id);
   builder.add_count(count);
-  builder.Finish()
+  builder.finish()
 }
 
 #[inline]
@@ -966,7 +968,7 @@ impl<'a> MonsterBuilder<'a> {
   // MonsterBuilder &operator=(const MonsterBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<Monster> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<Monster>;
+    let o = flatbuffers::Offset::<Monster>::new(end);
     self.fbb_.Required(o, Monster::VT_NAME);
     o
   }
@@ -1044,7 +1046,7 @@ fn CreateMonster(
   builder.add_testbool(testbool);
   builder.add_test_type(test_type);
   builder.add_color(color);
-  builder.Finish()
+  builder.finish()
 }
 
 #[inline]
@@ -1294,7 +1296,7 @@ impl<'a> TypeAliasesBuilder<'a> {
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TypeAliases> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<TypeAliases>;
+    let o = flatbuffers::Offset::<TypeAliases>::new(end);
     o
   }
 }
@@ -1327,7 +1329,7 @@ fn CreateTypeAliases(
   builder.add_i16_(i16_);
   builder.add_u8_(u8_);
   builder.add_i8_(i8_);
-  builder.Finish()
+  builder.finish()
 }
 
 #[inline]
@@ -1398,6 +1400,7 @@ fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vecto
 
 #[inline]
 fn ColorTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, 0 },
@@ -1422,6 +1425,7 @@ fn ColorTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn AnyTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, -1 },
@@ -1449,6 +1453,7 @@ fn AnyTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn TestTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SHORT, 0, -1 },
@@ -1468,6 +1473,7 @@ fn TestTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn TestSimpleTableWithEnumTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, 0 }
@@ -1487,6 +1493,7 @@ fn TestSimpleTableWithEnumTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn Vec3TypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_FLOAT, 0, -1 },
@@ -1518,6 +1525,7 @@ fn Vec3TypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn AbilityTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_UINT, 0, -1 },
@@ -1537,6 +1545,7 @@ fn AbilityTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn StatTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_STRING, 0, -1 },
@@ -1557,6 +1566,7 @@ fn StatTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
@@ -1651,6 +1661,7 @@ fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn TypeAliasesTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_CHAR, 0, -1 },
@@ -1723,7 +1734,7 @@ fn MonsterExtension() -> &'static str {
 fn FinishMonsterBuffer(
     fbb: &mut flatbuffers::FlatBufferBuilder,
     root: flatbuffers::Offset<Monster>) {
-  fbb.Finish(root, MonsterIdentifier());
+  fbb.finish(root, MonsterIdentifier());
 }
 
 }  // pub mod Example

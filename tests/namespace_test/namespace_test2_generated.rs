@@ -75,7 +75,7 @@ impl<'a> TableInFirstNSBuilder<'a> {
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TableInFirstNS> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<TableInFirstNS>;
+    let o = flatbuffers::Offset::<TableInFirstNS>::new(end);
     o
   }
 }
@@ -90,7 +90,7 @@ fn CreateTableInFirstNS(
   builder.add_foo_struct(foo_struct);
   builder.add_foo_table(foo_table);
   builder.add_foo_enum(foo_enum);
-  builder.Finish()
+  builder.finish()
 }
 
 pub struct SecondTableInA {}
@@ -131,7 +131,7 @@ impl<'a> SecondTableInABuilder<'a> {
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<SecondTableInA> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<SecondTableInA>;
+    let o = flatbuffers::Offset::<SecondTableInA>::new(end);
     o
   }
 }
@@ -142,11 +142,12 @@ fn CreateSecondTableInA(
     refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC>  /* = 0 */) -> flatbuffers::Offset<SecondTableInA> {
   let mut builder = SecondTableInABuilder::new(_fbb);
   builder.add_refer_to_c(refer_to_c);
-  builder.Finish()
+  builder.finish()
 }
 
 #[inline]
 fn TableInFirstNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
@@ -172,6 +173,7 @@ fn TableInFirstNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 
 #[inline]
 fn SecondTableInATypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 }
@@ -251,7 +253,7 @@ impl<'a> TableInCBuilder<'a> {
   // TableInCBuilder &operator=(const TableInCBuilder &);
   fn finish(&mut self) -> flatbuffers::Offset<TableInC> {
     let end = self.fbb_.end_table(self.start_);
-    let o = end as flatbuffers::Offset<TableInC>;
+    let o = flatbuffers::Offset::<TableInC>::new(end);
     o
   }
 }
@@ -264,11 +266,12 @@ fn CreateTableInC(
   let mut builder = TableInCBuilder::new(_fbb);
   builder.add_refer_to_a2(refer_to_a2);
   builder.add_refer_to_a1(refer_to_a1);
-  builder.Finish()
+  builder.finish()
 }
 
 #[inline]
 fn TableInCTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+  return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_SEQUENCE, 0, 0 },
