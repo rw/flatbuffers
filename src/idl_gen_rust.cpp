@@ -634,8 +634,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string GenEnumValDecl(const EnumDef &enum_def,
                              const std::string &enum_val) const {
-    const IDLOptions &opts = parser_.opts;
-    return opts.prefixed_enums ? Name(enum_def) + "_" + enum_val : enum_val;
+    return enum_val;
   }
 
   std::string GetEnumValUse(const EnumDef &enum_def,

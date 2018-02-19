@@ -10,11 +10,11 @@ pub mod NamespaceB {
   use self::flatbuffers::flexbuffers;
 
 enum EnumInNestedNS {
-  EnumInNestedNS_A = 0,
-  EnumInNestedNS_B = 1,
-  EnumInNestedNS_C = 2,
-  EnumInNestedNS_MIN = EnumInNestedNS_A,
-  EnumInNestedNS_MAX = EnumInNestedNS_C
+  A = 0,
+  B = 1,
+  C = 2,
+  MIN = A,
+  MAX = C
 }
 
 const EnumValuesEnumInNestedNS:[EnumInNestedNS; 3] = [

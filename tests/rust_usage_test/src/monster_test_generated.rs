@@ -107,11 +107,11 @@ pub mod Example {
   use self::flatbuffers::flexbuffers;
 
 enum Color {
-  Color_Red = 1,
-  Color_Green = 2,
-  Color_Blue = 8,
-  Color_NONE = 0,
-  Color_ANY = 11
+  Red = 1,
+  Green = 2,
+  Blue = 8,
+  NONE = 0,
+  ANY = 11
 }
 
 const EnumValuesColor:[Color; 3] = [
@@ -137,12 +137,12 @@ fn EnumNameColor(e: Color) -> &'static str {
 }
 
 enum Any {
-  Any_NONE = 0,
-  Any_Monster = 1,
-  Any_TestSimpleTableWithEnum = 2,
-  Any_MyGame_Example2_Monster = 3,
-  Any_MIN = Any_NONE,
-  Any_MAX = Any_MyGame_Example2_Monster
+  NONE = 0,
+  Monster = 1,
+  TestSimpleTableWithEnum = 2,
+  MyGame_Example2_Monster = 3,
+  MIN = NONE,
+  MAX = MyGame_Example2_Monster
 }
 
 const EnumValuesAny:[Any; 4] = [
