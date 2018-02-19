@@ -32,6 +32,7 @@ static std::string GeneratedFileName(const std::string &path,
 }
 
 namespace rust {
+
 class RustGenerator : public BaseGenerator {
  public:
   RustGenerator(const Parser &parser, const std::string &path,
@@ -177,6 +178,18 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string Name(const EnumVal &ev) const { return EscapeKeyword(ev.name); }
+
+  std::string WrapInRelativeNameSpace(const Namespace *ns,
+                                      const std::string &name) const {
+    if (CurrentNameSpace() == ns) return name;
+    std::string prefix = GetRelativeNamespaceTraversal(CurrentNameSpace(),
+                                                       ns);
+    return prefix + name;
+    //std::string qualified_name = qualifying_start_;
+    //for (auto it = ns->components.begin(); it != ns->components.end(); ++it)
+    //  qualified_name += *it + qualifying_separator_;
+    //return qualified_name + name;
+  }
 
   // Iterate through all definitions we haven't generate code for (enums,
   // structs, and tables) and output them to a single file.
@@ -475,7 +488,9 @@ class RustGenerator : public BaseGenerator {
         return "flatbuffers::Vector<" + type_name + ">";
       }
       case BASE_TYPE_STRUCT: {
-        return WrapInNameSpace(*type.struct_def);
+        //return WrapInNameSpace(*type.struct_def);
+        return WrapInRelativeNameSpace(type.struct_def->defined_namespace,
+                                       type.struct_def->name);
       }
       case BASE_TYPE_UNION:
       // fall through
@@ -598,6 +613,18 @@ class RustGenerator : public BaseGenerator {
       return beforeptr + GenTypePointer(type) + afterptr;
     }
   }
+
+  //// Return a Rust++ type for any type (scalar/pointer) specifically for
+  //// using a flatbuffer, including the relative namespace string path.
+  //std::string GenTypeGet(const Type &type, const char *afterbasic,
+  //                       const char *beforeptr, const char *afterptr,
+  //                       bool user_facing_type, Namespace &ns) {
+  //  if (IsScalar(type.base_type)) {
+  //    return GenTypeBasic(type, user_facing_type) + afterbasic;
+  //  } else {
+  //    return beforeptr + GenTypePointer(type) + afterptr;
+  //  }
+  //}
 
   std::string GenEnumDecl(const EnumDef &enum_def) const {
     const IDLOptions &opts = parser_.opts;
@@ -1289,8 +1316,8 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
   }
 
-  std::string GetRelativeNamespaceTraversal(const Namespace &src,
-                                            const Namespace &dst) const {
+  std::string GetRelativeNamespaceTraversal(const Namespace *src,
+                                            const Namespace *dst) const {
     // calculate the path needed to reference dst from src.
     // example: f(A::B::C, A::B::C) -> n/a
     // example: f(A::B::C, A::B)    -> super::
@@ -1304,21 +1331,21 @@ class RustGenerator : public BaseGenerator {
     size_t i = 0;
     std::stringstream stream;
 
-    auto s = src.components.begin();
-    auto d = dst.components.begin();
+    auto s = src->components.begin();
+    auto d = dst->components.begin();
     while(true) {
-      if (s == src.components.end()) { break; }
-      if (d == dst.components.end()) { break; }
+      if (s == src->components.end()) { break; }
+      if (d == dst->components.end()) { break; }
       if (*s != *d) { break; }
       s++;
       d++;
       i++;
     }
 
-    for (; s != src.components.end(); s++) {
+    for (; s != src->components.end(); s++) {
       stream << "super::";
     }
-    for (; d != dst.components.end(); d++) {
+    for (; d != dst->components.end(); d++) {
       stream << *d + "::";
     }
     return stream.str();
@@ -1604,6 +1631,7 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
       code_ += "  fn {{FIELD_NAME}}() -> {{FIELD_TYPE}} {";
+      code_ += "    // yo";
       code_ += "    self.{{FIELD_VALUE}}";
       code_ += "  }";
 
