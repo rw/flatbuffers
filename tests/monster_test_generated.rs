@@ -551,8 +551,8 @@ impl Monster /* private flatbuffers::Table */ {
   // TODO: fn test_as_TestSimpleTableWithEnum() -> &TestSimpleTableWithEnum {
 // TODO:     if test_type() == Any_TestSimpleTableWithEnum { static_cast::<&TestSimpleTableWithEnum>(test()) } else { nullptr }
 // TODO:   }
-  // TODO: fn test_as_MyGame_Example2_Monster() -> &MyGame::Example2::Monster {
-// TODO:     if test_type() == Any_MyGame_Example2_Monster { static_cast::<&MyGame::Example2::Monster>(test()) } else { nullptr }
+  // TODO: fn test_as_MyGame_Example2_Monster() -> &super::Example2::Monster {
+// TODO:     if test_type() == Any_MyGame_Example2_Monster { static_cast::<&super::Example2::Monster>(test()) } else { nullptr }
 // TODO:   }
   fn mutable_test(&mut self) -> &mut void  {
     /* TODO: are there non-reference choices here? */
@@ -837,7 +837,7 @@ impl Monster /* private flatbuffers::Table */ {
 //
 //TODO: inject these functions into impl for type
 //#[inline]
-//fn Monster_MEMBER_test_as_X_MyGame::Example2::Monster_X() -> &MyGame::Example2::Monster {
+//fn Monster_MEMBER_test_as_X_super::Example2::Monster_X() -> &super::Example2::Monster {
 //  return test_as_MyGame_Example2_Monster();
 //}
 //
@@ -1367,7 +1367,7 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &const_void, type_: Any) -> 
       return verifier.VerifyTable(ptr);
     }
     Any_MyGame_Example2_Monster => {
-      let ptr = reinterpret_cast::<&MyGame::Example2::Monster>(obj);
+      let ptr = reinterpret_cast::<&super::Example2::Monster>(obj);
       return verifier.VerifyTable(ptr);
     }
     _ => { return false; }
