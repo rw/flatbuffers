@@ -13,7 +13,7 @@ impl FlatBufferBuilder {
     pub fn start_table(&mut self) -> usize {
         0
     }
-    pub fn end_table(&mut self) {
+    pub fn end_table<T>(&mut self, _: T) {
     }
 }
 pub type UOffsetT = usize;
@@ -26,8 +26,8 @@ pub struct Offset<T> {
     _o: isize,
     phantom: PhantomData<T>,
 }
-pub fn verify_table_start(_: &Verifier) -> ! {
-    unimplemented!()
+pub fn verify_table_start(_: &Verifier) -> bool {
+    false
 }
 pub fn endian_scalar<T>(_: T) -> ! {
     unimplemented!()
