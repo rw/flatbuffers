@@ -80,7 +80,7 @@ impl TableInFirstNSBuilder {
 fn CreateTableInFirstNS(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
     foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS>  /* = 0 */,
-    foo_enum: NamespaceA::NamespaceB::EnumInNestedNS  /* = NamespaceA::NamespaceB::EnumInNestedNS_A */,
+    foo_enum: NamespaceA::NamespaceB::EnumInNestedNS  /* = NamespaceA::NamespaceB::EnumInNestedNS::A */,
     foo_struct: &NamespaceB::StructInNestedNS /* = 0 */) -> flatbuffers::Offset<TableInFirstNS> {
   let mut builder = TableInFirstNSBuilder::new(_fbb);
   builder.add_foo_struct(foo_struct);

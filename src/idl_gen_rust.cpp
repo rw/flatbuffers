@@ -639,6 +639,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string GetEnumValUse(const EnumDef &enum_def,
                             const EnumVal &enum_val) const {
+    return Name(enum_def) + "::" + Name(enum_val);
     const IDLOptions &opts = parser_.opts;
     if (opts.scoped_enums) {
       return Name(enum_def) + "::" + Name(enum_val);
@@ -897,28 +898,29 @@ class RustGenerator : public BaseGenerator {
       anyv |= ev.value;
     }
 
-    if (parser_.opts.scoped_enums || parser_.opts.prefixed_enums) {
-      assert(minv && maxv);
+    //// TODO: necessary?
+    //if (parser_.opts.scoped_enums || parser_.opts.prefixed_enums) {
+    //  assert(minv && maxv);
 
-      code_.SetValue("SEP", ",\n");
-      if (enum_def.attributes.Lookup("bit_flags")) {
-        code_.SetValue("KEY", GenEnumValDecl(enum_def, "NONE"));
-        code_.SetValue("VALUE", "0");
-        code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
+    //  code_.SetValue("SEP", ",\n");
+    //  if (enum_def.attributes.Lookup("bit_flags")) {
+    //    code_.SetValue("KEY", GenEnumValDecl(enum_def, "NONE"));
+    //    code_.SetValue("VALUE", "0");
+    //    code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
 
-        code_.SetValue("KEY", GenEnumValDecl(enum_def, "ANY"));
-        code_.SetValue("VALUE", NumToString(anyv));
-        code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
-      } else {  // MIN & MAX are useless for bit_flags
-        code_.SetValue("KEY", GenEnumValDecl(enum_def, "MIN"));
-        code_.SetValue("VALUE", GenEnumValDecl(enum_def, minv->name));
-        code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
+    //    code_.SetValue("KEY", GenEnumValDecl(enum_def, "ANY"));
+    //    code_.SetValue("VALUE", NumToString(anyv));
+    //    code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
+    //  } else {  // MIN & MAX are useless for bit_flags
+    //    code_.SetValue("KEY", GenEnumValDecl(enum_def, "MIN"));
+    //    code_.SetValue("VALUE", GenEnumValDecl(enum_def, minv->name));
+    //    code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
 
-        code_.SetValue("KEY", GenEnumValDecl(enum_def, "MAX"));
-        code_.SetValue("VALUE", GenEnumValDecl(enum_def, maxv->name));
-        code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
-      }
-    }
+    //    code_.SetValue("KEY", GenEnumValDecl(enum_def, "MAX"));
+    //    code_.SetValue("VALUE", GenEnumValDecl(enum_def, maxv->name));
+    //    code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
+    //  }
+    //}
     code_ += "";
     code_ += "}";
 
