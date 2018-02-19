@@ -16,7 +16,7 @@ impl FlatBufferBuilder {
     pub fn end_table(&mut self) {
     }
 }
-pub type uoffset_t = usize;
+pub type UOffsetT = usize;
 pub type String = i32;
 pub type Void<'a> = &'a [u8];
 pub struct Vector<T>  {

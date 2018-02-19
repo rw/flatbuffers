@@ -520,7 +520,7 @@ class RustGenerator : public BaseGenerator {
     } else if (IsStruct(type)) {
       return GenTypePointer(type);
     } else {
-      return "flatbuffers::uoffset_t";
+      return "flatbuffers::UOffsetT";
     }
   }
 
@@ -1135,7 +1135,7 @@ class RustGenerator : public BaseGenerator {
     code_ += UnionVectorVerifySignature(enum_def) + " {";
     code_ += "  if !values || !types { return !values && !types; }";
     code_ += "  if values.size() != types.size() { return false; }";
-    code_ += "  for i in (0 as flatbuffers::uoffset_t)..values.size() {";
+    code_ += "  for i in (0 as flatbuffers::UOffsetT)..values.size() {";
     code_ += "    if !Verify" + Name(enum_def) + "(";
     code_ += "        verifier,  values.Get(i), types.GetEnum::<" +
              Name(enum_def) + ">(i)) {";
@@ -1848,7 +1848,7 @@ class RustGenerator : public BaseGenerator {
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a> {";
     code_ += "  fbb_: &'a flatbuffers::FlatBufferBuilder,";
-    code_ += "  start_: flatbuffers::uoffset_t,";
+    code_ += "  start_: flatbuffers::UOffsetT,";
     code_ += "}";
 
     // Generate builder functions:
@@ -2069,7 +2069,7 @@ class RustGenerator : public BaseGenerator {
         if (field.value.type.element == BASE_TYPE_BOOL) { indexing += " != 0"; }
 
         // Generate code that pushes data from _e to _o in the form:
-        //   for (uoffset_t i = 0; i < _e->size(); ++i) {
+        //   for (UOffsetT i = 0; i < _e->size(); ++i) {
         //     _o->field.push_back(_e->Get(_i));
         //   }
         auto name = Name(field);
@@ -2081,7 +2081,7 @@ class RustGenerator : public BaseGenerator {
                 ? ".type"
                 : (field.value.type.element == BASE_TYPE_UNION ? ".value" : "");
         code += "{ _o->" + name + ".resize(_e->size()); ";
-        code += "for (flatbuffers::uoffset_t _i = 0;";
+        code += "for (flatbuffers::UOffsetT _i = 0;";
         code += " _i < _e->size(); _i++) { ";
         code += "_o->" + name + "[_i]" + access + " = ";
         code +=
