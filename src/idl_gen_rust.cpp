@@ -575,10 +575,10 @@ class RustGenerator : public BaseGenerator {
             type.struct_def->attributes.Lookup("native_custom_alloc")) {
           auto native_custom_alloc =
               type.struct_def->attributes.Lookup("native_custom_alloc");
-          return "Vector<" + type_name + "," +
+          return "Vec<" + type_name + "," +
                  native_custom_alloc->constant + "<" + type_name + ">>";
         } else
-          return "Vector<" + type_name + ">";
+          return "Vec<" + type_name + ">";
       }
       case BASE_TYPE_STRUCT: {
         auto type_name = WrapInNameSpace(*type.struct_def);
@@ -1390,7 +1390,7 @@ class RustGenerator : public BaseGenerator {
       } else {
         type = GenTypeWire(vtype, "", false);
       }
-      code_.SetValue("PARAM_TYPE", "Option<Vector<" + type + ">>");
+      code_.SetValue("PARAM_TYPE", "Option<Vec<" + type + ">>");
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else {
       code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", true));
