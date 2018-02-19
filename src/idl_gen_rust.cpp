@@ -1629,12 +1629,12 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("U_NULLABLE", NullableExtension());
 
           // `const Type *union_name_asType() const` accessor.
-          code_ += "  fn {{U_NULLABLE}}{{U_FIELD_NAME}}() -> {{U_FIELD_TYPE}} {";
+          code_ += "  // TODO: fn {{U_NULLABLE}}{{U_FIELD_NAME}}() -> {{U_FIELD_TYPE}} {";
           code_ +=
-              "    if {{U_GET_TYPE}}() == {{U_ELEMENT_TYPE}} { "
+              "// TODO:     if {{U_GET_TYPE}}() == {{U_ELEMENT_TYPE}} { "
               "static_cast::<{{U_FIELD_TYPE}}>({{FIELD_NAME}}()) "
               "} else { nullptr }";
-          code_ += "  }";
+          code_ += "// TODO:   }";
         }
       }
 
