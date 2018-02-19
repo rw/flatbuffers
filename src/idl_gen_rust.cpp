@@ -326,8 +326,9 @@ class RustGenerator : public BaseGenerator {
         if (struct_def.defined_namespace != ns) { continue; }
         SetNameSpace(struct_def.defined_namespace);
         auto name = Name(struct_def);
-        auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
-        auto cpp_name = TranslateNameSpace(qualified_name);
+        //auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
+        auto cpp_name = WrapInRelativeNameSpace(struct_def.defined_namespace,
+                                                name);
 
         code_.SetValue("STRUCT_NAME", name);
         code_.SetValue("CPP_NAME", cpp_name);

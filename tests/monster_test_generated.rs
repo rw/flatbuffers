@@ -1679,8 +1679,8 @@ fn TypeAliasesTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn GetMonster(buf: &Vec<u8>) -> &MyGame::Example::Monster  {
-  return flatbuffers::GetRoot::<MyGame::Example::Monster>(buf);
+fn GetMonster(buf: &Vec<u8>) -> &Monster  {
+  return flatbuffers::GetRoot::<Monster>(buf);
 }
 
 #[inline]
@@ -1702,7 +1702,7 @@ fn MonsterBufferHasIdentifier(buf: &Vec<u8>) -> bool {
 #[inline]
 fn VerifyMonsterBuffer(
     verifier: &flatbuffers::Verifier) -> bool {
-  return verifier.VerifyBuffer::<MyGame::Example::Monster>(MonsterIdentifier());
+  return verifier.VerifyBuffer::<Monster>(MonsterIdentifier());
 }
 
 #[inline]
@@ -1713,7 +1713,7 @@ fn MonsterExtension() -> &const_char {
 #[inline]
 fn FinishMonsterBuffer(
     fbb: &mut flatbuffers::FlatBufferBuilder,
-    root: flatbuffers::Offset<MyGame::Example::Monster>) {
+    root: flatbuffers::Offset<Monster>) {
   fbb.Finish(root, MonsterIdentifier());
 }
 
