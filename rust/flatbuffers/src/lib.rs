@@ -2,6 +2,7 @@ use std::marker::PhantomData;
 
 pub trait Table {}
 pub struct Verifier {}
+pub struct TypeTable {}
 pub struct FlatBufferBuilder {}
 pub type uoffset_t = usize;
 pub struct Offset<T> {
