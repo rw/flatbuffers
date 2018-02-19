@@ -4,7 +4,9 @@
 
 pub mod MyGame {
   extern crate flatbuffers;
+  #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
+  #[allow(unused_imports)]
   use std::cmp::Ordering;
 
 pub struct InParentNamespace {}
@@ -54,7 +56,9 @@ fn InParentNamespaceTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 
 pub mod Example2 {
   extern crate flatbuffers;
+  #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
+  #[allow(unused_imports)]
   use std::cmp::Ordering;
 
 pub struct Monster {}
@@ -106,7 +110,9 @@ fn MonsterTypeTable() -> &/*mut?*/flatbuffers::TypeTable {
 
 pub mod Example {
   extern crate flatbuffers;
+  #[allow(unused_imports)]
   use self::flatbuffers::flexbuffers;
+  #[allow(unused_imports)]
   use std::cmp::Ordering;
 
 enum Color {
