@@ -2386,8 +2386,8 @@ class RustGenerator : public BaseGenerator {
   }
 
   static void PaddingDefinition(int bits, std::string *code_ptr, int *id) {
-    *code_ptr += "  u" + NumToString(bits) + ": padding" +
-                 NumToString((*id)++) + "__,";
+    *code_ptr += "padding" + NumToString((*id)++) + "__: u" + \
+                 NumToString(bits) + ",";
   }
 
   static void PaddingInitializer(int bits, std::string *code_ptr, int *id) {

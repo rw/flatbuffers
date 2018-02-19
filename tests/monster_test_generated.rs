@@ -165,7 +165,7 @@ fn EnumNameAny(e: Any) -> &'static str {
 pub struct Test {
   a_: i16,
   b_: i8,
-  u8: padding0__,
+padding0__: u8,
 } // pub struct Test
 
 impl Test {
@@ -198,12 +198,12 @@ pub struct Vec3 {
   x_: f32,
   y_: f32,
   z_: f32,
-  u32: padding0__,
+padding0__: u32,
   test1_: f64,
   test2_: i8,
-  u8: padding1__,
+padding1__: u8,
   test3_: Test,
-  u16: padding2__,
+padding2__: u16,
 } // pub struct Vec3
 
 impl Vec3 {
