@@ -727,8 +727,8 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer::<&mut flatbuffers::Vector<u8> >(self.VT_FLEX)
   }
-  fn flex_flexbuffer_root() -> flexbuffers::Reference {
-    let v = flex();
+  fn flex_flexbuffer_root(&self) -> flexbuffers::Reference {
+    let v = self.flex();
     return flexbuffers::get_root(v.Data(), v.size());
   }
   fn test5(&self) -> &flatbuffers::Vector<&Test>  {
