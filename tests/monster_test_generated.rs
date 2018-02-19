@@ -599,6 +599,7 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer::<&mut flatbuffers::Vector<u8> >(self.VT_TESTNESTEDFLATBUFFER)
   }
+//TODO: mutable nested root
   fn testnestedflatbuffer_nested_root(&self) -> &Monster{
     return flatbuffers::get_root::<Monster>(self.testnestedflatbuffer().Data());
   }
@@ -767,7 +768,7 @@ impl Monster /* private flatbuffers::Table */ {
            flatbuffers::verify_field::<Vec3>(verifier, self.VT_POS) &&
            flatbuffers::verify_field::<i16>(verifier, self.VT_MANA) &&
            flatbuffers::verify_field::<i16>(verifier, self.VT_HP) &&
-           flatbuffers::verify_offsetRequired(verifier, self.VT_NAME) &&
+           flatbuffers::verify_offset_required(verifier, self.VT_NAME) &&
            verifier.Verify(self.name()) &&
            flatbuffers::verify_offset(verifier, self.VT_INVENTORY) &&
            verifier.Verify(self.inventory()) &&

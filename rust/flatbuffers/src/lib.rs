@@ -32,6 +32,9 @@ pub fn verify_field(_: &Verifier, _: isize) -> ! {
 pub fn verify_offset(_: &Verifier, _: isize) -> ! {
     unimplemented!()
 }
+pub fn verify_offset_required(_: &Verifier, _: isize) -> ! {
+    unimplemented!()
+}
 pub fn get_root<T>(_: isize) -> ! {
     unimplemented!()
 }
