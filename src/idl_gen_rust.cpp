@@ -1497,7 +1497,7 @@ class RustGenerator : public BaseGenerator {
   void GenVerifyCall(const FieldDef &field, const char *prefix) {
     code_.SetValue("PRE", prefix);
     code_.SetValue("NAME", "self." + Name(field));
-    code_.SetValue("REQUIRED", field.required ? "Required" : "");
+    code_.SetValue("REQUIRED", field.required ? "_required" : "");
     code_.SetValue("SIZE", GenTypeSize(field.value.type));
     code_.SetValue("OFFSET", GenFieldOffsetName(field));
     if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type)) {
