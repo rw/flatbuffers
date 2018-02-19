@@ -280,11 +280,11 @@ impl Ability {
   fn mutate_id(&mut self, _id: u32) {
     flatbuffers::write_scalar(&self.id_, _id);
   }
-  fn KeyCompareLessThan(o: &Ability) -> bool {
+  fn KeyCompareLessThan(&self, o: &Ability) -> bool {
     self.id() < o.id()
   }
-  fn KeyCompareWithValue(val: u32) -> isize {
-    let key = id();
+  fn KeyCompareWithValue(&self, val: u32) -> isize {
+    let key = self.id();
     (key > val) - (key < val)
   }
   fn distance(&self) -> u32  {
@@ -508,11 +508,11 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut GetPointer::<&mut flatbuffers::String >(VT_NAME)
   }
-  fn KeyCompareLessThan(o: &Monster) -> bool {
-    return *name() < *o.name();
+  fn KeyCompareLessThan(&self, o: &Monster) -> bool {
+    return *self.name() < *o.name();
   }
-  fn KeyCompareWithValue(val: &const_char) -> isize {
-    return strcmp(name().c_str(), val);
+  fn KeyCompareWithValue(&self, val: &const_char) -> isize {
+    return strcmp(self.name().c_str(), val);
   }
   fn inventory() -> &flatbuffers::Vector<u8>  {
     // yo
