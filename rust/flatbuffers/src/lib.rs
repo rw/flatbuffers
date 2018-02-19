@@ -12,6 +12,9 @@ pub struct Offset<T> {
 pub fn verify_table_start(_: &Verifier) -> ! {
     unimplemented!()
 }
+pub fn EndianScalar<T>(x: T) -> ! {
+    unimplemented!()
+}
 pub mod flexbuffers {
     pub struct Reference {}
 }
