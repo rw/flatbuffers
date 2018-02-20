@@ -3,6 +3,9 @@
 
 
 pub mod MyGame {
+  #[allow(unused_imports)]
+  use std::marker::PhantomData;
+  #[allow(unused_imports)]
   #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
@@ -57,6 +60,9 @@ fn InParentNamespaceTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 pub mod Example2 {
+  #[allow(unused_imports)]
+  use std::marker::PhantomData;
+  #[allow(unused_imports)]
   #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
@@ -113,6 +119,9 @@ fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }  // pub mod Example2
 
 pub mod Example {
+  #[allow(unused_imports)]
+  use std::marker::PhantomData;
+  #[allow(unused_imports)]
   #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
@@ -176,13 +185,14 @@ fn EnumNameAny(e: Any) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(2)
 #[repr(C, packed)]
-pub struct Test {
+pub struct Test<'a, T: 'a> {
   a_: i16,
   b_: i8,
   padding0__: u8,
+  _phantom: PhantomData<&'a T>,
 } // pub struct Test
 
-impl Test {
+impl<'a, T> Test<'a, T> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Test));
   }
@@ -208,7 +218,7 @@ impl Test {
 
 // MANUALLY_ALIGNED_STRUCT(16)
 #[repr(C, packed)]
-pub struct Vec3 {
+pub struct Vec3<'a, T: 'a> {
   x_: f32,
   y_: f32,
   z_: f32,
@@ -216,11 +226,12 @@ pub struct Vec3 {
   test1_: f64,
   test2_: i8,
   padding1__: u8,
-  test3_: Test,
+  test3_: &'a Test<'a>,
   padding2__: u16,
+  _phantom: PhantomData<&'a T>,
 } // pub struct Vec3
 
-impl Vec3 {
+impl<'a, T> Vec3<'a, T> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Vec3));
   }
@@ -274,12 +285,13 @@ impl Vec3 {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-pub struct Ability {
+pub struct Ability<'a, T: 'a> {
   id_: u32,
   distance_: u32,
+  _phantom: PhantomData<&'a T>,
 } // pub struct Ability
 
-impl Ability {
+impl<'a, T> Ability<'a, T> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Ability));
   }

@@ -5,6 +5,9 @@
 #include "namespace_test1_generated.rs"
 
 pub mod NamespaceA {
+  #[allow(unused_imports)]
+  use std::marker::PhantomData;
+  #[allow(unused_imports)]
   #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
@@ -194,6 +197,9 @@ fn SecondTableInATypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }  // pub mod NamespaceA
 
 pub mod NamespaceC {
+  #[allow(unused_imports)]
+  use std::marker::PhantomData;
+  #[allow(unused_imports)]
   #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]

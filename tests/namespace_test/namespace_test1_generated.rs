@@ -3,6 +3,9 @@
 
 
 pub mod NamespaceA {
+  #[allow(unused_imports)]
+  use std::marker::PhantomData;
+  #[allow(unused_imports)]
   #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
@@ -10,6 +13,9 @@ pub mod NamespaceA {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 pub mod NamespaceB {
+  #[allow(unused_imports)]
+  use std::marker::PhantomData;
+  #[allow(unused_imports)]
   #[allow(unreachable_code)]
   extern crate flatbuffers;
   #[allow(unused_imports)]
@@ -42,12 +48,13 @@ fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-pub struct StructInNestedNS {
+pub struct StructInNestedNS<'a, T: 'a> {
   a_: i32,
   b_: i32,
+  _phantom: PhantomData<&'a T>,
 } // pub struct StructInNestedNS
 
-impl StructInNestedNS {
+impl<'a, T> StructInNestedNS<'a, T> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(StructInNestedNS));
   }
