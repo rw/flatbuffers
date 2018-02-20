@@ -23,6 +23,7 @@ pub mod NamespaceB {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 
+#[repr(i8)]
 enum EnumInNestedNS {
   A = 0,
   B = 1,

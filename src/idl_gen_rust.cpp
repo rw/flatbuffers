@@ -927,8 +927,9 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("SEP", "");
 
     GenComment(enum_def.doc_comment);
+    code_ += "#[repr({{BASE_TYPE}})]";
     code_ += GenEnumDecl(enum_def) + "\\";
-    if (parser_.opts.scoped_enums) code_ += " : {{BASE_TYPE}}\\";
+    //if (parser_.opts.scoped_enums) code_ += " : {{BASE_TYPE}}\\";
     code_ += " {";
 
     int64_t anyv = 0;
