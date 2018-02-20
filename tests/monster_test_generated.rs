@@ -129,6 +129,7 @@ pub mod Example {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 
+#[repr(i8)]
 enum Color {
   Red = 1,
   Green = 2,
@@ -157,6 +158,7 @@ fn EnumNameColor(e: Color) -> &'static str {
   EnumNamesColor[index]
 }
 
+#[repr(u8)]
 enum Any {
   NONE = 0,
   Monster = 1,
