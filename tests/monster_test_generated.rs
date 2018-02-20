@@ -185,14 +185,13 @@ fn EnumNameAny(e: Any) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(2)
 #[repr(C, packed)]
-pub struct Test<'a, T: 'a> {
+pub struct Test {
   a_: i16,
   b_: i8,
   padding0__: u8,
-  _phantom: PhantomData<&'a T>,
 } // pub struct Test
 
-impl<'a, T> Test<'a, T> {
+impl<'a> Test<'a> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Test));
   }
@@ -218,7 +217,7 @@ impl<'a, T> Test<'a, T> {
 
 // MANUALLY_ALIGNED_STRUCT(16)
 #[repr(C, packed)]
-pub struct Vec3<'a, T: 'a> {
+pub struct Vec3<'a> {
   x_: f32,
   y_: f32,
   z_: f32,
@@ -226,12 +225,11 @@ pub struct Vec3<'a, T: 'a> {
   test1_: f64,
   test2_: i8,
   padding1__: u8,
-  test3_: &'a Test<'a>,
+  test3_: &'a Test,
   padding2__: u16,
-  _phantom: PhantomData<&'a T>,
 } // pub struct Vec3
 
-impl<'a, T> Vec3<'a, T> {
+impl<'a> Vec3<'a> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Vec3));
   }
@@ -285,13 +283,12 @@ impl<'a, T> Vec3<'a, T> {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-pub struct Ability<'a, T: 'a> {
+pub struct Ability {
   id_: u32,
   distance_: u32,
-  _phantom: PhantomData<&'a T>,
 } // pub struct Ability
 
-impl<'a, T> Ability<'a, T> {
+impl<'a> Ability<'a> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Ability));
   }

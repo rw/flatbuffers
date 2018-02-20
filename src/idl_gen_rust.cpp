@@ -31,15 +31,53 @@ static std::string GeneratedFileName(const std::string &path,
   return path + file_name + "_generated.rs";
 }
 
-bool StructDefHasPointer(const StructDef &struct_def) {
-    for (auto it = struct_def.fields.vec.begin();
-         it != struct_def.fields.vec.end(); ++it) {
-      const auto &field = **it;
-      if (!IsScalar(field.value.type.base_type)) {
-        return true;
-      }
+bool TypeNeedsLifetime(const Type &type) {
+  switch (type.base_type) {
+    case BASE_TYPE_STRING: {
+      return true;
     }
-    return false;
+    case BASE_TYPE_VECTOR: {
+      return true;
+    }
+    case BASE_TYPE_STRUCT: {
+      for (auto it = type.struct_def->fields.vec.begin();
+          it != type.struct_def->fields.vec.end(); ++it) {
+        const auto &field = **it;
+        if (TypeNeedsLifetime(field.value.type)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    case BASE_TYPE_UNION: {
+      return true;
+    }
+    default: {
+      return false;
+    }
+  }
+}
+
+bool StructNeedsLifetime(const StructDef &struct_def) {
+  for (auto it = struct_def.fields.vec.begin();
+      it != struct_def.fields.vec.end(); ++it) {
+    const auto &field = **it;
+    switch (field.value.type.base_type) {
+      case BASE_TYPE_STRING: return true;
+      case BASE_TYPE_VECTOR: return true;
+      case BASE_TYPE_STRUCT: return true;
+      case BASE_TYPE_UNION: return true;
+      default: ;
+    }
+  }
+  return false;
+}
+
+std::string TypeLifetime(const Type &type) {
+  if (TypeNeedsLifetime(type)) {
+    return "<'a>";
+  }
+  return "";
 }
 
 namespace rust {
@@ -1856,6 +1894,8 @@ class RustGenerator : public BaseGenerator {
 
   void GenBuilders(const StructDef &struct_def) {
     code_.SetValue("STRUCT_NAME", Name(struct_def));
+    code_.SetValue("PARENT_LIFETIME",
+        StructNeedsLifetime(struct_def) ? "<'a>" : "");
 
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a> {";
@@ -1864,6 +1904,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
 
     // Generate builder functions:
+    //code_ += "impl{{PARENT_LIFETIME}} {{STRUCT_NAME}}Builder{{PARENT_LIFETIME}} {";
     code_ += "impl<'a> {{STRUCT_NAME}}Builder<'a> {";
     bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();
@@ -2430,19 +2471,22 @@ class RustGenerator : public BaseGenerator {
     code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
     code_ += "#[repr(C, packed)]";
 
-    code_.SetValue("LIFETIME", "<'a>");
+    code_.SetValue("PARENT_LIFETIME",
+        StructNeedsLifetime(struct_def) ? "<'a>" : "");
 
 
     // TODO: maybe only use lifetimes when needed by members, and skip
-    //       PhantomData? use StructDefHasPointer.
-		code_ += "pub struct {{STRUCT_NAME}}{{LIFETIME}} {";
+    //       PhantomData? use TypeNeedsLifetime.
+		code_ += "pub struct {{STRUCT_NAME}}{{PARENT_LIFETIME}} {";
 
     int padding_id = 0;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
+      auto child_lifetime = TypeNeedsLifetime(field.value.type) ? "<'a>" : "";
       code_.SetValue("FIELD_TYPE",
-                     GenTypeGet(field.value.type, "", "&'a ", "<'a>", false));
+                     GenTypeGet(field.value.type, "", "&'a ", child_lifetime,
+                                false));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
