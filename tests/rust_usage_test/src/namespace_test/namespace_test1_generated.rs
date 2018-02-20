@@ -48,13 +48,12 @@ fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-pub struct StructInNestedNS<'a, T: 'a> {
+pub struct StructInNestedNS {
   a_: i32,
   b_: i32,
-  _phantom: PhantomData<&'a T>,
 } // pub struct StructInNestedNS
 
-impl<'a, T> StructInNestedNS<'a, T> {
+impl<'a> StructInNestedNS<'a> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(StructInNestedNS));
   }
