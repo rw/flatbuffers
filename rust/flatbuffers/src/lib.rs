@@ -26,17 +26,11 @@ pub type Void<'a> = &'a [u8];
 pub struct Vector<T>  {
     phantom: PhantomData<T>,
 }
-pub struct Offset<T> {
-    _o: usize,
-    phantom: PhantomData<T>,
-}
+pub struct Offset<T> (usize, PhantomData<T>);
 
 impl<T> Offset<T> {
     pub fn new(o: usize) -> Self {
-        Offset {
-            _o: o,
-            phantom: PhantomData,
-        }
+        Offset(o, PhantomData)
     }
 }
 

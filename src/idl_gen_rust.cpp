@@ -31,6 +31,17 @@ static std::string GeneratedFileName(const std::string &path,
   return path + file_name + "_generated.rs";
 }
 
+bool StructDefHasPointer(const StructDef &struct_def) {
+    for (auto it = struct_def.fields.vec.begin();
+         it != struct_def.fields.vec.end(); ++it) {
+      const auto &field = **it;
+      if (!IsScalar(field.value.type.base_type)) {
+        return true;
+      }
+    }
+    return false;
+}
+
 namespace rust {
 
 class RustGenerator : public BaseGenerator {
@@ -2418,14 +2429,20 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
     code_ += "#[repr(C, packed)]";
-    code_ += "pub struct {{STRUCT_NAME}} {";
+
+    code_.SetValue("LIFETIME", "<'a>");
+
+
+    // TODO: maybe only use lifetimes when needed by members, and skip
+    //       PhantomData? use StructDefHasPointer.
+		code_ += "pub struct {{STRUCT_NAME}}{{LIFETIME}} {";
 
     int padding_id = 0;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       code_.SetValue("FIELD_TYPE",
-                     GenTypeGet(field.value.type, "", "", "", false));
+                     GenTypeGet(field.value.type, "", "&'a ", "<'a>", false));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
@@ -2440,7 +2457,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate GetFullyQualifiedName
     code_ += "";
-    code_ += "impl {{STRUCT_NAME}} {";
+		code_ += "impl<'a> {{STRUCT_NAME}}<'a> {";
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate a default constructor.
@@ -2595,6 +2612,9 @@ class RustGenerator : public BaseGenerator {
     // in the previous example, E, then F, then G are opened
     for (auto j = common_prefix_size; j != new_size; ++j) {
       code_ += "pub mod " + ns->components[j] + " {";
+      code_ += "  #[allow(unused_imports)]";
+      code_ += "  use std::marker::PhantomData;";
+      code_ += "  #[allow(unused_imports)]";
       code_ += "  #[allow(unreachable_code)]";
       code_ += "  extern crate flatbuffers;";
       code_ += "  #[allow(unused_imports)]";
