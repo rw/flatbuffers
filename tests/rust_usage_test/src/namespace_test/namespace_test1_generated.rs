@@ -53,7 +53,7 @@ pub struct StructInNestedNS {
   b_: i32,
 } // pub struct StructInNestedNS
 
-impl<'a> StructInNestedNS<'a> {
+impl StructInNestedNS {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(StructInNestedNS));
   }
