@@ -2528,7 +2528,8 @@ class RustGenerator : public BaseGenerator {
       arg_list += arg_name + ": ";
       arg_list += arg_type;
       init_list += "      self." + member_name;
-      if (IsScalar(field.value.type.base_type)) {
+      if (IsScalar(field.value.type.base_type) &&
+          !IsFloat(field.value.type.base_type)) {
         auto type = GenUnderlyingCast(field, false, arg_name);
         init_list += " = flatbuffers::endian_scalar(" + type + ");\n";
       } else {
@@ -2562,7 +2563,8 @@ class RustGenerator : public BaseGenerator {
       const auto &field = **it;
 
       auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
-      auto is_scalar = IsScalar(field.value.type.base_type);
+      auto is_scalar = IsScalar(field.value.type.base_type) &&
+                       !IsFloat(field.value.type.base_type);
       auto member = "self." + Name(field) + "_";
       auto value =
           is_scalar ? "flatbuffers::endian_scalar(" + member + ")" : member;

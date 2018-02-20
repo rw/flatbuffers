@@ -1,3 +1,13 @@
+extern crate num_traits;
+
+//pub trait ToLittleEndian {
+//    fn to_le(self) -> Self {
+//        self.to_le()
+//    }
+//}
+
+//impl ToLittleEndian for i16 {}
+
 use std::marker::PhantomData;
 
 pub trait Table {}
@@ -37,8 +47,8 @@ impl<T> Offset<T> {
 pub fn verify_table_start(_: &Verifier) -> bool {
     false
 }
-pub fn endian_scalar<T>(_: T) -> ! {
-    unimplemented!()
+pub fn endian_scalar<T: num_traits::int::PrimInt>(x: T) -> T {
+    x.to_le()
 }
 pub fn write_scalar<S, T>(_: S, _: T) -> ! {
     unimplemented!()

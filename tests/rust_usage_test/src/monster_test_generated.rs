@@ -234,37 +234,37 @@ impl<'a> Vec3<'a> {
     //memset(this, 0, size_of(Vec3));
   }
   fn init(&mut self, _x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &Test) {
-      self.x_ = flatbuffers::endian_scalar(_x);
-      self.y_ = flatbuffers::endian_scalar(_y);
-      self.z_ = flatbuffers::endian_scalar(_z);
-      self.test1_ = flatbuffers::endian_scalar(_test1);
+      self.x_ = _x;
+      self.y_ = _y;
+      self.z_ = _z;
+      self.test1_ = _test1;
       self.test2_ = flatbuffers::endian_scalar(_test2 as i8);
       self.test3_ = _test3;
 
   }
   fn x(&self) -> f32  {
-    flatbuffers::endian_scalar(self.x_)
+    self.x_
   }
-  fn mutate_x(&mut self, _x: f32) {
-    flatbuffers::write_scalar(&self.x_, _x);
+  fn mutable_x(&mut self) -> f32 {
+    self.x_
   }
   fn y(&self) -> f32  {
-    flatbuffers::endian_scalar(self.y_)
+    self.y_
   }
-  fn mutate_y(&mut self, _y: f32) {
-    flatbuffers::write_scalar(&self.y_, _y);
+  fn mutable_y(&mut self) -> f32 {
+    self.y_
   }
   fn z(&self) -> f32  {
-    flatbuffers::endian_scalar(self.z_)
+    self.z_
   }
-  fn mutate_z(&mut self, _z: f32) {
-    flatbuffers::write_scalar(&self.z_, _z);
+  fn mutable_z(&mut self) -> f32 {
+    self.z_
   }
   fn test1(&self) -> f64  {
-    flatbuffers::endian_scalar(self.test1_)
+    self.test1_
   }
-  fn mutate_test1(&mut self, _test1: f64) {
-    flatbuffers::write_scalar(&self.test1_, _test1);
+  fn mutable_test1(&mut self) -> f64 {
+    self.test1_
   }
   fn test2(&self) -> Color  {
     flatbuffers::endian_scalar(self.test2_) as Color
