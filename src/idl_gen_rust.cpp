@@ -2501,7 +2501,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate GetFullyQualifiedName
     code_ += "";
-		code_ += "impl<'a> {{STRUCT_NAME}}<'a> {";
+		code_ += "impl{{PARENT_LIFETIME}} {{STRUCT_NAME}}{{PARENT_LIFETIME}} {";
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate a default constructor.
