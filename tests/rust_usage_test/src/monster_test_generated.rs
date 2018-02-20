@@ -191,7 +191,7 @@ pub struct Test {
   padding0__: u8,
 } // pub struct Test
 
-impl<'a> Test<'a> {
+impl Test {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Test));
   }
@@ -288,7 +288,7 @@ pub struct Ability {
   distance_: u32,
 } // pub struct Ability
 
-impl<'a> Ability<'a> {
+impl Ability {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Ability));
   }
