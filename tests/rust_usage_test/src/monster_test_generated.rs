@@ -247,26 +247,26 @@ impl<'a> Vec3<'a> {
   fn x(&self) -> f32  {
     self.x_
   }
-  fn mutable_x(&mut self) -> f32 {
-    self.x_
+  fn mutable_x(&mut self) -> &mut f32{
+    &mut self.x_
   }
   fn y(&self) -> f32  {
     self.y_
   }
-  fn mutable_y(&mut self) -> f32 {
-    self.y_
+  fn mutable_y(&mut self) -> &mut f32{
+    &mut self.y_
   }
   fn z(&self) -> f32  {
     self.z_
   }
-  fn mutable_z(&mut self) -> f32 {
-    self.z_
+  fn mutable_z(&mut self) -> &mut f32{
+    &mut self.z_
   }
   fn test1(&self) -> f64  {
     self.test1_
   }
-  fn mutable_test1(&mut self) -> f64 {
-    self.test1_
+  fn mutable_test1(&mut self) -> &mut f64{
+    &mut self.test1_
   }
   fn test2(&self) -> Color  {
     flatbuffers::endian_scalar(self.test2_) as Color
@@ -277,8 +277,8 @@ impl<'a> Vec3<'a> {
   fn test3(&self) -> &Test {
     self.test3_
   }
-  fn mutable_test3(&mut self) -> &mut Test {
-    self.test3_
+  fn mutable_test3(&mut self) -> &mut Test{
+    &mut self.test3_
   }
 }
 // STRUCT_END(Vec3, 32);

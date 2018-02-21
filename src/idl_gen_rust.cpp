@@ -2580,7 +2580,7 @@ class RustGenerator : public BaseGenerator {
       code_ += "  }";
 
       if (parser_.opts.mutable_buffer) {
-        auto mut_field_type = GenTypeGet(field.value.type, " ", "&mut ", " ", true);
+        auto mut_field_type = GenTypeGet(field.value.type, "", "", "", true);
         code_.SetValue("FIELD_TYPE", mut_field_type);
         if (is_scalar) {
           code_.SetValue("ARG", GenTypeBasic(field.value.type, true));
@@ -2593,8 +2593,8 @@ class RustGenerator : public BaseGenerator {
               "{{FIELD_VALUE}});";
           code_ += "  }";
         } else {
-          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> {{FIELD_TYPE}}{";
-          code_ += "    self.{{FIELD_NAME}}_";
+          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> &mut {{FIELD_TYPE}}{";
+          code_ += "    &mut self.{{FIELD_NAME}}_";
           code_ += "  }";
         }
       }
