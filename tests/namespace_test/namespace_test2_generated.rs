@@ -64,7 +64,7 @@ impl<'a> TableInFirstNSBuilder<'a> {
     self.fbb_.AddOffset(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
   fn add_foo_enum(&mut self, foo_enum: NamespaceA::NamespaceB::EnumInNestedNS ) {
-    self.fbb_.AddElement::<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum as i8, 0);
+    self.fbb_.add_element::<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum as i8, 0);
   }
   fn add_foo_struct(&mut self, foo_struct: &NamespaceB::StructInNestedNS) {
     self.fbb_.AddStruct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);

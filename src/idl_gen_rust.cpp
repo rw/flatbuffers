@@ -1932,7 +1932,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("ADD_VALUE", value);
         if (is_scalar) {
           const auto type = GenTypeWire(field.value.type, "", false);
-          code_.SetValue("ADD_FN", "AddElement::<" + type + ">");
+          code_.SetValue("ADD_FN", "add_element::<" + type + ">");
         } else if (IsStruct(field.value.type)) {
           code_.SetValue("ADD_FN", "AddStruct");
         } else {

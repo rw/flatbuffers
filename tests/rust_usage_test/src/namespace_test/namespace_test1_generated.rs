@@ -103,7 +103,7 @@ pub struct TableInNestedNSBuilder<'a> {
 }
 impl<'a> TableInNestedNSBuilder<'a> {
   fn add_foo(&mut self, foo: i32 ) {
-    self.fbb_.AddElement::<i32>(TableInNestedNS::VT_FOO, foo, 0);
+    self.fbb_.add_element::<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInNestedNSBuilder {
     TableInNestedNSBuilder {

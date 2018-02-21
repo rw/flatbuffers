@@ -23,6 +23,9 @@ impl FlatBufferBuilder {
     pub fn start_table(&mut self) -> usize {
         0
     }
+    pub fn add_element<T>(&mut self, _: isize, _: isize) -> usize {
+        0
+    }
     pub fn end_table<T>(&mut self, _: T) -> usize {
         0
     }
