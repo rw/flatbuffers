@@ -2520,7 +2520,7 @@ class RustGenerator : public BaseGenerator {
       const auto member_name = Name(field) + "_";
       const auto arg_name = "_" + Name(field);
       const auto arg_type =
-          GenTypeGet(field.value.type, "", "&", "", true);
+          GenTypeGet(field.value.type, "", "&'a ", "", true);
 
       if (it != struct_def.fields.vec.begin()) {
         arg_list += ", ";
