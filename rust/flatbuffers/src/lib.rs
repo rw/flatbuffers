@@ -56,8 +56,8 @@ pub fn write_scalar<S, T>(_: S, _: T) -> ! {
 pub fn set_field<T>(_: isize, _: T, _: isize) -> ! {
     unimplemented!()
 }
-pub fn verify_field(_: &Verifier, _: isize) -> ! {
-    unimplemented!()
+pub fn verify_field<T>(_: &Verifier, _: isize) -> bool {
+    false
 }
 pub fn verify_offset(_: &Verifier, _: isize) -> ! {
     unimplemented!()
@@ -74,7 +74,7 @@ pub fn get_mutable_root<T>(_: isize) -> ! {
 pub fn get_struct<T>(_: isize) -> ! {
     unimplemented!()
 }
-pub fn get_field<T>(_: isize) -> ! {
+pub fn get_field<T>(_: isize, _: isize) -> ! {
     unimplemented!()
 }
 pub fn get_pointer<T>(_: isize) -> ! {
