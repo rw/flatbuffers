@@ -1553,7 +1553,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("OFFSET", GenFieldOffsetName(field));
     if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type)) {
       code_ += "{{PRE}}flatbuffers::verify_field{{REQUIRED}}::<{{SIZE}}>"
-               "(verifier, self.{{OFFSET}})\\";
+               "(verifier, {{STRUCT_NAME}}::{{OFFSET}})\\";
     } else {
       code_ += "{{PRE}}flatbuffers::verify_offset{{REQUIRED}}"
                "(verifier, self.{{OFFSET}})\\";
@@ -1668,7 +1668,7 @@ class RustGenerator : public BaseGenerator {
       } else {
         accessor = "flatbuffers::get_pointer::<";
       }
-      auto offset_str = "self." + GenFieldOffsetName(field);
+      auto offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       auto offset_type =
           GenTypeGet(field.value.type, "", "&", "", false);
 
@@ -2613,7 +2613,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("KEY_TYPE", type);
         code_ += "  fn KeyCompareWithValue(&self, val: {{KEY_TYPE}}) -> isize {";
         code_ += "    let key = self.{{FIELD_NAME}}();";
-        code_ += "    (key > val) - (key < val)";
+        code_ += "    (key > val) as isize - (key < val) as isize";
         code_ += "  }";
       }
     }

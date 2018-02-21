@@ -85,14 +85,14 @@ impl TableInNestedNS /* private flatbuffers::Table */ {
 
   fn foo(&self) -> i32  {
     // yo
-    flatbuffers::get_field::<i32>(self.VT_FOO, 0)
+    flatbuffers::get_field::<i32>(TableInNestedNS::VT_FOO, 0)
   }
   fn mutate_foo(&mut self, foo_: i32) -> bool {
-    flatbuffers::set_field::<i32>(self.VT_FOO, foo_, 0)
+    flatbuffers::set_field::<i32>(TableInNestedNS::VT_FOO, foo_, 0)
   }
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
-           flatbuffers::verify_field::<i32>(verifier, self.VT_FOO) &&
+           flatbuffers::verify_field::<i32>(verifier, TableInNestedNS::VT_FOO) &&
            verifier.end_table();
   }
 }
