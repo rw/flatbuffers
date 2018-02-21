@@ -1556,7 +1556,7 @@ class RustGenerator : public BaseGenerator {
                "(verifier, {{STRUCT_NAME}}::{{OFFSET}})\\";
     } else {
       code_ += "{{PRE}}flatbuffers::verify_offset{{REQUIRED}}"
-               "(verifier, self.{{OFFSET}})\\";
+               "(verifier, {{STRUCT_NAME}}::{{OFFSET}})\\";
     }
 
     switch (field.value.type.base_type) {
