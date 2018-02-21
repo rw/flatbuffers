@@ -2580,7 +2580,7 @@ class RustGenerator : public BaseGenerator {
       code_ += "  }";
 
       if (parser_.opts.mutable_buffer) {
-        auto mut_field_type = GenTypeGet(field.value.type, "", "", "", true);
+        auto mut_field_type = GenTypeGet(field.value.type, " ", "", " ", true);
         code_.SetValue("FIELD_TYPE", mut_field_type);
         if (is_scalar) {
           code_.SetValue("ARG", GenTypeBasic(field.value.type, true));
