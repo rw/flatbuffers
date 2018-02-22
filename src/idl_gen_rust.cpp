@@ -2052,7 +2052,7 @@ class RustGenerator : public BaseGenerator {
                 ",\n      if let Some(x) = {{FIELD_NAME}} { "
                 "_fbb.create_string(x) } else { flatbuffers::Offset::new(0) }\\";
           } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-            code_ += ",\n      if {{FIELD_NAME}} { \\";
+            code_ += ",\n      if let Some(x) = {{FIELD_NAME}} { \\";
             const auto vtype = field.value.type.VectorType();
             if (IsStruct(vtype)) {
               const auto type = WrapInNameSpace(*vtype.struct_def);
@@ -2061,7 +2061,7 @@ class RustGenerator : public BaseGenerator {
               const auto type = GenTypeWire(vtype, "", false);
               code_ += "_fbb.create_vector::<" + type + ">\\";
             }
-            code_ += "(*{{FIELD_NAME}}) } else { 0 }\\";
+            code_ += "(x) } else { 0 }\\";
           } else {
             code_ += ",\n      {{FIELD_NAME}}\\";
           }
