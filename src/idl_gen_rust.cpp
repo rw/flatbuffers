@@ -1779,12 +1779,13 @@ class RustGenerator : public BaseGenerator {
       }
 
       if (field.flexbuffer) {
-        code_ +=
-            "  fn {{FIELD_NAME}}_flexbuffer_root(&self)"
-            " -> flexbuffers::Reference {";
-        code_ += "    let v = self.{{FIELD_NAME}}();";
-        code_ += "    return flexbuffers::get_root(v.Data(), v.size());";
-        code_ += "  }";
+        // TODO(rw)
+        //code_ +=
+        //    "  fn {{FIELD_NAME}}_flexbuffer_root(&self)"
+        //    " -> flexbuffers::Reference {";
+        //code_ += "    let v = self.{{FIELD_NAME}}();";
+        //code_ += "    return flexbuffers::get_root(v.Data(), v.size());";
+        //code_ += "  }";
       }
 
       // Generate a comparison function for this field if it is a key.
