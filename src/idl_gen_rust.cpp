@@ -1800,7 +1800,8 @@ class RustGenerator : public BaseGenerator {
 
         if (is_string) {
           code_ += "  fn KeyCompareWithValue(&self, val: &str) -> Ordering {";
-          code_ += "    self.{{FIELD_NAME}}().cmp(val)";
+          code_ += "    Ordering::Equal";
+          code_ += "    // TODO(rw): self.{{FIELD_NAME}}().cmp(val)";
           code_ += "  }";
         } else {
           auto type = GenTypeBasic(field.value.type, false);
