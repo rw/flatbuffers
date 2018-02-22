@@ -2056,10 +2056,10 @@ class RustGenerator : public BaseGenerator {
             const auto vtype = field.value.type.VectorType();
             if (IsStruct(vtype)) {
               const auto type = WrapInNameSpace(*vtype.struct_def);
-              code_ += "_fbb.CreateVectorOfStructs::<" + type + ">\\";
+              code_ += "_fbb.create_vector_of_structs::<" + type + ">\\";
             } else {
               const auto type = GenTypeWire(vtype, "", false);
-              code_ += "_fbb.CreateVector::<" + type + ">\\";
+              code_ += "_fbb.create_vector::<" + type + ">\\";
             }
             code_ += "(*{{FIELD_NAME}}) } else { 0 }\\";
           } else {
@@ -2232,7 +2232,7 @@ class RustGenerator : public BaseGenerator {
         auto vector_type = field.value.type.VectorType();
         switch (vector_type.base_type) {
           case BASE_TYPE_STRING: {
-            code += "_fbb.CreateVectorOfStrings(" + value + ")";
+            code += "_fbb.create_vector_of_strings(" + value + ")";
             break;
           }
           case BASE_TYPE_STRUCT: {
@@ -2247,7 +2247,7 @@ class RustGenerator : public BaseGenerator {
               }
               code += "(" + value + ")";
             } else {
-              code += "_fbb.CreateVector<flatbuffers::Offset<";
+              code += "_fbb.create_vector<flatbuffers::Offset<";
               code += WrapInNameSpace(*vector_type.struct_def) + ">> ";
               code += "(" + value + ".size(), ";
               code += "[](size_t i, _VectorArgs *__va) { ";
@@ -2259,12 +2259,12 @@ class RustGenerator : public BaseGenerator {
             break;
           }
           case BASE_TYPE_BOOL: {
-            code += "_fbb.CreateVector(" + value + ")";
+            code += "_fbb.create_vector(" + value + ")";
             break;
           }
           case BASE_TYPE_UNION: {
             code +=
-                "_fbb.CreateVector<flatbuffers::"
+                "_fbb.create_vector<flatbuffers::"
                 "Offset<flatbuffers::Void>>(" +
                 value +
                 ".size(), [](size_t i, _VectorArgs *__va) { "
@@ -2274,7 +2274,7 @@ class RustGenerator : public BaseGenerator {
           }
           case BASE_TYPE_UTYPE: {
             value = StripUnionType(value);
-            code += "_fbb.CreateVector<u8>(" + value +
+            code += "_fbb.create_vector<u8>(" + value +
                     ".size(), [](size_t i, _VectorArgs *__va) { "
                     "return static_cast<u8>(__va->_" +
                     value + "[i].type); }, &_va)";
@@ -2286,10 +2286,10 @@ class RustGenerator : public BaseGenerator {
               // the underlying storage type (eg. uint8_t).
               const auto basetype = GenTypeBasic(
                   field.value.type.enum_def->underlying_type, false);
-              code += "_fbb.CreateVector((const " + basetype + "*)" + value +
+              code += "_fbb.create_vector((const " + basetype + "*)" + value +
                       ".data(), " + value + ".size())";
             } else {
-              code += "_fbb.CreateVector(" + value + ")";
+              code += "_fbb.create_vector(" + value + ")";
             }
             break;
           }
