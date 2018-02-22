@@ -2046,8 +2046,8 @@ class RustGenerator : public BaseGenerator {
 
           if (field.value.type.base_type == BASE_TYPE_STRING) {
             code_ +=
-                ",\n      if {{FIELD_NAME}} { "
-                "_fbb.CreateString({{FIELD_NAME}}) } else { 0 }\\";
+                ",\n      if let Some(x) = {{FIELD_NAME}} { "
+                "_fbb.create_string(x) } else { flatbuffers::Offset::new(0) }\\";
           } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
             code_ += ",\n      if {{FIELD_NAME}} { \\";
             const auto vtype = field.value.type.VectorType();
@@ -2208,9 +2208,9 @@ class RustGenerator : public BaseGenerator {
     std::string code;
     switch (field.value.type.base_type) {
       // String fields are of the form:
-      //   _fbb.CreateString(_o->field)
+      //   _fbb.create_string(_o->field)
       case BASE_TYPE_STRING: {
-        code += "_fbb.CreateString(" + value + ")";
+        code += "_fbb.create_string(" + value + ")";
 
         // For optional fields, check to see if there actually is any data
         // in _o->field before attempting to access it.
