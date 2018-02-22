@@ -16,6 +16,15 @@ impl Verifier {
     pub fn verify<T>(&mut self, _: T) -> bool {
         false
     }
+    pub fn verify_vector_of_strings<T>(&mut self, _: T) -> bool {
+        false
+    }
+    pub fn verify_vector_of_tables<T>(&mut self, _: T) -> bool {
+        false
+    }
+    pub fn verify_table<T>(&mut self, _: T) -> bool {
+        false
+    }
     pub fn end_table(&mut self) -> bool {
         false
     }

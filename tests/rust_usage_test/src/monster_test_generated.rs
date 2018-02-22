@@ -791,25 +791,25 @@ impl Monster /* private flatbuffers::Table */ {
            flatbuffers::verify_offset_required(verifier, Monster::VT_NAME) &&
            verifier.verify(self.name()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_INVENTORY) &&
-           verifier.Verify(self.inventory()) &&
+           verifier.verify(self.inventory()) &&
            flatbuffers::verify_field::<i8>(verifier, Monster::VT_COLOR) &&
            flatbuffers::verify_field::<u8>(verifier, Monster::VT_TEST_TYPE) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TEST) &&
            VerifyAny(verifier, self.test(), self.test_type()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TEST4) &&
-           verifier.Verify(self.test4()) &&
+           verifier.verify(self.test4()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFSTRING) &&
-           verifier.Verify(self.testarrayofstring()) &&
-           verifier.VerifyVectorOfStrings(self.testarrayofstring()) &&
+           verifier.verify(self.testarrayofstring()) &&
+           verifier.verify_vector_of_strings(self.testarrayofstring()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFTABLES) &&
-           verifier.Verify(self.testarrayoftables()) &&
-           verifier.VerifyVectorOfTables(self.testarrayoftables()) &&
+           verifier.verify(self.testarrayoftables()) &&
+           verifier.verify_vector_of_tables(self.testarrayoftables()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_ENEMY) &&
-           verifier.VerifyTable(self.enemy()) &&
+           verifier.verify_table(self.enemy()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTNESTEDFLATBUFFER) &&
-           verifier.Verify(self.testnestedflatbuffer()) &&
+           verifier.verify(self.testnestedflatbuffer()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTEMPTY) &&
-           verifier.VerifyTable(self.testempty()) &&
+           verifier.verify_table(self.testempty()) &&
            flatbuffers::verify_field::<u8>(verifier, Monster::VT_TESTBOOL) &&
            flatbuffers::verify_field::<i32>(verifier, Monster::VT_TESTHASHS32_FNV1) &&
            flatbuffers::verify_field::<u32>(verifier, Monster::VT_TESTHASHU32_FNV1) &&
@@ -820,25 +820,25 @@ impl Monster /* private flatbuffers::Table */ {
            flatbuffers::verify_field::<i64>(verifier, Monster::VT_TESTHASHS64_FNV1A) &&
            flatbuffers::verify_field::<u64>(verifier, Monster::VT_TESTHASHU64_FNV1A) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFBOOLS) &&
-           verifier.Verify(self.testarrayofbools()) &&
+           verifier.verify(self.testarrayofbools()) &&
            flatbuffers::verify_field::<f32>(verifier, Monster::VT_TESTF) &&
            flatbuffers::verify_field::<f32>(verifier, Monster::VT_TESTF2) &&
            flatbuffers::verify_field::<f32>(verifier, Monster::VT_TESTF3) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFSTRING2) &&
-           verifier.Verify(self.testarrayofstring2()) &&
-           verifier.VerifyVectorOfStrings(self.testarrayofstring2()) &&
+           verifier.verify(self.testarrayofstring2()) &&
+           verifier.verify_vector_of_strings(self.testarrayofstring2()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFSORTEDSTRUCT) &&
-           verifier.Verify(self.testarrayofsortedstruct()) &&
+           verifier.verify(self.testarrayofsortedstruct()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_FLEX) &&
-           verifier.Verify(self.flex()) &&
+           verifier.verify(self.flex()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TEST5) &&
-           verifier.Verify(self.test5()) &&
+           verifier.verify(self.test5()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_VECTOR_OF_LONGS) &&
-           verifier.Verify(self.vector_of_longs()) &&
+           verifier.verify(self.vector_of_longs()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_VECTOR_OF_DOUBLES) &&
-           verifier.Verify(self.vector_of_doubles()) &&
+           verifier.verify(self.vector_of_doubles()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_PARENT_NAMESPACE_TEST) &&
-           verifier.VerifyTable(self.parent_namespace_test()) &&
+           verifier.verify_table(self.parent_namespace_test()) &&
            verifier.end_table();
   }
 }
@@ -1248,9 +1248,9 @@ impl TypeAliases /* private flatbuffers::Table */ {
            flatbuffers::verify_field::<f32>(verifier, TypeAliases::VT_F32_) &&
            flatbuffers::verify_field::<f64>(verifier, TypeAliases::VT_F64_) &&
            flatbuffers::verify_offset(verifier, TypeAliases::VT_V8) &&
-           verifier.Verify(self.v8()) &&
+           verifier.verify(self.v8()) &&
            flatbuffers::verify_offset(verifier, TypeAliases::VT_VF64) &&
-           verifier.Verify(self.vf64()) &&
+           verifier.verify(self.vf64()) &&
            verifier.end_table();
   }
 }
@@ -1380,15 +1380,15 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, type_: A
     }
     Any::Monster => {
       let ptr = obj as &Monster;
-      return verifier.VerifyTable(ptr);
+      return verifier.verify_table(ptr);
     }
     Any::TestSimpleTableWithEnum => {
       let ptr = obj as &TestSimpleTableWithEnum;
-      return verifier.VerifyTable(ptr);
+      return verifier.verify_table(ptr);
     }
     Any::MyGame_Example2_Monster => {
       let ptr = obj as &super::Example2::Monster;
-      return verifier.VerifyTable(ptr);
+      return verifier.verify_table(ptr);
     }
     _ => { return false; }
   }
