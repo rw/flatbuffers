@@ -1773,7 +1773,8 @@ class RustGenerator : public BaseGenerator {
 
         code_ += "//TODO: mutable nested root";
         code_ += "  fn {{FIELD_NAME}}_nested_root(&self) -> &{{CPP_NAME}}{";
-        code_ += "    return flatbuffers::get_root::<{{CPP_NAME}}>(self.{{FIELD_NAME}}().Data());";
+        code_ += "    unimplemented!()";
+        code_ += "    // TODO(rw): return flatbuffers::get_root::<{{CPP_NAME}}>(self.{{FIELD_NAME}}().Data());";
         code_ += "  }";
       }
 
