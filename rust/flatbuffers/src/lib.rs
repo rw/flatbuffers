@@ -29,7 +29,7 @@ impl FlatBufferBuilder {
     pub fn add_element<T>(&mut self, _: isize, _: T, _: isize) -> usize {
         0
     }
-    pub fn add_offset<T>(&mut self, _: isize, _: T, _: isize) -> usize {
+    pub fn add_offset<T>(&mut self, _: isize, _: Offset<T>) -> usize {
         0
     }
     pub fn end_table<T>(&mut self, _: T) -> usize {
