@@ -403,7 +403,7 @@ impl Stat /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_offset(verifier, Stat::VT_ID) &&
-           verifier.Verify(self.id()) &&
+           verifier.verify(self.id()) &&
            flatbuffers::verify_field::<i64>(verifier, Stat::VT_VAL) &&
            flatbuffers::verify_field::<u16>(verifier, Stat::VT_COUNT) &&
            verifier.end_table();
@@ -791,7 +791,7 @@ impl Monster /* private flatbuffers::Table */ {
            flatbuffers::verify_field::<i16>(verifier, Monster::VT_MANA) &&
            flatbuffers::verify_field::<i16>(verifier, Monster::VT_HP) &&
            flatbuffers::verify_offset_required(verifier, Monster::VT_NAME) &&
-           verifier.Verify(self.name()) &&
+           verifier.verify(self.name()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_INVENTORY) &&
            verifier.Verify(self.inventory()) &&
            flatbuffers::verify_field::<i8>(verifier, Monster::VT_COLOR) &&
