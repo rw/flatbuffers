@@ -459,7 +459,7 @@ fn CreateStatDirect(
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
   return CreateStat(
       _fbb,
-      if id { _fbb.CreateString(id) } else { 0 },
+      if let Some(x) = id { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) },
       val,
       count);
 }
@@ -1102,7 +1102,7 @@ fn CreateMonsterDirect(
       pos,
       mana,
       hp,
-      if name { _fbb.CreateString(name) } else { 0 },
+      if let Some(x) = name { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) },
       if inventory { _fbb.CreateVector::<u8>(*inventory) } else { 0 },
       color,
       test_type,
