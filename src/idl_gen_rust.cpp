@@ -1941,7 +1941,7 @@ class RustGenerator : public BaseGenerator {
         } else if (IsStruct(field.value.type)) {
           code_.SetValue("ADD_FN", "AddStruct");
         } else {
-          code_.SetValue("ADD_FN", "AddOffset");
+          code_.SetValue("ADD_FN", "add_offset");
         }
 
         code_ += "  fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
