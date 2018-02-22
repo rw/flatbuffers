@@ -13,6 +13,9 @@ use std::marker::PhantomData;
 pub trait Table {}
 pub struct Verifier {}
 impl Verifier {
+    pub fn verify<T>(&mut self, _: T) -> bool {
+        false
+    }
     pub fn end_table(&mut self) -> bool {
         false
     }
@@ -24,6 +27,9 @@ impl FlatBufferBuilder {
         0
     }
     pub fn add_element<T>(&mut self, _: isize, _: T, _: isize) -> usize {
+        0
+    }
+    pub fn add_offset<T>(&mut self, _: isize, _: T, _: isize) -> usize {
         0
     }
     pub fn end_table<T>(&mut self, _: T) -> usize {

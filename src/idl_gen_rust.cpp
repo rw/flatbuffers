@@ -1580,7 +1580,7 @@ class RustGenerator : public BaseGenerator {
         break;
       }
       case BASE_TYPE_STRING: {
-        code_ += "{{PRE}}verifier.Verify({{NAME}}())\\";
+        code_ += "{{PRE}}verifier.verify({{NAME}}())\\";
         break;
       }
       case BASE_TYPE_VECTOR: {
