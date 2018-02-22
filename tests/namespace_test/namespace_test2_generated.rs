@@ -32,7 +32,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
   }
   fn foo_enum(&self) -> NamespaceA::NamespaceB::EnumInNestedNS  {
     // yo
-    flatbuffers::get_field::<i8>(TableInFirstNS::VT_FOO_ENUM, 0) as NamespaceA::NamespaceB::EnumInNestedNS
+    EnumValuesNamespaceA::NamespaceB::EnumInNestedNS[flatbuffers::get_field::<i8>(TableInFirstNS::VT_FOO_ENUM, 0) as usize]
   }
   fn mutate_foo_enum(&mut self, foo_enum_: NamespaceA::NamespaceB::EnumInNestedNS) -> bool {
     flatbuffers::set_field::<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum_ as i8, 0)

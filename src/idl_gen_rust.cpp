@@ -1346,7 +1346,12 @@ class RustGenerator : public BaseGenerator {
     } else if ((field.value.type.enum_def &&
                 IsScalar(field.value.type.base_type)) ||
                field.value.type.base_type == BASE_TYPE_BOOL) {
-      return val + " as " + GenTypeBasic(field.value.type, from);
+      // TOD(rw): handle enums in other namespaces
+      if (from) {
+        return "EnumValues" + GenTypeBasic(field.value.type, from) + "[" + val + " as usize]";
+      } else {
+        return val + " as " + GenTypeBasic(field.value.type, from);
+      }
     } else {
       return val;
     }
