@@ -537,7 +537,8 @@ impl Monster /* private flatbuffers::Table */ {
     return *self.name() < *o.name();
   }
   fn KeyCompareWithValue(&self, val: &str) -> Ordering {
-    self.name().cmp(val)
+    Ordering::Equal
+    // TODO(rw): self.name().cmp(val)
   }
   fn inventory(&self) -> &flatbuffers::Vector<u8>  {
     // yo
