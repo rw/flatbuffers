@@ -454,7 +454,7 @@ fn CreateStat(
 #[inline]
 fn CreateStatDirect(
     _fbb: &mut flatbuffers::FlatBufferBuilder,
-    id: &str /* = nullptr */,
+    id: Option<&str> /* = nullptr */,
     val: i64  /* = 0 */,
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
   return CreateStat(
@@ -1066,7 +1066,7 @@ fn CreateMonsterDirect(
     pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
-    name: &str /* = nullptr */,
+    name: Option<&str> /* = nullptr */,
     inventory: Option<Vec<u8>> /* = nullptr */,
     color: Color  /* = Color::Blue */,
     test_type: Any  /* = Any::NONE */,
