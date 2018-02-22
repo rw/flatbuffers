@@ -65,7 +65,7 @@ pub fn endian_scalar<T: num_traits::int::PrimInt>(x: T) -> T {
 pub fn write_scalar<S, T>(_: S, _: T) -> ! {
     unimplemented!()
 }
-pub fn set_field<T>(_: isize, _: T, _: isize) -> ! {
+pub fn set_field<T>(_: isize, _: T, _: T) -> bool {
     unimplemented!()
 }
 pub fn verify_field<T>(_: &Verifier, _: isize) -> bool {
@@ -97,7 +97,7 @@ pub fn buffer_has_identifier<S, T>(_: S, _: T) -> ! {
 }
 pub mod flexbuffers {
     pub struct Reference {}
-pub fn get_root<T>(_: isize) -> ! {
+pub fn get_root<T>(_: &[u8], _: isize) -> T {
     unimplemented!()
 }
 }
