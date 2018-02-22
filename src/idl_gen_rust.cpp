@@ -1162,7 +1162,7 @@ class RustGenerator : public BaseGenerator {
             code_ += "      return true;";
           } else {
             code_ += getptr;
-            code_ += "      return verifier.VerifyTable(ptr);";
+            code_ += "      return verifier.verify_table(ptr);";
           }
         } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
           code_ += getptr;
@@ -1575,7 +1575,7 @@ class RustGenerator : public BaseGenerator {
       }
       case BASE_TYPE_STRUCT: {
         if (!field.value.type.struct_def->fixed) {
-          code_ += "{{PRE}}verifier.VerifyTable({{NAME}}())\\";
+          code_ += "{{PRE}}verifier.verify_table({{NAME}}())\\";
         }
         break;
       }
@@ -1584,16 +1584,16 @@ class RustGenerator : public BaseGenerator {
         break;
       }
       case BASE_TYPE_VECTOR: {
-        code_ += "{{PRE}}verifier.Verify({{NAME}}())\\";
+        code_ += "{{PRE}}verifier.verify({{NAME}}())\\";
 
         switch (field.value.type.element) {
           case BASE_TYPE_STRING: {
-            code_ += "{{PRE}}verifier.VerifyVectorOfStrings({{NAME}}())\\";
+            code_ += "{{PRE}}verifier.verify_vector_of_strings({{NAME}}())\\";
             break;
           }
           case BASE_TYPE_STRUCT: {
             if (!field.value.type.struct_def->fixed) {
-              code_ += "{{PRE}}verifier.VerifyVectorOfTables({{NAME}}())\\";
+              code_ += "{{PRE}}verifier.verify_vector_of_tables({{NAME}}())\\";
             }
             break;
           }
