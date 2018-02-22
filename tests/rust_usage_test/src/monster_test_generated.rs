@@ -1101,15 +1101,15 @@ fn CreateMonsterDirect(
       mana,
       hp,
       if let Some(x) = name { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) },
-      if inventory { _fbb.CreateVector::<u8>(*inventory) } else { 0 },
+      if inventory { _fbb.create_vector::<u8>(*inventory) } else { 0 },
       color,
       test_type,
       test,
-      if test4 { _fbb.CreateVectorOfStructs::<Test>(*test4) } else { 0 },
-      if testarrayofstring { _fbb.CreateVector::<flatbuffers::Offset<flatbuffers::String>>(*testarrayofstring) } else { 0 },
-      if testarrayoftables { _fbb.CreateVector::<flatbuffers::Offset<Monster>>(*testarrayoftables) } else { 0 },
+      if test4 { _fbb.create_vector_of_structs::<Test>(*test4) } else { 0 },
+      if testarrayofstring { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(*testarrayofstring) } else { 0 },
+      if testarrayoftables { _fbb.create_vector::<flatbuffers::Offset<Monster>>(*testarrayoftables) } else { 0 },
       enemy,
-      if testnestedflatbuffer { _fbb.CreateVector::<u8>(*testnestedflatbuffer) } else { 0 },
+      if testnestedflatbuffer { _fbb.create_vector::<u8>(*testnestedflatbuffer) } else { 0 },
       testempty,
       testbool,
       testhashs32_fnv1,
@@ -1120,16 +1120,16 @@ fn CreateMonsterDirect(
       testhashu32_fnv1a,
       testhashs64_fnv1a,
       testhashu64_fnv1a,
-      if testarrayofbools { _fbb.CreateVector::<u8>(*testarrayofbools) } else { 0 },
+      if testarrayofbools { _fbb.create_vector::<u8>(*testarrayofbools) } else { 0 },
       testf,
       testf2,
       testf3,
-      if testarrayofstring2 { _fbb.CreateVector::<flatbuffers::Offset<flatbuffers::String>>(*testarrayofstring2) } else { 0 },
-      if testarrayofsortedstruct { _fbb.CreateVectorOfStructs::<Ability>(*testarrayofsortedstruct) } else { 0 },
-      if flex { _fbb.CreateVector::<u8>(*flex) } else { 0 },
-      if test5 { _fbb.CreateVectorOfStructs::<Test>(*test5) } else { 0 },
-      if vector_of_longs { _fbb.CreateVector::<i64>(*vector_of_longs) } else { 0 },
-      if vector_of_doubles { _fbb.CreateVector::<f64>(*vector_of_doubles) } else { 0 },
+      if testarrayofstring2 { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(*testarrayofstring2) } else { 0 },
+      if testarrayofsortedstruct { _fbb.create_vector_of_structs::<Ability>(*testarrayofsortedstruct) } else { 0 },
+      if flex { _fbb.create_vector::<u8>(*flex) } else { 0 },
+      if test5 { _fbb.create_vector_of_structs::<Test>(*test5) } else { 0 },
+      if vector_of_longs { _fbb.create_vector::<i64>(*vector_of_longs) } else { 0 },
+      if vector_of_doubles { _fbb.create_vector::<f64>(*vector_of_doubles) } else { 0 },
       parent_namespace_test);
 }
 
@@ -1368,8 +1368,8 @@ fn CreateTypeAliasesDirect(
       u64_,
       f32_,
       f64_,
-      if v8 { _fbb.CreateVector::<i8>(*v8) } else { 0 },
-      if vf64 { _fbb.CreateVector::<f64>(*vf64) } else { 0 });
+      if v8 { _fbb.create_vector::<i8>(*v8) } else { 0 },
+      if vf64 { _fbb.create_vector::<f64>(*vf64) } else { 0 });
 }
 
 #[inline]
