@@ -624,7 +624,8 @@ impl Monster /* private flatbuffers::Table */ {
   }
 //TODO: mutable nested root
   fn testnestedflatbuffer_nested_root(&self) -> &Monster{
-    return flatbuffers::get_root::<Monster>(self.testnestedflatbuffer().Data());
+    unimplemented!()
+    // TODO(rw): return flatbuffers::get_root::<Monster>(self.testnestedflatbuffer().Data());
   }
   fn testempty(&self) -> &Stat  {
     // yo
