@@ -269,7 +269,7 @@ impl<'a> Vec3<'a> {
     &mut self.test1_
   }
   fn test2(&self) -> Color  {
-    flatbuffers::endian_scalar(self.test2_) as Color
+    EnumValuesColor[flatbuffers::endian_scalar(self.test2_) as usize]
   }
   fn mutate_test2(&mut self, _test2: Color) {
     flatbuffers::write_scalar(&self.test2_, _test2 as i8);
@@ -328,7 +328,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
 
   fn color(&self) -> Color  {
     // yo
-    flatbuffers::get_field::<i8>(TestSimpleTableWithEnum::VT_COLOR, 2) as Color
+    EnumValuesColor[flatbuffers::get_field::<i8>(TestSimpleTableWithEnum::VT_COLOR, 2) as usize]
   }
   fn mutate_color(&mut self, color_: Color) -> bool {
     flatbuffers::set_field::<i8>(TestSimpleTableWithEnum::VT_COLOR, color_ as i8, 2)
@@ -549,14 +549,14 @@ impl Monster /* private flatbuffers::Table */ {
   }
   fn color(&self) -> Color  {
     // yo
-    flatbuffers::get_field::<i8>(Monster::VT_COLOR, 8) as Color
+    EnumValuesColor[flatbuffers::get_field::<i8>(Monster::VT_COLOR, 8) as usize]
   }
   fn mutate_color(&mut self, color_: Color) -> bool {
     flatbuffers::set_field::<i8>(Monster::VT_COLOR, color_ as i8, 8)
   }
   fn test_type(&self) -> Any  {
     // yo
-    flatbuffers::get_field::<u8>(Monster::VT_TEST_TYPE, 0) as Any
+    EnumValuesAny[flatbuffers::get_field::<u8>(Monster::VT_TEST_TYPE, 0) as usize]
   }
   fn mutate_test_type(&mut self, test_type_: Any) -> bool {
     flatbuffers::set_field::<u8>(Monster::VT_TEST_TYPE, test_type_ as u8, 0)
