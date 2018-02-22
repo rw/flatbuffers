@@ -35,17 +35,23 @@ impl FlatBufferBuilder {
     pub fn start_table(&mut self) -> usize {
         0
     }
-    pub fn add_element<T>(&mut self, _: isize, _: T, _: isize) -> usize {
-        0
+    pub fn add_element<T>(&mut self, _: isize, _: T, _: T) -> T {
+        unimplemented!()
     }
     pub fn add_offset<T>(&mut self, _: isize, _: Offset<T>) -> usize {
-        0
+        unimplemented!()
+    }
+    pub fn add_struct<T>(&mut self, _: isize, _: T) {
+        unimplemented!()
     }
     pub fn create_string<T>(&mut self, _: &str) -> Offset<T> {
         Offset::new(0)
     }
     pub fn end_table<T>(&mut self, _: T) -> usize {
         0
+    }
+    pub fn required<T>(&self, _: Offset<T>, _: isize) -> bool {
+        unimplemented!()
     }
     pub fn finish<T>(&mut self) -> usize {
         0

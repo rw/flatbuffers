@@ -867,7 +867,7 @@ pub struct MonsterBuilder<'a> {
 }
 impl<'a> MonsterBuilder<'a> {
   fn add_pos(&mut self, pos: &Vec3) {
-    self.fbb_.AddStruct(Monster::VT_POS, pos);
+    self.fbb_.add_struct(Monster::VT_POS, pos);
   }
   fn add_mana(&mut self, mana: i16 ) {
     self.fbb_.add_element::<i16>(Monster::VT_MANA, mana, 150);
@@ -978,7 +978,7 @@ impl<'a> MonsterBuilder<'a> {
   fn finish(&mut self) -> flatbuffers::Offset<Monster> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<Monster>::new(end);
-    self.fbb_.Required(o, Monster::VT_NAME);
+    self.fbb_.required(o, Monster::VT_NAME);
     o
   }
 }

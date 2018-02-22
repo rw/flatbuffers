@@ -1942,7 +1942,7 @@ class RustGenerator : public BaseGenerator {
           const auto type = GenTypeWire(field.value.type, "", false);
           code_.SetValue("ADD_FN", "add_element::<" + type + ">");
         } else if (IsStruct(field.value.type)) {
-          code_.SetValue("ADD_FN", "AddStruct");
+          code_.SetValue("ADD_FN", "add_struct");
         } else {
           code_.SetValue("ADD_FN", "add_offset");
         }
@@ -1985,7 +1985,7 @@ class RustGenerator : public BaseGenerator {
       if (!field.deprecated && field.required) {
         code_.SetValue("FIELD_NAME", Name(field));
         code_.SetValue("OFFSET_NAME", GenFieldOffsetName(field));
-        code_ += "    self.fbb_.Required(o, {{STRUCT_NAME}}::{{OFFSET_NAME}});";
+        code_ += "    self.fbb_.required(o, {{STRUCT_NAME}}::{{OFFSET_NAME}});";
       }
     }
     code_ += "    o";
