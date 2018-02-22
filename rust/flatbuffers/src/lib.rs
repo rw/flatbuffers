@@ -86,7 +86,7 @@ pub fn get_mutable_root<T>(_: isize) -> T {
 pub fn get_struct<T>(_: isize) -> T {
     unimplemented!()
 }
-pub fn get_field<T>(_: isize, _: isize) -> T {
+pub fn get_field<T>(_: isize, _: T) -> T {
     unimplemented!()
 }
 pub fn get_pointer<'a, T: 'a>(_: isize) -> &'a T {

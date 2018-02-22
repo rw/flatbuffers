@@ -637,10 +637,10 @@ impl Monster /* private flatbuffers::Table */ {
   }
   fn testbool(&self) -> bool  {
     // yo
-    flatbuffers::get_field::<bool>(Monster::VT_TESTBOOL, 0) != 0
+    flatbuffers::get_field::<u8>(Monster::VT_TESTBOOL, 0) != 0
   }
   fn mutate_testbool(&mut self, testbool_: bool) -> bool {
-    flatbuffers::set_field::<bool>(Monster::VT_TESTBOOL, testbool_ as bool, 0)
+    flatbuffers::set_field::<u8>(Monster::VT_TESTBOOL, testbool_ as u8, 0)
   }
   fn testhashs32_fnv1(&self) -> i32  {
     // yo
@@ -698,13 +698,13 @@ impl Monster /* private flatbuffers::Table */ {
   fn mutate_testhashu64_fnv1a(&mut self, testhashu64_fnv1a_: u64) -> bool {
     flatbuffers::set_field::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a_, 0)
   }
-  fn testarrayofbools(&self) -> &flatbuffers::Vector<bool>  {
+  fn testarrayofbools(&self) -> &flatbuffers::Vector<u8>  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<bool>>(Monster::VT_TESTARRAYOFBOOLS)
+    flatbuffers::get_pointer::<&flatbuffers::Vector<u8>>(Monster::VT_TESTARRAYOFBOOLS)
   }
-  fn mutable_testarrayofbools(&mut self) -> &mut flatbuffers::Vector<bool>  {
+  fn mutable_testarrayofbools(&mut self) -> &mut flatbuffers::Vector<u8>  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer::<&mut flatbuffers::Vector<bool> >(Monster::VT_TESTARRAYOFBOOLS)
+    &mut flatbuffers::get_pointer::<&mut flatbuffers::Vector<u8> >(Monster::VT_TESTARRAYOFBOOLS)
   }
   fn testf(&self) -> f32  {
     // yo
@@ -814,7 +814,7 @@ impl Monster /* private flatbuffers::Table */ {
            verifier.Verify(self.testnestedflatbuffer()) &&
            flatbuffers::verify_offset(verifier, Monster::VT_TESTEMPTY) &&
            verifier.VerifyTable(self.testempty()) &&
-           flatbuffers::verify_field::<bool>(verifier, Monster::VT_TESTBOOL) &&
+           flatbuffers::verify_field::<u8>(verifier, Monster::VT_TESTBOOL) &&
            flatbuffers::verify_field::<i32>(verifier, Monster::VT_TESTHASHS32_FNV1) &&
            flatbuffers::verify_field::<u32>(verifier, Monster::VT_TESTHASHU32_FNV1) &&
            flatbuffers::verify_field::<i64>(verifier, Monster::VT_TESTHASHS64_FNV1) &&
@@ -913,7 +913,7 @@ impl<'a> MonsterBuilder<'a> {
     self.fbb_.add_offset(Monster::VT_TESTEMPTY, testempty);
   }
   fn add_testbool(&mut self, testbool: bool ) {
-    self.fbb_.add_element::<bool>(Monster::VT_TESTBOOL, testbool as bool, 0);
+    self.fbb_.add_element::<u8>(Monster::VT_TESTBOOL, testbool as u8, 0);
   }
   fn add_testhashs32_fnv1(&mut self, testhashs32_fnv1: i32 ) {
     self.fbb_.add_element::<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, 0);
@@ -939,7 +939,7 @@ impl<'a> MonsterBuilder<'a> {
   fn add_testhashu64_fnv1a(&mut self, testhashu64_fnv1a: u64 ) {
     self.fbb_.add_element::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, 0);
   }
-  fn add_testarrayofbools(&mut self, testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<bool>> ) {
+  fn add_testarrayofbools(&mut self, testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
     self.fbb_.add_offset(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools);
   }
   fn add_testf(&mut self, testf: f32 ) {
@@ -1013,7 +1013,7 @@ fn CreateMonster(
     testhashu32_fnv1a: u32  /* = 0 */,
     testhashs64_fnv1a: i64  /* = 0 */,
     testhashu64_fnv1a: u64  /* = 0 */,
-    testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<bool>>  /* = 0 */,
+    testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
     testf: f32  /* = 3.14159 */,
     testf2: f32  /* = 3.0 */,
     testf3: f32  /* = 0.0 */,
@@ -1088,7 +1088,7 @@ fn CreateMonsterDirect(
     testhashu32_fnv1a: u32  /* = 0 */,
     testhashs64_fnv1a: i64  /* = 0 */,
     testhashu64_fnv1a: u64  /* = 0 */,
-    testarrayofbools: Option<Vec<bool>> /* = nullptr */,
+    testarrayofbools: Option<Vec<u8>> /* = nullptr */,
     testf: f32  /* = 3.14159 */,
     testf2: f32  /* = 3.0 */,
     testf3: f32  /* = 0.0 */,
@@ -1124,7 +1124,7 @@ fn CreateMonsterDirect(
       testhashu32_fnv1a,
       testhashs64_fnv1a,
       testhashu64_fnv1a,
-      if testarrayofbools { _fbb.CreateVector::<bool>(*testarrayofbools) } else { 0 },
+      if testarrayofbools { _fbb.CreateVector::<u8>(*testarrayofbools) } else { 0 },
       testf,
       testf2,
       testf3,
