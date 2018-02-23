@@ -2061,7 +2061,7 @@ class RustGenerator : public BaseGenerator {
               const auto type = GenTypeWire(vtype, "", false);
               code_ += "_fbb.create_vector::<" + type + ">\\";
             }
-            code_ += "(x) } else { 0 }\\";
+            code_ += "(&x) } else { flatbuffers::Offset::new(0) }\\";
           } else {
             code_ += ",\n      {{FIELD_NAME}}\\";
           }

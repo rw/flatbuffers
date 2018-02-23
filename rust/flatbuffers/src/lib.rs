@@ -47,14 +47,20 @@ impl FlatBufferBuilder {
     pub fn create_string<T>(&mut self, _: &str) -> Offset<T> {
         Offset::new(0)
     }
+    pub fn create_vector<T>(&mut self, _: &Vec<T>) -> Offset<Vector<T>> {
+        Offset::new(0)
+    }
+    pub fn create_vector_of_structs<T>(&mut self, _: &Vec<T>) -> Offset<Vector<&T>> {
+        Offset::new(0)
+    }
     pub fn end_table<T>(&mut self, _: T) -> usize {
         0
     }
     pub fn required<T>(&self, _: Offset<T>, _: isize) -> bool {
         unimplemented!()
     }
-    pub fn finish<T>(&mut self) -> usize {
-        0
+    pub fn finish<T>(&mut self) -> Offset<T> {
+        Offset::new(0)
     }
 }
 pub type UOffsetT = usize;
