@@ -6,6 +6,8 @@
 
 pub mod NamespaceA {
   #[allow(unused_imports)]
+  use std::mem;
+  #[allow(unused_imports)]
   use std::marker::PhantomData;
   #[allow(unused_imports)]
   #[allow(unreachable_code)]
@@ -197,6 +199,8 @@ fn SecondTableInATypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }  // pub mod NamespaceA
 
 pub mod NamespaceC {
+  #[allow(unused_imports)]
+  use std::mem;
   #[allow(unused_imports)]
   use std::marker::PhantomData;
   #[allow(unused_imports)]
