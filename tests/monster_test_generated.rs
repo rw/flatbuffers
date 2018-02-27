@@ -4,6 +4,8 @@
 
 pub mod MyGame {
   #[allow(unused_imports)]
+  use std::mem;
+  #[allow(unused_imports)]
   use std::marker::PhantomData;
   #[allow(unused_imports)]
   #[allow(unreachable_code)]
@@ -60,6 +62,8 @@ fn InParentNamespaceTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 pub mod Example2 {
+  #[allow(unused_imports)]
+  use std::mem;
   #[allow(unused_imports)]
   use std::marker::PhantomData;
   #[allow(unused_imports)]
@@ -119,6 +123,8 @@ fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }  // pub mod Example2
 
 pub mod Example {
+  #[allow(unused_imports)]
+  use std::mem;
   #[allow(unused_imports)]
   use std::marker::PhantomData;
   #[allow(unused_imports)]
@@ -1373,22 +1379,40 @@ fn CreateTypeAliasesDirect(
 }
 
 #[inline]
-fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, type_: Any) -> bool {
+fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
   match type_ {
     Any::NONE => {
       return true;
     }
     Any::Monster => {
-      let ptr = obj as &Monster;
-      return verifier.verify_table(ptr);
+
+      if obj.len() != mem::size_of::<Monster>() {
+          return false;
+      }
+      let x: &Monster = unsafe {
+        &*(obj.as_ptr() as *const Monster)
+      };
+      return verifier.verify_table::<&Monster>(x);
     }
     Any::TestSimpleTableWithEnum => {
-      let ptr = obj as &TestSimpleTableWithEnum;
-      return verifier.verify_table(ptr);
+
+      if obj.len() != mem::size_of::<TestSimpleTableWithEnum>() {
+          return false;
+      }
+      let x: &TestSimpleTableWithEnum = unsafe {
+        &*(obj.as_ptr() as *const TestSimpleTableWithEnum)
+      };
+      return verifier.verify_table::<&TestSimpleTableWithEnum>(x);
     }
     Any::MyGame_Example2_Monster => {
-      let ptr = obj as &super::Example2::Monster;
-      return verifier.verify_table(ptr);
+
+      if obj.len() != mem::size_of::<super::Example2::Monster>() {
+          return false;
+      }
+      let x: &super::Example2::Monster = unsafe {
+        &*(obj.as_ptr() as *const super::Example2::Monster)
+      };
+      return verifier.verify_table::<&super::Example2::Monster>(x);
     }
     _ => { return false; }
   }

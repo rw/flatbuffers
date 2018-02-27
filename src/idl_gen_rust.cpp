@@ -721,7 +721,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string UnionVerifySignature(const EnumDef &enum_def) {
     return "fn Verify" + Name(enum_def) +
-           "(verifier: &flatbuffers::Verifier, obj: &flatbuffers::Void, " +
+           "(verifier: &flatbuffers::Verifier, obj: &[u8], " +
            "type_: " + Name(enum_def) + ") -> bool";
   }
 
@@ -1155,18 +1155,24 @@ class RustGenerator : public BaseGenerator {
       if (ev.value) {
         code_.SetValue("TYPE", GetUnionElement(ev, true, true));
         code_ += "    {{LABEL}} => {";
-        auto getptr =
-            "      let ptr = obj as &{{TYPE}};";
+        auto getptr = "";
+            //"      let x = obj.as_ptr() as *const {{TYPE}};";
         if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
           if (ev.union_type.struct_def->fixed) {
             code_ += "      return true;";
           } else {
             code_ += getptr;
-            code_ += "      return verifier.verify_table(ptr);";
+            code_ += "      if obj.len() != mem::size_of::<{{TYPE}}>() {";
+            code_ += "          return false;";
+            code_ += "      }";
+            code_ += "      let x: &{{TYPE}} = unsafe {";
+            code_ += "        &*(obj.as_ptr() as *const {{TYPE}})";
+            code_ += "      };";
+            code_ += "      return verifier.verify_table::<&{{TYPE}}>(x);";
           }
         } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
           code_ += getptr;
-          code_ += "      return verifier.Verify(ptr);";
+          code_ += "      return verifier.Verify::<String>(x);";
         } else {
           assert(false);
         }
@@ -2667,6 +2673,8 @@ class RustGenerator : public BaseGenerator {
     // in the previous example, E, then F, then G are opened
     for (auto j = common_prefix_size; j != new_size; ++j) {
       code_ += "pub mod " + ns->components[j] + " {";
+      code_ += "  #[allow(unused_imports)]";
+      code_ += "  use std::mem;";
       code_ += "  #[allow(unused_imports)]";
       code_ += "  use std::marker::PhantomData;";
       code_ += "  #[allow(unused_imports)]";

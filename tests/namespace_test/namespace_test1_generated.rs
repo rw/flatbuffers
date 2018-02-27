@@ -4,6 +4,8 @@
 
 pub mod NamespaceA {
   #[allow(unused_imports)]
+  use std::mem;
+  #[allow(unused_imports)]
   use std::marker::PhantomData;
   #[allow(unused_imports)]
   #[allow(unreachable_code)]
@@ -13,6 +15,8 @@ pub mod NamespaceA {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 pub mod NamespaceB {
+  #[allow(unused_imports)]
+  use std::mem;
   #[allow(unused_imports)]
   use std::marker::PhantomData;
   #[allow(unused_imports)]
