@@ -728,8 +728,8 @@ class RustGenerator : public BaseGenerator {
   std::string UnionVectorVerifySignature(const EnumDef &enum_def) {
     return "fn Verify" + Name(enum_def) + "Vector" +
            "(verifier: &flatbuffers::Verifier, " +
-           "values: &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Void>>, " +
-           "types: &flatbuffers::Vector<u8>) -> bool";
+           "values: &[flatbuffers::Offset<flatbuffers::Void>], " +
+           "types: &[u8]) -> bool";
   }
 
   std::string UnionUnPackSignature(const EnumDef &enum_def, bool inclass) {
@@ -1190,14 +1190,16 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "#[inline]";
     code_ += UnionVectorVerifySignature(enum_def) + " {";
-    code_ += "  if !values || !types { return !values && !types; }";
-    code_ += "  if values.size() != types.size() { return false; }";
-    code_ += "  for i in (0 as flatbuffers::UOffsetT)..values.size() {";
-    code_ += "    if !Verify" + Name(enum_def) + "(";
-    code_ += "        verifier,  values.Get(i), types.GetEnum::<" +
+    code_ += "  //if values.len() == 0 || types.len() == 0 {";
+    code_ += "  //  return values.len() == types.len();";
+    code_ += "  //}";
+    code_ += "  if values.len() != types.len() { return false; }";
+    code_ += "  for i in (0 as flatbuffers::UOffsetT)..values.len() {";
+    code_ += "    //if !Verify" + Name(enum_def) + "(";
+    code_ += "    //    verifier,  values.Get(i), types.GetEnum::<" +
              Name(enum_def) + ">(i)) {";
-    code_ += "      return false;";
-    code_ += "    }";
+    code_ += "    //  return false;";
+    code_ += "    //}";
     code_ += "  }";
     code_ += "  return true;";
     code_ += "}";
