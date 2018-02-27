@@ -16,6 +16,9 @@ impl Verifier {
     pub fn verify<T>(&mut self, _: T) -> bool {
         false
     }
+    pub fn verify_buffer<T>(&mut self, _: T) -> bool {
+        false
+    }
     pub fn verify_vector_of_strings<T>(&mut self, _: T) -> bool {
         false
     }

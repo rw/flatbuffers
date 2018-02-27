@@ -428,7 +428,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "#[inline]";
         code_ += "fn Verify{{STRUCT_NAME}}Buffer(";
         code_ += "    verifier: &flatbuffers::Verifier) -> bool {";
-        code_ += "  return verifier.VerifyBuffer::<{{CPP_NAME}}>({{ID}});";
+        code_ += "  return verifier.verify_buffer::<{{CPP_NAME}}>({{ID}});";
         code_ += "}";
         code_ += "";
 

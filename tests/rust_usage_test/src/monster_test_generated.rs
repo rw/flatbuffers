@@ -1757,7 +1757,7 @@ fn MonsterBufferHasIdentifier(buf: &Vec<u8>) -> bool {
 #[inline]
 fn VerifyMonsterBuffer(
     verifier: &flatbuffers::Verifier) -> bool {
-  return verifier.VerifyBuffer::<Monster>(MonsterIdentifier());
+  return verifier.verify_buffer::<Monster>(MonsterIdentifier());
 }
 
 #[inline]
