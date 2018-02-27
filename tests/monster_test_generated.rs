@@ -1419,14 +1419,16 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
 }
 
 #[inline]
-fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::Void>>, types: &flatbuffers::Vector<u8>) -> bool {
-  if !values || !types { return !values && !types; }
-  if values.size() != types.size() { return false; }
-  for i in (0 as flatbuffers::UOffsetT)..values.size() {
-    if !VerifyAny(
-        verifier,  values.Get(i), types.GetEnum::<Any>(i)) {
-      return false;
-    }
+fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &[flatbuffers::Offset<flatbuffers::Void>], types: &[u8]) -> bool {
+  //if values.len() == 0 || types.len() == 0 {
+  //  return values.len() == types.len();
+  //}
+  if values.len() != types.len() { return false; }
+  for i in (0 as flatbuffers::UOffsetT)..values.len() {
+    //if !VerifyAny(
+    //    verifier,  values.Get(i), types.GetEnum::<Any>(i)) {
+    //  return false;
+    //}
   }
   return true;
 }
