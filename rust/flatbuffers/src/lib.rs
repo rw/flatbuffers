@@ -98,10 +98,10 @@ pub fn verify_offset(_: &Verifier, _: isize) -> ! {
 pub fn verify_offset_required(_: &Verifier, _: isize) -> ! {
     unimplemented!()
 }
-pub fn get_root<T>(_: isize) -> T {
+pub fn get_root<T>(_: &[u8]) -> T {
     unimplemented!()
 }
-pub fn get_mutable_root<T>(_: isize) -> T {
+pub fn get_mutable_root<T>(_: &[u8]) -> T {
     unimplemented!()
 }
 pub fn get_struct<T>(_: isize) -> T {

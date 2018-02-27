@@ -1734,13 +1734,13 @@ fn TypeAliasesTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn GetMonster(buf: &Vec<u8>) -> &Monster  {
-  return flatbuffers::get_root::<Monster>(buf);
+fn GetMonster(buf: &[u8]) -> &Monster  {
+  return flatbuffers::get_root::<&Monster>(buf);
 }
 
 #[inline]
-fn GetMutableMonster(buf: &Vec<u8>) -> &Monster {
-  return flatbuffers::get_mutable_root::<Monster>(buf);
+fn GetMutableMonster(buf: &[u8]) -> &Monster {
+  return flatbuffers::get_mutable_root::<&Monster>(buf);
 }
 
 #[inline]
