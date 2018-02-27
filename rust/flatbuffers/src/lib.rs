@@ -113,8 +113,8 @@ pub fn get_field<T>(_: isize, _: T) -> T {
 pub fn get_pointer<'a, T: 'a>(_: isize) -> &'a T {
     unimplemented!()
 }
-pub fn buffer_has_identifier<S, T>(_: S, _: T) -> ! {
-    unimplemented!()
+pub fn buffer_has_identifier<S, T>(_: S, _: T) -> bool {
+    false
 }
 pub mod flexbuffers {
     pub struct Reference {}
