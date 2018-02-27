@@ -386,16 +386,16 @@ class RustGenerator : public BaseGenerator {
         // The root datatype accessor:
         code_ += "#[inline]";
         code_ +=
-            "fn Get{{STRUCT_NAME}}(buf: &Vec<u8>)"
+            "fn Get{{STRUCT_NAME}}(buf: &[u8])"
             " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
-        code_ += "  return flatbuffers::get_root::<{{CPP_NAME}}>(buf);";
+        code_ += "  return flatbuffers::get_root::<&{{CPP_NAME}}>(buf);";
         code_ += "}";
         code_ += "";
 
         if (parser_.opts.mutable_buffer) {
           code_ += "#[inline]";
-          code_ += "fn GetMutable{{STRUCT_NAME}}(buf: &Vec<u8>) -> &{{STRUCT_NAME}} {";
-          code_ += "  return flatbuffers::get_mutable_root::<{{STRUCT_NAME}}>(buf);";
+          code_ += "fn GetMutable{{STRUCT_NAME}}(buf: &[u8]) -> &{{STRUCT_NAME}} {";
+          code_ += "  return flatbuffers::get_mutable_root::<&{{STRUCT_NAME}}>(buf);";
           code_ += "}";
           code_ += "";
         }
