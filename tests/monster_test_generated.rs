@@ -138,6 +138,7 @@ pub mod Example {
   use std::cmp::Ordering;
 
 #[repr(i8)]
+#[derive(Clone, Copy)]
 enum Color {
   Red = 1,
   Green = 2,
@@ -167,6 +168,7 @@ fn EnumNameColor(e: Color) -> &'static str {
 }
 
 #[repr(u8)]
+#[derive(Clone, Copy)]
 enum Any {
   NONE = 0,
   Monster = 1,
