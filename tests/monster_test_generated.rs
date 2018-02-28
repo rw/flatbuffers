@@ -1414,7 +1414,6 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
       };
       return verifier.verify_table::<&super::Example2::Monster>(x);
     }
-    _ => { return false; }
   }
 }
 
