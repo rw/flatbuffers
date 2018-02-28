@@ -1195,7 +1195,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "  //  return values.len() == types.len();";
     code_ += "  //}";
     code_ += "  if values.len() != types.len() { return false; }";
-    code_ += "  for i in (0 as flatbuffers::UOffsetT)..values.len() {";
+    code_ += "  for _i in (0 as flatbuffers::UOffsetT)..values.len() {";
     code_ += "    //if !Verify" + Name(enum_def) + "(";
     code_ += "    //    verifier,  values.Get(i), types.GetEnum::<" +
              Name(enum_def) + ">(i)) {";
