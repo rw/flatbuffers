@@ -13,10 +13,13 @@ use std::marker::PhantomData;
 pub trait Table {}
 pub struct Verifier {}
 impl Verifier {
+    pub fn new() -> Self {
+        Verifier{}
+    }
     pub fn verify<T>(&mut self, _: T) -> bool {
         false
     }
-    pub fn verify_buffer<T>(&mut self, _: T) -> bool {
+    pub fn verify_buffer<T>(&mut self, _: &'static str) -> bool {
         false
     }
     pub fn verify_vector_of_strings<T>(&mut self, _: T) -> bool {
