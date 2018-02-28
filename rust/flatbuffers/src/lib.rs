@@ -121,6 +121,9 @@ pub fn get_field<T: num_traits::Num>(_: isize, _: T) -> T {
 pub fn get_pointer<'a, T: 'a>(_: isize) -> &'a T {
     unimplemented!()
 }
+pub fn get_pointer_mut<'a, T: 'a>(_: isize) -> &'a mut T {
+    unimplemented!()
+}
 pub fn buffer_has_identifier<S, T>(_: S, _: T) -> bool {
     false
 }
