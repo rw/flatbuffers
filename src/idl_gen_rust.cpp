@@ -930,6 +930,7 @@ class RustGenerator : public BaseGenerator {
 
     GenComment(enum_def.doc_comment);
     code_ += "#[repr({{BASE_TYPE}})]";
+    code_ += "#[derive(Clone, Copy)]";
     code_ += GenEnumDecl(enum_def) + "\\";
     //if (parser_.opts.scoped_enums) code_ += " : {{BASE_TYPE}}\\";
     code_ += " {";

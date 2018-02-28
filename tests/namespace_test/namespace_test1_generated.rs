@@ -28,6 +28,7 @@ pub mod NamespaceB {
   use std::cmp::Ordering;
 
 #[repr(i8)]
+#[derive(Clone, Copy)]
 enum EnumInNestedNS {
   A = 0,
   B = 1,
