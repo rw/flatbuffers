@@ -237,7 +237,7 @@ pub struct Vec3<'a> {
   test1_: f64,
   test2_: i8,
   padding1__: u8,
-  test3_: &'a Test,
+  test3_: &'a mut Test,
   padding2__: u16,
 } // pub struct Vec3
 
@@ -245,7 +245,7 @@ impl<'a> Vec3<'a> {
   fn Reset(&mut self) {
     //memset(this, 0, size_of(Vec3));
   }
-  fn init(&mut self, _x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a Test) {
+  fn init(&mut self, _x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a mut Test) {
       self.x_ = _x;
       self.y_ = _y;
       self.z_ = _z;

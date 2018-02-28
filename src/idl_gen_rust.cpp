@@ -2505,7 +2505,7 @@ class RustGenerator : public BaseGenerator {
       const auto &field = **it;
       auto child_lifetime = TypeNeedsLifetime(field.value.type) ? "<'a>" : "";
       code_.SetValue("FIELD_TYPE",
-                     GenTypeGet(field.value.type, "", "&'a ", child_lifetime,
+                     GenTypeGet(field.value.type, "", "&'a mut ", child_lifetime,
                                 false));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
@@ -2539,7 +2539,7 @@ class RustGenerator : public BaseGenerator {
       const auto member_name = Name(field) + "_";
       const auto arg_name = "_" + Name(field);
       const auto arg_type =
-          GenTypeGet(field.value.type, "", "&'a ", "", true);
+          GenTypeGet(field.value.type, "", "&'a mut ", "", true);
 
       if (it != struct_def.fields.vec.begin()) {
         arg_list += ", ";
