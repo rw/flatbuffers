@@ -1838,7 +1838,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a verifier function that can check a buffer from an untrusted
     // source will never cause reads outside the buffer.
-    code_ += "  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {";
+    code_ += "  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {";
     code_ += "    return flatbuffers::verify_table_start(verifier)\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -1917,7 +1917,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a> {";
-    code_ += "  fbb_: &'a flatbuffers::FlatBufferBuilder,";
+    code_ += "  fbb_: &'a mut flatbuffers::FlatBufferBuilder,";
     code_ += "  start_: flatbuffers::UOffsetT,";
     code_ += "}";
 
@@ -1972,9 +1972,10 @@ class RustGenerator : public BaseGenerator {
         "  fn new"
         "(_fbb: &mut flatbuffers::FlatBufferBuilder) -> "
         "{{STRUCT_NAME}}Builder {";
+    code_ += "    let start = _fbb.start_table();";
     code_ += "    {{STRUCT_NAME}}Builder {";
     code_ += "      fbb_: _fbb,";
-    code_ += "      start_: _fbb.start_table(),";
+    code_ += "      start_: start,";
     code_ += "    }";
     code_ += "  }";
 
