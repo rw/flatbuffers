@@ -1185,7 +1185,6 @@ class RustGenerator : public BaseGenerator {
         code_ += "    }";
       }
     }
-    code_ += "    _ => { return false; }";
     code_ += "  }";
     code_ += "}";
     code_ += "";
