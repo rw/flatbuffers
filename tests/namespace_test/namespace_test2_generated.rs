@@ -30,7 +30,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
   }
   fn mutable_foo_table(&mut self) -> &mut NamespaceB::TableInNestedNS  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer::<&mut NamespaceB::TableInNestedNS >(TableInFirstNS::VT_FOO_TABLE)
+    &mut flatbuffers::get_pointer_mut::<&mut NamespaceB::TableInNestedNS >(TableInFirstNS::VT_FOO_TABLE)
   }
   fn foo_enum(&self) -> NamespaceA::NamespaceB::EnumInNestedNS  {
     // yo
@@ -45,7 +45,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
   }
   fn mutable_foo_struct(&mut self) -> &mut NamespaceB::StructInNestedNS  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_struct::<&mut NamespaceB::StructInNestedNS >(TableInFirstNS::VT_FOO_STRUCT)
+    &mut flatbuffers::get_struct_mut::<&mut NamespaceB::StructInNestedNS >(TableInFirstNS::VT_FOO_STRUCT)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -110,7 +110,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
   }
   fn mutable_refer_to_c(&mut self) -> &mut super::NamespaceC::TableInC  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer::<&mut super::NamespaceC::TableInC >(SecondTableInA::VT_REFER_TO_C)
+    &mut flatbuffers::get_pointer_mut::<&mut super::NamespaceC::TableInC >(SecondTableInA::VT_REFER_TO_C)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -225,7 +225,7 @@ impl TableInC /* private flatbuffers::Table */ {
   }
   fn mutable_refer_to_a1(&mut self) -> &mut super::NamespaceA::TableInFirstNS  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer::<&mut super::NamespaceA::TableInFirstNS >(TableInC::VT_REFER_TO_A1)
+    &mut flatbuffers::get_pointer_mut::<&mut super::NamespaceA::TableInFirstNS >(TableInC::VT_REFER_TO_A1)
   }
   fn refer_to_a2(&self) -> &super::NamespaceA::SecondTableInA  {
     // yo
@@ -233,7 +233,7 @@ impl TableInC /* private flatbuffers::Table */ {
   }
   fn mutable_refer_to_a2(&mut self) -> &mut super::NamespaceA::SecondTableInA  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer::<&mut super::NamespaceA::SecondTableInA >(TableInC::VT_REFER_TO_A2)
+    &mut flatbuffers::get_pointer_mut::<&mut super::NamespaceA::SecondTableInA >(TableInC::VT_REFER_TO_A2)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
