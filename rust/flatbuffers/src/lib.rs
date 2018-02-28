@@ -65,8 +65,9 @@ impl FlatBufferBuilder {
     pub fn required<T>(&self, _: Offset<T>, _: isize) -> bool {
         unimplemented!()
     }
-    pub fn finish<T>(&mut self) -> Offset<T> {
-        Offset::new(0)
+    pub fn finish<T>(&mut self, _root: Offset<T>)  {
+    }
+    pub fn finish_with_identifier<T>(&mut self, _root: Offset<T>, _name: &'static str) {
     }
 }
 pub type UOffsetT = usize;

@@ -446,10 +446,12 @@ class RustGenerator : public BaseGenerator {
         code_ += "fn Finish{{STRUCT_NAME}}Buffer(";
         code_ += "    fbb: &mut flatbuffers::FlatBufferBuilder,";
         code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}>) {";
-        if (parser_.file_identifier_.length())
-          code_ += "  fbb.finish(root, {{STRUCT_NAME}}Identifier());";
-        else
+        if (parser_.file_identifier_.length()) {
+          code_ += "  fbb.finish_with_identifier(root, "
+                   "{{STRUCT_NAME}}Identifier());";
+        } else {
           code_ += "  fbb.finish(root);";
+        }
         code_ += "}";
         code_ += "";
 
