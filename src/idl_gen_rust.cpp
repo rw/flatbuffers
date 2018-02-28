@@ -1349,7 +1349,9 @@ class RustGenerator : public BaseGenerator {
   // different underlying type from its interface type (currently only the
   // case for enums. "from" specify the direction, true meaning from the
   // underlying type to the interface type.
-  std::string GenUnderlyingCast(const FieldDef &field, bool from,
+  std::string GenUnderlyingCast(const FieldDef &field,
+                                bool from,
+                                const bool mut,
                                 const std::string &val) {
     if (from && field.value.type.base_type == BASE_TYPE_BOOL) {
       return val + " != 0";
@@ -1433,7 +1435,7 @@ class RustGenerator : public BaseGenerator {
         return WrapInNameSpace(field.value.type.enum_def->defined_namespace,
                                GetEnumValUse(*field.value.type.enum_def, *ev));
       } else {
-        return GenUnderlyingCast(field, true, field.value.constant);
+        return GenUnderlyingCast(field, true, false, field.value.constant);
       }
     } else if (field.value.type.base_type == BASE_TYPE_BOOL) {
       return field.value.constant == "0" ? "false" : "true";
@@ -1696,7 +1698,7 @@ class RustGenerator : public BaseGenerator {
       GenComment(field.doc_comment, "  ");
       code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "&",
                                               afterptr.c_str(), true));
-      code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
+      code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, false, call));
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
       code_ += "  fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
@@ -1743,7 +1745,7 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("OFFSET_NAME", offset_str);
           code_.SetValue("FIELD_TYPE", GenTypeBasic(field.value.type, true));
           code_.SetValue("FIELD_VALUE",
-                         GenUnderlyingCast(field, false, Name(field) + "_"));
+                         GenUnderlyingCast(field, false, false, Name(field) + "_"));
           code_.SetValue("DEFAULT_VALUE", GenDefaultConstant(field));
 
           code_ +=
@@ -1760,7 +1762,7 @@ class RustGenerator : public BaseGenerator {
           auto underlying = accessor + type + ">(" + offset_str + ")";
           code_.SetValue("FIELD_TYPE", type);
           code_.SetValue("FIELD_VALUE",
-                         GenUnderlyingCast(field, true, underlying));
+                         GenUnderlyingCast(field, true, false, underlying));
 
           code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> {{FIELD_TYPE}} {";
           code_ += "    /* TODO: are there non-reference choices here? */";
@@ -1936,7 +1938,7 @@ class RustGenerator : public BaseGenerator {
         if (is_string || is_vector) { has_string_or_vector_fields = true; }
 
         std::string offset = GenFieldOffsetName(field);
-        std::string name = GenUnderlyingCast(field, false, Name(field));
+        std::string name = GenUnderlyingCast(field, false, false, Name(field));
         std::string value = is_scalar ? GenDefaultConstant(field) : "";
 
         // Generate accessor functions of the form:
@@ -2550,7 +2552,7 @@ class RustGenerator : public BaseGenerator {
       init_list += "      self." + member_name;
       if (IsScalar(field.value.type.base_type) &&
           !IsFloat(field.value.type.base_type)) {
-        auto type = GenUnderlyingCast(field, false, arg_name);
+        auto type = GenUnderlyingCast(field, false, false, arg_name);
         init_list += " = flatbuffers::endian_scalar(" + type + ");\n";
       } else {
         init_list += " = " + arg_name + ";\n";
@@ -2591,7 +2593,7 @@ class RustGenerator : public BaseGenerator {
 
       code_.SetValue("FIELD_NAME", Name(field));
       code_.SetValue("FIELD_TYPE", field_type);
-      code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, value));
+      code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, false, value));
 
       GenComment(field.doc_comment, "  ");
       code_ += "  fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
@@ -2604,7 +2606,7 @@ class RustGenerator : public BaseGenerator {
         if (is_scalar) {
           code_.SetValue("ARG", GenTypeBasic(field.value.type, true));
           code_.SetValue("FIELD_VALUE",
-                         GenUnderlyingCast(field, false, "_" + Name(field)));
+                         GenUnderlyingCast(field, false, false, "_" + Name(field)));
 
           code_ += "  fn mutate_{{FIELD_NAME}}(&mut self, _{{FIELD_NAME}}: {{ARG}}) {";
           code_ +=
