@@ -1423,7 +1423,7 @@ fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &[flatbuffers::Offs
   //  return values.len() == types.len();
   //}
   if values.len() != types.len() { return false; }
-  for i in (0 as flatbuffers::UOffsetT)..values.len() {
+  for _i in (0 as flatbuffers::UOffsetT)..values.len() {
     //if !VerifyAny(
     //    verifier,  values.Get(i), types.GetEnum::<Any>(i)) {
     //  return false;
