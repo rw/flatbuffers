@@ -115,7 +115,13 @@ pub fn get_mutable_root<T>(_: &[u8]) -> T {
 pub fn get_struct<T>(_: isize) -> T {
     unimplemented!()
 }
+pub fn get_struct_mut<T>(_: isize) -> T {
+    unimplemented!()
+}
 pub fn get_field<T: num_traits::Num>(_: isize, _: T) -> T {
+    unimplemented!()
+}
+pub fn get_field_mut<T: num_traits::Num>(_: isize, _: T) -> T {
     unimplemented!()
 }
 pub fn get_pointer<'a, T: 'a>(_: isize) -> &'a T {

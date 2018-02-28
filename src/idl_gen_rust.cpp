@@ -1737,6 +1737,14 @@ class RustGenerator : public BaseGenerator {
       }
 
       if (parser_.opts.mutable_buffer) {
+        std::string mut_accessor = "";
+        if (is_scalar) {
+          mut_accessor = "flatbuffers::get_field_mut::<";
+        } else if (is_struct) {
+          mut_accessor = "flatbuffers::get_struct_mut::<";
+        } else {
+          mut_accessor = "flatbuffers::get_pointer_mut::<";
+        }
         if (is_scalar) {
           const auto type = GenTypeWire(field.value.type, "", false);
           code_.SetValue("SET_FN", "flatbuffers::set_field::<" + type + ">");
@@ -1757,7 +1765,7 @@ class RustGenerator : public BaseGenerator {
           auto postptr = " " + NullableExtension();
           auto type =
               GenTypeGet(field.value.type, " ", "&mut ", postptr.c_str(), true);
-          auto underlying = accessor + type + ">(" + offset_str + ")";
+          auto underlying = mut_accessor + type + ">(" + offset_str + ")";
           code_.SetValue("FIELD_TYPE", type);
           code_.SetValue("FIELD_VALUE",
                          GenUnderlyingCast(field, true, underlying));
