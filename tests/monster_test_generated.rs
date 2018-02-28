@@ -18,21 +18,22 @@ pub mod MyGame {
 pub struct InParentNamespace {}
 impl flatbuffers::Table for InParentNamespace {}
 impl InParentNamespace /* private flatbuffers::Table */ {
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            verifier.end_table();
   }
 }
 
 pub struct InParentNamespaceBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> InParentNamespaceBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> InParentNamespaceBuilder {
+    let start = _fbb.start_table();
     InParentNamespaceBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
@@ -77,21 +78,22 @@ pub mod Example2 {
 pub struct Monster {}
 impl flatbuffers::Table for Monster {}
 impl Monster /* private flatbuffers::Table */ {
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            verifier.end_table();
   }
 }
 
 pub struct MonsterBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> MonsterBuilder<'a> {
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
+    let start = _fbb.start_table();
     MonsterBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
@@ -339,7 +341,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
   fn mutate_color(&mut self, color_: Color) -> bool {
     flatbuffers::set_field::<i8>(TestSimpleTableWithEnum::VT_COLOR, color_ as i8, 2)
   }
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_field::<i8>(verifier, TestSimpleTableWithEnum::VT_COLOR) &&
            verifier.end_table();
@@ -347,7 +349,7 @@ impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
 }
 
 pub struct TestSimpleTableWithEnumBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> TestSimpleTableWithEnumBuilder<'a> {
@@ -355,9 +357,10 @@ impl<'a> TestSimpleTableWithEnumBuilder<'a> {
     self.fbb_.add_element::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TestSimpleTableWithEnumBuilder {
+    let start = _fbb.start_table();
     TestSimpleTableWithEnumBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
@@ -406,7 +409,7 @@ impl Stat /* private flatbuffers::Table */ {
   fn mutate_count(&mut self, count_: u16) -> bool {
     flatbuffers::set_field::<u16>(Stat::VT_COUNT, count_, 0)
   }
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_offset(verifier, Stat::VT_ID) &&
            verifier.verify(self.id()) &&
@@ -417,7 +420,7 @@ impl Stat /* private flatbuffers::Table */ {
 }
 
 pub struct StatBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> StatBuilder<'a> {
@@ -431,9 +434,10 @@ impl<'a> StatBuilder<'a> {
     self.fbb_.add_element::<u16>(Stat::VT_COUNT, count, 0);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> StatBuilder {
+    let start = _fbb.start_table();
     StatBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // StatBuilder &operator=(const StatBuilder &);
@@ -789,7 +793,7 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer::<&mut super::InParentNamespace >(Monster::VT_PARENT_NAMESPACE_TEST)
   }
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_field::<Vec3>(verifier, Monster::VT_POS) &&
            flatbuffers::verify_field::<i16>(verifier, Monster::VT_MANA) &&
@@ -868,7 +872,7 @@ impl Monster /* private flatbuffers::Table */ {
 //}
 //
 pub struct MonsterBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> MonsterBuilder<'a> {
@@ -975,9 +979,10 @@ impl<'a> MonsterBuilder<'a> {
     self.fbb_.add_offset(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> MonsterBuilder {
+    let start = _fbb.start_table();
     MonsterBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
@@ -1241,7 +1246,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer::<&mut flatbuffers::Vector<f64> >(TypeAliases::VT_VF64)
   }
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_field::<i8>(verifier, TypeAliases::VT_I8_) &&
            flatbuffers::verify_field::<u8>(verifier, TypeAliases::VT_U8_) &&
@@ -1262,7 +1267,7 @@ impl TypeAliases /* private flatbuffers::Table */ {
 }
 
 pub struct TypeAliasesBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> TypeAliasesBuilder<'a> {
@@ -1303,9 +1308,10 @@ impl<'a> TypeAliasesBuilder<'a> {
     self.fbb_.add_offset(TypeAliases::VT_VF64, vf64);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TypeAliasesBuilder {
+    let start = _fbb.start_table();
     TypeAliasesBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);

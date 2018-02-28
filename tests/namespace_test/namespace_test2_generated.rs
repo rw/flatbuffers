@@ -47,7 +47,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_struct::<&mut NamespaceB::StructInNestedNS >(TableInFirstNS::VT_FOO_STRUCT)
   }
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_offset(verifier, TableInFirstNS::VT_FOO_TABLE) &&
            verifier.verify_table(self.foo_table()) &&
@@ -58,7 +58,7 @@ impl TableInFirstNS /* private flatbuffers::Table */ {
 }
 
 pub struct TableInFirstNSBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> TableInFirstNSBuilder<'a> {
@@ -72,9 +72,10 @@ impl<'a> TableInFirstNSBuilder<'a> {
     self.fbb_.add_struct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInFirstNSBuilder {
+    let start = _fbb.start_table();
     TableInFirstNSBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
@@ -111,7 +112,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer::<&mut super::NamespaceC::TableInC >(SecondTableInA::VT_REFER_TO_C)
   }
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_offset(verifier, SecondTableInA::VT_REFER_TO_C) &&
            verifier.verify_table(self.refer_to_c()) &&
@@ -120,7 +121,7 @@ impl SecondTableInA /* private flatbuffers::Table */ {
 }
 
 pub struct SecondTableInABuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> SecondTableInABuilder<'a> {
@@ -128,9 +129,10 @@ impl<'a> SecondTableInABuilder<'a> {
     self.fbb_.add_offset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder {
+    let start = _fbb.start_table();
     SecondTableInABuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
@@ -233,7 +235,7 @@ impl TableInC /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer::<&mut super::NamespaceA::SecondTableInA >(TableInC::VT_REFER_TO_A2)
   }
-  fn Verify(&self, verifier: &flatbuffers::Verifier) -> bool {
+  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            flatbuffers::verify_offset(verifier, TableInC::VT_REFER_TO_A1) &&
            verifier.verify_table(self.refer_to_a1()) &&
@@ -244,7 +246,7 @@ impl TableInC /* private flatbuffers::Table */ {
 }
 
 pub struct TableInCBuilder<'a> {
-  fbb_: &'a flatbuffers::FlatBufferBuilder,
+  fbb_: &'a mut flatbuffers::FlatBufferBuilder,
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> TableInCBuilder<'a> {
@@ -255,9 +257,10 @@ impl<'a> TableInCBuilder<'a> {
     self.fbb_.add_offset(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInCBuilder {
+    let start = _fbb.start_table();
     TableInCBuilder {
       fbb_: _fbb,
-      start_: _fbb.start_table(),
+      start_: start,
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
