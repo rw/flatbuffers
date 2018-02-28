@@ -1769,7 +1769,7 @@ fn MonsterExtension() -> &'static str {
 fn FinishMonsterBuffer(
     fbb: &mut flatbuffers::FlatBufferBuilder,
     root: flatbuffers::Offset<Monster>) {
-  fbb.finish(root, MonsterIdentifier());
+  fbb.finish_with_identifier(root, MonsterIdentifier());
 }
 
 }  // pub mod Example
