@@ -552,13 +552,13 @@ impl Monster /* private flatbuffers::Table */ {
     Ordering::Equal
     // TODO(rw): self.name().cmp(val)
   }
-  fn inventory(&self) -> &flatbuffers::Vector<u8>  {
+  fn inventory(&self) -> &&[u8]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<u8>>(Monster::VT_INVENTORY)
+    flatbuffers::get_pointer::<&&[u8]>(Monster::VT_INVENTORY)
   }
-  fn mutable_inventory(&mut self) -> &mut flatbuffers::Vector<u8>  {
+  fn mutable_inventory(&mut self) -> &mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<u8> >(Monster::VT_INVENTORY)
+    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_INVENTORY)
   }
   fn color(&self) -> Color  {
     // yo
@@ -592,31 +592,31 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Void >(Monster::VT_TEST)
   }
-  fn test4(&self) -> &flatbuffers::Vector<&Test>  {
+  fn test4(&self) -> &&[&Test]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<&Test>>(Monster::VT_TEST4)
+    flatbuffers::get_pointer::<&&[&Test]>(Monster::VT_TEST4)
   }
-  fn mutable_test4(&mut self) -> &mut flatbuffers::Vector<&Test>  {
+  fn mutable_test4(&mut self) -> &mut &[&Test]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<&Test> >(Monster::VT_TEST4)
+    &mut flatbuffers::get_pointer_mut::<&mut &[&Test] >(Monster::VT_TEST4)
   }
-  fn testarrayofstring(&self) -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+  fn testarrayofstring(&self) -> &&[flatbuffers::Offset<flatbuffers::String>]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(Monster::VT_TESTARRAYOFSTRING)
+    flatbuffers::get_pointer::<&&[flatbuffers::Offset<flatbuffers::String>]>(Monster::VT_TESTARRAYOFSTRING)
   }
-  fn mutable_testarrayofstring(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+  fn mutable_testarrayofstring(&mut self) -> &mut &[flatbuffers::Offset<flatbuffers::String>]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(Monster::VT_TESTARRAYOFSTRING)
+    &mut flatbuffers::get_pointer_mut::<&mut &[flatbuffers::Offset<flatbuffers::String>] >(Monster::VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
-  fn testarrayoftables(&self) -> &flatbuffers::Vector<flatbuffers::Offset<Monster>>  {
+  fn testarrayoftables(&self) -> &&[flatbuffers::Offset<Monster>]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<flatbuffers::Offset<Monster>>>(Monster::VT_TESTARRAYOFTABLES)
+    flatbuffers::get_pointer::<&&[flatbuffers::Offset<Monster>]>(Monster::VT_TESTARRAYOFTABLES)
   }
-  fn mutable_testarrayoftables(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<Monster>>  {
+  fn mutable_testarrayoftables(&mut self) -> &mut &[flatbuffers::Offset<Monster>]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<flatbuffers::Offset<Monster>> >(Monster::VT_TESTARRAYOFTABLES)
+    &mut flatbuffers::get_pointer_mut::<&mut &[flatbuffers::Offset<Monster>] >(Monster::VT_TESTARRAYOFTABLES)
   }
   fn enemy(&self) -> &Monster  {
     // yo
@@ -626,13 +626,13 @@ impl Monster /* private flatbuffers::Table */ {
     /* TODO: are there non-reference choices here? */
     &mut flatbuffers::get_pointer_mut::<&mut Monster >(Monster::VT_ENEMY)
   }
-  fn testnestedflatbuffer(&self) -> &flatbuffers::Vector<u8>  {
+  fn testnestedflatbuffer(&self) -> &&[u8]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<u8>>(Monster::VT_TESTNESTEDFLATBUFFER)
+    flatbuffers::get_pointer::<&&[u8]>(Monster::VT_TESTNESTEDFLATBUFFER)
   }
-  fn mutable_testnestedflatbuffer(&mut self) -> &mut flatbuffers::Vector<u8>  {
+  fn mutable_testnestedflatbuffer(&mut self) -> &mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<u8> >(Monster::VT_TESTNESTEDFLATBUFFER)
+    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_TESTNESTEDFLATBUFFER)
   }
 //TODO: mutable nested root
   fn testnestedflatbuffer_nested_root(&self) -> &Monster{
@@ -710,13 +710,13 @@ impl Monster /* private flatbuffers::Table */ {
   fn mutate_testhashu64_fnv1a(&mut self, testhashu64_fnv1a_: u64) -> bool {
     flatbuffers::set_field::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a_, 0)
   }
-  fn testarrayofbools(&self) -> &flatbuffers::Vector<u8>  {
+  fn testarrayofbools(&self) -> &&[u8]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<u8>>(Monster::VT_TESTARRAYOFBOOLS)
+    flatbuffers::get_pointer::<&&[u8]>(Monster::VT_TESTARRAYOFBOOLS)
   }
-  fn mutable_testarrayofbools(&mut self) -> &mut flatbuffers::Vector<u8>  {
+  fn mutable_testarrayofbools(&mut self) -> &mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<u8> >(Monster::VT_TESTARRAYOFBOOLS)
+    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_TESTARRAYOFBOOLS)
   }
   fn testf(&self) -> f32  {
     // yo
@@ -739,53 +739,53 @@ impl Monster /* private flatbuffers::Table */ {
   fn mutate_testf3(&mut self, testf3_: f32) -> bool {
     flatbuffers::set_field::<f32>(Monster::VT_TESTF3, testf3_, 0.0)
   }
-  fn testarrayofstring2(&self) -> &flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+  fn testarrayofstring2(&self) -> &&[flatbuffers::Offset<flatbuffers::String>]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>(Monster::VT_TESTARRAYOFSTRING2)
+    flatbuffers::get_pointer::<&&[flatbuffers::Offset<flatbuffers::String>]>(Monster::VT_TESTARRAYOFSTRING2)
   }
-  fn mutable_testarrayofstring2(&mut self) -> &mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>  {
+  fn mutable_testarrayofstring2(&mut self) -> &mut &[flatbuffers::Offset<flatbuffers::String>]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> >(Monster::VT_TESTARRAYOFSTRING2)
+    &mut flatbuffers::get_pointer_mut::<&mut &[flatbuffers::Offset<flatbuffers::String>] >(Monster::VT_TESTARRAYOFSTRING2)
   }
-  fn testarrayofsortedstruct(&self) -> &flatbuffers::Vector<&Ability>  {
+  fn testarrayofsortedstruct(&self) -> &&[&Ability]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<&Ability>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
+    flatbuffers::get_pointer::<&&[&Ability]>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
   }
-  fn mutable_testarrayofsortedstruct(&mut self) -> &mut flatbuffers::Vector<&Ability>  {
+  fn mutable_testarrayofsortedstruct(&mut self) -> &mut &[&Ability]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<&Ability> >(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
+    &mut flatbuffers::get_pointer_mut::<&mut &[&Ability] >(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
   }
-  fn flex(&self) -> &flatbuffers::Vector<u8>  {
+  fn flex(&self) -> &&[u8]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<u8>>(Monster::VT_FLEX)
+    flatbuffers::get_pointer::<&&[u8]>(Monster::VT_FLEX)
   }
-  fn mutable_flex(&mut self) -> &mut flatbuffers::Vector<u8>  {
+  fn mutable_flex(&mut self) -> &mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<u8> >(Monster::VT_FLEX)
+    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_FLEX)
   }
-  fn test5(&self) -> &flatbuffers::Vector<&Test>  {
+  fn test5(&self) -> &&[&Test]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<&Test>>(Monster::VT_TEST5)
+    flatbuffers::get_pointer::<&&[&Test]>(Monster::VT_TEST5)
   }
-  fn mutable_test5(&mut self) -> &mut flatbuffers::Vector<&Test>  {
+  fn mutable_test5(&mut self) -> &mut &[&Test]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<&Test> >(Monster::VT_TEST5)
+    &mut flatbuffers::get_pointer_mut::<&mut &[&Test] >(Monster::VT_TEST5)
   }
-  fn vector_of_longs(&self) -> &flatbuffers::Vector<i64>  {
+  fn vector_of_longs(&self) -> &&[i64]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<i64>>(Monster::VT_VECTOR_OF_LONGS)
+    flatbuffers::get_pointer::<&&[i64]>(Monster::VT_VECTOR_OF_LONGS)
   }
-  fn mutable_vector_of_longs(&mut self) -> &mut flatbuffers::Vector<i64>  {
+  fn mutable_vector_of_longs(&mut self) -> &mut &[i64]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<i64> >(Monster::VT_VECTOR_OF_LONGS)
+    &mut flatbuffers::get_pointer_mut::<&mut &[i64] >(Monster::VT_VECTOR_OF_LONGS)
   }
-  fn vector_of_doubles(&self) -> &flatbuffers::Vector<f64>  {
+  fn vector_of_doubles(&self) -> &&[f64]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<f64>>(Monster::VT_VECTOR_OF_DOUBLES)
+    flatbuffers::get_pointer::<&&[f64]>(Monster::VT_VECTOR_OF_DOUBLES)
   }
-  fn mutable_vector_of_doubles(&mut self) -> &mut flatbuffers::Vector<f64>  {
+  fn mutable_vector_of_doubles(&mut self) -> &mut &[f64]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<f64> >(Monster::VT_VECTOR_OF_DOUBLES)
+    &mut flatbuffers::get_pointer_mut::<&mut &[f64] >(Monster::VT_VECTOR_OF_DOUBLES)
   }
   fn parent_namespace_test(&self) -> &super::InParentNamespace  {
     // yo
@@ -890,7 +890,7 @@ impl<'a> MonsterBuilder<'a> {
   fn add_name(&mut self, name: flatbuffers::Offset<flatbuffers::String> ) {
     self.fbb_.add_offset(Monster::VT_NAME, name);
   }
-  fn add_inventory(&mut self, inventory: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
+  fn add_inventory(&mut self, inventory: flatbuffers::Offset<&[u8]> ) {
     self.fbb_.add_offset(Monster::VT_INVENTORY, inventory);
   }
   fn add_color(&mut self, color: Color ) {
@@ -902,19 +902,19 @@ impl<'a> MonsterBuilder<'a> {
   fn add_test(&mut self, test: flatbuffers::Offset<flatbuffers::Void> ) {
     self.fbb_.add_offset(Monster::VT_TEST, test);
   }
-  fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
+  fn add_test4(&mut self, test4: flatbuffers::Offset<&[&Test]> ) {
     self.fbb_.add_offset(Monster::VT_TEST4, test4);
   }
-  fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
+  fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<&[flatbuffers::Offset<flatbuffers::String>]> ) {
     self.fbb_.add_offset(Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
   }
-  fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>> ) {
+  fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<&[flatbuffers::Offset<Monster>]> ) {
     self.fbb_.add_offset(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
   }
   fn add_enemy(&mut self, enemy: flatbuffers::Offset<Monster> ) {
     self.fbb_.add_offset(Monster::VT_ENEMY, enemy);
   }
-  fn add_testnestedflatbuffer(&mut self, testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
+  fn add_testnestedflatbuffer(&mut self, testnestedflatbuffer: flatbuffers::Offset<&[u8]> ) {
     self.fbb_.add_offset(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer);
   }
   fn add_testempty(&mut self, testempty: flatbuffers::Offset<Stat> ) {
@@ -947,7 +947,7 @@ impl<'a> MonsterBuilder<'a> {
   fn add_testhashu64_fnv1a(&mut self, testhashu64_fnv1a: u64 ) {
     self.fbb_.add_element::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, 0);
   }
-  fn add_testarrayofbools(&mut self, testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
+  fn add_testarrayofbools(&mut self, testarrayofbools: flatbuffers::Offset<&[u8]> ) {
     self.fbb_.add_offset(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools);
   }
   fn add_testf(&mut self, testf: f32 ) {
@@ -959,22 +959,22 @@ impl<'a> MonsterBuilder<'a> {
   fn add_testf3(&mut self, testf3: f32 ) {
     self.fbb_.add_element::<f32>(Monster::VT_TESTF3, testf3, 0.0);
   }
-  fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> ) {
+  fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<&[flatbuffers::Offset<flatbuffers::String>]> ) {
     self.fbb_.add_offset(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
   }
-  fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<&Ability>> ) {
+  fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::Offset<&[&Ability]> ) {
     self.fbb_.add_offset(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct);
   }
-  fn add_flex(&mut self, flex: flatbuffers::Offset<flatbuffers::Vector<u8>> ) {
+  fn add_flex(&mut self, flex: flatbuffers::Offset<&[u8]> ) {
     self.fbb_.add_offset(Monster::VT_FLEX, flex);
   }
-  fn add_test5(&mut self, test5: flatbuffers::Offset<flatbuffers::Vector<&Test>> ) {
+  fn add_test5(&mut self, test5: flatbuffers::Offset<&[&Test]> ) {
     self.fbb_.add_offset(Monster::VT_TEST5, test5);
   }
-  fn add_vector_of_longs(&mut self, vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>> ) {
+  fn add_vector_of_longs(&mut self, vector_of_longs: flatbuffers::Offset<&[i64]> ) {
     self.fbb_.add_offset(Monster::VT_VECTOR_OF_LONGS, vector_of_longs);
   }
-  fn add_vector_of_doubles(&mut self, vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
+  fn add_vector_of_doubles(&mut self, vector_of_doubles: flatbuffers::Offset<&[f64]> ) {
     self.fbb_.add_offset(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
   }
   fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::Offset<super::InParentNamespace> ) {
@@ -1003,15 +1003,15 @@ fn CreateMonster(
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
     name: flatbuffers::Offset<flatbuffers::String>  /* = 0 */,
-    inventory: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
+    inventory: flatbuffers::Offset<&[u8]>  /* = 0 */,
     color: Color  /* = Color::Blue */,
     test_type: Any  /* = Any::NONE */,
     test: flatbuffers::Offset<flatbuffers::Void>  /* = 0 */,
-    test4: flatbuffers::Offset<flatbuffers::Vector<&Test>>  /* = 0 */,
-    testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
-    testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Monster>>>  /* = 0 */,
+    test4: flatbuffers::Offset<&[&Test]>  /* = 0 */,
+    testarrayofstring: flatbuffers::Offset<&[flatbuffers::Offset<flatbuffers::String>]>  /* = 0 */,
+    testarrayoftables: flatbuffers::Offset<&[flatbuffers::Offset<Monster>]>  /* = 0 */,
     enemy: flatbuffers::Offset<Monster>  /* = 0 */,
-    testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
+    testnestedflatbuffer: flatbuffers::Offset<&[u8]>  /* = 0 */,
     testempty: flatbuffers::Offset<Stat>  /* = 0 */,
     testbool: bool  /* = false */,
     testhashs32_fnv1: i32  /* = 0 */,
@@ -1022,16 +1022,16 @@ fn CreateMonster(
     testhashu32_fnv1a: u32  /* = 0 */,
     testhashs64_fnv1a: i64  /* = 0 */,
     testhashu64_fnv1a: u64  /* = 0 */,
-    testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
+    testarrayofbools: flatbuffers::Offset<&[u8]>  /* = 0 */,
     testf: f32  /* = 3.14159 */,
     testf2: f32  /* = 3.0 */,
     testf3: f32  /* = 0.0 */,
-    testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>>  /* = 0 */,
-    testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<&Ability>>  /* = 0 */,
-    flex: flatbuffers::Offset<flatbuffers::Vector<u8>>  /* = 0 */,
-    test5: flatbuffers::Offset<flatbuffers::Vector<&Test>>  /* = 0 */,
-    vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<i64>>  /* = 0 */,
-    vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */,
+    testarrayofstring2: flatbuffers::Offset<&[flatbuffers::Offset<flatbuffers::String>]>  /* = 0 */,
+    testarrayofsortedstruct: flatbuffers::Offset<&[&Ability]>  /* = 0 */,
+    flex: flatbuffers::Offset<&[u8]>  /* = 0 */,
+    test5: flatbuffers::Offset<&[&Test]>  /* = 0 */,
+    vector_of_longs: flatbuffers::Offset<&[i64]>  /* = 0 */,
+    vector_of_doubles: flatbuffers::Offset<&[f64]>  /* = 0 */,
     parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder.add_testhashu64_fnv1a(testhashu64_fnv1a);
@@ -1232,21 +1232,21 @@ impl TypeAliases /* private flatbuffers::Table */ {
   fn mutate_f64_(&mut self, f64__: f64) -> bool {
     flatbuffers::set_field::<f64>(TypeAliases::VT_F64_, f64__, 0.0)
   }
-  fn v8(&self) -> &flatbuffers::Vector<i8>  {
+  fn v8(&self) -> &&[i8]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<i8>>(TypeAliases::VT_V8)
+    flatbuffers::get_pointer::<&&[i8]>(TypeAliases::VT_V8)
   }
-  fn mutable_v8(&mut self) -> &mut flatbuffers::Vector<i8>  {
+  fn mutable_v8(&mut self) -> &mut &[i8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<i8> >(TypeAliases::VT_V8)
+    &mut flatbuffers::get_pointer_mut::<&mut &[i8] >(TypeAliases::VT_V8)
   }
-  fn vf64(&self) -> &flatbuffers::Vector<f64>  {
+  fn vf64(&self) -> &&[f64]  {
     // yo
-    flatbuffers::get_pointer::<&flatbuffers::Vector<f64>>(TypeAliases::VT_VF64)
+    flatbuffers::get_pointer::<&&[f64]>(TypeAliases::VT_VF64)
   }
-  fn mutable_vf64(&mut self) -> &mut flatbuffers::Vector<f64>  {
+  fn mutable_vf64(&mut self) -> &mut &[f64]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Vector<f64> >(TypeAliases::VT_VF64)
+    &mut flatbuffers::get_pointer_mut::<&mut &[f64] >(TypeAliases::VT_VF64)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -1303,10 +1303,10 @@ impl<'a> TypeAliasesBuilder<'a> {
   fn add_f64_(&mut self, f64_: f64 ) {
     self.fbb_.add_element::<f64>(TypeAliases::VT_F64_, f64_, 0.0);
   }
-  fn add_v8(&mut self, v8: flatbuffers::Offset<flatbuffers::Vector<i8>> ) {
+  fn add_v8(&mut self, v8: flatbuffers::Offset<&[i8]> ) {
     self.fbb_.add_offset(TypeAliases::VT_V8, v8);
   }
-  fn add_vf64(&mut self, vf64: flatbuffers::Offset<flatbuffers::Vector<f64>> ) {
+  fn add_vf64(&mut self, vf64: flatbuffers::Offset<&[f64]> ) {
     self.fbb_.add_offset(TypeAliases::VT_VF64, vf64);
   }
   fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TypeAliasesBuilder {
@@ -1337,8 +1337,8 @@ fn CreateTypeAliases(
     u64_: u64  /* = 0 */,
     f32_: f32  /* = 0.0 */,
     f64_: f64  /* = 0.0 */,
-    v8: flatbuffers::Offset<flatbuffers::Vector<i8>>  /* = 0 */,
-    vf64: flatbuffers::Offset<flatbuffers::Vector<f64>>  /* = 0 */) -> flatbuffers::Offset<TypeAliases> {
+    v8: flatbuffers::Offset<&[i8]>  /* = 0 */,
+    vf64: flatbuffers::Offset<&[f64]>  /* = 0 */) -> flatbuffers::Offset<TypeAliases> {
   let mut builder = TypeAliasesBuilder::new(_fbb);
   builder.add_f64_(f64_);
   builder.add_u64_(u64_);
