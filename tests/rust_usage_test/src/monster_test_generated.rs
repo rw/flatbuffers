@@ -1078,15 +1078,15 @@ fn CreateMonsterDirect(
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
     name: Option<&str> /* = nullptr */,
-    inventory: Option<Vec<u8>> /* = nullptr */,
+    inventory: Option<&[u8]> /* = nullptr */,
     color: Color  /* = Color::Blue */,
     test_type: Any  /* = Any::NONE */,
     test: flatbuffers::Offset<flatbuffers::Void>  /* = 0 */,
-    test4: Option<Vec<Test>> /* = nullptr */,
-    testarrayofstring: Option<Vec<flatbuffers::Offset<flatbuffers::String>>> /* = nullptr */,
-    testarrayoftables: Option<Vec<flatbuffers::Offset<Monster>>> /* = nullptr */,
+    test4: Option<&[&Test]> /* = nullptr */,
+    testarrayofstring: Option<&[flatbuffers::Offset<flatbuffers::String>]> /* = nullptr */,
+    testarrayoftables: Option<&[flatbuffers::Offset<Monster>]> /* = nullptr */,
     enemy: flatbuffers::Offset<Monster>  /* = 0 */,
-    testnestedflatbuffer: Option<Vec<u8>> /* = nullptr */,
+    testnestedflatbuffer: Option<&[u8]> /* = nullptr */,
     testempty: flatbuffers::Offset<Stat>  /* = 0 */,
     testbool: bool  /* = false */,
     testhashs32_fnv1: i32  /* = 0 */,
@@ -1097,16 +1097,16 @@ fn CreateMonsterDirect(
     testhashu32_fnv1a: u32  /* = 0 */,
     testhashs64_fnv1a: i64  /* = 0 */,
     testhashu64_fnv1a: u64  /* = 0 */,
-    testarrayofbools: Option<Vec<u8>> /* = nullptr */,
+    testarrayofbools: Option<&[u8]> /* = nullptr */,
     testf: f32  /* = 3.14159 */,
     testf2: f32  /* = 3.0 */,
     testf3: f32  /* = 0.0 */,
-    testarrayofstring2: Option<Vec<flatbuffers::Offset<flatbuffers::String>>> /* = nullptr */,
-    testarrayofsortedstruct: Option<Vec<Ability>> /* = nullptr */,
-    flex: Option<Vec<u8>> /* = nullptr */,
-    test5: Option<Vec<Test>> /* = nullptr */,
-    vector_of_longs: Option<Vec<i64>> /* = nullptr */,
-    vector_of_doubles: Option<Vec<f64>> /* = nullptr */,
+    testarrayofstring2: Option<&[flatbuffers::Offset<flatbuffers::String>]> /* = nullptr */,
+    testarrayofsortedstruct: Option<&[&Ability]> /* = nullptr */,
+    flex: Option<&[u8]> /* = nullptr */,
+    test5: Option<&[&Test]> /* = nullptr */,
+    vector_of_longs: Option<&[i64]> /* = nullptr */,
+    vector_of_doubles: Option<&[f64]> /* = nullptr */,
     parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
   return CreateMonster(
       _fbb,
@@ -1114,15 +1114,15 @@ fn CreateMonsterDirect(
       mana,
       hp,
       if let Some(x) = name { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = inventory { _fbb.create_vector::<u8>(&x) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = inventory { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
       color,
       test_type,
       test,
-      if let Some(x) = test4 { _fbb.create_vector_of_structs::<Test>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = testarrayofstring { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = testarrayoftables { _fbb.create_vector::<flatbuffers::Offset<Monster>>(&x) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = test4 { _fbb.create_vector_of_structs::<&Test>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = testarrayofstring { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = testarrayoftables { _fbb.create_vector::<flatbuffers::Offset<Monster>>(x /* slice */) } else { flatbuffers::Offset::new(0) },
       enemy,
-      if let Some(x) = testnestedflatbuffer { _fbb.create_vector::<u8>(&x) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = testnestedflatbuffer { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
       testempty,
       testbool,
       testhashs32_fnv1,
@@ -1133,16 +1133,16 @@ fn CreateMonsterDirect(
       testhashu32_fnv1a,
       testhashs64_fnv1a,
       testhashu64_fnv1a,
-      if let Some(x) = testarrayofbools { _fbb.create_vector::<u8>(&x) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = testarrayofbools { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
       testf,
       testf2,
       testf3,
-      if let Some(x) = testarrayofstring2 { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = testarrayofsortedstruct { _fbb.create_vector_of_structs::<Ability>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = flex { _fbb.create_vector::<u8>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = test5 { _fbb.create_vector_of_structs::<Test>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = vector_of_longs { _fbb.create_vector::<i64>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = vector_of_doubles { _fbb.create_vector::<f64>(&x) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = testarrayofstring2 { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = testarrayofsortedstruct { _fbb.create_vector_of_structs::<&Ability>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = flex { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = test5 { _fbb.create_vector_of_structs::<&Test>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = vector_of_longs { _fbb.create_vector::<i64>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = vector_of_doubles { _fbb.create_vector::<f64>(x /* slice */) } else { flatbuffers::Offset::new(0) },
       parent_namespace_test);
 }
 
@@ -1368,8 +1368,8 @@ fn CreateTypeAliasesDirect(
     u64_: u64  /* = 0 */,
     f32_: f32  /* = 0.0 */,
     f64_: f64  /* = 0.0 */,
-    v8: Option<Vec<i8>> /* = nullptr */,
-    vf64: Option<Vec<f64>> /* = nullptr */) -> flatbuffers::Offset<TypeAliases> {
+    v8: Option<&[i8]> /* = nullptr */,
+    vf64: Option<&[f64]> /* = nullptr */) -> flatbuffers::Offset<TypeAliases> {
   return CreateTypeAliases(
       _fbb,
       i8_,
@@ -1382,8 +1382,8 @@ fn CreateTypeAliasesDirect(
       u64_,
       f32_,
       f64_,
-      if let Some(x) = v8 { _fbb.create_vector::<i8>(&x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = vf64 { _fbb.create_vector::<f64>(&x) } else { flatbuffers::Offset::new(0) });
+      if let Some(x) = v8 { _fbb.create_vector::<i8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      if let Some(x) = vf64 { _fbb.create_vector::<f64>(x /* slice */) } else { flatbuffers::Offset::new(0) });
 }
 
 #[inline]
@@ -1756,7 +1756,7 @@ fn MonsterIdentifier() -> &'static str {
 }
 
 #[inline]
-fn MonsterBufferHasIdentifier(buf: &Vec<u8>) -> bool {
+fn MonsterBufferHasIdentifier(buf: &[u8]) -> bool {
   return flatbuffers::buffer_has_identifier(
       buf, MonsterIdentifier());
 }

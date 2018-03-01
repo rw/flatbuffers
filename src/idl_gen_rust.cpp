@@ -410,7 +410,7 @@ class RustGenerator : public BaseGenerator {
 
           // Check if a buffer has the identifier.
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &Vec<u8>)"
+          code_ += "fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &[u8])"
                    " -> bool {";
           code_ += "  return flatbuffers::buffer_has_identifier(";
           code_ += "      buf, {{STRUCT_NAME}}Identifier());";
@@ -627,10 +627,10 @@ class RustGenerator : public BaseGenerator {
             type.struct_def->attributes.Lookup("native_custom_alloc")) {
           auto native_custom_alloc =
               type.struct_def->attributes.Lookup("native_custom_alloc");
-          return "Vec<" + type_name + "," +
-                 native_custom_alloc->constant + "<" + type_name + ">>";
+          return "&[" + type_name + "," +
+                 native_custom_alloc->constant + "<" + type_name + ">]";
         } else
-          return "Vec<" + type_name + ">";
+          return "&[" + type_name + "]";
       }
       case BASE_TYPE_STRUCT: {
         auto type_name = WrapInNameSpace(*type.struct_def);
@@ -1454,10 +1454,11 @@ class RustGenerator : public BaseGenerator {
       std::string type;
       if (IsStruct(vtype)) {
         type = WrapInNameSpace(*vtype.struct_def);
+        code_.SetValue("PARAM_TYPE", "Option<&[&" + type + "]>");
       } else {
         type = GenTypeWire(vtype, "", false);
+        code_.SetValue("PARAM_TYPE", "Option<&[" + type + "]>");
       }
-      code_.SetValue("PARAM_TYPE", "Option<Vec<" + type + ">>");
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else {
       code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", true));
@@ -2076,12 +2077,13 @@ class RustGenerator : public BaseGenerator {
             const auto vtype = field.value.type.VectorType();
             if (IsStruct(vtype)) {
               const auto type = WrapInNameSpace(*vtype.struct_def);
-              code_ += "_fbb.create_vector_of_structs::<" + type + ">\\";
+              code_ += "_fbb.create_vector_of_structs::<&" + type + ">\\";
+              code_ += "(x /* slice */) } else { flatbuffers::Offset::new(0) }\\";
             } else {
               const auto type = GenTypeWire(vtype, "", false);
               code_ += "_fbb.create_vector::<" + type + ">\\";
+              code_ += "(x /* slice */) } else { flatbuffers::Offset::new(0) }\\";
             }
-            code_ += "(&x) } else { flatbuffers::Offset::new(0) }\\";
           } else {
             code_ += ",\n      {{FIELD_NAME}}\\";
           }
