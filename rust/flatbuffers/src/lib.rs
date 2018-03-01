@@ -10,7 +10,7 @@ extern crate num_traits;
 
 
 use std::marker::PhantomData;
-use std::iter::FromIterator;
+//use std::iter::FromIterator;
 
 pub trait Table {}
 pub struct Verifier {}
@@ -55,10 +55,11 @@ impl FlatBufferBuilder {
     pub fn create_string<T>(&mut self, _: &str) -> Offset<T> {
         Offset::new(0)
     }
-    pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
+    //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
+    pub fn create_vector<T>(&mut self, _: &[T]) -> Offset<&[T]> {
         Offset::new(0)
     }
-    pub fn create_vector_of_structs<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<&T>> {
+    pub fn create_vector_of_structs<T>(&mut self, _: &[T]) -> Offset<&[T]> {
         Offset::new(0)
     }
     pub fn end_table<T>(&mut self, _: T) -> usize {
