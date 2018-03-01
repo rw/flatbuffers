@@ -393,9 +393,9 @@ impl Stat /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&flatbuffers::String>(Stat::VT_ID)
   }
-  fn mutable_id(&mut self) -> &mut flatbuffers::String  {
+  fn mutable_id<'a>(&'a mut self) -> &'a mut flatbuffers::String  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::String >(Stat::VT_ID)
+    &mut flatbuffers::get_pointer_mut::<&'a mut flatbuffers::String >(Stat::VT_ID)
   }
   fn val(&self) -> i64  {
     // yo
@@ -519,9 +519,9 @@ impl Monster /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_struct::<&Vec3>(Monster::VT_POS)
   }
-  fn mutable_pos(&mut self) -> &mut Vec3  {
+  fn mutable_pos<'a>(&'a mut self) -> &'a mut Vec3  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_struct_mut::<&mut Vec3 >(Monster::VT_POS)
+    &mut flatbuffers::get_struct_mut::<&'a mut Vec3 >(Monster::VT_POS)
   }
   fn mana(&self) -> i16  {
     // yo
@@ -541,9 +541,9 @@ impl Monster /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&flatbuffers::String>(Monster::VT_NAME)
   }
-  fn mutable_name(&mut self) -> &mut flatbuffers::String  {
+  fn mutable_name<'a>(&'a mut self) -> &'a mut flatbuffers::String  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::String >(Monster::VT_NAME)
+    &mut flatbuffers::get_pointer_mut::<&'a mut flatbuffers::String >(Monster::VT_NAME)
   }
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
     return *self.name() < *o.name();
@@ -556,9 +556,9 @@ impl Monster /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&&[u8]>(Monster::VT_INVENTORY)
   }
-  fn mutable_inventory(&mut self) -> &mut &[u8]  {
+  fn mutable_inventory<'a>(&'a mut self) -> &'a mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_INVENTORY)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[u8] >(Monster::VT_INVENTORY)
   }
   fn color(&self) -> Color  {
     // yo
@@ -588,25 +588,25 @@ impl Monster /* private flatbuffers::Table */ {
   // TODO: fn test_as_MyGame_Example2_Monster() -> &super::Example2::Monster {
 // TODO:     if test_type() == Any::MyGame_Example2_Monster { static_cast::<&super::Example2::Monster>(test()) } else { nullptr }
 // TODO:   }
-  fn mutable_test(&mut self) -> &mut flatbuffers::Void  {
+  fn mutable_test<'a>(&'a mut self) -> &'a mut flatbuffers::Void  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut flatbuffers::Void >(Monster::VT_TEST)
+    &mut flatbuffers::get_pointer_mut::<&'a mut flatbuffers::Void >(Monster::VT_TEST)
   }
   fn test4(&self) -> &&[&Test]  {
     // yo
     flatbuffers::get_pointer::<&&[&Test]>(Monster::VT_TEST4)
   }
-  fn mutable_test4(&mut self) -> &mut &[&Test]  {
+  fn mutable_test4<'a>(&'a mut self) -> &'a mut &[&Test]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[&Test] >(Monster::VT_TEST4)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[&Test] >(Monster::VT_TEST4)
   }
   fn testarrayofstring(&self) -> &&[flatbuffers::Offset<flatbuffers::String>]  {
     // yo
     flatbuffers::get_pointer::<&&[flatbuffers::Offset<flatbuffers::String>]>(Monster::VT_TESTARRAYOFSTRING)
   }
-  fn mutable_testarrayofstring(&mut self) -> &mut &[flatbuffers::Offset<flatbuffers::String>]  {
+  fn mutable_testarrayofstring<'a>(&'a mut self) -> &'a mut &[flatbuffers::Offset<flatbuffers::String>]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[flatbuffers::Offset<flatbuffers::String>] >(Monster::VT_TESTARRAYOFSTRING)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[flatbuffers::Offset<flatbuffers::String>] >(Monster::VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
@@ -614,25 +614,25 @@ impl Monster /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&&[flatbuffers::Offset<Monster>]>(Monster::VT_TESTARRAYOFTABLES)
   }
-  fn mutable_testarrayoftables(&mut self) -> &mut &[flatbuffers::Offset<Monster>]  {
+  fn mutable_testarrayoftables<'a>(&'a mut self) -> &'a mut &[flatbuffers::Offset<Monster>]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[flatbuffers::Offset<Monster>] >(Monster::VT_TESTARRAYOFTABLES)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[flatbuffers::Offset<Monster>] >(Monster::VT_TESTARRAYOFTABLES)
   }
   fn enemy(&self) -> &Monster  {
     // yo
     flatbuffers::get_pointer::<&Monster>(Monster::VT_ENEMY)
   }
-  fn mutable_enemy(&mut self) -> &mut Monster  {
+  fn mutable_enemy<'a>(&'a mut self) -> &'a mut Monster  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut Monster >(Monster::VT_ENEMY)
+    &mut flatbuffers::get_pointer_mut::<&'a mut Monster >(Monster::VT_ENEMY)
   }
   fn testnestedflatbuffer(&self) -> &&[u8]  {
     // yo
     flatbuffers::get_pointer::<&&[u8]>(Monster::VT_TESTNESTEDFLATBUFFER)
   }
-  fn mutable_testnestedflatbuffer(&mut self) -> &mut &[u8]  {
+  fn mutable_testnestedflatbuffer<'a>(&'a mut self) -> &'a mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_TESTNESTEDFLATBUFFER)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[u8] >(Monster::VT_TESTNESTEDFLATBUFFER)
   }
 //TODO: mutable nested root
   fn testnestedflatbuffer_nested_root(&self) -> &Monster{
@@ -643,9 +643,9 @@ impl Monster /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&Stat>(Monster::VT_TESTEMPTY)
   }
-  fn mutable_testempty(&mut self) -> &mut Stat  {
+  fn mutable_testempty<'a>(&'a mut self) -> &'a mut Stat  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut Stat >(Monster::VT_TESTEMPTY)
+    &mut flatbuffers::get_pointer_mut::<&'a mut Stat >(Monster::VT_TESTEMPTY)
   }
   fn testbool(&self) -> bool  {
     // yo
@@ -714,9 +714,9 @@ impl Monster /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&&[u8]>(Monster::VT_TESTARRAYOFBOOLS)
   }
-  fn mutable_testarrayofbools(&mut self) -> &mut &[u8]  {
+  fn mutable_testarrayofbools<'a>(&'a mut self) -> &'a mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_TESTARRAYOFBOOLS)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[u8] >(Monster::VT_TESTARRAYOFBOOLS)
   }
   fn testf(&self) -> f32  {
     // yo
@@ -743,57 +743,57 @@ impl Monster /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&&[flatbuffers::Offset<flatbuffers::String>]>(Monster::VT_TESTARRAYOFSTRING2)
   }
-  fn mutable_testarrayofstring2(&mut self) -> &mut &[flatbuffers::Offset<flatbuffers::String>]  {
+  fn mutable_testarrayofstring2<'a>(&'a mut self) -> &'a mut &[flatbuffers::Offset<flatbuffers::String>]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[flatbuffers::Offset<flatbuffers::String>] >(Monster::VT_TESTARRAYOFSTRING2)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[flatbuffers::Offset<flatbuffers::String>] >(Monster::VT_TESTARRAYOFSTRING2)
   }
   fn testarrayofsortedstruct(&self) -> &&[&Ability]  {
     // yo
     flatbuffers::get_pointer::<&&[&Ability]>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
   }
-  fn mutable_testarrayofsortedstruct(&mut self) -> &mut &[&Ability]  {
+  fn mutable_testarrayofsortedstruct<'a>(&'a mut self) -> &'a mut &[&Ability]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[&Ability] >(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[&Ability] >(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
   }
   fn flex(&self) -> &&[u8]  {
     // yo
     flatbuffers::get_pointer::<&&[u8]>(Monster::VT_FLEX)
   }
-  fn mutable_flex(&mut self) -> &mut &[u8]  {
+  fn mutable_flex<'a>(&'a mut self) -> &'a mut &[u8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[u8] >(Monster::VT_FLEX)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[u8] >(Monster::VT_FLEX)
   }
   fn test5(&self) -> &&[&Test]  {
     // yo
     flatbuffers::get_pointer::<&&[&Test]>(Monster::VT_TEST5)
   }
-  fn mutable_test5(&mut self) -> &mut &[&Test]  {
+  fn mutable_test5<'a>(&'a mut self) -> &'a mut &[&Test]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[&Test] >(Monster::VT_TEST5)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[&Test] >(Monster::VT_TEST5)
   }
   fn vector_of_longs(&self) -> &&[i64]  {
     // yo
     flatbuffers::get_pointer::<&&[i64]>(Monster::VT_VECTOR_OF_LONGS)
   }
-  fn mutable_vector_of_longs(&mut self) -> &mut &[i64]  {
+  fn mutable_vector_of_longs<'a>(&'a mut self) -> &'a mut &[i64]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[i64] >(Monster::VT_VECTOR_OF_LONGS)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[i64] >(Monster::VT_VECTOR_OF_LONGS)
   }
   fn vector_of_doubles(&self) -> &&[f64]  {
     // yo
     flatbuffers::get_pointer::<&&[f64]>(Monster::VT_VECTOR_OF_DOUBLES)
   }
-  fn mutable_vector_of_doubles(&mut self) -> &mut &[f64]  {
+  fn mutable_vector_of_doubles<'a>(&'a mut self) -> &'a mut &[f64]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[f64] >(Monster::VT_VECTOR_OF_DOUBLES)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[f64] >(Monster::VT_VECTOR_OF_DOUBLES)
   }
   fn parent_namespace_test(&self) -> &super::InParentNamespace  {
     // yo
     flatbuffers::get_pointer::<&super::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST)
   }
-  fn mutable_parent_namespace_test(&mut self) -> &mut super::InParentNamespace  {
+  fn mutable_parent_namespace_test<'a>(&'a mut self) -> &'a mut super::InParentNamespace  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut super::InParentNamespace >(Monster::VT_PARENT_NAMESPACE_TEST)
+    &mut flatbuffers::get_pointer_mut::<&'a mut super::InParentNamespace >(Monster::VT_PARENT_NAMESPACE_TEST)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -1236,17 +1236,17 @@ impl TypeAliases /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&&[i8]>(TypeAliases::VT_V8)
   }
-  fn mutable_v8(&mut self) -> &mut &[i8]  {
+  fn mutable_v8<'a>(&'a mut self) -> &'a mut &[i8]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[i8] >(TypeAliases::VT_V8)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[i8] >(TypeAliases::VT_V8)
   }
   fn vf64(&self) -> &&[f64]  {
     // yo
     flatbuffers::get_pointer::<&&[f64]>(TypeAliases::VT_VF64)
   }
-  fn mutable_vf64(&mut self) -> &mut &[f64]  {
+  fn mutable_vf64<'a>(&'a mut self) -> &'a mut &[f64]  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&mut &[f64] >(TypeAliases::VT_VF64)
+    &mut flatbuffers::get_pointer_mut::<&'a mut &[f64] >(TypeAliases::VT_VF64)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
