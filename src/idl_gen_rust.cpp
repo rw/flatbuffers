@@ -1766,13 +1766,13 @@ class RustGenerator : public BaseGenerator {
         } else {
           auto postptr = " " + NullableExtension();
           auto type =
-              GenTypeGet(field.value.type, " ", "&mut ", postptr.c_str(), true);
+              GenTypeGet(field.value.type, " ", "&'a mut ", postptr.c_str(), true);
           auto underlying = mut_accessor + type + ">(" + offset_str + ")";
           code_.SetValue("FIELD_TYPE", type);
           code_.SetValue("FIELD_VALUE",
                          GenUnderlyingCast(field, true, underlying));
 
-          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> {{FIELD_TYPE}} {";
+          code_ += "  fn mutable_{{FIELD_NAME}}<'a>(&'a mut self) -> {{FIELD_TYPE}} {";
           code_ += "    /* TODO: are there non-reference choices here? */";
           code_ += "    &mut {{FIELD_VALUE}}";
           code_ += "  }";
