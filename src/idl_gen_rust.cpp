@@ -2062,6 +2062,28 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
 
       code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}<'fbb>> {";
+      for (auto it = struct_def.fields.vec.begin();
+           it != struct_def.fields.vec.end(); ++it) {
+        const auto &field = **it;
+        if (!field.deprecated) {
+          code_.SetValue("FIELD_NAME", Name(field));
+
+          if (field.value.type.base_type == BASE_TYPE_STRING) {
+            code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) };";
+          } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
+            const auto vtype = field.value.type.VectorType();
+            if (IsStruct(vtype)) {
+              const auto type = WrapInNameSpace(*vtype.struct_def);
+              code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector_of_structs::<&" + type + ">(x /* slice */) } else { flatbuffers::Offset::new(0) };";
+            } else {
+              const auto type = GenTypeWire(vtype, "", false);
+              code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector::<" + type + ">(x /* slice */) } else { flatbuffers::Offset::new(0) };";
+            }
+          } else {
+            // PASS
+          }
+        }
+      }
       code_ += "  return Create{{STRUCT_NAME}}(";
       code_ += "      _fbb\\";
       for (auto it = struct_def.fields.vec.begin();
@@ -2071,21 +2093,9 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("FIELD_NAME", Name(field));
 
           if (field.value.type.base_type == BASE_TYPE_STRING) {
-            code_ +=
-                ",\n      if let Some(x) = {{FIELD_NAME}} { "
-                "_fbb.create_string(x) } else { flatbuffers::Offset::new(0) }\\";
+            code_ += ",\n      _offset_{{FIELD_NAME}}\\";
           } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-            code_ += ",\n      if let Some(x) = {{FIELD_NAME}} { \\";
-            const auto vtype = field.value.type.VectorType();
-            if (IsStruct(vtype)) {
-              const auto type = WrapInNameSpace(*vtype.struct_def);
-              code_ += "_fbb.create_vector_of_structs::<&" + type + ">\\";
-              code_ += "(x /* slice */) } else { flatbuffers::Offset::new(0) }\\";
-            } else {
-              const auto type = GenTypeWire(vtype, "", false);
-              code_ += "_fbb.create_vector::<" + type + ">\\";
-              code_ += "(x /* slice */) } else { flatbuffers::Offset::new(0) }\\";
-            }
+            code_ += ",\n      _offset_{{FIELD_NAME}}\\";
           } else {
             code_ += ",\n      {{FIELD_NAME}}\\";
           }
