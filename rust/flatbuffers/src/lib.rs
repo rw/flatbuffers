@@ -65,7 +65,7 @@ impl FlatBufferBuilder {
     pub fn end_table<T>(&mut self, _: T) -> usize {
         0
     }
-    pub fn required<T>(&self, _: Offset<T>, _: isize) -> bool {
+    pub fn required<T>(&self, _: &Offset<T>, _: isize) -> bool {
         unimplemented!()
     }
     pub fn finish<T>(&mut self, _root: Offset<T>)  {
@@ -79,6 +79,8 @@ pub type Void<'a> = &'a [u8];
 pub struct Vector<T>  {
     phantom: PhantomData<T>,
 }
+
+#[derive(Clone, Copy)]
 pub struct Offset<T> (usize, PhantomData<T>);
 
 impl<T> Offset<T> {
