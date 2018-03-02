@@ -111,7 +111,8 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   // memcpy(inv_buf, inv_data, 10);
 
   let tests = vec![MyGame::Example::Test::new(10, 20), MyGame::Example::Test::new(30, 40)];
-  let testv = builder.create_vector_of_structs(&tests);
+  // Create a vector of structures from a lambda.
+  let testv = builder.create_vector_of_structs_from_fn(2, |i, s| *s = tests[i]);
 
 //  // clang-format off
 //  #ifndef FLATBUFFERS_CPP98_STL

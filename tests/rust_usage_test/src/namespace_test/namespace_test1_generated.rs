@@ -54,6 +54,7 @@ pub fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
+#[derive(Clone, Copy)]
 pub struct StructInNestedNS {
   a_: i32,
   b_: i32,

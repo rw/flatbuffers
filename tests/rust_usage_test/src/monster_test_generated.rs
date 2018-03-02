@@ -201,6 +201,7 @@ pub fn EnumNameAny(e: Any) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(2)
 #[repr(C, packed)]
+#[derive(Clone, Copy)]
 pub struct Test {
   a_: i16,
   b_: i8,
@@ -311,6 +312,7 @@ impl<'a> Vec3<'a> {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
+#[derive(Clone, Copy)]
 pub struct Ability {
   id_: u32,
   distance_: u32,
