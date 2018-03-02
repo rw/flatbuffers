@@ -39,7 +39,7 @@ impl<'a> InParentNamespaceBuilder<'a> {
     }
   }
   // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<InParentNamespace<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<InParentNamespace<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<InParentNamespace>::new(end);
     o
@@ -101,7 +101,7 @@ impl<'a> MonsterBuilder<'a> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<Monster<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<Monster>::new(end);
     o
@@ -386,7 +386,7 @@ impl<'a> TestSimpleTableWithEnumBuilder<'a> {
     }
   }
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TestSimpleTableWithEnum>::new(end);
     o
@@ -465,7 +465,7 @@ impl<'a> StatBuilder<'a> {
     }
   }
   // StatBuilder &operator=(const StatBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<Stat<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<Stat<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<Stat>::new(end);
     o
@@ -1013,7 +1013,7 @@ impl<'a> MonsterBuilder<'a> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<Monster<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<Monster>::new(end);
     self.fbb_.required(&o, Monster::VT_NAME);
@@ -1357,7 +1357,7 @@ impl<'a> TypeAliasesBuilder<'a> {
     }
   }
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<TypeAliases<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<TypeAliases<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TypeAliases>::new(end);
     o

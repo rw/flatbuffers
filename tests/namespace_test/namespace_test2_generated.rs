@@ -81,7 +81,7 @@ impl<'a> TableInFirstNSBuilder<'a> {
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<TableInFirstNS<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInFirstNS>::new(end);
     o
@@ -140,7 +140,7 @@ impl<'a> SecondTableInABuilder<'a> {
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<SecondTableInA<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<SecondTableInA<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<SecondTableInA>::new(end);
     o
@@ -270,7 +270,7 @@ impl<'a> TableInCBuilder<'a> {
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<TableInC<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<TableInC<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInC>::new(end);
     o
