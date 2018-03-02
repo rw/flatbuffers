@@ -30,9 +30,9 @@ impl<'buf> TableInFirstNS<'buf> /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&NamespaceB::TableInNestedNS>(TableInFirstNS::VT_FOO_TABLE)
   }
-  fn mutable_foo_table<'a>(&'a mut self) -> &'a mut NamespaceB::TableInNestedNS  {
+  fn mutable_foo_table(&'buf mut self) -> &'buf mut NamespaceB::TableInNestedNS  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&'a mut NamespaceB::TableInNestedNS >(TableInFirstNS::VT_FOO_TABLE)
+    flatbuffers::get_pointer_mut::<&'buf mut NamespaceB::TableInNestedNS >(TableInFirstNS::VT_FOO_TABLE)
   }
   fn foo_enum(&self) -> NamespaceA::NamespaceB::EnumInNestedNS  {
     // yo
@@ -45,9 +45,9 @@ impl<'buf> TableInFirstNS<'buf> /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_struct::<&NamespaceB::StructInNestedNS>(TableInFirstNS::VT_FOO_STRUCT)
   }
-  fn mutable_foo_struct<'a>(&'a mut self) -> &'a mut NamespaceB::StructInNestedNS  {
+  fn mutable_foo_struct(&'buf mut self) -> &'buf mut NamespaceB::StructInNestedNS  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_struct_mut::<&'a mut NamespaceB::StructInNestedNS >(TableInFirstNS::VT_FOO_STRUCT)
+    flatbuffers::get_struct_mut::<&'buf mut NamespaceB::StructInNestedNS >(TableInFirstNS::VT_FOO_STRUCT)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -81,7 +81,7 @@ impl<'a> TableInFirstNSBuilder<'a> {
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<TableInFirstNS> {
+  fn finish(mut self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInFirstNS>::new(end);
     o
@@ -112,9 +112,9 @@ impl<'buf> SecondTableInA<'buf> /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&super::NamespaceC::TableInC>(SecondTableInA::VT_REFER_TO_C)
   }
-  fn mutable_refer_to_c<'a>(&'a mut self) -> &'a mut super::NamespaceC::TableInC  {
+  fn mutable_refer_to_c(&'buf mut self) -> &'buf mut super::NamespaceC::TableInC  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&'a mut super::NamespaceC::TableInC >(SecondTableInA::VT_REFER_TO_C)
+    flatbuffers::get_pointer_mut::<&'buf mut super::NamespaceC::TableInC >(SecondTableInA::VT_REFER_TO_C)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -140,7 +140,7 @@ impl<'a> SecondTableInABuilder<'a> {
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<SecondTableInA> {
+  fn finish(mut self) -> flatbuffers::Offset<SecondTableInA<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<SecondTableInA>::new(end);
     o
@@ -229,17 +229,17 @@ impl<'buf> TableInC<'buf> /* private flatbuffers::Table */ {
     // yo
     flatbuffers::get_pointer::<&super::NamespaceA::TableInFirstNS>(TableInC::VT_REFER_TO_A1)
   }
-  fn mutable_refer_to_a1<'a>(&'a mut self) -> &'a mut super::NamespaceA::TableInFirstNS  {
+  fn mutable_refer_to_a1(&'buf mut self) -> &'buf mut super::NamespaceA::TableInFirstNS  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&'a mut super::NamespaceA::TableInFirstNS >(TableInC::VT_REFER_TO_A1)
+    flatbuffers::get_pointer_mut::<&'buf mut super::NamespaceA::TableInFirstNS >(TableInC::VT_REFER_TO_A1)
   }
   fn refer_to_a2(&self) -> &super::NamespaceA::SecondTableInA  {
     // yo
     flatbuffers::get_pointer::<&super::NamespaceA::SecondTableInA>(TableInC::VT_REFER_TO_A2)
   }
-  fn mutable_refer_to_a2<'a>(&'a mut self) -> &'a mut super::NamespaceA::SecondTableInA  {
+  fn mutable_refer_to_a2(&'buf mut self) -> &'buf mut super::NamespaceA::SecondTableInA  {
     /* TODO: are there non-reference choices here? */
-    &mut flatbuffers::get_pointer_mut::<&'a mut super::NamespaceA::SecondTableInA >(TableInC::VT_REFER_TO_A2)
+    flatbuffers::get_pointer_mut::<&'buf mut super::NamespaceA::SecondTableInA >(TableInC::VT_REFER_TO_A2)
   }
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -270,7 +270,7 @@ impl<'a> TableInCBuilder<'a> {
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<TableInC> {
+  fn finish(mut self) -> flatbuffers::Offset<TableInC<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInC>::new(end);
     o
