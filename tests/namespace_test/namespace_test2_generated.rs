@@ -73,7 +73,7 @@ impl<'a> TableInFirstNSBuilder<'a> {
   fn add_foo_struct(&mut self, foo_struct: &NamespaceB::StructInNestedNS) {
     self.fbb_.add_struct(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
-  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInFirstNSBuilder {
+  fn new(_fbb: &'a mut flatbuffers::FlatBufferBuilder) -> TableInFirstNSBuilder<'a> {
     let start = _fbb.start_table();
     TableInFirstNSBuilder {
       fbb_: _fbb,
@@ -81,7 +81,7 @@ impl<'a> TableInFirstNSBuilder<'a> {
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
-  fn finish(&mut self) -> flatbuffers::Offset<TableInFirstNS> {
+  fn finish(mut self) -> flatbuffers::Offset<TableInFirstNS> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInFirstNS>::new(end);
     o
@@ -132,7 +132,7 @@ impl<'a> SecondTableInABuilder<'a> {
   fn add_refer_to_c(&mut self, refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC> ) {
     self.fbb_.add_offset(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
-  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder {
+  fn new(_fbb: &'a mut flatbuffers::FlatBufferBuilder) -> SecondTableInABuilder<'a> {
     let start = _fbb.start_table();
     SecondTableInABuilder {
       fbb_: _fbb,
@@ -140,7 +140,7 @@ impl<'a> SecondTableInABuilder<'a> {
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  fn finish(&mut self) -> flatbuffers::Offset<SecondTableInA> {
+  fn finish(mut self) -> flatbuffers::Offset<SecondTableInA> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<SecondTableInA>::new(end);
     o
@@ -262,7 +262,7 @@ impl<'a> TableInCBuilder<'a> {
   fn add_refer_to_a2(&mut self, refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA> ) {
     self.fbb_.add_offset(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
-  fn new(_fbb: &mut flatbuffers::FlatBufferBuilder) -> TableInCBuilder {
+  fn new(_fbb: &'a mut flatbuffers::FlatBufferBuilder) -> TableInCBuilder<'a> {
     let start = _fbb.start_table();
     TableInCBuilder {
       fbb_: _fbb,
@@ -270,7 +270,7 @@ impl<'a> TableInCBuilder<'a> {
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
-  fn finish(&mut self) -> flatbuffers::Offset<TableInC> {
+  fn finish(mut self) -> flatbuffers::Offset<TableInC> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInC>::new(end);
     o
