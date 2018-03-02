@@ -18,22 +18,22 @@ impl Verifier {
     pub fn new() -> Self {
         Verifier{}
     }
-    pub fn verify<T>(&mut self, _: T) -> bool {
+    pub fn verify<T>(&self, _: T) -> bool {
         false
     }
-    pub fn verify_buffer<T>(&mut self, _: &'static str) -> bool {
+    pub fn verify_buffer<T>(&self, _: &'static str) -> bool {
         false
     }
-    pub fn verify_vector_of_strings<T>(&mut self, _: T) -> bool {
+    pub fn verify_vector_of_strings<T>(&self, _: T) -> bool {
         false
     }
-    pub fn verify_vector_of_tables<T>(&mut self, _: T) -> bool {
+    pub fn verify_vector_of_tables<T>(&self, _: T) -> bool {
         false
     }
-    pub fn verify_table<T>(&mut self, _: T) -> bool {
+    pub fn verify_table<T>(&self, _: T) -> bool {
         false
     }
-    pub fn end_table(&mut self) -> bool {
+    pub fn end_table(&self) -> bool {
         false
     }
 }
