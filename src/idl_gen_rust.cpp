@@ -2513,9 +2513,14 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
     code_ += "#[repr(C, packed)]";
+    if (StructNeedsLifetime(struct_def)) {
+      //code_ += "impl Copy for {{STRUCT_NAME}} {}";
+      code_.SetValue("PARENT_LIFETIME", "<'a>");
+    } else {
+      code_ += "#[derive(Clone, Copy)]";
+      code_.SetValue("PARENT_LIFETIME", "");
+    }
 
-    code_.SetValue("PARENT_LIFETIME",
-        StructNeedsLifetime(struct_def) ? "<'a>" : "");
 
 
     // TODO: maybe only use lifetimes when needed by members, and skip
