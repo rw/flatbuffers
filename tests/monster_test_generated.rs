@@ -208,13 +208,17 @@ pub struct Test {
 } // pub struct Test
 
 impl Test {
-  fn Reset(&mut self) {
+  pub fn Reset(&mut self) {
     //memset(this, 0, size_of(Test));
   }
-  fn init(&mut self, _a: i16, _b: i8) {
-      self.a_ = flatbuffers::endian_scalar(_a);
-      self.b_ = flatbuffers::endian_scalar(_b);
+  pub fn new(_a: i16, _b: i8) -> Self {
+    Test {
+      a_: flatbuffers::endian_scalar(_a),
+      b_: flatbuffers::endian_scalar(_b),
 
+
+        padding0__: 0,
+    }
   }
   fn a(&self) -> i16  {
     flatbuffers::endian_scalar(self.a_)
@@ -246,17 +250,25 @@ pub struct Vec3<'a> {
 } // pub struct Vec3
 
 impl<'a> Vec3<'a> {
-  fn Reset(&mut self) {
+  pub fn Reset(&mut self) {
     //memset(this, 0, size_of(Vec3));
   }
-  fn init(&mut self, _x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a mut Test) {
-      self.x_ = _x;
-      self.y_ = _y;
-      self.z_ = _z;
-      self.test1_ = _test1;
-      self.test2_ = flatbuffers::endian_scalar(_test2 as i8);
-      self.test3_ = _test3;
+  pub fn new(_x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a mut Test) -> Self {
+    Vec3 {
+      x_: _x,
+      y_: _y,
+      z_: _z,
+      test1_: _test1,
+      test2_: flatbuffers::endian_scalar(_test2 as i8),
+      test3_: _test3,
 
+
+        padding0__: 0,
+
+        padding1__: 0,
+
+        padding2__: 0,
+    }
   }
   fn x(&self) -> f32  {
     self.x_
@@ -305,13 +317,15 @@ pub struct Ability {
 } // pub struct Ability
 
 impl Ability {
-  fn Reset(&mut self) {
+  pub fn Reset(&mut self) {
     //memset(this, 0, size_of(Ability));
   }
-  fn init(&mut self, _id: u32, _distance: u32) {
-      self.id_ = flatbuffers::endian_scalar(_id);
-      self.distance_ = flatbuffers::endian_scalar(_distance);
+  pub fn new(_id: u32, _distance: u32) -> Self {
+    Ability {
+      id_: flatbuffers::endian_scalar(_id),
+      distance_: flatbuffers::endian_scalar(_distance),
 
+    }
   }
   fn id(&self) -> u32  {
     flatbuffers::endian_scalar(self.id_)

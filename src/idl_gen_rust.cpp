@@ -2492,7 +2492,7 @@ class RustGenerator : public BaseGenerator {
 
   static void PaddingInitializer(int bits, std::string *code_ptr, int *id) {
     (void)bits;
-    *code_ptr += ",\n        padding" + NumToString((*id)++) + "__(0)";
+    *code_ptr += "\n        padding" + NumToString((*id)++) + "__: 0,";
   }
 
   static void PaddingNoop(int bits, std::string *code_ptr, int *id) {
@@ -2548,7 +2548,7 @@ class RustGenerator : public BaseGenerator {
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate a default constructor.
-    code_ += "  fn Reset(&mut self) {";
+    code_ += "  pub fn Reset(&mut self) {";
     code_ += "    //memset(this, 0, size_of({{STRUCT_NAME}}));";
     code_ += "  }";
 
@@ -2570,13 +2570,13 @@ class RustGenerator : public BaseGenerator {
       }
       arg_list += arg_name + ": ";
       arg_list += arg_type;
-      init_list += "      self." + member_name;
+      init_list += "      " + member_name;
       if (IsScalar(field.value.type.base_type) &&
           !IsFloat(field.value.type.base_type)) {
         auto type = GenUnderlyingCast(field, false, arg_name);
-        init_list += " = flatbuffers::endian_scalar(" + type + ");\n";
+        init_list += ": flatbuffers::endian_scalar(" + type + "),\n";
       } else {
-        init_list += " = " + arg_name + ";\n";
+        init_list += ": " + arg_name + ",\n";
       }
       //if (field.padding) {
       //  GenPadding(field, &init_list, &padding_id, PaddingInitializer);
@@ -2585,18 +2585,20 @@ class RustGenerator : public BaseGenerator {
 
     code_.SetValue("ARG_LIST", arg_list);
     code_.SetValue("INIT_LIST", init_list);
-    code_ += "  fn init(&mut self, {{ARG_LIST}}) {";
+    code_ += "  pub fn new({{ARG_LIST}}) -> Self {";
+    code_ += "    {{STRUCT_NAME}} {";
     code_ += "{{INIT_LIST}}";
-    //padding_id = 0;
-    //for (auto it = struct_def.fields.vec.begin();
-    //     it != struct_def.fields.vec.end(); ++it) {
-    //  const auto &field = **it;
-    //  //if (field.padding) {
-    //  //  std::string padding;
-    //  //  GenPadding(field, &padding, &padding_id, PaddingNoop);
-    //  //  code_ += padding;
-    //  //}
-    //}
+    padding_id = 0;
+    for (auto it = struct_def.fields.vec.begin();
+         it != struct_def.fields.vec.end(); ++it) {
+      const auto &field = **it;
+      if (field.padding) {
+        std::string padding;
+        GenPadding(field, &padding, &padding_id, PaddingInitializer);
+        code_ += padding;
+      }
+    }
+    code_ += "    }";
     code_ += "  }";
 
     // Generate accessor methods of the form:
