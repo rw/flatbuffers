@@ -132,7 +132,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //
   // create monster with very few fields set:
   // (same functionality as CreateMonster below, but sets fields manually)
-  let mut mlocs: [flatbuffers::Offset<MyGame::Example::Monster>; 3] = [flatbuffers::Offset::<MyGame::Example::Monster>::new(0); 3];
+  let mut mlocs: [flatbuffers::Offset<MyGame::Example::Monster>; 3] = [flatbuffers::Offset::<_>::new(0); 3];
   let fred = builder.create_string("Fred");
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
