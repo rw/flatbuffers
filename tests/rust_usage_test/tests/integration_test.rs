@@ -96,26 +96,24 @@ fn foo() {}
 //
 // example of how to build up a serialized buffer algorithmically:
 fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
-    let mut _builder = flatbuffers::FlatBufferBuilder::new();
+  let mut builder = flatbuffers::FlatBufferBuilder::new();
 
-    let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, MyGame::Example::Test::new(10, 20));
-    return flatbuffers::DetachedBuffer{};
-//  auto vec = Vec3(1, 2, 3, 0, Color_Red, Test(10, 20));
-//
-//  auto name = builder.CreateString("MyMonster");
-//
-//  unsigned char inv_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-//  auto inventory = builder.CreateVector(inv_data, 10);
-//
-//  // Alternatively, create the vector first, and fill in data later:
-//  // unsigned char *inv_buf = nullptr;
-//  // auto inventory = builder.CreateUninitializedVector<unsigned char>(
-//  //                                                              10, &inv_buf);
-//  // memcpy(inv_buf, inv_data, 10);
-//
-//  Test tests[] = { Test(10, 20), Test(30, 40) };
-//  auto testv = builder.CreateVectorOfStructs(tests, 2);
-//
+  let mut x = MyGame::Example::Test::new(10, 20);
+  let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, &mut x);
+  let _name = builder.create_string("MyMonster");
+  let inv_data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let _inventory = builder.create_vector(&inv_data);
+  return flatbuffers::DetachedBuffer{};
+
+  // Alternatively, create the vector first, and fill in data later:
+  // unsigned char *inv_buf = nullptr;
+  // auto inventory = builder.CreateUninitializedVector<unsigned char>(
+  //                                                              10, &inv_buf);
+  // memcpy(inv_buf, inv_data, 10);
+
+  let tests = vec![MyGame::Example::Test::new(10, 20), MyGame::Example::Test::new(30, 40)];
+  let testv = builder.create_vector_of_structs(&tests);
+
 //  // clang-format off
 //  #ifndef FLATBUFFERS_CPP98_STL
 //    // Create a vector of structures from a lambda.
@@ -132,15 +130,15 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //  #endif  // FLATBUFFERS_CPP98_STL
 //  // clang-format on
 //
-//  // create monster with very few fields set:
-//  // (same functionality as CreateMonster below, but sets fields manually)
-//  flatbuffers::Offset<Monster> mlocs[3];
-//  auto fred = builder.CreateString("Fred");
-//  auto barney = builder.CreateString("Barney");
-//  auto wilma = builder.CreateString("Wilma");
-//  MonsterBuilder mb1(builder);
-//  mb1.add_name(fred);
-//  mlocs[0] = mb1.Finish();
+  // create monster with very few fields set:
+  // (same functionality as CreateMonster below, but sets fields manually)
+  let mut mlocs: [flatbuffers::Offset<MyGame::Example::Monster>; 3] = [flatbuffers::Offset::<MyGame::Example::Monster>::new(0); 3];
+  let fred = builder.create_string("Fred");
+  let barney = builder.create_string("Barney");
+  let wilma = builder.create_string("Wilma");
+  let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
+  mb1.add_name(fred);
+  mlocs[0] = mb1.finish();
 //  MonsterBuilder mb2(builder);
 //  mb2.add_name(barney);
 //  mb2.add_hp(1000);

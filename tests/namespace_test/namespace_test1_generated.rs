@@ -111,10 +111,10 @@ pub struct TableInNestedNSBuilder<'a> {
   start_: flatbuffers::UOffsetT,
 }
 impl<'a> TableInNestedNSBuilder<'a> {
-  fn add_foo(&mut self, foo: i32 ) {
+  pub fn add_foo(&mut self, foo: i32 ) {
     self.fbb_.add_element::<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
-  fn new(_fbb: &'a mut flatbuffers::FlatBufferBuilder) -> TableInNestedNSBuilder<'a> {
+  pub fn new(_fbb: &'a mut flatbuffers::FlatBufferBuilder) -> TableInNestedNSBuilder<'a> {
     let start = _fbb.start_table();
     TableInNestedNSBuilder {
       fbb_: _fbb,
@@ -122,7 +122,7 @@ impl<'a> TableInNestedNSBuilder<'a> {
     }
   }
   // TableInNestedNSBuilder &operator=(const TableInNestedNSBuilder &);
-  fn finish(self) -> flatbuffers::Offset<TableInNestedNS<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<TableInNestedNS<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInNestedNS>::new(end);
     o

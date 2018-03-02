@@ -1969,7 +1969,7 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("ADD_FN", "add_offset");
         }
 
-        code_ += "  fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
+        code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         code_ += "    self.fbb_.{{ADD_FN}}(\\";
         if (is_scalar) {
           code_ += "{{ADD_OFFSET}}, {{ADD_NAME}}, {{ADD_VALUE}});";
@@ -1982,7 +1982,7 @@ class RustGenerator : public BaseGenerator {
 
     // Builder constructor
     code_ +=
-        "  fn new"
+        "  pub fn new"
         "(_fbb: &'a mut flatbuffers::FlatBufferBuilder) -> "
         "{{STRUCT_NAME}}Builder<'a> {";
     code_ += "    let start = _fbb.start_table();";
@@ -1998,7 +1998,7 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  fn finish(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
+    code_ += "  pub fn finish(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let end = self.fbb_.end_table(self.start_);";
     code_ += "    let o = flatbuffers::Offset::<{{STRUCT_NAME}}>::new(end);";
 

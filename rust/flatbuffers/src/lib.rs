@@ -55,7 +55,7 @@ impl FlatBufferBuilder {
     pub fn add_struct<T>(&mut self, _: isize, _: T) {
         unimplemented!()
     }
-    pub fn create_string<T>(&mut self, _: &str) -> Offset<T> {
+    pub fn create_string(&mut self, _: &str) -> Offset<String> {
         Offset::new(0)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
@@ -83,8 +83,14 @@ pub struct Vector<T>  {
     phantom: PhantomData<T>,
 }
 
-#[derive(Clone, Copy)]
 pub struct Offset<T> (usize, PhantomData<T>);
+impl<T> Copy for Offset<T> { }
+
+impl<T> Clone for Offset<T> {
+    fn clone(&self) -> Offset<T> {
+        *self
+    }
+}
 
 impl<T> Offset<T> {
     pub fn new(o: usize) -> Self {
