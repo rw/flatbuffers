@@ -103,7 +103,6 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let _name = builder.create_string("MyMonster");
   let inv_data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   let _inventory = builder.create_vector(&inv_data);
-  return flatbuffers::DetachedBuffer{};
 
   // Alternatively, create the vector first, and fill in data later:
   // unsigned char *inv_buf = nullptr;
@@ -136,13 +135,21 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let fred = builder.create_string("Fred");
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
-  let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
-  mb1.add_name(fred);
-  mlocs[0] = mb1.finish();
-//  MonsterBuilder mb2(builder);
-//  mb2.add_name(barney);
-//  mb2.add_hp(1000);
-//  mlocs[1] = mb2.Finish();
+
+{
+	  let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
+	  mb1.add_name(fred);
+	  mlocs[0] = mb1.finish();
+}
+
+{
+	  let mut mb2 = MyGame::Example::MonsterBuilder::new(&mut builder);
+	  mb2.add_name(barney);
+	  mb2.add_hp(1000);
+	  mlocs[1] = mb2.finish();
+}
+
+	  return flatbuffers::DetachedBuffer{};
 //  MonsterBuilder mb3(builder);
 //  mb3.add_name(wilma);
 //  mlocs[2] = mb3.Finish();

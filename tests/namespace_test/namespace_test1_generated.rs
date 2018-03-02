@@ -122,7 +122,7 @@ impl<'a> TableInNestedNSBuilder<'a> {
     }
   }
   // TableInNestedNSBuilder &operator=(const TableInNestedNSBuilder &);
-  pub fn finish(self) -> flatbuffers::Offset<TableInNestedNS<'a>> {
+  pub fn finish<'b: 'a>(mut self) -> flatbuffers::Offset<TableInNestedNS<'b>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TableInNestedNS>::new(end);
     o

@@ -1,4 +1,5 @@
 extern crate num_traits;
+use std::convert::AsMut;
 
 //pub trait ToLittleEndian {
 //    fn to_le(self) -> Self {
@@ -39,12 +40,20 @@ impl Verifier {
 }
 pub struct TypeTable {}
 pub struct FlatBufferBuilder {}
+//impl<T> AsMut<T> for FlatBufferBuilder {
+//    fn as_mut(&mut self) -> &mut FlatBufferBuilder {
+//        self
+//    }
+//}
 impl FlatBufferBuilder {
     pub fn new() -> Self {
         FlatBufferBuilder{}
     }
     pub fn start_table(&mut self) -> usize {
         0
+    }
+    pub fn as_mut(&mut self) -> &mut Self {
+        self
     }
     pub fn add_element<T>(&mut self, _: isize, _: T, _: T) -> T {
         unimplemented!()
