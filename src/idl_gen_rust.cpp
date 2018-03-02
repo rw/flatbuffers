@@ -1633,9 +1633,11 @@ class RustGenerator : public BaseGenerator {
     GenComment(struct_def.doc_comment);
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
-    code_ += "pub struct {{STRUCT_NAME}} {}";
-    code_ += "impl flatbuffers::Table for {{STRUCT_NAME}} {}";
-    code_ += "impl {{STRUCT_NAME}} /* private flatbuffers::Table */ {";
+    code_ += "pub struct {{STRUCT_NAME}}<'buf> {";
+    code_ += "  _phantom: PhantomData<&'buf ()>,";
+    code_ += "}";
+    code_ += "impl<'buf> flatbuffers::Table for {{STRUCT_NAME}}<'buf> {}";
+    code_ += "impl<'buf> {{STRUCT_NAME}}<'buf> /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
     //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
     //}
@@ -2017,14 +2019,14 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "fn Create{{STRUCT_NAME}}(";
-    code_ += "    _fbb: &mut flatbuffers::FlatBufferBuilder\\";
+    code_ += "fn Create{{STRUCT_NAME}}<'fbb>(";
+    code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated) { GenParam(field, false, ",\n    "); }
     }
-    code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
+    code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}<'fbb>> {";
 
     code_ += "  let mut builder = {{STRUCT_NAME}}Builder::new(_fbb);";
     for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
@@ -2046,8 +2048,8 @@ class RustGenerator : public BaseGenerator {
     // Generate a CreateXDirect function with vector types as parameters
     if (has_string_or_vector_fields) {
       code_ += "#[inline]";
-      code_ += "fn Create{{STRUCT_NAME}}Direct(";
-      code_ += "    _fbb: &mut flatbuffers::FlatBufferBuilder\\";
+      code_ += "fn Create{{STRUCT_NAME}}Direct<'fbb>(";
+      code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder\\";
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
         const auto &field = **it;
@@ -2059,7 +2061,7 @@ class RustGenerator : public BaseGenerator {
           struct_def.defined_namespace->GetFullyQualifiedName("Create");
       code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
 
-      code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
+      code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}<'fbb>> {";
       code_ += "  return Create{{STRUCT_NAME}}(";
       code_ += "      _fbb\\";
       for (auto it = struct_def.fields.vec.begin();

@@ -17,9 +17,11 @@ pub mod NamespaceA {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 
-pub struct TableInFirstNS {}
-impl flatbuffers::Table for TableInFirstNS {}
-impl TableInFirstNS /* private flatbuffers::Table */ {
+pub struct TableInFirstNS<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for TableInFirstNS<'buf> {}
+impl<'buf> TableInFirstNS<'buf> /* private flatbuffers::Table */ {
     const VT_FOO_TABLE: isize = 4;
     const VT_FOO_ENUM: isize = 6;
     const VT_FOO_STRUCT: isize = 8;
@@ -87,11 +89,11 @@ impl<'a> TableInFirstNSBuilder<'a> {
 }
 
 #[inline]
-fn CreateTableInFirstNS(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateTableInFirstNS<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS>  /* = 0 */,
     foo_enum: NamespaceA::NamespaceB::EnumInNestedNS  /* = NamespaceA::NamespaceB::EnumInNestedNS::A */,
-    foo_struct: &NamespaceB::StructInNestedNS /* = 0 */) -> flatbuffers::Offset<TableInFirstNS> {
+    foo_struct: &NamespaceB::StructInNestedNS /* = 0 */) -> flatbuffers::Offset<TableInFirstNS<'fbb>> {
   let mut builder = TableInFirstNSBuilder::new(_fbb);
   builder.add_foo_struct(foo_struct);
   builder.add_foo_table(foo_table);
@@ -99,9 +101,11 @@ fn CreateTableInFirstNS(
   builder.finish()
 }
 
-pub struct SecondTableInA {}
-impl flatbuffers::Table for SecondTableInA {}
-impl SecondTableInA /* private flatbuffers::Table */ {
+pub struct SecondTableInA<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for SecondTableInA<'buf> {}
+impl<'buf> SecondTableInA<'buf> /* private flatbuffers::Table */ {
     const VT_REFER_TO_C: isize = 4;
 
   fn refer_to_c(&self) -> &super::NamespaceC::TableInC  {
@@ -144,9 +148,9 @@ impl<'a> SecondTableInABuilder<'a> {
 }
 
 #[inline]
-fn CreateSecondTableInA(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
-    refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC>  /* = 0 */) -> flatbuffers::Offset<SecondTableInA> {
+fn CreateSecondTableInA<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
+    refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC>  /* = 0 */) -> flatbuffers::Offset<SecondTableInA<'fbb>> {
   let mut builder = SecondTableInABuilder::new(_fbb);
   builder.add_refer_to_c(refer_to_c);
   builder.finish()
@@ -213,9 +217,11 @@ pub mod NamespaceC {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 
-pub struct TableInC {}
-impl flatbuffers::Table for TableInC {}
-impl TableInC /* private flatbuffers::Table */ {
+pub struct TableInC<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for TableInC<'buf> {}
+impl<'buf> TableInC<'buf> /* private flatbuffers::Table */ {
     const VT_REFER_TO_A1: isize = 4;
     const VT_REFER_TO_A2: isize = 6;
 
@@ -272,10 +278,10 @@ impl<'a> TableInCBuilder<'a> {
 }
 
 #[inline]
-fn CreateTableInC(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateTableInC<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS>  /* = 0 */,
-    refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA>  /* = 0 */) -> flatbuffers::Offset<TableInC> {
+    refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA>  /* = 0 */) -> flatbuffers::Offset<TableInC<'fbb>> {
   let mut builder = TableInCBuilder::new(_fbb);
   builder.add_refer_to_a2(refer_to_a2);
   builder.add_refer_to_a1(refer_to_a1);

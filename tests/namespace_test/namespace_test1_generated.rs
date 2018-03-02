@@ -83,9 +83,11 @@ impl StructInNestedNS {
 }
 // STRUCT_END(StructInNestedNS, 8);
 
-pub struct TableInNestedNS {}
-impl flatbuffers::Table for TableInNestedNS {}
-impl TableInNestedNS /* private flatbuffers::Table */ {
+pub struct TableInNestedNS<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for TableInNestedNS<'buf> {}
+impl<'buf> TableInNestedNS<'buf> /* private flatbuffers::Table */ {
     const VT_FOO: isize = 4;
 
   fn foo(&self) -> i32  {
@@ -126,9 +128,9 @@ impl<'a> TableInNestedNSBuilder<'a> {
 }
 
 #[inline]
-fn CreateTableInNestedNS(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
-    foo: i32  /* = 0 */) -> flatbuffers::Offset<TableInNestedNS> {
+fn CreateTableInNestedNS<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
+    foo: i32  /* = 0 */) -> flatbuffers::Offset<TableInNestedNS<'fbb>> {
   let mut builder = TableInNestedNSBuilder::new(_fbb);
   builder.add_foo(foo);
   builder.finish()

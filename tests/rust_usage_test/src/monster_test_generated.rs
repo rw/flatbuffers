@@ -15,9 +15,11 @@ pub mod MyGame {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 
-pub struct InParentNamespace {}
-impl flatbuffers::Table for InParentNamespace {}
-impl InParentNamespace /* private flatbuffers::Table */ {
+pub struct InParentNamespace<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for InParentNamespace<'buf> {}
+impl<'buf> InParentNamespace<'buf> /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            verifier.end_table();
@@ -45,8 +47,8 @@ impl<'a> InParentNamespaceBuilder<'a> {
 }
 
 #[inline]
-fn CreateInParentNamespace(
-    _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace> {
+fn CreateInParentNamespace<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace<'fbb>> {
   let mut builder = InParentNamespaceBuilder::new(_fbb);
   builder.finish()
 }
@@ -75,9 +77,11 @@ pub mod Example2 {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 
-pub struct Monster {}
-impl flatbuffers::Table for Monster {}
-impl Monster /* private flatbuffers::Table */ {
+pub struct Monster<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for Monster<'buf> {}
+impl<'buf> Monster<'buf> /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
            verifier.end_table();
@@ -105,8 +109,8 @@ impl<'a> MonsterBuilder<'a> {
 }
 
 #[inline]
-fn CreateMonster(
-    _fbb: &mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<Monster> {
+fn CreateMonster<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<Monster<'fbb>> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder.finish()
 }
@@ -331,9 +335,11 @@ impl Ability {
 }
 // STRUCT_END(Ability, 8);
 
-pub struct TestSimpleTableWithEnum {}
-impl flatbuffers::Table for TestSimpleTableWithEnum {}
-impl TestSimpleTableWithEnum /* private flatbuffers::Table */ {
+pub struct TestSimpleTableWithEnum<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for TestSimpleTableWithEnum<'buf> {}
+impl<'buf> TestSimpleTableWithEnum<'buf> /* private flatbuffers::Table */ {
     const VT_COLOR: isize = 4;
 
   fn color(&self) -> Color  {
@@ -374,17 +380,19 @@ impl<'a> TestSimpleTableWithEnumBuilder<'a> {
 }
 
 #[inline]
-fn CreateTestSimpleTableWithEnum(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
-    color: Color  /* = Color::Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum> {
+fn CreateTestSimpleTableWithEnum<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
+    color: Color  /* = Color::Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum<'fbb>> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
   builder.add_color(color);
   builder.finish()
 }
 
-pub struct Stat {}
-impl flatbuffers::Table for Stat {}
-impl Stat /* private flatbuffers::Table */ {
+pub struct Stat<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for Stat<'buf> {}
+impl<'buf> Stat<'buf> /* private flatbuffers::Table */ {
     const VT_ID: isize = 4;
     const VT_VAL: isize = 6;
     const VT_COUNT: isize = 8;
@@ -451,11 +459,11 @@ impl<'a> StatBuilder<'a> {
 }
 
 #[inline]
-fn CreateStat(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateStat<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     id: flatbuffers::Offset<flatbuffers::String>  /* = 0 */,
     val: i64  /* = 0 */,
-    count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
+    count: u16  /* = 0 */) -> flatbuffers::Offset<Stat<'fbb>> {
   let mut builder = StatBuilder::new(_fbb);
   builder.add_val(val);
   builder.add_id(id);
@@ -464,11 +472,11 @@ fn CreateStat(
 }
 
 #[inline]
-fn CreateStatDirect(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateStatDirect<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     id: Option<&str> /* = nullptr */,
     val: i64  /* = 0 */,
-    count: u16  /* = 0 */) -> flatbuffers::Offset<Stat> {
+    count: u16  /* = 0 */) -> flatbuffers::Offset<Stat<'fbb>> {
   return CreateStat(
       _fbb,
       if let Some(x) = id { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) },
@@ -477,9 +485,11 @@ fn CreateStatDirect(
 }
 
 /// an example documentation comment: monster object
-pub struct Monster {}
-impl flatbuffers::Table for Monster {}
-impl Monster /* private flatbuffers::Table */ {
+pub struct Monster<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for Monster<'buf> {}
+impl<'buf> Monster<'buf> /* private flatbuffers::Table */ {
     const VT_POS: isize = 4;
     const VT_MANA: isize = 6;
     const VT_HP: isize = 8;
@@ -997,8 +1007,8 @@ impl<'a> MonsterBuilder<'a> {
 }
 
 #[inline]
-fn CreateMonster(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateMonster<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
@@ -1032,7 +1042,7 @@ fn CreateMonster(
     test5: flatbuffers::Offset<&[&Test]>  /* = 0 */,
     vector_of_longs: flatbuffers::Offset<&[i64]>  /* = 0 */,
     vector_of_doubles: flatbuffers::Offset<&[f64]>  /* = 0 */,
-    parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
+    parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster<'fbb>> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder.add_testhashu64_fnv1a(testhashu64_fnv1a);
   builder.add_testhashs64_fnv1a(testhashs64_fnv1a);
@@ -1072,8 +1082,8 @@ fn CreateMonster(
 }
 
 #[inline]
-fn CreateMonsterDirect(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateMonsterDirect<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
     hp: i16  /* = 100 */,
@@ -1107,7 +1117,7 @@ fn CreateMonsterDirect(
     test5: Option<&[&Test]> /* = nullptr */,
     vector_of_longs: Option<&[i64]> /* = nullptr */,
     vector_of_doubles: Option<&[f64]> /* = nullptr */,
-    parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster> {
+    parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster<'fbb>> {
   return CreateMonster(
       _fbb,
       pos,
@@ -1146,9 +1156,11 @@ fn CreateMonsterDirect(
       parent_namespace_test);
 }
 
-pub struct TypeAliases {}
-impl flatbuffers::Table for TypeAliases {}
-impl TypeAliases /* private flatbuffers::Table */ {
+pub struct TypeAliases<'buf> {
+  _phantom: PhantomData<&'buf ()>,
+}
+impl<'buf> flatbuffers::Table for TypeAliases<'buf> {}
+impl<'buf> TypeAliases<'buf> /* private flatbuffers::Table */ {
     const VT_I8_: isize = 4;
     const VT_U8_: isize = 6;
     const VT_I16_: isize = 8;
@@ -1325,8 +1337,8 @@ impl<'a> TypeAliasesBuilder<'a> {
 }
 
 #[inline]
-fn CreateTypeAliases(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateTypeAliases<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     i8_: i8  /* = 0 */,
     u8_: u8  /* = 0 */,
     i16_: i16  /* = 0 */,
@@ -1338,7 +1350,7 @@ fn CreateTypeAliases(
     f32_: f32  /* = 0.0 */,
     f64_: f64  /* = 0.0 */,
     v8: flatbuffers::Offset<&[i8]>  /* = 0 */,
-    vf64: flatbuffers::Offset<&[f64]>  /* = 0 */) -> flatbuffers::Offset<TypeAliases> {
+    vf64: flatbuffers::Offset<&[f64]>  /* = 0 */) -> flatbuffers::Offset<TypeAliases<'fbb>> {
   let mut builder = TypeAliasesBuilder::new(_fbb);
   builder.add_f64_(f64_);
   builder.add_u64_(u64_);
@@ -1356,8 +1368,8 @@ fn CreateTypeAliases(
 }
 
 #[inline]
-fn CreateTypeAliasesDirect(
-    _fbb: &mut flatbuffers::FlatBufferBuilder,
+fn CreateTypeAliasesDirect<'fbb>(
+    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     i8_: i8  /* = 0 */,
     u8_: u8  /* = 0 */,
     i16_: i16  /* = 0 */,
@@ -1369,7 +1381,7 @@ fn CreateTypeAliasesDirect(
     f32_: f32  /* = 0.0 */,
     f64_: f64  /* = 0.0 */,
     v8: Option<&[i8]> /* = nullptr */,
-    vf64: Option<&[f64]> /* = nullptr */) -> flatbuffers::Offset<TypeAliases> {
+    vf64: Option<&[f64]> /* = nullptr */) -> flatbuffers::Offset<TypeAliases<'fbb>> {
   return CreateTypeAliases(
       _fbb,
       i8_,
