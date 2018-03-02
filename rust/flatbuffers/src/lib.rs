@@ -56,10 +56,10 @@ impl FlatBufferBuilder {
         Offset::new(0)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
-    pub fn create_vector<T>(&mut self, _: &[T]) -> Offset<&[T]> {
+    pub fn create_vector<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
         Offset::new(0)
     }
-    pub fn create_vector_of_structs<T>(&mut self, _: &[T]) -> Offset<&[T]> {
+    pub fn create_vector_of_structs<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
         Offset::new(0)
     }
     pub fn end_table<T>(&mut self, _: T) -> usize {
