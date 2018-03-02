@@ -477,9 +477,10 @@ fn CreateStatDirect<'fbb>(
     id: Option<&str> /* = nullptr */,
     val: i64  /* = 0 */,
     count: u16  /* = 0 */) -> flatbuffers::Offset<Stat<'fbb>> {
+  let _offset_id = if let Some(x) = id { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) };
   return CreateStat(
       _fbb,
-      if let Some(x) = id { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) },
+      _offset_id,
       val,
       count);
 }
@@ -1118,21 +1119,34 @@ fn CreateMonsterDirect<'fbb>(
     vector_of_longs: Option<&[i64]> /* = nullptr */,
     vector_of_doubles: Option<&[f64]> /* = nullptr */,
     parent_namespace_test: flatbuffers::Offset<super::InParentNamespace>  /* = 0 */) -> flatbuffers::Offset<Monster<'fbb>> {
+  let _offset_name = if let Some(x) = name { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) };
+  let _offset_inventory = if let Some(x) = inventory { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_test4 = if let Some(x) = test4 { _fbb.create_vector_of_structs::<&Test>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_testarrayofstring = if let Some(x) = testarrayofstring { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_testarrayoftables = if let Some(x) = testarrayoftables { _fbb.create_vector::<flatbuffers::Offset<Monster>>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_testnestedflatbuffer = if let Some(x) = testnestedflatbuffer { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_testarrayofbools = if let Some(x) = testarrayofbools { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_testarrayofstring2 = if let Some(x) = testarrayofstring2 { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_testarrayofsortedstruct = if let Some(x) = testarrayofsortedstruct { _fbb.create_vector_of_structs::<&Ability>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_flex = if let Some(x) = flex { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_test5 = if let Some(x) = test5 { _fbb.create_vector_of_structs::<&Test>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_vector_of_longs = if let Some(x) = vector_of_longs { _fbb.create_vector::<i64>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_vector_of_doubles = if let Some(x) = vector_of_doubles { _fbb.create_vector::<f64>(x /* slice */) } else { flatbuffers::Offset::new(0) };
   return CreateMonster(
       _fbb,
       pos,
       mana,
       hp,
-      if let Some(x) = name { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = inventory { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      _offset_name,
+      _offset_inventory,
       color,
       test_type,
       test,
-      if let Some(x) = test4 { _fbb.create_vector_of_structs::<&Test>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = testarrayofstring { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = testarrayoftables { _fbb.create_vector::<flatbuffers::Offset<Monster>>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      _offset_test4,
+      _offset_testarrayofstring,
+      _offset_testarrayoftables,
       enemy,
-      if let Some(x) = testnestedflatbuffer { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      _offset_testnestedflatbuffer,
       testempty,
       testbool,
       testhashs32_fnv1,
@@ -1143,16 +1157,16 @@ fn CreateMonsterDirect<'fbb>(
       testhashu32_fnv1a,
       testhashs64_fnv1a,
       testhashu64_fnv1a,
-      if let Some(x) = testarrayofbools { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      _offset_testarrayofbools,
       testf,
       testf2,
       testf3,
-      if let Some(x) = testarrayofstring2 { _fbb.create_vector::<flatbuffers::Offset<flatbuffers::String>>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = testarrayofsortedstruct { _fbb.create_vector_of_structs::<&Ability>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = flex { _fbb.create_vector::<u8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = test5 { _fbb.create_vector_of_structs::<&Test>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = vector_of_longs { _fbb.create_vector::<i64>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = vector_of_doubles { _fbb.create_vector::<f64>(x /* slice */) } else { flatbuffers::Offset::new(0) },
+      _offset_testarrayofstring2,
+      _offset_testarrayofsortedstruct,
+      _offset_flex,
+      _offset_test5,
+      _offset_vector_of_longs,
+      _offset_vector_of_doubles,
       parent_namespace_test);
 }
 
@@ -1382,6 +1396,8 @@ fn CreateTypeAliasesDirect<'fbb>(
     f64_: f64  /* = 0.0 */,
     v8: Option<&[i8]> /* = nullptr */,
     vf64: Option<&[f64]> /* = nullptr */) -> flatbuffers::Offset<TypeAliases<'fbb>> {
+  let _offset_v8 = if let Some(x) = v8 { _fbb.create_vector::<i8>(x /* slice */) } else { flatbuffers::Offset::new(0) };
+  let _offset_vf64 = if let Some(x) = vf64 { _fbb.create_vector::<f64>(x /* slice */) } else { flatbuffers::Offset::new(0) };
   return CreateTypeAliases(
       _fbb,
       i8_,
@@ -1394,8 +1410,8 @@ fn CreateTypeAliasesDirect<'fbb>(
       u64_,
       f32_,
       f64_,
-      if let Some(x) = v8 { _fbb.create_vector::<i8>(x /* slice */) } else { flatbuffers::Offset::new(0) },
-      if let Some(x) = vf64 { _fbb.create_vector::<f64>(x /* slice */) } else { flatbuffers::Offset::new(0) });
+      _offset_v8,
+      _offset_vf64);
 }
 
 #[inline]
