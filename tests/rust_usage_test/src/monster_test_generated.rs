@@ -47,14 +47,14 @@ impl<'a> InParentNamespaceBuilder<'a> {
 }
 
 #[inline]
-fn CreateInParentNamespace<'fbb>(
+pub fn CreateInParentNamespace<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<InParentNamespace<'fbb>> {
   let mut builder = InParentNamespaceBuilder::new(_fbb);
   builder.finish()
 }
 
 #[inline]
-fn InParentNamespaceTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn InParentNamespaceTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeTable tt = {
@@ -109,14 +109,14 @@ impl<'a> MonsterBuilder<'a> {
 }
 
 #[inline]
-fn CreateMonster<'fbb>(
+pub fn CreateMonster<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder) -> flatbuffers::Offset<Monster<'fbb>> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder.finish()
 }
 
 #[inline]
-fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeTable tt = {
@@ -143,7 +143,7 @@ pub mod Example {
 
 #[repr(i8)]
 #[derive(Clone, Copy)]
-enum Color {
+pub enum Color {
   Red = 1,
   Green = 2,
   Blue = 8
@@ -166,14 +166,14 @@ const EnumNamesColor:[&'static str; 8] = [
     "Blue"
 ];
 
-fn EnumNameColor(e: Color) -> &'static str {
+pub fn EnumNameColor(e: Color) -> &'static str {
   let index: usize = e as usize - Color::Red as usize;
   EnumNamesColor[index]
 }
 
 #[repr(u8)]
 #[derive(Clone, Copy)]
-enum Any {
+pub enum Any {
   NONE = 0,
   Monster = 1,
   TestSimpleTableWithEnum = 2,
@@ -194,7 +194,7 @@ const EnumNamesAny:[&'static str; 4] = [
     "MyGame_Example2_Monster"
 ];
 
-fn EnumNameAny(e: Any) -> &'static str {
+pub fn EnumNameAny(e: Any) -> &'static str {
   let index: usize = e as usize;
   EnumNamesAny[index]
 }
@@ -380,7 +380,7 @@ impl<'a> TestSimpleTableWithEnumBuilder<'a> {
 }
 
 #[inline]
-fn CreateTestSimpleTableWithEnum<'fbb>(
+pub fn CreateTestSimpleTableWithEnum<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     color: Color  /* = Color::Green */) -> flatbuffers::Offset<TestSimpleTableWithEnum<'fbb>> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
@@ -459,7 +459,7 @@ impl<'a> StatBuilder<'a> {
 }
 
 #[inline]
-fn CreateStat<'fbb>(
+pub fn CreateStat<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     id: flatbuffers::Offset<flatbuffers::String>  /* = 0 */,
     val: i64  /* = 0 */,
@@ -472,7 +472,7 @@ fn CreateStat<'fbb>(
 }
 
 #[inline]
-fn CreateStatDirect<'fbb>(
+pub fn CreateStatDirect<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     id: Option<&str> /* = nullptr */,
     val: i64  /* = 0 */,
@@ -1008,7 +1008,7 @@ impl<'a> MonsterBuilder<'a> {
 }
 
 #[inline]
-fn CreateMonster<'fbb>(
+pub fn CreateMonster<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
@@ -1083,7 +1083,7 @@ fn CreateMonster<'fbb>(
 }
 
 #[inline]
-fn CreateMonsterDirect<'fbb>(
+pub fn CreateMonsterDirect<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     pos: &Vec3 /* = 0 */,
     mana: i16  /* = 150 */,
@@ -1351,7 +1351,7 @@ impl<'a> TypeAliasesBuilder<'a> {
 }
 
 #[inline]
-fn CreateTypeAliases<'fbb>(
+pub fn CreateTypeAliases<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     i8_: i8  /* = 0 */,
     u8_: u8  /* = 0 */,
@@ -1382,7 +1382,7 @@ fn CreateTypeAliases<'fbb>(
 }
 
 #[inline]
-fn CreateTypeAliasesDirect<'fbb>(
+pub fn CreateTypeAliasesDirect<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     i8_: i8  /* = 0 */,
     u8_: u8  /* = 0 */,
@@ -1415,7 +1415,7 @@ fn CreateTypeAliasesDirect<'fbb>(
 }
 
 #[inline]
-fn VerifyAny(verifier: &mut flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
+pub fn VerifyAny(verifier: &mut flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
   match type_ {
     Any::NONE => {
       return true;
@@ -1454,7 +1454,7 @@ fn VerifyAny(verifier: &mut flatbuffers::Verifier, obj: &[u8], type_: Any) -> bo
 }
 
 #[inline]
-fn VerifyAnyVector(_verifier: &mut flatbuffers::Verifier, values: &[flatbuffers::Offset<flatbuffers::Void>], types: &[u8]) -> bool {
+pub fn VerifyAnyVector(_verifier: &mut flatbuffers::Verifier, values: &[flatbuffers::Offset<flatbuffers::Void>], types: &[u8]) -> bool {
   //if values.len() == 0 || types.len() == 0 {
   //  return values.len() == types.len();
   //}
@@ -1469,7 +1469,7 @@ fn VerifyAnyVector(_verifier: &mut flatbuffers::Verifier, values: &[flatbuffers:
 }
 
 #[inline]
-fn ColorTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn ColorTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1494,7 +1494,7 @@ fn ColorTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn AnyTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn AnyTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1522,7 +1522,7 @@ fn AnyTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn TestTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn TestTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1542,7 +1542,7 @@ fn TestTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn TestSimpleTableWithEnumTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn TestSimpleTableWithEnumTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1562,7 +1562,7 @@ fn TestSimpleTableWithEnumTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn Vec3TypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn Vec3TypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1594,7 +1594,7 @@ fn Vec3TypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn AbilityTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn AbilityTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1614,7 +1614,7 @@ fn AbilityTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn StatTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn StatTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1635,7 +1635,7 @@ fn StatTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1730,7 +1730,7 @@ fn MonsterTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn TypeAliasesTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn TypeAliasesTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -1769,39 +1769,39 @@ fn TypeAliasesTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn GetMonster(buf: &[u8]) -> &Monster  {
+pub fn GetMonster(buf: &[u8]) -> &Monster  {
   return flatbuffers::get_root::<&Monster>(buf);
 }
 
 #[inline]
-fn GetMutableMonster(buf: &[u8]) -> &Monster {
+pub fn GetMutableMonster(buf: &[u8]) -> &Monster {
   return flatbuffers::get_mutable_root::<&Monster>(buf);
 }
 
 #[inline]
-fn MonsterIdentifier() -> &'static str {
+pub fn MonsterIdentifier() -> &'static str {
   return "MONS";
 }
 
 #[inline]
-fn MonsterBufferHasIdentifier(buf: &[u8]) -> bool {
+pub fn MonsterBufferHasIdentifier(buf: &[u8]) -> bool {
   return flatbuffers::buffer_has_identifier(
       buf, MonsterIdentifier());
 }
 
 #[inline]
-fn VerifyMonsterBuffer(
+pub fn VerifyMonsterBuffer(
     verifier: &mut flatbuffers::Verifier) -> bool {
   return verifier.verify_buffer::<Monster>(MonsterIdentifier());
 }
 
 #[inline]
-fn MonsterExtension() -> &'static str {
+pub fn MonsterExtension() -> &'static str {
   return "mon";
 }
 
 #[inline]
-fn FinishMonsterBuffer(
+pub fn FinishMonsterBuffer(
     fbb: &mut flatbuffers::FlatBufferBuilder,
     root: flatbuffers::Offset<Monster>) {
   fbb.finish_with_identifier(root, MonsterIdentifier());

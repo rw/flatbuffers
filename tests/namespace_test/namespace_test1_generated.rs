@@ -29,7 +29,7 @@ pub mod NamespaceB {
 
 #[repr(i8)]
 #[derive(Clone, Copy)]
-enum EnumInNestedNS {
+pub enum EnumInNestedNS {
   A = 0,
   B = 1,
   C = 2
@@ -47,7 +47,7 @@ const EnumNamesEnumInNestedNS:[&'static str; 3] = [
     "C"
 ];
 
-fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
+pub fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
   let index: usize = e as usize;
   EnumNamesEnumInNestedNS[index]
 }
@@ -128,7 +128,7 @@ impl<'a> TableInNestedNSBuilder<'a> {
 }
 
 #[inline]
-fn CreateTableInNestedNS<'fbb>(
+pub fn CreateTableInNestedNS<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     foo: i32  /* = 0 */) -> flatbuffers::Offset<TableInNestedNS<'fbb>> {
   let mut builder = TableInNestedNSBuilder::new(_fbb);
@@ -137,7 +137,7 @@ fn CreateTableInNestedNS<'fbb>(
 }
 
 #[inline]
-fn EnumInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn EnumInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -161,7 +161,7 @@ fn EnumInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn TableInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn TableInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -178,7 +178,7 @@ fn TableInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn StructInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn StructInNestedNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {

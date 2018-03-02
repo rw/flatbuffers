@@ -89,7 +89,7 @@ impl<'a> TableInFirstNSBuilder<'a> {
 }
 
 #[inline]
-fn CreateTableInFirstNS<'fbb>(
+pub fn CreateTableInFirstNS<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS>  /* = 0 */,
     foo_enum: NamespaceA::NamespaceB::EnumInNestedNS  /* = NamespaceA::NamespaceB::EnumInNestedNS::A */,
@@ -148,7 +148,7 @@ impl<'a> SecondTableInABuilder<'a> {
 }
 
 #[inline]
-fn CreateSecondTableInA<'fbb>(
+pub fn CreateSecondTableInA<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC>  /* = 0 */) -> flatbuffers::Offset<SecondTableInA<'fbb>> {
   let mut builder = SecondTableInABuilder::new(_fbb);
@@ -157,7 +157,7 @@ fn CreateSecondTableInA<'fbb>(
 }
 
 #[inline]
-fn TableInFirstNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn TableInFirstNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -183,7 +183,7 @@ fn TableInFirstNSTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
 }
 
 #[inline]
-fn SecondTableInATypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn SecondTableInATypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {
@@ -278,7 +278,7 @@ impl<'a> TableInCBuilder<'a> {
 }
 
 #[inline]
-fn CreateTableInC<'fbb>(
+pub fn CreateTableInC<'fbb>(
     _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,
     refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS>  /* = 0 */,
     refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA>  /* = 0 */) -> flatbuffers::Offset<TableInC<'fbb>> {
@@ -289,7 +289,7 @@ fn CreateTableInC<'fbb>(
 }
 
 #[inline]
-fn TableInCTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
+pub fn TableInCTypeTable() -> /*&mut?*/flatbuffers::TypeTable {
   return flatbuffers::TypeTable{};
   /* disable type table for now
   static flatbuffers::TypeCode type_codes[] = {

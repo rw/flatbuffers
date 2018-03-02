@@ -40,6 +40,9 @@ impl Verifier {
 pub struct TypeTable {}
 pub struct FlatBufferBuilder {}
 impl FlatBufferBuilder {
+    pub fn new() -> Self {
+        FlatBufferBuilder{}
+    }
     pub fn start_table(&mut self) -> usize {
         0
     }
@@ -137,9 +140,11 @@ pub fn get_pointer_mut<'a, T: 'a>(_: isize) -> &'a mut T {
 pub fn buffer_has_identifier<S, T>(_: S, _: T) -> bool {
     false
 }
+pub struct DetachedBuffer {}
 pub mod flexbuffers {
     pub struct Reference {}
 pub fn get_root<T>(_: &[u8], _: isize) -> T {
     unimplemented!()
 }
+
 }
