@@ -136,24 +136,26 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
 
-{
+  {
 	  let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
 	  mb1.add_name(fred);
 	  mlocs[0] = mb1.finish();
-}
+  }
 
-{
+  {
 	  let mut mb2 = MyGame::Example::MonsterBuilder::new(&mut builder);
 	  mb2.add_name(barney);
 	  mb2.add_hp(1000);
 	  mlocs[1] = mb2.finish();
-}
+  }
+
+  {
+	  let mut mb3 = MyGame::Example::MonsterBuilder::new(&mut builder);
+	  mb3.add_name(wilma);
+	  mlocs[2] = mb3.finish();
+  }
 
 	  return flatbuffers::DetachedBuffer{};
-//  MonsterBuilder mb3(builder);
-//  mb3.add_name(wilma);
-//  mlocs[2] = mb3.Finish();
-//
 //  // Create an array of strings. Also test string pooling, and lambdas.
 //  auto vecofstrings =
 //      builder.CreateVector<flatbuffers::Offset<flatbuffers::String>>(
