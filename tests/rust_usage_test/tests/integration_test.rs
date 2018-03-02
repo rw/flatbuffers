@@ -144,7 +144,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   return flatbuffers::DetachedBuffer{};
   let vecofstrings = builder.create_vector_from_fn::<_, _>(
       4,
-      |b, i| -> flatbuffers::Offset<flatbuffers::String> {
+      |i, b| -> flatbuffers::Offset<flatbuffers::String> {
           let names: [&'static str; 4] = ["bob", "fred", "bob", "fred"];
           b.create_shared_string(names[i])
       });
