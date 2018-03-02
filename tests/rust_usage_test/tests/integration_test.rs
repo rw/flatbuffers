@@ -98,7 +98,7 @@ fn foo() {}
 fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
     let mut _builder = flatbuffers::FlatBufferBuilder::new();
 
-    let _vec = MyGame::Example::Vec3::new(1,2,3,0, MyGame::Example::Color::Red, MyGame::Example::Test::new(10, 20));
+    let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, MyGame::Example::Test::new(10, 20));
     return flatbuffers::DetachedBuffer{};
 //  auto vec = Vec3(1, 2, 3, 0, Color_Red, Test(10, 20));
 //
