@@ -60,13 +60,15 @@ pub struct StructInNestedNS {
 } // pub struct StructInNestedNS
 
 impl StructInNestedNS {
-  fn Reset(&mut self) {
+  pub fn Reset(&mut self) {
     //memset(this, 0, size_of(StructInNestedNS));
   }
-  fn init(&mut self, _a: i32, _b: i32) {
-      self.a_ = flatbuffers::endian_scalar(_a);
-      self.b_ = flatbuffers::endian_scalar(_b);
+  pub fn new(_a: i32, _b: i32) -> Self {
+    StructInNestedNS {
+      a_: flatbuffers::endian_scalar(_a),
+      b_: flatbuffers::endian_scalar(_b),
 
+    }
   }
   fn a(&self) -> i32  {
     flatbuffers::endian_scalar(self.a_)
