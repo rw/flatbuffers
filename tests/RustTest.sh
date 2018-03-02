@@ -56,7 +56,7 @@
 
 
 cd ./rust_usage_test
-cargo test
+cargo test 
 TEST_RESULT=$?
 #rm -rf ${go_path}/{pkg,src}
 if [[ $TEST_RESULT  == 0 ]]; then
