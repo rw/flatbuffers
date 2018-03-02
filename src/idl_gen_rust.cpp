@@ -386,7 +386,7 @@ class RustGenerator : public BaseGenerator {
         // The root datatype accessor:
         code_ += "#[inline]";
         code_ +=
-            "fn Get{{STRUCT_NAME}}(buf: &[u8])"
+            "pub fn Get{{STRUCT_NAME}}(buf: &[u8])"
             " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
         code_ += "  return flatbuffers::get_root::<&{{CPP_NAME}}>(buf);";
         code_ += "}";
@@ -394,7 +394,7 @@ class RustGenerator : public BaseGenerator {
 
         if (parser_.opts.mutable_buffer) {
           code_ += "#[inline]";
-          code_ += "fn GetMutable{{STRUCT_NAME}}(buf: &[u8]) -> &{{STRUCT_NAME}} {";
+          code_ += "pub fn GetMutable{{STRUCT_NAME}}(buf: &[u8]) -> &{{STRUCT_NAME}} {";
           code_ += "  return flatbuffers::get_mutable_root::<&{{STRUCT_NAME}}>(buf);";
           code_ += "}";
           code_ += "";
@@ -403,14 +403,14 @@ class RustGenerator : public BaseGenerator {
         if (parser_.file_identifier_.length()) {
           // Return the identifier
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}Identifier() -> &'static str {";
+          code_ += "pub fn {{STRUCT_NAME}}Identifier() -> &'static str {";
           code_ += "  return \"" + parser_.file_identifier_ + "\";";
           code_ += "}";
           code_ += "";
 
           // Check if a buffer has the identifier.
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &[u8])"
+          code_ += "pub fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &[u8])"
                    " -> bool {";
           code_ += "  return flatbuffers::buffer_has_identifier(";
           code_ += "      buf, {{STRUCT_NAME}}Identifier());";
@@ -426,7 +426,7 @@ class RustGenerator : public BaseGenerator {
         }
 
         code_ += "#[inline]";
-        code_ += "fn Verify{{STRUCT_NAME}}Buffer(";
+        code_ += "pub fn Verify{{STRUCT_NAME}}Buffer(";
         code_ += "    verifier: &mut flatbuffers::Verifier) -> bool {";
         code_ += "  return verifier.verify_buffer::<{{CPP_NAME}}>({{ID}});";
         code_ += "}";
@@ -435,7 +435,7 @@ class RustGenerator : public BaseGenerator {
         if (parser_.file_extension_.length()) {
           // Return the extension
           code_ += "#[inline]";
-          code_ += "fn {{STRUCT_NAME}}Extension() -> &'static str {";
+          code_ += "pub fn {{STRUCT_NAME}}Extension() -> &'static str {";
           code_ += "  return \"" + parser_.file_extension_ + "\";";
           code_ += "}";
           code_ += "";
@@ -443,7 +443,7 @@ class RustGenerator : public BaseGenerator {
 
         // Finish a buffer with a given root object:
         code_ += "#[inline]";
-        code_ += "fn Finish{{STRUCT_NAME}}Buffer(";
+        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer(";
         code_ += "    fbb: &mut flatbuffers::FlatBufferBuilder,";
         code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}>) {";
         if (parser_.file_identifier_.length()) {
@@ -681,7 +681,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string GenEnumDecl(const EnumDef &enum_def) const {
     const IDLOptions &opts = parser_.opts;
-    return (opts.scoped_enums ? "enum class " : "enum ") + Name(enum_def);
+    return (opts.scoped_enums ? "pub enum class " : "pub enum ") + Name(enum_def);
   }
 
   std::string GenEnumValDecl(const EnumDef &enum_def,
@@ -723,13 +723,13 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string UnionVerifySignature(const EnumDef &enum_def) {
-    return "fn Verify" + Name(enum_def) +
+    return "pub fn Verify" + Name(enum_def) +
            "(verifier: &mut flatbuffers::Verifier, obj: &[u8], " +
            "type_: " + Name(enum_def) + ") -> bool";
   }
 
   std::string UnionVectorVerifySignature(const EnumDef &enum_def) {
-    return "fn Verify" + Name(enum_def) + "Vector" +
+    return "pub fn Verify" + Name(enum_def) + "Vector" +
            "(_verifier: &mut flatbuffers::Verifier, " +
            "values: &[flatbuffers::Offset<flatbuffers::Void>], " +
            "types: &[u8]) -> bool";
@@ -885,7 +885,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("NAMES", ns);
     code_.SetValue("VALUES", vs);
     code_ += "#[inline]";
-    code_ += "fn {{NAME}}TypeTable() -> /*&mut?*/flatbuffers::TypeTable {";
+    code_ += "pub fn {{NAME}}TypeTable() -> /*&mut?*/flatbuffers::TypeTable {";
     code_ += "  return flatbuffers::TypeTable{};";
     code_ += "  /* disable type table for now";
     if (num_fields) {
@@ -1023,7 +1023,7 @@ class RustGenerator : public BaseGenerator {
       code_ += "];";
       code_ += "";
 
-      code_ += "fn EnumName{{ENUM_NAME}}(e: {{ENUM_NAME}}) -> &'static str {";
+      code_ += "pub fn EnumName{{ENUM_NAME}}(e: {{ENUM_NAME}}) -> &'static str {";
 
       code_ += "  let index: usize = e as usize\\";
       if (enum_def.vals.vec.front()->value) {
@@ -2019,7 +2019,7 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "fn Create{{STRUCT_NAME}}<'fbb>(";
+    code_ += "pub fn Create{{STRUCT_NAME}}<'fbb>(";
     code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder\\";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2048,7 +2048,7 @@ class RustGenerator : public BaseGenerator {
     // Generate a CreateXDirect function with vector types as parameters
     if (has_string_or_vector_fields) {
       code_ += "#[inline]";
-      code_ += "fn Create{{STRUCT_NAME}}Direct<'fbb>(";
+      code_ += "pub fn Create{{STRUCT_NAME}}Direct<'fbb>(";
       code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder\\";
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {

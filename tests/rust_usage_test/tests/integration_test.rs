@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+extern crate flatbuffers;
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::MyGame;
 
@@ -93,10 +94,12 @@ fn foo() {}
 //
 //std::string test_data_path = "tests/";
 //
-//// example of how to build up a serialized buffer algorithmically:
-//flatbuffers::DetachedBuffer CreateFlatBufferTest(std::string &buffer) {
-//  flatbuffers::FlatBufferBuilder builder;
-//
+// example of how to build up a serialized buffer algorithmically:
+fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
+    let mut _builder = flatbuffers::FlatBufferBuilder::new();
+
+    let _vec = MyGame::Example::Vec3::new(1,2,3,0, MyGame::Example::Color::Red, MyGame::Example::Test::new(10, 20));
+    return flatbuffers::DetachedBuffer{};
 //  auto vec = Vec3(1, 2, 3, 0, Color_Red, Test(10, 20));
 //
 //  auto name = builder.CreateString("MyMonster");
@@ -227,8 +230,8 @@ fn foo() {}
 //  buffer.assign(bufferpointer, bufferpointer + builder.GetSize());
 //
 //  return builder.ReleaseBufferPointer();
-//}
-//
+}
+
 ////  example of accessing a buffer loaded in memory:
 //void AccessFlatBufferTest(const uint8_t *flatbuf, size_t length,
 //                          bool pooled = true) {
