@@ -141,7 +141,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 	  mlocs[2] = mb3.finish();
   }
 
-  return flatbuffers::DetachedBuffer{};
+  // Create an array of strings. Also test string pooling, and lambdas.
   let vecofstrings = builder.create_vector_from_fn::<_, _>(
       4,
       |i, b| -> flatbuffers::Offset<flatbuffers::String> {
@@ -149,56 +149,45 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
           b.create_shared_string(names[i])
       });
 
-//  // Create an array of strings. Also test string pooling, and lambdas.
-//  auto vecofstrings =
-//      builder.CreateVector<flatbuffers::Offset<flatbuffers::String>>(
-//          4,
-//          [](size_t i, flatbuffers::FlatBufferBuilder *b)
-//              -> flatbuffers::Offset<flatbuffers::String> {
-//            static const char *names[] = { "bob", "fred", "bob", "fred" };
-//            return b->CreateSharedString(names[i]);
-//          },
-//          &builder);
-//
-//  // Creating vectors of strings in one convenient call.
-//  std::vector<std::string> names2;
-//  names2.push_back("jane");
-//  names2.push_back("mary");
-//  auto vecofstrings2 = builder.CreateVectorOfStrings(names2);
-//
-//  // Create an array of sorted tables, can be used with binary search when read:
-//  auto vecoftables = builder.CreateVectorOfSortedTables(mlocs, 3);
-//
-//  // Create an array of sorted structs,
-//  // can be used with binary search when read:
-//  std::vector<Ability> abilities;
-//  abilities.push_back(Ability(4, 40));
-//  abilities.push_back(Ability(3, 30));
-//  abilities.push_back(Ability(2, 20));
-//  abilities.push_back(Ability(1, 10));
-//  auto vecofstructs = builder.CreateVectorOfSortedStructs(&abilities);
-//
-//  // Create a nested FlatBuffer.
-//  // Nested FlatBuffers are stored in a ubyte vector, which can be convenient
-//  // since they can be memcpy'd around much easier than other FlatBuffer
-//  // values. They have little overhead compared to storing the table directly.
-//  // As a test, create a mostly empty Monster buffer:
-//  flatbuffers::FlatBufferBuilder nested_builder;
-//  auto nmloc = CreateMonster(nested_builder, nullptr, 0, 0,
-//                             nested_builder.CreateString("NestedMonster"));
-//  FinishMonsterBuffer(nested_builder, nmloc);
-//  // Now we can store the buffer in the parent. Note that by default, vectors
-//  // are only aligned to their elements or size field, so in this case if the
-//  // buffer contains 64-bit elements, they may not be correctly aligned. We fix
-//  // that with:
-//  builder.ForceVectorAlignment(nested_builder.GetSize(), sizeof(uint8_t),
-//                               nested_builder.GetBufferMinAlignment());
-//  // If for whatever reason you don't have the nested_builder available, you
-//  // can substitute flatbuffers::largest_scalar_t (64-bit) for the alignment, or
-//  // the largest force_align value in your schema if you're using it.
-//  auto nested_flatbuffer_vector = builder.CreateVector(
-//      nested_builder.GetBufferPointer(), nested_builder.GetSize());
-//
+  // Creating vectors of strings in one convenient call.
+  let names2 = vec!["jane", "mary"];
+  let vecofstrings2 = builder.create_vector_of_strings(&names2);
+
+  // Create an array of sorted tables, can be used with binary search when read:
+  let vecoftables = builder.create_vector_of_sorted_tables(&mut mlocs);
+
+  // Create an array of sorted structs,
+  // can be used with binary search when read:
+  let mut abilities = vec![];
+  abilities.push(MyGame::Example::Ability::new(4, 40));
+  abilities.push(MyGame::Example::Ability::new(3, 30));
+  abilities.push(MyGame::Example::Ability::new(2, 20));
+  abilities.push(MyGame::Example::Ability::new(1, 10));
+  let vecofstructs = builder.create_vector_of_sorted_structs(&mut abilities);
+
+  return flatbuffers::DetachedBuffer{};
+
+  // Create a nested FlatBuffer.
+  // Nested FlatBuffers are stored in a ubyte vector, which can be convenient
+  // since they can be memcpy'd around much easier than other FlatBuffer
+  // values. They have little overhead compared to storing the table directly.
+  // As a test, create a mostly empty Monster buffer:
+  let mut nested_builder = flatbuffers::FlatBufferBuilder::new();
+  //let nmloc = MyGame::Example::CreateMonster(nested_builder, nullptr, 0, 0,
+  //                                          nested_builder.CreateString("NestedMonster"));
+  //FinishMonsterBuffer(nested_builder, nmloc);
+  //// Now we can store the buffer in the parent. Note that by default, vectors
+  //// are only aligned to their elements or size field, so in this case if the
+  //// buffer contains 64-bit elements, they may not be correctly aligned. We fix
+  //// that with:
+  //builder.ForceVectorAlignment(nested_builder.GetSize(), sizeof(uint8_t),
+  //                             nested_builder.GetBufferMinAlignment());
+  //// If for whatever reason you don't have the nested_builder available, you
+  //// can substitute flatbuffers::largest_scalar_t (64-bit) for the alignment, or
+  //// the largest force_align value in your schema if you're using it.
+  //auto nested_flatbuffer_vector = builder.CreateVector(
+  //    nested_builder.GetBufferPointer(), nested_builder.GetSize());
+
 //  // Test a nested FlexBuffer:
 //  flexbuffers::Builder flexbuild;
 //  flexbuild.Int(1234);

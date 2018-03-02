@@ -70,6 +70,9 @@ impl FlatBufferBuilder {
     pub fn create_shared_string(&mut self, _: &str) -> Offset<String> {
         Offset::new(0)
     }
+    pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
+        Offset::new(0)
+    }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
     pub fn create_vector<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
         Offset::new(0)
@@ -80,7 +83,13 @@ impl FlatBufferBuilder {
     pub fn create_vector_of_structs<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
         Offset::new(0)
     }
+    pub fn create_vector_of_sorted_structs<'a, 'b, T: 'b>(&'a mut self, _: &'b mut [T]) -> Offset<&'b [T]> {
+        Offset::new(0)
+    }
     pub fn create_vector_of_structs_from_fn<'a, 'b, T: 'b, F: Fn(usize, &mut T)>(&'a mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
+        Offset::new(0)
+    }
+    pub fn create_vector_of_sorted_tables<'a, 'b, T: 'b>(&'a mut self, _: &'b mut [T]) -> Offset<&'b [T]> {
         Offset::new(0)
     }
     pub fn end_table<T>(&mut self, _: T) -> usize {
