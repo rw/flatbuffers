@@ -1998,7 +1998,7 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  fn finish(mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}> {";
+    code_ += "  fn finish(mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let end = self.fbb_.end_table(self.start_);";
     code_ += "    let o = flatbuffers::Offset::<{{STRUCT_NAME}}>::new(end);";
 
