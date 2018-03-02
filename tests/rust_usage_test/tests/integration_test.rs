@@ -111,25 +111,10 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   // memcpy(inv_buf, inv_data, 10);
 
   let tests = vec![MyGame::Example::Test::new(10, 20), MyGame::Example::Test::new(30, 40)];
+
   // Create a vector of structures from a lambda.
   let testv = builder.create_vector_of_structs_from_fn(2, |i, s| *s = tests[i]);
 
-//  // clang-format off
-//  #ifndef FLATBUFFERS_CPP98_STL
-//    // Create a vector of structures from a lambda.
-//    auto testv2 = builder.CreateVectorOfStructs<Test>(
-//          2, [&](size_t i, Test* s) -> void {
-//            *s = tests[i];
-//          });
-//  #else
-//    // Create a vector of structures using a plain old C++ function.
-//    auto testv2 = builder.CreateVectorOfStructs<Test>(
-//          2, [](size_t i, Test* s, void *state) -> void {
-//            *s = (reinterpret_cast<Test*>(state))[i];
-//          }, tests);
-//  #endif  // FLATBUFFERS_CPP98_STL
-//  // clang-format on
-//
   // create monster with very few fields set:
   // (same functionality as CreateMonster below, but sets fields manually)
   let mut mlocs: [flatbuffers::Offset<MyGame::Example::Monster>; 3] = [flatbuffers::Offset::<_>::new(0); 3];
@@ -156,7 +141,14 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 	  mlocs[2] = mb3.finish();
   }
 
-	  return flatbuffers::DetachedBuffer{};
+  return flatbuffers::DetachedBuffer{};
+  let vecofstrings = builder.create_vector_from_fn::<_, _>(
+      4,
+      |b, i| -> flatbuffers::Offset<flatbuffers::String> {
+          let names: [&'static str; 4] = ["bob", "fred", "bob", "fred"];
+          b.create_shared_string(names[i])
+      });
+
 //  // Create an array of strings. Also test string pooling, and lambdas.
 //  auto vecofstrings =
 //      builder.CreateVector<flatbuffers::Offset<flatbuffers::String>>(
