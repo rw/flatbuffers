@@ -427,7 +427,7 @@ class RustGenerator : public BaseGenerator {
 
         code_ += "#[inline]";
         code_ += "fn Verify{{STRUCT_NAME}}Buffer(";
-        code_ += "    verifier: &flatbuffers::Verifier) -> bool {";
+        code_ += "    verifier: &mut flatbuffers::Verifier) -> bool {";
         code_ += "  return verifier.verify_buffer::<{{CPP_NAME}}>({{ID}});";
         code_ += "}";
         code_ += "";
@@ -724,13 +724,13 @@ class RustGenerator : public BaseGenerator {
 
   std::string UnionVerifySignature(const EnumDef &enum_def) {
     return "fn Verify" + Name(enum_def) +
-           "(verifier: &flatbuffers::Verifier, obj: &[u8], " +
+           "(verifier: &mut flatbuffers::Verifier, obj: &[u8], " +
            "type_: " + Name(enum_def) + ") -> bool";
   }
 
   std::string UnionVectorVerifySignature(const EnumDef &enum_def) {
     return "fn Verify" + Name(enum_def) + "Vector" +
-           "(verifier: &flatbuffers::Verifier, " +
+           "(_verifier: &mut flatbuffers::Verifier, " +
            "values: &[flatbuffers::Offset<flatbuffers::Void>], " +
            "types: &[u8]) -> bool";
   }
@@ -1823,7 +1823,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "  }";
 
         if (is_string) {
-          code_ += "  fn KeyCompareWithValue(&self, val: &str) -> Ordering {";
+          code_ += "  fn KeyCompareWithValue(&self, _val: &str) -> Ordering {";
           code_ += "    Ordering::Equal";
           code_ += "    // TODO(rw): self.{{FIELD_NAME}}().cmp(val)";
           code_ += "  }";
@@ -1998,7 +1998,7 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  fn finish(mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
+    code_ += "  fn finish(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let end = self.fbb_.end_table(self.start_);";
     code_ += "    let o = flatbuffers::Offset::<{{STRUCT_NAME}}>::new(end);";
 

@@ -39,7 +39,7 @@ impl<'a> InParentNamespaceBuilder<'a> {
     }
   }
   // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<InParentNamespace<'a>> {
+  fn finish(self) -> flatbuffers::Offset<InParentNamespace<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<InParentNamespace>::new(end);
     o
@@ -101,7 +101,7 @@ impl<'a> MonsterBuilder<'a> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<Monster<'a>> {
+  fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<Monster>::new(end);
     o
@@ -372,7 +372,7 @@ impl<'a> TestSimpleTableWithEnumBuilder<'a> {
     }
   }
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
+  fn finish(self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TestSimpleTableWithEnum>::new(end);
     o
@@ -451,7 +451,7 @@ impl<'a> StatBuilder<'a> {
     }
   }
   // StatBuilder &operator=(const StatBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<Stat<'a>> {
+  fn finish(self) -> flatbuffers::Offset<Stat<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<Stat>::new(end);
     o
@@ -559,7 +559,7 @@ impl<'buf> Monster<'buf> /* private flatbuffers::Table */ {
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
     return *self.name() < *o.name();
   }
-  fn KeyCompareWithValue(&self, val: &str) -> Ordering {
+  fn KeyCompareWithValue(&self, _val: &str) -> Ordering {
     Ordering::Equal
     // TODO(rw): self.name().cmp(val)
   }
@@ -999,7 +999,7 @@ impl<'a> MonsterBuilder<'a> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<Monster<'a>> {
+  fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<Monster>::new(end);
     self.fbb_.required(&o, Monster::VT_NAME);
@@ -1343,7 +1343,7 @@ impl<'a> TypeAliasesBuilder<'a> {
     }
   }
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
-  fn finish(mut self) -> flatbuffers::Offset<TypeAliases<'a>> {
+  fn finish(self) -> flatbuffers::Offset<TypeAliases<'a>> {
     let end = self.fbb_.end_table(self.start_);
     let o = flatbuffers::Offset::<TypeAliases>::new(end);
     o
@@ -1415,7 +1415,7 @@ fn CreateTypeAliasesDirect<'fbb>(
 }
 
 #[inline]
-fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
+fn VerifyAny(verifier: &mut flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
   match type_ {
     Any::NONE => {
       return true;
@@ -1454,7 +1454,7 @@ fn VerifyAny(verifier: &flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
 }
 
 #[inline]
-fn VerifyAnyVector(verifier: &flatbuffers::Verifier, values: &[flatbuffers::Offset<flatbuffers::Void>], types: &[u8]) -> bool {
+fn VerifyAnyVector(_verifier: &mut flatbuffers::Verifier, values: &[flatbuffers::Offset<flatbuffers::Void>], types: &[u8]) -> bool {
   //if values.len() == 0 || types.len() == 0 {
   //  return values.len() == types.len();
   //}
@@ -1791,7 +1791,7 @@ fn MonsterBufferHasIdentifier(buf: &[u8]) -> bool {
 
 #[inline]
 fn VerifyMonsterBuffer(
-    verifier: &flatbuffers::Verifier) -> bool {
+    verifier: &mut flatbuffers::Verifier) -> bool {
   return verifier.verify_buffer::<Monster>(MonsterIdentifier());
 }
 
