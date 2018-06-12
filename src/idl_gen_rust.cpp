@@ -201,7 +201,7 @@ class RustGenerator : public BaseGenerator {
     int num_includes = 0;
     for (auto it = parser_.native_included_files_.begin();
          it != parser_.native_included_files_.end(); ++it) {
-      code_ += "#include \"" + *it + "\"";
+      code_ += "//include \"" + *it + "\"";
       num_includes++;
     }
     for (auto it = parser_.included_files_.begin();
@@ -210,7 +210,7 @@ class RustGenerator : public BaseGenerator {
       auto noext = flatbuffers::StripExtension(it->second);
       auto basename = flatbuffers::StripPath(noext);
 
-      code_ += "#include \"" + parser_.opts.include_prefix +
+      code_ += "//#include \"" + parser_.opts.include_prefix +
                (parser_.opts.keep_include_path ? noext : basename) +
                "_generated.rs\"";
       num_includes++;
@@ -530,37 +530,45 @@ class RustGenerator : public BaseGenerator {
 
   // Return a C++ pointer type, specialized to the actual struct/table types,
   // and vector element types.
-  std::string GenTypePointer(const Type &type) const {
+  std::string GenTypePointer(const Type &type, const std::string &lifetime) const {
     switch (type.base_type) {
       case BASE_TYPE_STRING: {
         return "flatbuffers::String";
       }
       case BASE_TYPE_VECTOR: {
-        const auto type_name = GenTypeWire(type.VectorType(), "", false);
+        const auto type_name = GenTypeWire(type.VectorType(), "", lifetime, false);
         //return "flatbuffers::Vector<" + type_name + ">";
-        return "&[" + type_name + "]";
+        return "&" + lifetime + "[" + type_name + "]";
       }
       case BASE_TYPE_STRUCT: {
         //return WrapInNameSpace(*type.struct_def);
-        return WrapInRelativeNameSpace(type.struct_def->defined_namespace,
-                                       type.struct_def->name);
+        std::string s;
+        s.append(lifetime);
+        s.append(WrapInRelativeNameSpace(type.struct_def->defined_namespace,
+                                         type.struct_def->name));
+        if (StructNeedsLifetime(*type.struct_def)) {
+          s.append("<" + lifetime + ">");
+        }
+        return s;
       }
       case BASE_TYPE_UNION:
       // fall through
-      default: { return "flatbuffers::Void"; }
+      default: { return "&" + lifetime + "flatbuffers::Void"; }
     }
   }
 
   // Return a C++ type for any type (scalar/pointer) specifically for
   // building a flatbuffer.
   std::string GenTypeWire(const Type &type, const char *postfix,
+                          const std::string &lifetime,
                           bool user_facing_type) const {
     if (IsScalar(type.base_type)) {
       return GenTypeBasic(type, user_facing_type) + postfix;
     } else if (IsStruct(type)) {
-      return "&" + GenTypePointer(type);
+      //return "&'xxx" + GenTypePointer(type, lifetime);
+      return "&" + GenTypePointer(type, lifetime);
     } else {
-      return "flatbuffers::Offset<" + GenTypePointer(type) + ">" + postfix;
+      return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
   }
 
@@ -570,7 +578,7 @@ class RustGenerator : public BaseGenerator {
     if (IsScalar(type.base_type)) {
       return GenTypeBasic(type, false);
     } else if (IsStruct(type)) {
-      return GenTypePointer(type);
+      return GenTypePointer(type, "");
     } else {
       return "flatbuffers::UOffsetT";
     }
@@ -663,7 +671,7 @@ class RustGenerator : public BaseGenerator {
     if (IsScalar(type.base_type)) {
       return GenTypeBasic(type, user_facing_type) + afterbasic;
     } else {
-      return beforeptr + GenTypePointer(type) + afterptr;
+      return beforeptr + GenTypePointer(type, "") + afterptr;
     }
   }
 
@@ -1443,25 +1451,31 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  void GenParam(const FieldDef &field, bool direct, const char *prefix) {
+  void GenParam(const FieldDef &field, bool direct, const char *prefix,
+                const std::string &lifetime) {
     code_.SetValue("PRE", prefix);
     code_.SetValue("PARAM_NAME", Name(field));
+    //code_.SetValue("PARAM_LIFETIME", lifetime);
     if (direct && field.value.type.base_type == BASE_TYPE_STRING) {
-      code_.SetValue("PARAM_TYPE", "Option<&str>");
+      code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + "str>");
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else if (direct && field.value.type.base_type == BASE_TYPE_VECTOR) {
       const auto vtype = field.value.type.VectorType();
       std::string type;
       if (IsStruct(vtype)) {
         type = WrapInNameSpace(*vtype.struct_def);
-        code_.SetValue("PARAM_TYPE", "Option<&[&" + type + "]>");
+        //std::string s;
+        //s.append("Option<&"); s.append(lifetime); s.append("[&");
+        //s.append(lifetime) ; s.append(type); s.append("]>");
+        //code_.SetValue("PARAM_TYPE", s);
+        code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + "[&" + lifetime + type + "]>");
       } else {
-        type = GenTypeWire(vtype, "", false);
-        code_.SetValue("PARAM_TYPE", "Option<&[" + type + "]>");
+        type = GenTypeWire(vtype, "", lifetime, false);
+        code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + "[" + type + "]>");
       }
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else {
-      code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", true));
+      code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", lifetime, true));
       code_.SetValue("PARAM_VALUE", GetDefaultScalarValue(field));
     }
     code_ += "{{PRE}}{{PARAM_NAME}}: {{PARAM_TYPE}} /* = {{PARAM_VALUE}} */\\";
@@ -1750,7 +1764,7 @@ class RustGenerator : public BaseGenerator {
           mut_accessor = "flatbuffers::get_pointer_mut::<";
         }
         if (is_scalar) {
-          const auto type = GenTypeWire(field.value.type, "", false);
+          const auto type = GenTypeWire(field.value.type, "", "", false);
           code_.SetValue("SET_FN", "flatbuffers::set_field::<" + type + ">");
           code_.SetValue("OFFSET_NAME", offset_str);
           code_.SetValue("FIELD_TYPE", GenTypeBasic(field.value.type, true));
@@ -1928,6 +1942,21 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("PARENT_LIFETIME",
         StructNeedsLifetime(struct_def) ? "<'a>" : "");
 
+    // Generate an args struct (primarily useful incombination with the Default
+    // trait):
+    code_ += "pub struct {{STRUCT_NAME}}Args<'a> {";
+    //code_ += "  fbb_: &'a mut flatbuffers::FlatBufferBuilder,";
+    //code_ += "  start_: flatbuffers::UOffsetT,";
+    for (auto it = struct_def.fields.vec.begin();
+         it != struct_def.fields.vec.end(); ++it) {
+      const auto &field = **it;
+      if (!field.deprecated) {
+        GenParam(field, false, "    ", "'a ");
+        code_ += ",";
+      }
+    }
+    code_ += "}";
+
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a> {";
     code_ += "  fbb_: &'a mut flatbuffers::FlatBufferBuilder,";
@@ -1956,12 +1985,12 @@ class RustGenerator : public BaseGenerator {
         //   fbb_.AddElement::<type>(offset, name, default);
         // }
         code_.SetValue("FIELD_NAME", Name(field));
-        code_.SetValue("FIELD_TYPE", GenTypeWire(field.value.type, " ", true));
+        code_.SetValue("FIELD_TYPE", GenTypeWire(field.value.type, " ", "", true));
         code_.SetValue("ADD_OFFSET", Name(struct_def) + "::" + offset);
         code_.SetValue("ADD_NAME", name);
         code_.SetValue("ADD_VALUE", value);
         if (is_scalar) {
-          const auto type = GenTypeWire(field.value.type, "", false);
+          const auto type = GenTypeWire(field.value.type, "", "", false);
           code_.SetValue("ADD_FN", "add_element::<" + type + ">");
         } else if (IsStruct(field.value.type)) {
           code_.SetValue("ADD_FN", "add_struct");
@@ -2019,14 +2048,15 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "pub fn Create{{STRUCT_NAME}}<'fbb>(";
-    code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder\\";
-    for (auto it = struct_def.fields.vec.begin();
-         it != struct_def.fields.vec.end(); ++it) {
-      const auto &field = **it;
-      if (!field.deprecated) { GenParam(field, false, ",\n    "); }
-    }
-    code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}<'fbb>> {";
+    code_ += "pub fn Create{{STRUCT_NAME}}<'fbb, 'a: 'fbb>(";
+    code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,";
+    code_ += "    args: &{{STRUCT_NAME}}Args<'a>) -> \\";
+    code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'fbb>> {";
+    //for (auto it = struct_def.fields.vec.begin();
+    //     it != struct_def.fields.vec.end(); ++it) {
+    //  const auto &field = **it;
+    //  if (!field.deprecated) { GenParam(field, false, ",\n    "); }
+    //}
 
     code_ += "  let mut builder = {{STRUCT_NAME}}Builder::new(_fbb);";
     for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
@@ -2037,7 +2067,7 @@ class RustGenerator : public BaseGenerator {
         if (!field.deprecated && (!struct_def.sortbysize ||
                                   size == SizeOf(field.value.type.base_type))) {
           code_.SetValue("FIELD_NAME", Name(field));
-          code_ += "  builder.add_{{FIELD_NAME}}({{FIELD_NAME}});";
+          code_ += "  builder.add_{{FIELD_NAME}}(args.{{FIELD_NAME}}());";
         }
       }
     }
@@ -2053,7 +2083,7 @@ class RustGenerator : public BaseGenerator {
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
         const auto &field = **it;
-        if (!field.deprecated) { GenParam(field, true, ",\n    "); }
+        if (!field.deprecated) { GenParam(field, true, ",\n    ", ""); }
       }
 
       // Need to call "Create" with the struct namespace.
@@ -2076,7 +2106,7 @@ class RustGenerator : public BaseGenerator {
               const auto type = WrapInNameSpace(*vtype.struct_def);
               code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector_of_structs::<&" + type + ">(x /* slice */) } else { flatbuffers::Offset::new(0) };";
             } else {
-              const auto type = GenTypeWire(vtype, "", false);
+              const auto type = GenTypeWire(vtype, "", "", false);
               code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector::<" + type + ">(x /* slice */) } else { flatbuffers::Offset::new(0) };";
             }
           } else {
