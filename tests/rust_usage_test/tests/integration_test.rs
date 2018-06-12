@@ -173,9 +173,10 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   // values. They have little overhead compared to storing the table directly.
   // As a test, create a mostly empty Monster buffer:
   let mut nested_builder = flatbuffers::FlatBufferBuilder::new();
-  //let nmloc = MyGame::Example::CreateMonster(nested_builder, nullptr, 0, 0,
-  //                                          nested_builder.CreateString("NestedMonster"));
-  //FinishMonsterBuffer(nested_builder, nmloc);
+  let args = MyGame::Example::CreateMonsterArgs{ ..Default::Default() };
+  let nmloc = MyGame::Example::CreateMonster(nested_builder, None, 0, 0,
+                                             nested_builder.CreateString("NestedMonster"));
+  MyGame::Example::FinishMonsterBuffer(nested_builder, nmloc);
   //// Now we can store the buffer in the parent. Note that by default, vectors
   //// are only aligned to their elements or size field, so in this case if the
   //// buffer contains 64-bit elements, they may not be correctly aligned. We fix

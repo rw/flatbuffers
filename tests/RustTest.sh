@@ -55,6 +55,7 @@
 
 
 
+../flatc -r -I include_test -o rust_usage_test/src monster_test.fbs
 cd ./rust_usage_test
 cargo test 
 TEST_RESULT=$?
