@@ -59,9 +59,15 @@ bool TypeNeedsLifetime(const Type &type) {
 }
 
 bool StructNeedsLifetime(const StructDef &struct_def) {
+  if (!struct_def.fixed) {
+    return true;
+  }
   for (auto it = struct_def.fields.vec.begin();
       it != struct_def.fields.vec.end(); ++it) {
     const auto &field = **it;
+    if (field.nested_flatbuffer != NULL ) {
+      return true;
+    }
     switch (field.value.type.base_type) {
       case BASE_TYPE_STRING: return true;
       case BASE_TYPE_VECTOR: return true;
@@ -201,7 +207,7 @@ class RustGenerator : public BaseGenerator {
     int num_includes = 0;
     for (auto it = parser_.native_included_files_.begin();
          it != parser_.native_included_files_.end(); ++it) {
-      code_ += "//include \"" + *it + "\"";
+      code_ += "// #include \"" + *it + "\"";
       num_includes++;
     }
     for (auto it = parser_.included_files_.begin();
@@ -210,7 +216,7 @@ class RustGenerator : public BaseGenerator {
       auto noext = flatbuffers::StripExtension(it->second);
       auto basename = flatbuffers::StripPath(noext);
 
-      code_ += "//#include \"" + parser_.opts.include_prefix +
+      code_ += "// #include \"" + parser_.opts.include_prefix +
                (parser_.opts.keep_include_path ? noext : basename) +
                "_generated.rs\"";
       num_includes++;
@@ -543,17 +549,20 @@ class RustGenerator : public BaseGenerator {
       case BASE_TYPE_STRUCT: {
         //return WrapInNameSpace(*type.struct_def);
         std::string s;
-        s.append(lifetime);
+        //s.append(lifetime);
         s.append(WrapInRelativeNameSpace(type.struct_def->defined_namespace,
                                          type.struct_def->name));
         if (StructNeedsLifetime(*type.struct_def)) {
           s.append("<" + lifetime + ">");
+        } else {
+          s.append("/* foo */");
         }
         return s;
       }
       case BASE_TYPE_UNION:
       // fall through
-      default: { return "&" + lifetime + "flatbuffers::Void"; }
+      //default: { return "&" + lifetime + "flatbuffers::Void"; }
+      default: { return "flatbuffers::Void<" + lifetime + ">"; }
     }
   }
 
@@ -566,7 +575,7 @@ class RustGenerator : public BaseGenerator {
       return GenTypeBasic(type, user_facing_type) + postfix;
     } else if (IsStruct(type)) {
       //return "&'xxx" + GenTypePointer(type, lifetime);
-      return "&" + GenTypePointer(type, lifetime);
+      return "&" + lifetime + GenTypePointer(type, lifetime);
     } else {
       return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
@@ -1647,11 +1656,11 @@ class RustGenerator : public BaseGenerator {
     GenComment(struct_def.doc_comment);
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
-    code_ += "pub struct {{STRUCT_NAME}}<'buf> {";
-    code_ += "  _phantom: PhantomData<&'buf ()>,";
+    code_ += "pub struct {{STRUCT_NAME}}<'a> {";
+    code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
-    code_ += "impl<'buf> flatbuffers::Table for {{STRUCT_NAME}}<'buf> {}";
-    code_ += "impl<'buf> {{STRUCT_NAME}}<'buf> /* private flatbuffers::Table */ {";
+    code_ += "impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {}";
+    code_ += "impl<'a> {{STRUCT_NAME}}<'a> /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
     //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
     //}
@@ -1782,13 +1791,13 @@ class RustGenerator : public BaseGenerator {
         } else {
           auto postptr = " " + NullableExtension();
           auto type =
-              GenTypeGet(field.value.type, " ", "&'buf mut ", postptr.c_str(), true);
+              GenTypeGet(field.value.type, " ", "&'a mut ", postptr.c_str(), true);
           auto underlying = mut_accessor + type + ">(" + offset_str + ")";
           code_.SetValue("FIELD_TYPE", type);
           code_.SetValue("FIELD_VALUE",
                          GenUnderlyingCast(field, true, underlying));
 
-          code_ += "  fn mutable_{{FIELD_NAME}}(&'buf mut self) -> {{FIELD_TYPE}} {";
+          code_ += "  fn mutable_{{FIELD_NAME}}(&'a mut self) -> {{FIELD_TYPE}} {";
           code_ += "    /* TODO: are there non-reference choices here? */";
           code_ += "    {{FIELD_VALUE}}";
           code_ += "  }";
@@ -1955,6 +1964,7 @@ class RustGenerator : public BaseGenerator {
         code_ += ",";
       }
     }
+    code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
 
     // Generate a builder struct:
@@ -2067,7 +2077,7 @@ class RustGenerator : public BaseGenerator {
         if (!field.deprecated && (!struct_def.sortbysize ||
                                   size == SizeOf(field.value.type.base_type))) {
           code_.SetValue("FIELD_NAME", Name(field));
-          code_ += "  builder.add_{{FIELD_NAME}}(args.{{FIELD_NAME}}());";
+          code_ += "  builder.add_{{FIELD_NAME}}(args.{{FIELD_NAME}});";
         }
       }
     }
@@ -2076,7 +2086,8 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
 
     // Generate a CreateXDirect function with vector types as parameters
-    if (has_string_or_vector_fields) {
+    // TODO
+    if (has_string_or_vector_fields && false) {
       code_ += "#[inline]";
       code_ += "pub fn Create{{STRUCT_NAME}}Direct<'fbb>(";
       code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder\\";
