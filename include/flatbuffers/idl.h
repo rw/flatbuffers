@@ -57,8 +57,8 @@ namespace flatbuffers {
 #define FLATBUFFERS_GEN_TYPES_POINTER(TD) \
   TD(STRING, "string", Offset<void>, int, int, StringOffset, int, Offset) \
   TD(VECTOR, "",       Offset<void>, int, int, VectorOffset, int, Offset) \
-  TD(STRUCT, "",       Offset<void>, int, int, int, int, Offset) \
-  TD(UNION,  "",       Offset<void>, int, int, int, int, Offset)
+  TD(STRUCT, "",       Offset<void>, int, int, int,          int, Offset) \
+  TD(UNION,  "",       Offset<void>, int, int, int,          int, Offset)
 
 // The fields are:
 // - enum

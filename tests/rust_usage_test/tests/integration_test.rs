@@ -173,7 +173,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   // values. They have little overhead compared to storing the table directly.
   // As a test, create a mostly empty Monster buffer:
   let mut nested_builder = flatbuffers::FlatBufferBuilder::new();
-  let args = MyGame::Example::CreateMonsterArgs{ ..Default::Default() };
+  let args = MyGame::Example::MonsterArgs{ ..Default::Default() };
   let nmloc = MyGame::Example::CreateMonster(nested_builder, None, 0, 0,
                                              nested_builder.CreateString("NestedMonster"));
   MyGame::Example::FinishMonsterBuffer(nested_builder, nmloc);
