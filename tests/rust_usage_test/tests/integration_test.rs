@@ -156,32 +156,32 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let names2 = vec!["jane", "mary"];
   let vecofstrings2 = builder.create_vector_of_strings(&names2);
 
-  //|| // Create an array of sorted tables, can be used with binary search when read:
-  //|| let vecoftables = builder.create_vector_of_sorted_tables(&mut mlocs);
+  // Create an array of sorted tables, can be used with binary search when read:
+  let vecoftables = builder.create_vector_of_sorted_tables(&mut mlocs);
 
-  //|| // Create an array of sorted structs,
-  //|| // can be used with binary search when read:
-  //|| let mut abilities = vec![];
-  //|| abilities.push(MyGame::Example::Ability::new(4, 40));
-  //|| abilities.push(MyGame::Example::Ability::new(3, 30));
-  //|| abilities.push(MyGame::Example::Ability::new(2, 20));
-  //|| abilities.push(MyGame::Example::Ability::new(1, 10));
-  //|| let vecofstructs = builder.create_vector_of_sorted_structs(&mut abilities);
+  // Create an array of sorted structs,
+  // can be used with binary search when read:
+  let mut abilities = vec![];
+  abilities.push(MyGame::Example::Ability::new(4, 40));
+  abilities.push(MyGame::Example::Ability::new(3, 30));
+  abilities.push(MyGame::Example::Ability::new(2, 20));
+  abilities.push(MyGame::Example::Ability::new(1, 10));
+  let vecofstructs = builder.create_vector_of_sorted_structs(&mut abilities);
 
-  //|| // Create a nested FlatBuffer.
-  //|| // Nested FlatBuffers are stored in a ubyte vector, which can be convenient
-  //|| // since they can be memcpy'd around much easier than other FlatBuffer
-  //|| // values. They have little overhead compared to storing the table directly.
-  //|| // As a test, create a mostly empty Monster buffer:
-  //|| let mut nested_builder = flatbuffers::FlatBufferBuilder::new();
-  //|| let args = MyGame::Example::MonsterArgs{
-  //||     mana: 0,
-  //||     hp: 0,
-  //||     name: nested_builder.create_string("NestedMonster"),
-  //||     ..Default::default()
-  //|| };
-  //|| let nmloc = MyGame::Example::CreateMonster(&mut nested_builder, &args);
-  //|| MyGame::Example::FinishMonsterBuffer(&mut nested_builder, nmloc);
+  // Create a nested FlatBuffer.
+  // Nested FlatBuffers are stored in a ubyte vector, which can be convenient
+  // since they can be memcpy'd around much easier than other FlatBuffer
+  // values. They have little overhead compared to storing the table directly.
+  // As a test, create a mostly empty Monster buffer:
+  let mut nested_builder = flatbuffers::FlatBufferBuilder::new();
+  let args = MyGame::Example::MonsterArgs{
+      mana: 0,
+      hp: 0,
+      name: nested_builder.create_string("NestedMonster"),
+      ..Default::default()
+  };
+  let nmloc = MyGame::Example::CreateMonster(&mut nested_builder, &args);
+  MyGame::Example::FinishMonsterBuffer(&mut nested_builder, nmloc);
   // Now we can store the buffer in the parent. Note that by default, vectors
   // are only aligned to their elements or size field, so in this case if the
   // buffer contains 64-bit elements, they may not be correctly aligned. We fix
@@ -242,8 +242,9 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //||  });
 
 
-    //MyGame::Example::FinishMonsterBuffer(&mut builder, mloc);
-    MyGame::Example::FinishMonsterBuffer(&mut builder, flatbuffers::Offset::new(0));
+    let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{..Default::default()});
+    MyGame::Example::FinishMonsterBuffer(&mut builder, mloc);
+    //MyGame::Example::FinishMonsterBuffer(&mut builder, flatbuffers::Offset::new(0));
 //
 //  // clang-format off
 //  #ifdef FLATBUFFERS_TEST_VERBOSE

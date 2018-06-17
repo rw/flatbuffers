@@ -109,7 +109,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn finish<T>(&mut self, _root: Offset<T>)  {
     }
-    pub fn finish_with_identifier<T>(&mut self, _root: Offset<T>, _name: &'static str) {
+    pub fn finish_with_identifier<'a, T>(&'a mut self, _root: Offset<T>, _name: &'static str) {
     }
 }
 pub type UOffsetT = usize;
