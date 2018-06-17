@@ -444,9 +444,9 @@ class RustGenerator : public BaseGenerator {
 
         // Finish a buffer with a given root object:
         code_ += "#[inline]";
-        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer(";
-        code_ += "    fbb: &mut flatbuffers::FlatBufferBuilder,";
-        code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}>) {";
+        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'fbb, 'a>(";
+        code_ += "    fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,";
+        code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
           code_ += "  fbb.finish_with_identifier(root, "
                    "{{STRUCT_NAME}}Identifier());";
@@ -2097,9 +2097,9 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "pub fn Create{{STRUCT_NAME}}<'fbb, 'a: 'fbb>(";
+    code_ += "pub fn Create{{STRUCT_NAME}}<'args, 'fbb: 'args, 'a>(";
     code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,";
-    code_ += "    args: &{{STRUCT_NAME}}Args<'a>) -> \\";
+    code_ += "    args: &{{STRUCT_NAME}}Args<'args>) -> \\";
     code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
