@@ -1,5 +1,5 @@
 extern crate num_traits;
-use std::convert::AsMut;
+//use std::convert::AsMut;
 
 //pub trait ToLittleEndian {
 //    fn to_le(self) -> Self {
@@ -124,6 +124,24 @@ impl<T> Offset<T> {
         Offset(o, PhantomData)
     }
 }
+
+//impl<T> From<usize> for Offset<T> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl<T> From<isize> for Offset<T> { fn from(n: isize) -> Self { Offset::new(n) } }
+//impl<T> From<u8> for Offset<T>  { fn from(n: u8)  -> Self { Offset::new(n) } }
+//impl<T> From<u16> for Offset<T> { fn from(n: u16) -> Self { Offset::new(n) } }
+//impl<T> From<u32> for Offset<T> { fn from(n: u32) -> Self { Offset::new(n) } }
+//impl<T> From<u64> for Offset<T> { fn from(n: u64) -> Self { Offset::new(n) } }
+//impl<T> From<i8> for Offset<T>  { fn from(n: i8)  -> Self { Offset::new(n) } }
+//impl<T> From<i16> for Offset<T> { fn from(n: i16) -> Self { Offset::new(n) } }
+//impl<T> From<i32> for Offset<T> { fn from(n: i32) -> Self { Offset::new(n) } }
+//impl<T> From<i64> for Offset<T> { fn from(n: i64) -> Self { Offset::new(n) } }
+//impl<T> From<usize> for Offset<T> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl<T> From<isize> for Offset<T> { fn from(n: isize) -> Self { Offset::new(n) } }
+//impl From<usize> for Offset<u16> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl From<usize> for Offset<u32> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl From<usize> for Offset<u64> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl From<usize> for Offset<f32> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl From<usize> for Offset<f64> { fn from(n: usize) -> Self { Offset::new(n) } }
 
 pub fn verify_table_start(_: &Verifier) -> bool {
     false
