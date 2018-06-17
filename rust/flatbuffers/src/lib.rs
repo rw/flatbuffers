@@ -53,7 +53,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             _phantom: PhantomData,
         }
     }
-    pub fn start_table(&mut self) -> usize {
+    pub fn start_table(&mut self) -> UOffsetT {
         0
     }
     pub fn as_mut(&mut self) -> &mut Self {
@@ -112,7 +112,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn finish_with_identifier<'a, T>(&'a mut self, _root: Offset<T>, _name: &'static str) {
     }
 }
-pub type UOffsetT = usize;
+pub trait UOffsetTTrait {}
+pub trait OffsetTTrait {}
+pub trait VOffsetTTrait {}
+pub type UOffsetT = u32;
+pub type OffsetT = i32;
+pub type VOffsetT = i16;
+
 pub type String<'a> = &'a str;
 pub type Void<'a> = &'a [u8];
 pub struct Vector<T>  {
