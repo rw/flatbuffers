@@ -165,18 +165,20 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   abilities.push(MyGame::Example::Ability::new(1, 10));
   let vecofstructs = builder.create_vector_of_sorted_structs(&mut abilities);
 
-  return flatbuffers::DetachedBuffer{};
-
   // Create a nested FlatBuffer.
   // Nested FlatBuffers are stored in a ubyte vector, which can be convenient
   // since they can be memcpy'd around much easier than other FlatBuffer
   // values. They have little overhead compared to storing the table directly.
   // As a test, create a mostly empty Monster buffer:
   let mut nested_builder = flatbuffers::FlatBufferBuilder::new();
-  let args = MyGame::Example::MonsterArgs{ ..Default::Default() };
-  let nmloc = MyGame::Example::CreateMonster(nested_builder, None, 0, 0,
-                                             nested_builder.CreateString("NestedMonster"));
-  MyGame::Example::FinishMonsterBuffer(nested_builder, nmloc);
+  let args = MyGame::Example::MonsterArgs{
+      mana: 0,
+      hp: 0,
+      name: nested_builder.create_string("NestedMonster"),
+      ..Default::default()
+  };
+  let nmloc = MyGame::Example::CreateMonster(&mut nested_builder, &args);
+  MyGame::Example::FinishMonsterBuffer(&mut nested_builder, nmloc);
   //// Now we can store the buffer in the parent. Note that by default, vectors
   //// are only aligned to their elements or size field, so in this case if the
   //// buffer contains 64-bit elements, they may not be correctly aligned. We fix
@@ -220,6 +222,8 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //  buffer.assign(bufferpointer, bufferpointer + builder.GetSize());
 //
 //  return builder.ReleaseBufferPointer();
+
+  return flatbuffers::DetachedBuffer{};
 }
 
 ////  example of accessing a buffer loaded in memory:

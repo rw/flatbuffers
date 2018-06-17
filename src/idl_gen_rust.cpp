@@ -575,7 +575,8 @@ class RustGenerator : public BaseGenerator {
       return GenTypeBasic(type, user_facing_type) + postfix;
     } else if (IsStruct(type)) {
       //return "&'xxx" + GenTypePointer(type, lifetime);
-      return "&" + lifetime + GenTypePointer(type, lifetime);
+      //return "&" + lifetime + GenTypePointer(type, lifetime);
+      return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
     } else {
       return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
@@ -1448,26 +1449,34 @@ class RustGenerator : public BaseGenerator {
       auto ev = field.value.type.enum_def->ReverseLookup(
           StringToInt(field.value.constant.c_str()), false);
       if (ev) {
-        return WrapInNameSpace(field.value.type.enum_def->defined_namespace,
+        return "/* A */" + WrapInNameSpace(field.value.type.enum_def->defined_namespace,
                                GetEnumValUse(*field.value.type.enum_def, *ev));
       } else {
-        return GenUnderlyingCast(field, true, field.value.constant);
+        return "/* B */" + GenUnderlyingCast(field, true, field.value.constant);
       }
     } else if (field.value.type.base_type == BASE_TYPE_BOOL) {
       return field.value.constant == "0" ? "false" : "true";
+    } else if (IsScalar(field.value.type.base_type)) {
+      return "/* C */" + GenDefaultConstant(field);
+    } else if (IsStruct(field.value.type)) {
+      return "/* D */ flatbuffers::Offset::new(0)";
     } else {
-      return GenDefaultConstant(field);
+      return "/* E */ flatbuffers::Offset::new(0)";
+      //return "/* D */ None";
     }
   }
 
   void GenParam(const FieldDef &field, bool direct, const char *prefix,
-                const std::string &lifetime) {
+                const std::string &lifetime, const std::string tmpl) {
     code_.SetValue("PRE", prefix);
     code_.SetValue("PARAM_NAME", Name(field));
     //code_.SetValue("PARAM_LIFETIME", lifetime);
     if (direct && field.value.type.base_type == BASE_TYPE_STRING) {
       code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + "str>");
       code_.SetValue("PARAM_VALUE", "nullptr");
+    //} else if (IsStruct(field.value.type)) {
+    //    code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", lifetime, true));
+    //    code_.SetValue("PARAM_VALUE", "None");
     } else if (direct && field.value.type.base_type == BASE_TYPE_VECTOR) {
       const auto vtype = field.value.type.VectorType();
       std::string type;
@@ -1485,9 +1494,13 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else {
       code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", lifetime, true));
-      code_.SetValue("PARAM_VALUE", GetDefaultScalarValue(field));
+      const std::string type_suffix = GenTypeBasic(field.value.type, true);
+      //code_.SetValue("PARAM_VALUE", GetDefaultScalarValue(field) + type_suffix + ".into()");
+      //code_.SetValue("PARAM_VALUE", GetDefaultScalarValue(field) + ".into()");
+      code_.SetValue("PARAM_VALUE", "/* yo */" + GetDefaultScalarValue(field));
     }
-    code_ += "{{PRE}}{{PARAM_NAME}}: {{PARAM_TYPE}} /* = {{PARAM_VALUE}} */\\";
+    code_ += tmpl;
+    //code_ += "{{PRE}}{{PARAM_NAME}}: {{PARAM_TYPE}} /* = {{PARAM_VALUE}} */\\";
   }
 
   // Generate a member, including a default value for scalars and raw pointers.
@@ -1565,6 +1578,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   void GenNativeTable(const StructDef &struct_def) {
+    assert(false);
     const auto native_name =
         NativeName(Name(struct_def), &struct_def, parser_.opts);
     code_.SetValue("STRUCT_NAME", Name(struct_def));
@@ -1726,8 +1740,7 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
-      code_ += "  fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
-      code_ += "    // yo";
+      code_ += "  pub fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
       code_ += "    {{FIELD_VALUE}}";
       code_ += "  }";
 
@@ -1951,7 +1964,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("PARENT_LIFETIME",
         StructNeedsLifetime(struct_def) ? "<'a>" : "");
 
-    // Generate an args struct (primarily useful incombination with the Default
+    // Generate an args struct (primarily useful combined with the Default
     // trait):
     code_ += "pub struct {{STRUCT_NAME}}Args<'a> {";
     //code_ += "  fbb_: &'a mut flatbuffers::FlatBufferBuilder,";
@@ -1960,11 +1973,32 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated) {
-        GenParam(field, false, "    ", "'a ");
-        code_ += ",";
+        // TODO: required-ness
+        GenParam(field, false, "    ", "'a ",
+                 "{{PRE}}pub {{PARAM_NAME}}: {{PARAM_TYPE}},");
       }
     }
-    code_ += "  _phantom: PhantomData<&'a ()>,";
+    code_ += "  pub _phantom: PhantomData<&'a ()>, // pub for default trait";
+    code_ += "}";
+
+    // Generate an impl of Default for the *Args type:
+    code_ += "impl<'a> Default for {{STRUCT_NAME}}Args<'a> {";
+    code_ += "    fn default() -> Self {";
+    code_ += "        {{STRUCT_NAME}}Args {";
+    for (auto it = struct_def.fields.vec.begin();
+        it != struct_def.fields.vec.end(); ++it) {
+      const auto &field = **it;
+      if (!field.deprecated) {
+        std::string tmpl = "{{PRE}}{{PARAM_NAME}}: {{PARAM_VALUE}},";
+        if (field.required) {
+          tmpl += " // required";
+        }
+        GenParam(field, false, "            ", "'a ", tmpl);
+      }
+    }
+    code_ += "            _phantom: PhantomData,";
+    code_ += "        }";
+    code_ += "    }";
     code_ += "}";
 
     // Generate a builder struct:
@@ -2061,7 +2095,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub fn Create{{STRUCT_NAME}}<'fbb, 'a: 'fbb>(";
     code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder,";
     code_ += "    args: &{{STRUCT_NAME}}Args<'a>) -> \\";
-    code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'fbb>> {";
+    code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
     //  const auto &field = **it;
@@ -2094,7 +2128,10 @@ class RustGenerator : public BaseGenerator {
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
         const auto &field = **it;
-        if (!field.deprecated) { GenParam(field, true, ",\n    ", ""); }
+        if (!field.deprecated) {
+          GenParam(field, true, ",\n    ", "",
+                  "{{PRE}}{{PARAM_NAME}}: {{PARAM_TYPE}} /* = {{PARAM_VALUE}} */\\");
+        }
       }
 
       // Need to call "Create" with the struct namespace.
@@ -2572,9 +2609,10 @@ class RustGenerator : public BaseGenerator {
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
-      auto child_lifetime = TypeNeedsLifetime(field.value.type) ? "<'a>" : "";
+      const bool needs_lifetime = TypeNeedsLifetime(field.value.type);
+      const auto lifetime = needs_lifetime ? "<'a>" : "";
       code_.SetValue("FIELD_TYPE",
-                     GenTypeGet(field.value.type, "", "&'a mut ", child_lifetime,
+                     GenTypeGet(field.value.type, "", "&'a mut ", lifetime,
                                 false));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
