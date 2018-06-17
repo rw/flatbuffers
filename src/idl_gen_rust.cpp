@@ -446,7 +446,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "#[inline]";
         code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'fbb, 'a>(";
         code_ += "    fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,";
-        code_ += "    root: flatbuffers::Offset<{{CPP_NAME}}<'a>>) {";
+        code_ += "    root: flatbuffers::Offset<{{OFFSET_TYPELABEL}}>) {";
         if (parser_.file_identifier_.length()) {
           code_ += "  fbb.finish_with_identifier(root, "
                    "{{STRUCT_NAME}}Identifier());";
@@ -1211,13 +1211,13 @@ class RustGenerator : public BaseGenerator {
     code_ += "  //  return values.len() == types.len();";
     code_ += "  //}";
     code_ += "  if values.len() != types.len() { return false; }";
-    code_ += "  for _i in (0 as flatbuffers::UOffsetT)..values.len() {";
+    code_ += "  //for _i in (0 as flatbuffers::UOffsetT)..values.len() {";
     code_ += "    //if !Verify" + Name(enum_def) + "(";
     code_ += "    //    verifier,  values.Get(i), types.GetEnum::<" +
              Name(enum_def) + ">(i)) {";
     code_ += "    //  return false;";
     code_ += "    //}";
-    code_ += "  }";
+    code_ += "  //}";
     code_ += "  return true;";
     code_ += "}";
     code_ += "";
@@ -1672,6 +1672,8 @@ class RustGenerator : public BaseGenerator {
     GenComment(struct_def.doc_comment);
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
+    code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
+    code_ += "pub type {{OFFSET_TYPELABEL}} = ();";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
     code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
@@ -1963,6 +1965,7 @@ class RustGenerator : public BaseGenerator {
 
   void GenBuilders(const StructDef &struct_def) {
     code_.SetValue("STRUCT_NAME", Name(struct_def));
+    code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
     code_.SetValue("PARENT_LIFETIME",
         StructNeedsLifetime(struct_def) ? "<'a>" : "");
 
@@ -2076,9 +2079,9 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'c>> {";
+    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     code_ += "    let end = self.fbb_.end_table(self.start_);";
-    code_ += "    let o = flatbuffers::Offset::<{{STRUCT_NAME}}>::new(end);";
+    code_ += "    let o = flatbuffers::Offset::<{{OFFSET_TYPELABEL}}>::new(end);";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2100,7 +2103,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub fn Create{{STRUCT_NAME}}<'args, 'fbb: 'args, 'a>(";
     code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,";
     code_ += "    args: &{{STRUCT_NAME}}Args<'args>) -> \\";
-    code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
+    code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
     //  const auto &field = **it;
