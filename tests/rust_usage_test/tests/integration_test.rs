@@ -98,11 +98,13 @@ fn foo() {}
 fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let mut builder = flatbuffers::FlatBufferBuilder::new();
 
-  let mut x = MyGame::Example::Test::new(10, 20);
-  let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, &mut x);
+  let x = MyGame::Example::Test::new(10, 20);
+  let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, x);
   let _name = builder.create_string("MyMonster");
-  let inv_data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-  let _inventory = builder.create_vector(&inv_data);
+  let inventory = {
+      let inv_data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      builder.create_vector(&inv_data)
+  };
 
   // Alternatively, create the vector first, and fill in data later:
   // unsigned char *inv_buf = nullptr;
@@ -122,30 +124,31 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
 
-  {
-	  let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
-	  mb1.add_name(fred);
-	  mlocs[0] = mb1.finish();
-  }
+  //{
+  //    let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
+  //    mb1.add_name(fred);
+  //    mlocs[0] = mb1.finish();
+  //}
 
-  {
-	  let mut mb2 = MyGame::Example::MonsterBuilder::new(&mut builder);
-	  mb2.add_name(barney);
-	  mb2.add_hp(1000);
-	  mlocs[1] = mb2.finish();
-  }
+  //{
+  //    let mut mb2 = MyGame::Example::MonsterBuilder::new(&mut builder);
+  //    mb2.add_name(barney);
+  //    mb2.add_hp(1000);
+  //    mlocs[1] = mb2.finish();
+  //}
 
-  {
-	  let mut mb3 = MyGame::Example::MonsterBuilder::new(&mut builder);
-	  mb3.add_name(wilma);
-	  mlocs[2] = mb3.finish();
-  }
+  //{
+  //    let mut mb3 = MyGame::Example::MonsterBuilder::new(&mut builder);
+  //    mb3.add_name(wilma);
+  //    mlocs[2] = mb3.finish();
+  //}
 
   // Create an array of strings. Also test string pooling, and lambdas.
+  let names: [&'static str; 4] = ["bob", "fred", "bob", "fred"];
+  //let vecofstrings = builder.create_vector_of_strings(&names);
   let vecofstrings = builder.create_vector_from_fn::<_, _>(
       4,
       |i, b| -> flatbuffers::Offset<flatbuffers::String> {
-          let names: [&'static str; 4] = ["bob", "fred", "bob", "fred"];
           b.create_shared_string(names[i])
       });
 
@@ -179,17 +182,18 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   };
   let nmloc = MyGame::Example::CreateMonster(&mut nested_builder, &args);
   MyGame::Example::FinishMonsterBuffer(&mut nested_builder, nmloc);
-  //// Now we can store the buffer in the parent. Note that by default, vectors
-  //// are only aligned to their elements or size field, so in this case if the
-  //// buffer contains 64-bit elements, they may not be correctly aligned. We fix
-  //// that with:
-  //builder.ForceVectorAlignment(nested_builder.GetSize(), sizeof(uint8_t),
-  //                             nested_builder.GetBufferMinAlignment());
-  //// If for whatever reason you don't have the nested_builder available, you
-  //// can substitute flatbuffers::largest_scalar_t (64-bit) for the alignment, or
-  //// the largest force_align value in your schema if you're using it.
-  //auto nested_flatbuffer_vector = builder.CreateVector(
-  //    nested_builder.GetBufferPointer(), nested_builder.GetSize());
+  // Now we can store the buffer in the parent. Note that by default, vectors
+  // are only aligned to their elements or size field, so in this case if the
+  // buffer contains 64-bit elements, they may not be correctly aligned. We fix
+  // that with:
+  //builder.ForceVectorAlignment(nested_builder.get_size(), size_of(uint8_t),
+  //                             nested_builder.get_buffer_min_alignment());
+  // If for whatever reason you don't have the nested_builder available, you
+  // can substitute flatbuffers::largest_scalar_t (64-bit) for the alignment, or
+  // the largest force_align value in your schema if you're using it.
+  // TODO
+  let nested_flatbuffer_vector = builder.create_vector(&vec![0, 0][..]);
+  //    nested_builder.get_buffer_pointer(), nested_builder.get_size());
 
 //  // Test a nested FlexBuffer:
 //  flexbuffers::Builder flexbuild;
@@ -197,15 +201,49 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //  flexbuild.Finish();
 //  auto flex = builder.CreateVector(flexbuild.GetBuffer());
 //
-//  // shortcut for creating monster with all fields set:
-//  auto mloc = CreateMonster(builder, &vec, 150, 80, name, inventory, Color_Blue,
-//                            Any_Monster, mlocs[1].Union(),  // Store a union.
-//                            testv, vecofstrings, vecoftables, 0,
-//                            nested_flatbuffer_vector, 0, false, 0, 0, 0, 0, 0,
-//                            0, 0, 0, 0, 3.14159f, 3.0f, 0.0f, vecofstrings2,
-//                            vecofstructs, flex, testv2);
-//
-//  FinishMonsterBuffer(builder, mloc);
+//||  // shortcut for creating monster with all fields set:
+//||  let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{
+//||      pos: Some(&_vec),
+//||      mana: 150,
+//||      hp: 80,
+//||      name: _name,
+//||      inventory: inventory,
+//||      color: MyGame::Example::Color::Blue,
+//||      test_type: MyGame::Example::Any::Monster,
+//||      test: mlocs[1].union(),  // Store a union.
+//||      test4: testv,
+//||      testarrayofstring: vecofstrings,
+//||      testarrayoftables: vecoftables,
+//||      enemy: flatbuffers::Offset::new(0),
+//||      testnestedflatbuffer: nested_flatbuffer_vector,
+//||      testempty: flatbuffers::Offset::new(0),
+//||      testbool: false,
+//||      testhashs32_fnv1: 0,
+//||      testhashu32_fnv1: 0,
+//||      testhashs64_fnv1: 0,
+//||      testhashu64_fnv1: 0,
+//||      testhashs32_fnv1a: 0,
+//||      testhashu32_fnv1a: 0,
+//||      testhashs64_fnv1a: 0,
+//||      testhashu64_fnv1a: 0,
+//||      testarrayofbools: flatbuffers::Offset::new(0),
+//||      testf: 3.14159f32,
+//||      testf2: 3.0f32,
+//||      testf3: 0.0f32,
+//||      testarrayofstring2: vecofstrings2,
+//||      testarrayofsortedstruct: vecofstructs,
+//||      flex: flatbuffers::Offset::new(0),
+//||      test5: flatbuffers::Offset::new(0),
+//||      vector_of_longs: flatbuffers::Offset::new(0),
+//||      vector_of_doubles: flatbuffers::Offset::new(0),
+//||      parent_namespace_test: flatbuffers::Offset::new(0),
+//||
+//||      ..Default::default() // for phantom
+//||  });
+
+
+    //MyGame::Example::FinishMonsterBuffer(&mut builder, mloc);
+    MyGame::Example::FinishMonsterBuffer(&mut builder, flatbuffers::Offset::new(0));
 //
 //  // clang-format off
 //  #ifdef FLATBUFFERS_TEST_VERBOSE
