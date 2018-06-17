@@ -39,15 +39,19 @@ impl Verifier {
     }
 }
 pub struct TypeTable {}
-pub struct FlatBufferBuilder {}
+pub struct FlatBufferBuilder<'fbb> {
+    _phantom: PhantomData<&'fbb ()>,
+}
 //impl<T> AsMut<T> for FlatBufferBuilder {
 //    fn as_mut(&mut self) -> &mut FlatBufferBuilder {
 //        self
 //    }
 //}
-impl FlatBufferBuilder {
+impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn new() -> Self {
-        FlatBufferBuilder{}
+        FlatBufferBuilder{
+            _phantom: PhantomData,
+        }
     }
     pub fn start_table(&mut self) -> usize {
         0
@@ -64,32 +68,37 @@ impl FlatBufferBuilder {
     pub fn add_struct<T>(&mut self, _: isize, _: T) {
         unimplemented!()
     }
-    pub fn create_string(&mut self, _: &str) -> Offset<String> {
+    pub fn create_string<'a>(&mut self, _: &'a str) -> Offset<String<'fbb>> {
         Offset::new(0)
     }
-    pub fn create_shared_string(&mut self, _: &str) -> Offset<String> {
+    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<String<'fbb>> {
         Offset::new(0)
     }
-    pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
+    //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
+    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> Offset<&'fbb [Offset<String<'fbb>>]> {
         Offset::new(0)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
-    pub fn create_vector<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
+    pub fn create_vector<'a, T: 'a>(&'a mut self, _: &'a [T]) -> Offset<&'fbb [T]> {
         Offset::new(0)
     }
-    pub fn create_vector_from_fn<'a, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'a mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
+//  //pub fn create_vector_from_fn<'a: 'fbb, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'fbb mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
+    pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [T]>
+        where F: FnMut(usize, &mut Self) -> T {
         Offset::new(0)
     }
-    pub fn create_vector_of_structs<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
+//  pub fn create_vector_of_structs<'a, T: 'a>(&'fbb mut self, _: &'a [T]) -> Offset<&'a [T]> {
+//      Offset::new(0)
+//  }
+//  // TODO probably should not be returning [&T]
+    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> Offset<&'fbb [&'fbb T]> {
         Offset::new(0)
     }
-    pub fn create_vector_of_sorted_structs<'a, 'b, T: 'b>(&'a mut self, _: &'b mut [T]) -> Offset<&'b [T]> {
+    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [&'fbb T]>
+        where F: FnMut(usize, &mut T) {
         Offset::new(0)
     }
-    pub fn create_vector_of_structs_from_fn<'a, 'b, T: 'b, F: Fn(usize, &mut T)>(&'a mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
-        Offset::new(0)
-    }
-    pub fn create_vector_of_sorted_tables<'a, 'b, T: 'b>(&'a mut self, _: &'b mut [T]) -> Offset<&'b [T]> {
+    pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> Offset<&'fbb [T]> {
         Offset::new(0)
     }
     pub fn end_table<T>(&mut self, _: T) -> usize {
@@ -104,13 +113,14 @@ impl FlatBufferBuilder {
     }
 }
 pub type UOffsetT = usize;
-pub type String = i32;
+pub type String<'a> = &'a str;
 pub type Void<'a> = &'a [u8];
 pub struct Vector<T>  {
     phantom: PhantomData<T>,
 }
 
 pub struct Offset<T> (usize, PhantomData<T>);
+pub struct UOffset<T> (u32, PhantomData<T>);
 impl<T> Copy for Offset<T> { }
 
 impl<T> Clone for Offset<T> {
@@ -123,9 +133,17 @@ impl<T> Offset<T> {
     pub fn new(o: usize) -> Self {
         Offset(o, PhantomData)
     }
+    pub fn union(&self) -> Offset<Void> {
+        Offset::new(self.0)
+    }
+}
+impl<T> UOffset<T> {
+    pub fn new(o: u32) -> Self {
+        UOffset(o, PhantomData)
+    }
 }
 
-//impl<T> From<usize> for Offset<T> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl<T> From<usize> for UOffset<T> { fn from(n: usize) -> Self { UOffset::new(n) } }
 //impl<T> From<isize> for Offset<T> { fn from(n: isize) -> Self { Offset::new(n) } }
 //impl<T> From<u8> for Offset<T>  { fn from(n: u8)  -> Self { Offset::new(n) } }
 //impl<T> From<u16> for Offset<T> { fn from(n: u16) -> Self { Offset::new(n) } }
