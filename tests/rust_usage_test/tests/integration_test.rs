@@ -95,16 +95,24 @@ fn foo() {}
 //std::string test_data_path = "tests/";
 //
 // example of how to build up a serialized buffer algorithmically:
+fn Foo<'fbb, 'a: 'fbb>(
+    fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,
+    root: flatbuffers::Offset<MyGame::Example::MonsterOffset>) {
+    //fbb.finish_with_identifier(root, MonsterIdentifier());
+}
+fn Bar<'a, 'b, 'c: 'a>(
+    _fbb: &'a mut flatbuffers::FlatBufferBuilder<'c>,
+    args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::MonsterOffset> {
+    flatbuffers::Offset::new(0)
+}
 fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let mut builder = flatbuffers::FlatBufferBuilder::new();
 
   let x = MyGame::Example::Test::new(10, 20);
   let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, x);
   let _name = builder.create_string("MyMonster");
-  let inventory = {
-      let inv_data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-      builder.create_vector(&inv_data)
-  };
+  let inv_data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let inventory = builder.create_vector(&inv_data);
 
   // Alternatively, create the vector first, and fill in data later:
   // unsigned char *inv_buf = nullptr;
@@ -119,7 +127,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 
   // create monster with very few fields set:
   // (same functionality as CreateMonster below, but sets fields manually)
-  let mut mlocs: [flatbuffers::Offset<MyGame::Example::Monster>; 3] = [flatbuffers::Offset::<_>::new(0); 3];
+  let mut mlocs: [flatbuffers::Offset<MyGame::Example::MonsterOffset>; 3] = [flatbuffers::Offset::<_>::new(0); 3];
   let fred = builder.create_string("Fred");
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
@@ -182,6 +190,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   };
   let nmloc = MyGame::Example::CreateMonster(&mut nested_builder, &args);
   MyGame::Example::FinishMonsterBuffer(&mut nested_builder, nmloc);
+
   // Now we can store the buffer in the parent. Note that by default, vectors
   // are only aligned to their elements or size field, so in this case if the
   // buffer contains 64-bit elements, they may not be correctly aligned. We fix
@@ -201,48 +210,48 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //  flexbuild.Finish();
 //  auto flex = builder.CreateVector(flexbuild.GetBuffer());
 //
-//||  // shortcut for creating monster with all fields set:
-//||  let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{
-//||      pos: Some(&_vec),
-//||      mana: 150,
-//||      hp: 80,
-//||      name: _name,
-//||      inventory: inventory,
-//||      color: MyGame::Example::Color::Blue,
-//||      test_type: MyGame::Example::Any::Monster,
-//||      test: mlocs[1].union(),  // Store a union.
-//||      test4: testv,
-//||      testarrayofstring: vecofstrings,
-//||      testarrayoftables: vecoftables,
-//||      enemy: flatbuffers::Offset::new(0),
-//||      testnestedflatbuffer: nested_flatbuffer_vector,
-//||      testempty: flatbuffers::Offset::new(0),
-//||      testbool: false,
-//||      testhashs32_fnv1: 0,
-//||      testhashu32_fnv1: 0,
-//||      testhashs64_fnv1: 0,
-//||      testhashu64_fnv1: 0,
-//||      testhashs32_fnv1a: 0,
-//||      testhashu32_fnv1a: 0,
-//||      testhashs64_fnv1a: 0,
-//||      testhashu64_fnv1a: 0,
-//||      testarrayofbools: flatbuffers::Offset::new(0),
-//||      testf: 3.14159f32,
-//||      testf2: 3.0f32,
-//||      testf3: 0.0f32,
-//||      testarrayofstring2: vecofstrings2,
-//||      testarrayofsortedstruct: vecofstructs,
-//||      flex: flatbuffers::Offset::new(0),
-//||      test5: flatbuffers::Offset::new(0),
-//||      vector_of_longs: flatbuffers::Offset::new(0),
-//||      vector_of_doubles: flatbuffers::Offset::new(0),
-//||      parent_namespace_test: flatbuffers::Offset::new(0),
-//||
-//||      ..Default::default() // for phantom
-//||  });
+    // shortcut for creating monster with all fields set:
+    let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{
+        pos: Some(&_vec),
+        mana: 150,
+        hp: 80,
+        name: _name,
+        inventory: inventory,
+        color: MyGame::Example::Color::Blue,
+        test_type: MyGame::Example::Any::Monster,
+        test: mlocs[1].union(),  // Store a union.
+        test4: testv,
+        testarrayofstring: vecofstrings,
+        //testarrayoftables: vecoftables,
+        enemy: flatbuffers::Offset::new(0),
+        testnestedflatbuffer: nested_flatbuffer_vector,
+        testempty: flatbuffers::Offset::new(0),
+        testbool: false,
+        testhashs32_fnv1: 0,
+        testhashu32_fnv1: 0,
+        testhashs64_fnv1: 0,
+        testhashu64_fnv1: 0,
+        testhashs32_fnv1a: 0,
+        testhashu32_fnv1a: 0,
+        testhashs64_fnv1a: 0,
+        testhashu64_fnv1a: 0,
+        testarrayofbools: flatbuffers::Offset::new(0),
+        testf: 3.14159f32,
+        testf2: 3.0f32,
+        testf3: 0.0f32,
+        testarrayofstring2: vecofstrings2,
+        testarrayofsortedstruct: vecofstructs,
+        flex: flatbuffers::Offset::new(0),
+        test5: flatbuffers::Offset::new(0),
+        vector_of_longs: flatbuffers::Offset::new(0),
+        vector_of_doubles: flatbuffers::Offset::new(0),
+        parent_namespace_test: flatbuffers::Offset::new(0),
+
+        ..Default::default() // for phantom
+    });
 
 
-    let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{..Default::default()});
+    let mloc = MyGame::Example::CreateMonster(&mut builder, &args);
     MyGame::Example::FinishMonsterBuffer(&mut builder, mloc);
     //MyGame::Example::FinishMonsterBuffer(&mut builder, flatbuffers::Offset::new(0));
 //
