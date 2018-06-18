@@ -443,9 +443,10 @@ class RustGenerator : public BaseGenerator {
         }
 
         // Finish a buffer with a given root object:
+        code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
         code_ += "#[inline]";
-        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'fbb, 'a>(";
-        code_ += "    fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,";
+        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'a: 'b, 'b>(";
+        code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{OFFSET_TYPELABEL}}>) {";
         if (parser_.file_identifier_.length()) {
           code_ += "  fbb.finish_with_identifier(root, "
@@ -2006,14 +2007,14 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
 
     // Generate a builder struct:
-    code_ += "pub struct {{STRUCT_NAME}}Builder<'a> {";
-    code_ += "  fbb_: &'a mut flatbuffers::FlatBufferBuilder<'a>,";
+    code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
+    code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
     code_ += "  start_: flatbuffers::UOffsetT,";
     code_ += "}";
 
     // Generate builder functions:
     //code_ += "impl{{PARENT_LIFETIME}} {{STRUCT_NAME}}Builder{{PARENT_LIFETIME}} {";
-    code_ += "impl<'a, 'b: 'a> {{STRUCT_NAME}}Builder<'a> {";
+    code_ += "impl<'a: 'b, 'b> {{STRUCT_NAME}}Builder<'a, 'b> {";
     bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2064,8 +2065,8 @@ class RustGenerator : public BaseGenerator {
     // Builder constructor
     code_ +=
         "  pub fn new"
-        "(_fbb: &'a mut flatbuffers::FlatBufferBuilder<'a>) -> "
-        "{{STRUCT_NAME}}Builder<'a> {";
+        "(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> "
+        "{{STRUCT_NAME}}Builder<'a, 'b> {";
     code_ += "    let start = _fbb.start_table();";
     code_ += "    {{STRUCT_NAME}}Builder {";
     code_ += "      fbb_: _fbb,";
@@ -2100,9 +2101,9 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "pub fn Create{{STRUCT_NAME}}<'args, 'fbb: 'args, 'a>(";
-    code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,";
-    code_ += "    args: &{{STRUCT_NAME}}Args<'args>) -> \\";
+    code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b>(";
+    code_ += "    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
+    code_ += "    args: &{{STRUCT_NAME}}Args) -> \\";
     code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
