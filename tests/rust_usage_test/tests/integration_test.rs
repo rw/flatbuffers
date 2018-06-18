@@ -83,17 +83,30 @@ fn foo() {}
 //#define TEST_NOTNULL(exp) TestEq(exp == NULL, false, #exp, __FILE__, __LINE__)
 //#define TEST_EQ_STR(exp, val) TestEqStr(exp, val, #exp, __FILE__, __LINE__)
 //
-//// Include simple random number generator to ensure results will be the
-//// same cross platform.
-//// http://en.wikipedia.org/wiki/Park%E2%80%93Miller_random_number_generator
+// Include simple random number generator to ensure results will be the
+// same cross platform.
+// http://en.wikipedia.org/wiki/Park%E2%80%93Miller_random_number_generator
+struct LCG(u64);
+impl LCG {
+    fn new() -> Self {
+        LCG { 0: 48271 }
+    }
+    fn update(&mut self) -> u64 {
+        self.0 = (self.0 * 279470273u64) % 4294967291u64;
+        self.0
+    }
+    fn reset(&mut self) {
+        self.0 = 48271
+    }
+}
 //uint32_t lcg_seed = 48271;
 //uint32_t lcg_rand() {
-//  return lcg_seed = ((uint64_t)lcg_seed * 279470273UL) % 4294967291UL;
+ // return lcg_seed = ((uint64_t)lcg_seed * 279470273UL) % 4294967291UL;
 //}
 //void lcg_reset() { lcg_seed = 48271; }
-//
+
 //std::string test_data_path = "tests/";
-//
+
 // example of how to build up a serialized buffer algorithmically:
 fn Foo<'fbb, 'a: 'fbb>(
     fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,
@@ -132,24 +145,24 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
 
-  //{
-  //    let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
-  //    mb1.add_name(fred);
-  //    mlocs[0] = mb1.finish();
-  //}
+  {
+      let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
+      mb1.add_name(fred);
+      mlocs[0] = mb1.finish();
+  }
 
-  //{
-  //    let mut mb2 = MyGame::Example::MonsterBuilder::new(&mut builder);
-  //    mb2.add_name(barney);
-  //    mb2.add_hp(1000);
-  //    mlocs[1] = mb2.finish();
-  //}
+  {
+      let mut mb2 = MyGame::Example::MonsterBuilder::new(&mut builder);
+      mb2.add_name(barney);
+      mb2.add_hp(1000);
+      mlocs[1] = mb2.finish();
+  }
 
-  //{
-  //    let mut mb3 = MyGame::Example::MonsterBuilder::new(&mut builder);
-  //    mb3.add_name(wilma);
-  //    mlocs[2] = mb3.finish();
-  //}
+  {
+      let mut mb3 = MyGame::Example::MonsterBuilder::new(&mut builder);
+      mb3.add_name(wilma);
+      mlocs[2] = mb3.finish();
+  }
 
   // Create an array of strings. Also test string pooling, and lambdas.
   let names: [&'static str; 4] = ["bob", "fred", "bob", "fred"];
@@ -222,7 +235,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
         test: mlocs[1].union(),  // Store a union.
         test4: testv,
         testarrayofstring: vecofstrings,
-        //testarrayoftables: vecoftables,
+        //testarrayoftables: vecoftables, // TODO
         enemy: flatbuffers::Offset::new(0),
         testnestedflatbuffer: nested_flatbuffer_vector,
         testempty: flatbuffers::Offset::new(0),
@@ -253,7 +266,6 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 
     let mloc = MyGame::Example::CreateMonster(&mut builder, &args);
     MyGame::Example::FinishMonsterBuffer(&mut builder, mloc);
-    //MyGame::Example::FinishMonsterBuffer(&mut builder, flatbuffers::Offset::new(0));
 //
 //  // clang-format off
 //  #ifdef FLATBUFFERS_TEST_VERBOSE
@@ -269,9 +281,9 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //      reinterpret_cast<const char *>(builder.GetBufferPointer());
 //  buffer.assign(bufferpointer, bufferpointer + builder.GetSize());
 //
-//  return builder.ReleaseBufferPointer();
+  return builder.release_buffer_pointer();
 
-  return flatbuffers::DetachedBuffer{};
+  //return flatbuffers::DetachedBuffer{};
 }
 
 ////  example of accessing a buffer loaded in memory:
@@ -950,32 +962,33 @@ fn json_default_test() {
 // different kinds of data in different combinations
 #[test]
 fn fuzz_test1() {
-//  // Values we're testing against: chosen to ensure no bits get chopped
-//  // off anywhere, and also be different from eachother.
-//  const uint8_t bool_val = true;
-//  const int8_t char_val = -127;  // 0x81
-//  const uint8_t uchar_val = 0xFF;
-//  const int16_t short_val = -32222;  // 0x8222;
-//  const uint16_t ushort_val = 0xFEEE;
-//  const int32_t int_val = 0x83333333;
-//  const uint32_t uint_val = 0xFDDDDDDD;
-//  const int64_t long_val = 0x8444444444444444LL;
-//  const uint64_t ulong_val = 0xFCCCCCCCCCCCCCCCULL;
-//  const float float_val = 3.14159f;
-//  const double double_val = 3.14159265359;
-//
-//  const int test_values_max = 11;
-//  const flatbuffers::voffset_t fields_per_object = 4;
-//  const int num_fuzz_objects = 10000;  // The higher, the more thorough :)
-//
-//  flatbuffers::FlatBufferBuilder builder;
-//
-//  lcg_reset();  // Keep it deterministic.
-//
-//  flatbuffers::uoffset_t objects[num_fuzz_objects];
-//
-//  // Generate num_fuzz_objects random objects each consisting of
-//  // fields_per_object fields, each of a random type.
+  // Values we're testing against: chosen to ensure no bits get chopped
+  // off anywhere, and also be different from eachother.
+  let bool_val: u8 = 1;
+
+  let char_val: i8 = -127;  // 0x81
+  let uchar_val: u8 = 0xFF;
+  let short_val: i16 = -32222;  // 0x8222;
+  let ushort_val: u16 = 0xFEEE;
+  let int_val: i32 = 0x83333333;
+  let uint_val: u32 = 0xFDDDDDDD;
+  let long_val: i64 = 0x8444444444444444i64; // TODO: byte literal?
+  let ulong_val: u64 = 0xFCCCCCCCCCCCCCCCu64;
+  let float_val: f32 = 3.14159;
+  let double_val: f64 = 3.14159265359;
+
+  let test_values_max: isize = 11;
+  //const flatbuffers::voffset_t fields_per_object = 4;
+  let num_fuzz_objects: isize = 10000;  // The higher, the more thorough :)
+
+  let mut builder = flatbuffers::FlatBufferBuilder::new();
+  let mut lcg = LCG::new();
+
+  let objects: Vec<flatbuffers::UOffsetT> = vec![];
+  //objects[num_fuzz_objects];
+
+  // Generate num_fuzz_objects random objects each consisting of
+  // fields_per_object fields, each of a random type.
 //  for (int i = 0; i < num_fuzz_objects; i++) {
 //    auto start = builder.StartTable();
 //    for (flatbuffers::voffset_t f = 0; f < fields_per_object; f++) {
@@ -999,8 +1012,8 @@ fn fuzz_test1() {
 //  }
 //  builder.PreAlign<flatbuffers::largest_scalar_t>(0);  // Align whole buffer.
 //
-//  lcg_reset();  // Reset.
-//
+    lcg.reset(); // Reset.
+
 //  uint8_t *eob = builder.GetCurrentBufferPointer() + builder.GetSize();
 //
 //  // Test that all objects we generated are readable and return the

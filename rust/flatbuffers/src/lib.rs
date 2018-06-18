@@ -111,6 +111,22 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn finish_with_identifier<'a, T>(&'a mut self, _root: Offset<T>, _name: &'static str) {
     }
+
+    pub fn release_buffer_pointer(&mut self) -> DetachedBuffer  {
+       //self.Finished();
+       // self.buf_.release();
+       DetachedBuffer{}
+    }
+
+    pub fn release(&mut self) {
+        //DetachedBuffer fb(allocator_, own_allocator_, buf_, reserved_, cur_,
+        //                  size());
+        //allocator_ = nullptr;
+        //own_allocator_ = false;
+        //buf_ = nullptr;
+        //clear();
+        //return fb;
+    }
 }
 pub trait UOffsetTTrait {}
 pub trait OffsetTTrait {}
