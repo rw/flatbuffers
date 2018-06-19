@@ -4,4 +4,4 @@ version = "0.1.0"
 authors = ["Robert Winslow <me@rwinslow.com>", "FlatBuffers Maintainers"]
 
 [dependencies]
-num-traits = "0.2"
+#num-traits = "0.2"

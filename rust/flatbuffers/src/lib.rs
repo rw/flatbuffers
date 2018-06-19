@@ -1,4 +1,4 @@
-extern crate num_traits;
+//extern crate num_traits;
 //use std::convert::AsMut;
 
 //pub trait ToLittleEndian {
@@ -10,8 +10,23 @@ extern crate num_traits;
 //impl ToLittleEndian for i16 {}
 
 
+const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
+
 use std::marker::PhantomData;
 //use std::iter::FromIterator;
+
+pub trait ElementScalar : Sized {
+    fn to_le(self) -> Self;
+}
+//impl ElementScalar for bool { fn to_le(self) -> bool { u8::to_le(self as u8) as bool } }
+impl ElementScalar for u8 { fn to_le(self) -> u8 { u8::to_le(self) } }
+impl ElementScalar for i8 { fn to_le(self) -> i8 { i8::to_le(self) } }
+impl ElementScalar for u16 { fn to_le(self) -> u16 { u16::to_le(self) } }
+impl ElementScalar for i16 { fn to_le(self) -> i16 { i16::to_le(self) } }
+impl ElementScalar for u32 { fn to_le(self) -> u32 { u32::to_le(self) } }
+impl ElementScalar for i32 { fn to_le(self) -> i32 { i32::to_le(self) } }
+impl ElementScalar for u64 { fn to_le(self) -> u64 { u64::to_le(self) } }
+impl ElementScalar for i64 { fn to_le(self) -> i64 { i64::to_le(self) } }
 
 pub trait Table {}
 pub struct Verifier {}
@@ -40,6 +55,8 @@ impl Verifier {
 }
 pub struct TypeTable {}
 pub struct FlatBufferBuilder<'fbb> {
+    owned_buf: Vec<u8>,
+    cur_idx: usize,
     _phantom: PhantomData<&'fbb ()>,
 }
 //impl<T> AsMut<T> for FlatBufferBuilder {
@@ -50,15 +67,57 @@ pub struct FlatBufferBuilder<'fbb> {
 impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn new() -> Self {
         FlatBufferBuilder{
+            owned_buf: Vec::new(),
+            cur_idx: 0,
             _phantom: PhantomData,
         }
     }
     pub fn start_table(&mut self) -> UOffsetT {
         0
     }
-    pub fn as_mut(&mut self) -> &mut Self {
-        self
+    pub fn get_buf_slice(&self) -> &[u8] {
+        &self.owned_buf[..]
     }
+    pub fn get_active_buf_slice(&self) -> &[u8] {
+        &self.owned_buf[self.cur_idx..]
+    }
+    pub fn reallocate(&mut self, _: usize) {
+        unimplemented!()
+    }
+
+    pub fn grow_owned_buf(&mut self) -> usize {
+        assert!(self.owned_buf.len() * 2 <= FLATBUFFERS_MAX_BUFFER_SIZE,
+		        "cannot grow buffer beyond 2 gigabytes");
+
+        let old_len = self.owned_buf.len();
+        let new_len = std::cmp::max(1, self.owned_buf.len() * 2);
+        let diff = new_len - old_len;
+
+        self.owned_buf.resize(new_len, 0);
+        self.cur_idx += diff;
+        if self.owned_buf.len() == 1 {
+            return 1;
+        }
+
+		// calculate the midpoint, and safely copy the old end data to the new
+		// end position:
+		let middle = new_len / 2;
+		{
+			let (left, right) = &mut self.owned_buf[..].split_at_mut(middle);
+            //println!("foo {}, {:?}, {:?}", middle, &left[..], &right[..]);
+			right.copy_from_slice(left);
+		}
+        // then, zero out the old end data (just to be safe):
+        // should be vectorized by the compiler--rust has no stdlib memset.
+        for x in &mut self.owned_buf[..middle] {
+            *x = 0;
+        }
+
+        new_len
+	}
+    //pub fn as_mut(&mut self) -> &mut Self {
+    //    self
+    //}
     pub fn add_element<T>(&mut self, _: isize, _: T, _: T) -> T {
         unimplemented!()
     }
@@ -118,6 +177,30 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
        DetachedBuffer{}
     }
 
+    pub fn push_element_bool(&mut self, b: bool) {
+        self.push_element_scalar(b as u8);
+    }
+    fn align(&mut self, elem_size: usize) {
+        let delta = self.cur_idx % elem_size;
+        self.cur_idx -= delta;
+    }
+    pub fn push_element_scalar<T: ElementScalar>(&mut self, t: T) -> UOffsetT {
+        let t = t.to_le(); // convert to little-endian
+        self.align(std::mem::size_of::<T>());
+        self.push(t); // TODO: push_small
+        self.cur_idx as UOffsetT
+    }
+
+    pub fn push<T: Sized>(&mut self, x: T) {
+        let data = unsafe {
+            std::slice::from_raw_parts((&x as *const T) as *const u8,
+                                       std::mem::size_of::<T>())
+        };
+
+        let n = self.make_space(data.len());//std::mem::size_of::<T>());
+        self.owned_buf[n..n+data.len()].copy_from_slice(data);
+    }
+
     pub fn release(&mut self) {
         //DetachedBuffer fb(allocator_, own_allocator_, buf_, reserved_, cur_,
         //                  size());
@@ -126,6 +209,21 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //buf_ = nullptr;
         //clear();
         //return fb;
+    }
+
+    pub fn make_space(&mut self, want: usize) -> usize {
+        self.ensure_space(want);
+        self.cur_idx -= want;
+        self.cur_idx
+    }
+    pub fn ensure_space(&mut self, want: usize) -> usize {
+        assert!(want <= FLATBUFFERS_MAX_BUFFER_SIZE,
+		        "cannot grow buffer beyond 2 gigabytes");
+        while self.cur_idx < want {
+            println!("growing: {} < {}", self.cur_idx, want);
+            self.grow_owned_buf();
+        }
+        want
     }
 }
 pub trait UOffsetTTrait {}
@@ -186,8 +284,12 @@ impl<T> UOffset<T> {
 pub fn verify_table_start(_: &Verifier) -> bool {
     false
 }
-pub fn endian_scalar<T: num_traits::int::PrimInt>(x: T) -> T {
-    x.to_le()
+//pub fn endian_scalar<T: num_traits::int::PrimInt>(x: T) -> T {
+//    x.to_le()
+//}
+pub fn endian_scalar<T>(x: T) -> T {
+    x
+    //x.to_le()
 }
 pub fn write_scalar<S, T>(_: S, _: T) -> ! {
     unimplemented!()
@@ -216,12 +318,15 @@ pub fn get_struct<T>(_: isize) -> T {
 pub fn get_struct_mut<T>(_: isize) -> T {
     unimplemented!()
 }
-pub fn get_field<T: num_traits::Num>(_: isize, _: T) -> T {
+pub fn get_field<T>(_: isize, _: T) -> T {
     unimplemented!()
 }
-pub fn get_field_mut<T: num_traits::Num>(_: isize, _: T) -> T {
-    unimplemented!()
-}
+//pub fn get_field<T: num_traits::Num>(_: isize, _: T) -> T {
+//    unimplemented!()
+//}
+//pub fn get_field_mut<T: num_traits::Num>(_: isize, _: T) -> T {
+//    unimplemented!()
+//}
 pub fn get_pointer<'a, T: 'a>(_: isize) -> &'a T {
     unimplemented!()
 }
