@@ -447,7 +447,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "#[inline]";
         code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'a: 'b, 'b>(";
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-        code_ += "    root: flatbuffers::Offset<{{OFFSET_TYPELABEL}}>) {";
+        code_ += "    root: flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}>) {";
         if (parser_.file_identifier_.length()) {
           code_ += "  fbb.finish_with_identifier(root, "
                    "{{STRUCT_NAME}}Identifier());";
@@ -576,7 +576,7 @@ class RustGenerator : public BaseGenerator {
       //return "&" + lifetime + GenTypePointer(type, lifetime);
       return "&" + lifetime + " " + GenTypePointer(type, lifetime) + postfix;
     } else {
-      return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
+      return "flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
   }
 
@@ -747,7 +747,7 @@ class RustGenerator : public BaseGenerator {
   std::string UnionVectorVerifySignature(const EnumDef &enum_def) {
     return "pub fn Verify" + Name(enum_def) + "Vector" +
            "(_verifier: &mut flatbuffers::Verifier, " +
-           "values: &[flatbuffers::Offset<flatbuffers::Void>], " +
+           "values: &[flatbuffers::LabeledUOffsetT<flatbuffers::Void>], " +
            "types: &[u8]) -> bool";
   }
 
@@ -759,7 +759,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string UnionPackSignature(const EnumDef &enum_def, bool inclass) {
-    return "flatbuffers::Offset<flatbuffers::Void> " +
+    return "flatbuffers::LabeledUOffsetT<flatbuffers::Void> " +
            (inclass ? "" : Name(enum_def) + "Union::") +
            "Pack(flatbuffers::FlatBufferBuilder &_fbb, " +
            "const flatbuffers::rehasher_function_t *_rehasher" +
@@ -768,7 +768,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string TableCreateSignature(const StructDef &struct_def, bool predecl,
                                    const IDLOptions &opts) {
-    return "flatbuffers::Offset<" + Name(struct_def) + "> Create" +
+    return "flatbuffers::LabeledUOffsetT<" + Name(struct_def) + "> Create" +
            Name(struct_def) + "(flatbuffers::FlatBufferBuilder &_fbb, const " +
            NativeName(Name(struct_def), &struct_def, opts) +
            " *_o, const flatbuffers::rehasher_function_t *_rehasher" +
@@ -777,7 +777,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string TablePackSignature(const StructDef &struct_def, bool inclass,
                                  const IDLOptions &opts) {
-    return std::string(inclass ? "static " : "") + "flatbuffers::Offset<" +
+    return std::string(inclass ? "static " : "") + "flatbuffers::LabeledUOffsetT<" +
            Name(struct_def) + "> " + (inclass ? "" : Name(struct_def) + "::") +
            "Pack(flatbuffers::FlatBufferBuilder &_fbb, " + "const " +
            NativeName(Name(struct_def), &struct_def, opts) + "* _o, " +
@@ -1457,12 +1457,12 @@ class RustGenerator : public BaseGenerator {
     } else if (IsScalar(field.value.type.base_type)) {
       return "/* C */" + GenDefaultConstant(field);
     } else if (IsStruct(field.value.type)) {
-      //return "/* D */ flatbuffers::Offset::new(0)";
+      //return "/* D */ flatbuffers::LabeledUOffsetT::new(0)";
       //return "/* D */ None";
       return "/* D */ None";// + WrapInRelativeNameSpace(field.value.type.struct_def->defined_namespace,
                               ;//                     field.value.type.struct_def->name) + "::new()";
     } else {
-      return "/* E */ flatbuffers::Offset::new(0)";
+      return "/* E */ flatbuffers::LabeledUOffsetT::new(0)";
       //return "/* D */ None";
     }
   }
@@ -2081,9 +2081,9 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
+    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}> {";
     code_ += "    let end = self.fbb_.end_table(self.start_);";
-    code_ += "    let o = flatbuffers::Offset::<{{OFFSET_TYPELABEL}}>::new(end);";
+    code_ += "    let o = flatbuffers::LabeledUOffsetT::<{{OFFSET_TYPELABEL}}>::new(end);";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2105,7 +2105,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b>(";
     code_ += "    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
     code_ += "    args: &{{STRUCT_NAME}}Args) -> \\";
-    code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
+    code_ += "flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
     //  const auto &field = **it;
@@ -2149,7 +2149,7 @@ class RustGenerator : public BaseGenerator {
           struct_def.defined_namespace->GetFullyQualifiedName("Create");
       code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
 
-      code_ += ") -> flatbuffers::Offset<{{STRUCT_NAME}}<'fbb>> {";
+      code_ += ") -> flatbuffers::LabeledUOffsetT<{{STRUCT_NAME}}<'fbb>> {";
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
         const auto &field = **it;
@@ -2157,15 +2157,15 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("FIELD_NAME", Name(field));
 
           if (field.value.type.base_type == BASE_TYPE_STRING) {
-            code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_string(x) } else { flatbuffers::Offset::new(0) };";
+            code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_string(x) } else { flatbuffers::LabeledUOffsetT::new(0) };";
           } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
             const auto vtype = field.value.type.VectorType();
             if (IsStruct(vtype)) {
               const auto type = WrapInNameSpace(*vtype.struct_def);
-              code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector_of_structs::<&" + type + ">(x /* slice */) } else { flatbuffers::Offset::new(0) };";
+              code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector_of_structs::<&" + type + ">(x /* slice */) } else { flatbuffers::LabeledUOffsetT::new(0) };";
             } else {
               const auto type = GenTypeWire(vtype, "", "", false);
-              code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector::<" + type + ">(x /* slice */) } else { flatbuffers::Offset::new(0) };";
+              code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector::<" + type + ">(x /* slice */) } else { flatbuffers::LabeledUOffsetT::new(0) };";
             }
           } else {
             // PASS
@@ -2369,7 +2369,7 @@ class RustGenerator : public BaseGenerator {
               }
               code += "(" + value + ")";
             } else {
-              code += "_fbb.create_vector<flatbuffers::Offset<";
+              code += "_fbb.create_vector<flatbuffers::LabeledUOffsetT<";
               code += WrapInNameSpace(*vector_type.struct_def) + ">> ";
               code += "(" + value + ".size(), ";
               code += "[](size_t i, _VectorArgs *__va) { ";
@@ -2387,7 +2387,7 @@ class RustGenerator : public BaseGenerator {
           case BASE_TYPE_UNION: {
             code +=
                 "_fbb.create_vector<flatbuffers::"
-                "Offset<flatbuffers::Void>>(" +
+                "LabeledUOffsetT<flatbuffers::Void>>(" +
                 value +
                 ".size(), [](size_t i, _VectorArgs *__va) { "
                 "return __va->_" +
