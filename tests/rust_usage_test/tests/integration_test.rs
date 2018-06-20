@@ -169,7 +169,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   //let vecofstrings = builder.create_vector_of_strings(&names);
   let vecofstrings = builder.create_vector_from_fn::<_, _>(
       4,
-      |i, b| -> flatbuffers::Offset<flatbuffers::String> {
+      |i, b| -> flatbuffers::Offset<flatbuffers::StringOffset> {
           b.create_shared_string(names[i])
       });
 
@@ -252,7 +252,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
         testf: 3.14159f32,
         testf2: 3.0f32,
         testf3: 0.0f32,
-        testarrayofstring2: vecofstrings2,
+        //testarrayofstring2: vecofstrings2, // TODO
         testarrayofsortedstruct: vecofstructs,
         flex: flatbuffers::Offset::new(0),
         test5: flatbuffers::Offset::new(0),
@@ -2161,42 +2161,46 @@ mod test_byte_layouts {
         check(&b, &[2, 0, 0, 0, 0xBA, 0xDC, 0xCD, 0xAB]);
     }
 
-//	// test 6: CreateString
-//
-//	b = flatbuffers.NewBuilder(0)
-//	b.CreateString("foo")
-//	check([]byte{3, 0, 0, 0, 'f', 'o', 'o', 0}) // 0-terminated, no pad
-//	b.CreateString("moop")
-//	check([]byte{4, 0, 0, 0, 'm', 'o', 'o', 'p', 0, 0, 0, 0, // 0-terminated, 3-byte pad
-//		3, 0, 0, 0, 'f', 'o', 'o', 0})
-//
-//	// test 6b: CreateString unicode
-//
-//	b = flatbuffers.NewBuilder(0)
-//	// These characters are chinese from blog.golang.org/strings
-//	// We use escape codes here so that editors without unicode support
-//	// aren't bothered:
-//	uni_str := "\u65e5\u672c\u8a9e"
-//	b.CreateString(uni_str)
-//	check([]byte{9, 0, 0, 0, 230, 151, 165, 230, 156, 172, 232, 170, 158, 0, //  null-terminated, 2-byte pad
-//		0, 0})
-//
-//	// test 6c: CreateByteString
-//
-//	b = flatbuffers.NewBuilder(0)
-//	b.CreateByteString([]byte("foo"))
-//	check([]byte{3, 0, 0, 0, 'f', 'o', 'o', 0}) // 0-terminated, no pad
-//	b.CreateByteString([]byte("moop"))
-//	check([]byte{4, 0, 0, 0, 'm', 'o', 'o', 'p', 0, 0, 0, 0, // 0-terminated, 3-byte pad
-//		3, 0, 0, 0, 'f', 'o', 'o', 0})
-//
-//	// test 7: empty vtable
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(0)
-//	check([]byte{})
-//	b.EndObject()
-//	check([]byte{4, 0, 4, 0, 4, 0, 0, 0})
-//
+    #[test]
+    fn test_6_create_string() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.create_string("foo");
+        check(&b, b"\x03\x00\x00\x00foo\x00"); // 0-terminated, no pad
+        b.create_string("moop");
+        check(&b, b"\x04\x00\x00\x00moop\x00\x00\x00\x00\
+                    \x03\x00\x00\x00foo\x00"); // 0-terminated, 3-byte pad
+    }
+
+    #[test]
+    fn test_6b_create_string_unicode() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        // These characters are chinese from blog.golang.org/strings
+        // We use escape codes here so that editors without unicode support
+        // aren't bothered:
+        let uni_str = "\u{65e5}\u{672c}\u{8a9e}";
+        b.create_string(uni_str);
+        check(&b, &[9, 0, 0, 0, 230, 151, 165, 230, 156, 172, 232, 170, 158, 0, //  null-terminated, 2-byte pad
+                    0, 0]);
+    }
+
+    #[test]
+    fn test_6c_create_byte_string() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.create_byte_string(b"foo");
+        check(&b, b"\x03\x00\x00\x00foo\x00"); // 0-terminated, no pad
+        b.create_byte_string(b"moop");
+        check(&b, b"\x04\x00\x00\x00moop\x00\x00\x00\x00\
+                    \x03\x00\x00\x00foo\x00"); // 0-terminated, 3-byte pad
+    }
+
+    //#[test]
+    //fn test_7_empty_vtable() {
+    //    let mut b = flatbuffers::FlatBufferBuilder::new();
+    //    b.start_object(0);
+    //    check(&b, &[]);
+    //    b.end_object();
+    //    check(&b, &[4, 0, 4, 0, 4, 0, 0, 0]);
+    //}
 //	// test 8: vtable with one true bool
 //	b = flatbuffers.NewBuilder(0)
 //	check([]byte{})

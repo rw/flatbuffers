@@ -15,6 +15,8 @@ const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
 use std::marker::PhantomData;
 //use std::iter::FromIterator;
 
+pub type StringOffset = ();
+pub type ByteStringOffset = ();
 pub trait ElementScalar : Sized {
     fn to_le(self) -> Self;
 }
@@ -195,14 +197,23 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn add_struct<T>(&mut self, _: isize, _: T) {
         unimplemented!()
     }
-    pub fn create_string<'a>(&mut self, _: &'a str) -> Offset<String<'fbb>> {
-        Offset::new(0)
+    // utf-8 string creation
+    pub fn create_string(&mut self, s: &str) -> Offset<StringOffset> {
+        self.create_byte_string(s.as_bytes())
     }
-    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<String<'fbb>> {
+    pub fn create_byte_string<'a>(&mut self, data: &[u8]) -> Offset<ByteStringOffset> {
+        self.assert_not_nested();
+        self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
+        self.fill(1);
+        self.push_bytes(data);
+        self.push_element_scalar(data.len() as UOffsetT);
+        Offset::new(self.get_size())
+    }
+    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<StringOffset> {
         Offset::new(0)
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
-    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> Offset<&'fbb [Offset<String<'fbb>>]> {
+    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> Offset<VectorOffset<StringOffset>> {
         Offset::new(0)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
@@ -258,6 +269,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push(t); // TODO: push_small
         self.cur_idx as UOffsetT
     }
+    pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
+        let n = self.make_space(x.len());//std::mem::size_of::<T>());
+        self.owned_buf[n..n+x.len()].copy_from_slice(x);
+
+        self.cur_idx as UOffsetT
+    }
 
     pub fn push<T: Sized>(&mut self, x: T) {
         let data = unsafe {
@@ -301,13 +318,14 @@ pub type UOffsetT = u32;
 pub type OffsetT = i32;
 pub type VOffsetT = i16;
 
-pub type String<'a> = &'a str;
+//pub type String<'a> = &'a str;
 pub type Void<'a> = &'a [u8];
 pub struct Vector<T>  {
     phantom: PhantomData<T>,
 }
 
 pub struct Offset<T> (usize, PhantomData<T>);
+pub struct VectorOffset<T> (usize, PhantomData<T>);
 pub struct UOffset<T> (u32, PhantomData<T>);
 impl<T> Copy for Offset<T> { }
 

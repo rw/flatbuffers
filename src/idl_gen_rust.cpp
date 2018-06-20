@@ -535,7 +535,8 @@ class RustGenerator : public BaseGenerator {
   std::string GenTypePointer(const Type &type, const std::string &lifetime) const {
     switch (type.base_type) {
       case BASE_TYPE_STRING: {
-        return "flatbuffers::String<" + lifetime + ">";
+        return "flatbuffers::StringOffset";
+        //return "flatbuffers::String<" + lifetime + ">";
       }
       case BASE_TYPE_VECTOR: {
         const auto type_name = GenTypeWire(type.VectorType(), "", lifetime, false);
