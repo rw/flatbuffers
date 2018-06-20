@@ -110,13 +110,13 @@ impl LCG {
 // example of how to build up a serialized buffer algorithmically:
 fn Foo<'fbb, 'a: 'fbb>(
     fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,
-    root: flatbuffers::Offset<MyGame::Example::MonsterOffset>) {
+    root: flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>) {
     //fbb.finish_with_identifier(root, MonsterIdentifier());
 }
 fn Bar<'a, 'b, 'c: 'a>(
     _fbb: &'a mut flatbuffers::FlatBufferBuilder<'c>,
-    args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::MonsterOffset> {
-    flatbuffers::Offset::new(0)
+    args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset> {
+    flatbuffers::LabeledUOffsetT::new(0)
 }
 fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   let mut builder = flatbuffers::FlatBufferBuilder::new();
@@ -140,7 +140,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 
   // create monster with very few fields set:
   // (same functionality as CreateMonster below, but sets fields manually)
-  let mut mlocs: [flatbuffers::Offset<MyGame::Example::MonsterOffset>; 3] = [flatbuffers::Offset::<_>::new(0); 3];
+  let mut mlocs: [flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>; 3] = [flatbuffers::LabeledUOffsetT::<_>::new(0); 3];
   let fred = builder.create_string("Fred");
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
@@ -169,7 +169,7 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
   //let vecofstrings = builder.create_vector_of_strings(&names);
   let vecofstrings = builder.create_vector_from_fn::<_, _>(
       4,
-      |i, b| -> flatbuffers::Offset<flatbuffers::StringOffset> {
+      |i, b| -> flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset> {
           b.create_shared_string(names[i])
       });
 
@@ -236,9 +236,9 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
         test4: testv,
         testarrayofstring: vecofstrings,
         //testarrayoftables: vecoftables, // TODO
-        enemy: flatbuffers::Offset::new(0),
+        enemy: flatbuffers::LabeledUOffsetT::new(0),
         testnestedflatbuffer: nested_flatbuffer_vector,
-        testempty: flatbuffers::Offset::new(0),
+        testempty: flatbuffers::LabeledUOffsetT::new(0),
         testbool: false,
         testhashs32_fnv1: 0,
         testhashu32_fnv1: 0,
@@ -248,17 +248,17 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
         testhashu32_fnv1a: 0,
         testhashs64_fnv1a: 0,
         testhashu64_fnv1a: 0,
-        testarrayofbools: flatbuffers::Offset::new(0),
+        testarrayofbools: flatbuffers::LabeledUOffsetT::new(0),
         testf: 3.14159f32,
         testf2: 3.0f32,
         testf3: 0.0f32,
         //testarrayofstring2: vecofstrings2, // TODO
         testarrayofsortedstruct: vecofstructs,
-        flex: flatbuffers::Offset::new(0),
-        test5: flatbuffers::Offset::new(0),
-        vector_of_longs: flatbuffers::Offset::new(0),
-        vector_of_doubles: flatbuffers::Offset::new(0),
-        parent_namespace_test: flatbuffers::Offset::new(0),
+        flex: flatbuffers::LabeledUOffsetT::new(0),
+        test5: flatbuffers::LabeledUOffsetT::new(0),
+        vector_of_longs: flatbuffers::LabeledUOffsetT::new(0),
+        vector_of_doubles: flatbuffers::LabeledUOffsetT::new(0),
+        parent_namespace_test: flatbuffers::LabeledUOffsetT::new(0),
 
         ..Default::default() // for phantom
     });
@@ -2193,14 +2193,14 @@ mod test_byte_layouts {
                     \x03\x00\x00\x00foo\x00"); // 0-terminated, 3-byte pad
     }
 
-    //#[test]
-    //fn test_7_empty_vtable() {
-    //    let mut b = flatbuffers::FlatBufferBuilder::new();
-    //    b.start_object(0);
-    //    check(&b, &[]);
-    //    b.end_object();
-    //    check(&b, &[4, 0, 4, 0, 4, 0, 0, 0]);
-    //}
+    #[test]
+    fn test_7_empty_vtable() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        //b.start_table(0);
+        //check(&b, &[]);
+        //b.end_table();
+        //check(&b, &[4, 0, 4, 0, 4, 0, 0, 0]);
+    }
 //	// test 8: vtable with one true bool
 //	b = flatbuffers.NewBuilder(0)
 //	check([]byte{})

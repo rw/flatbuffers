@@ -15,6 +15,7 @@ const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
 use std::marker::PhantomData;
 //use std::iter::FromIterator;
 
+pub type VectorOffset = ();
 pub type StringOffset = ();
 pub type ByteStringOffset = ();
 pub trait ElementScalar : Sized {
@@ -191,63 +192,64 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn add_element<T>(&mut self, _: isize, _: T, _: T) -> T {
         unimplemented!()
     }
-    pub fn add_offset<T>(&mut self, _: isize, _: Offset<T>) -> usize {
+    pub fn add_offset<T>(&mut self, _: isize, _: LabeledUOffsetT<T>) -> usize {
         unimplemented!()
     }
     pub fn add_struct<T>(&mut self, _: isize, _: T) {
         unimplemented!()
     }
     // utf-8 string creation
-    pub fn create_string(&mut self, s: &str) -> Offset<StringOffset> {
+    pub fn create_string(&mut self, s: &str) -> LabeledUOffsetT<StringOffset> {
         self.create_byte_string(s.as_bytes())
     }
-    pub fn create_byte_string<'a>(&mut self, data: &[u8]) -> Offset<ByteStringOffset> {
+    pub fn create_byte_string<'a>(&mut self, data: &[u8]) -> LabeledUOffsetT<ByteStringOffset> {
         self.assert_not_nested();
         self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
         self.fill(1);
         self.push_bytes(data);
         self.push_element_scalar(data.len() as UOffsetT);
-        Offset::new(self.get_size())
+        LabeledUOffsetT::new(self.get_size() as u32)
     }
-    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<StringOffset> {
-        Offset::new(0)
+    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> LabeledUOffsetT<StringOffset> {
+        LabeledUOffsetT::new(0)
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
-    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> Offset<VectorOffset<StringOffset>> {
-        Offset::new(0)
+    //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
+    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset> {
+        LabeledUOffsetT::new(0)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
-    pub fn create_vector<'a, T: 'a>(&'a mut self, _: &'a [T]) -> Offset<&'fbb [T]> {
-        Offset::new(0)
+    pub fn create_vector<'a, T: 'a>(&'a mut self, _: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
+        LabeledUOffsetT::new(0)
     }
 //  //pub fn create_vector_from_fn<'a: 'fbb, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'fbb mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
-    pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [T]>
+    pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> LabeledUOffsetT<&'fbb [T]>
         where F: FnMut(usize, &mut Self) -> T {
-        Offset::new(0)
+        LabeledUOffsetT::new(0)
     }
 //  pub fn create_vector_of_structs<'a, T: 'a>(&'fbb mut self, _: &'a [T]) -> Offset<&'a [T]> {
-//      Offset::new(0)
+//      LabeledUOffsetT::new(0)
 //  }
 //  // TODO probably should not be returning [&T]
-    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> Offset<&'fbb [&'fbb T]> {
-        Offset::new(0)
+    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [&'fbb T]> {
+        LabeledUOffsetT::new(0)
     }
-    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [&'fbb T]>
+    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> LabeledUOffsetT<&'fbb [&'fbb T]>
         where F: FnMut(usize, &mut T) {
-        Offset::new(0)
+        LabeledUOffsetT::new(0)
     }
-    pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> Offset<&'fbb [T]> {
-        Offset::new(0)
+    pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [T]> {
+        LabeledUOffsetT::new(0)
     }
-    pub fn end_table<T>(&mut self, _: T) -> usize {
+    pub fn end_table<T>(&mut self, _: T) -> UOffsetT {
         0
     }
-    pub fn required<T>(&self, _: &Offset<T>, _: isize) -> bool {
+    pub fn required<T>(&self, _: &LabeledUOffsetT<T>, _: isize) -> bool {
         unimplemented!()
     }
-    pub fn finish<T>(&mut self, _root: Offset<T>)  {
+    pub fn finish<T>(&mut self, _root: LabeledUOffsetT<T>)  {
     }
-    pub fn finish_with_identifier<'a, T>(&'a mut self, _root: Offset<T>, _name: &'static str) {
+    pub fn finish_with_identifier<'a, T>(&'a mut self, _root: LabeledUOffsetT<T>, _name: &'static str) {
     }
 
     pub fn release_buffer_pointer(&mut self) -> DetachedBuffer  {
@@ -324,48 +326,57 @@ pub struct Vector<T>  {
     phantom: PhantomData<T>,
 }
 
-pub struct Offset<T> (usize, PhantomData<T>);
-pub struct VectorOffset<T> (usize, PhantomData<T>);
-pub struct UOffset<T> (u32, PhantomData<T>);
-impl<T> Copy for Offset<T> { }
+//pub struct LabeledUOffsetT<T> (usize, PhantomData<T>);
+pub struct VectorLabeledUOffsetT<T> (usize, PhantomData<T>);
+//pub struct ULabeledUOffsetT<T> (u32, PhantomData<T>);
 
-impl<T> Clone for Offset<T> {
-    fn clone(&self) -> Offset<T> {
-        *self
+//impl<T> LabeledUOffsetT<T> {
+//    pub fn new(o: usize) -> Self {
+//        Offset(o, PhantomData)
+//    }
+//    pub fn union(&self) -> Offset<Void> {
+//        LabeledUOffsetT::new(self.0)
+//    }
+//}
+//impl<T> ULabeledUOffsetT<T> {
+//    pub fn new(o: u32) -> Self {
+//        UOffset(o, PhantomData)
+//    }
+//}
+pub struct LabeledUOffsetT<T> (UOffsetT, PhantomData<T>);
+impl<T> Copy for LabeledUOffsetT<T> { } // TODO: why does deriving Copy cause ownership errors?
+impl<T> Clone for LabeledUOffsetT<T> {
+    fn clone(&self) -> LabeledUOffsetT<T> {
+        LabeledUOffsetT::new(self.0.clone())
     }
 }
 
-impl<T> Offset<T> {
-    pub fn new(o: usize) -> Self {
-        Offset(o, PhantomData)
+impl<T> LabeledUOffsetT<T> {
+    pub fn new(o: UOffsetT) -> Self {
+        LabeledUOffsetT(o, PhantomData)
     }
-    pub fn union(&self) -> Offset<Void> {
-        Offset::new(self.0)
-    }
-}
-impl<T> UOffset<T> {
-    pub fn new(o: u32) -> Self {
-        UOffset(o, PhantomData)
+    pub fn union(&self) -> LabeledUOffsetT<Void> {
+        LabeledUOffsetT::new(self.0)
     }
 }
 
-//impl<T> From<usize> for UOffset<T> { fn from(n: usize) -> Self { UOffset::new(n) } }
-//impl<T> From<isize> for Offset<T> { fn from(n: isize) -> Self { Offset::new(n) } }
-//impl<T> From<u8> for Offset<T>  { fn from(n: u8)  -> Self { Offset::new(n) } }
-//impl<T> From<u16> for Offset<T> { fn from(n: u16) -> Self { Offset::new(n) } }
-//impl<T> From<u32> for Offset<T> { fn from(n: u32) -> Self { Offset::new(n) } }
-//impl<T> From<u64> for Offset<T> { fn from(n: u64) -> Self { Offset::new(n) } }
-//impl<T> From<i8> for Offset<T>  { fn from(n: i8)  -> Self { Offset::new(n) } }
-//impl<T> From<i16> for Offset<T> { fn from(n: i16) -> Self { Offset::new(n) } }
-//impl<T> From<i32> for Offset<T> { fn from(n: i32) -> Self { Offset::new(n) } }
-//impl<T> From<i64> for Offset<T> { fn from(n: i64) -> Self { Offset::new(n) } }
-//impl<T> From<usize> for Offset<T> { fn from(n: usize) -> Self { Offset::new(n) } }
-//impl<T> From<isize> for Offset<T> { fn from(n: isize) -> Self { Offset::new(n) } }
-//impl From<usize> for Offset<u16> { fn from(n: usize) -> Self { Offset::new(n) } }
-//impl From<usize> for Offset<u32> { fn from(n: usize) -> Self { Offset::new(n) } }
-//impl From<usize> for Offset<u64> { fn from(n: usize) -> Self { Offset::new(n) } }
-//impl From<usize> for Offset<f32> { fn from(n: usize) -> Self { Offset::new(n) } }
-//impl From<usize> for Offset<f64> { fn from(n: usize) -> Self { Offset::new(n) } }
+//impl<T> From<usize> for ULabeledUOffsetT<T> { fn from(n: usize) -> Self { ULabeledUOffsetT::new(n) } }
+//impl<T> From<isize> for LabeledUOffsetT<T> { fn from(n: isize) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<u8> for LabeledUOffsetT<T>  { fn from(n: u8)  -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<u16> for LabeledUOffsetT<T> { fn from(n: u16) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<u32> for LabeledUOffsetT<T> { fn from(n: u32) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<u64> for LabeledUOffsetT<T> { fn from(n: u64) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<i8> for LabeledUOffsetT<T>  { fn from(n: i8)  -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<i16> for LabeledUOffsetT<T> { fn from(n: i16) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<i32> for LabeledUOffsetT<T> { fn from(n: i32) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<i64> for LabeledUOffsetT<T> { fn from(n: i64) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<usize> for LabeledUOffsetT<T> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
+//impl<T> From<isize> for LabeledUOffsetT<T> { fn from(n: isize) -> Self { LabeledUOffsetT::new(n) } }
+//impl From<usize> for Offset<u16> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
+//impl From<usize> for Offset<u32> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
+//impl From<usize> for Offset<u64> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
+//impl From<usize> for Offset<f32> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
+//impl From<usize> for Offset<f64> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
 
 pub fn verify_table_start(_: &Verifier) -> bool {
     false
