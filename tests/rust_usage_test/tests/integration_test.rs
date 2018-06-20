@@ -2196,10 +2196,10 @@ mod test_byte_layouts {
     #[test]
     fn test_7_empty_vtable() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        //b.start_table(0);
-        //check(&b, &[]);
-        //b.end_table();
-        //check(&b, &[4, 0, 4, 0, 4, 0, 0, 0]);
+        let off = b.start_table();
+        check(&b, &[]);
+        b.end_table(off);
+        check(&b, &[4, 0, 4, 0, 4, 0, 0, 0]);
     }
 //	// test 8: vtable with one true bool
 //	b = flatbuffers.NewBuilder(0)

@@ -40,10 +40,25 @@ pub const SIZE_I32: usize = 4;
 pub const SIZE_U64: usize = 8;
 pub const SIZE_I64: usize = 8;
 pub const SIZE_UOFFSET: usize = SIZE_U32;
+pub const SIZE_SOFFSET: usize = SIZE_I32;
+pub const SIZE_VOFFSET: usize = SIZE_I16;
 
 #[inline]
 pub fn padding_bytes(buf_size: usize, scalar_size: usize) -> usize {
   ((!buf_size) + 1) & (scalar_size - 1)
+}
+pub fn field_index_to_offset(field_id: VOffsetT) -> VOffsetT {
+    // Should correspond to what end_table() below builds up.
+    let fixed_fields = 2;  // Vtable size and Object Size.
+    ((field_id + fixed_fields) * (SIZE_VOFFSET as VOffsetT)) as VOffsetT
+}
+pub fn emplace_scalar<T>(s: &mut [u8], x: T) {
+        let data = unsafe {
+            std::slice::from_raw_parts((&x as *const T) as *const u8,
+                                       std::mem::size_of::<T>())
+        };
+
+        s.copy_from_slice(data);
 }
 
 pub trait Table {}
@@ -78,6 +93,7 @@ pub struct FlatBufferBuilder<'fbb> {
     nested: bool,
     num_field_loc: isize,
     min_align: usize,
+    max_voffset: VOffsetT,
     _phantom: PhantomData<&'fbb ()>,
 }
 //impl<T> AsMut<T> for FlatBufferBuilder {
@@ -87,14 +103,7 @@ pub struct FlatBufferBuilder<'fbb> {
 //}
 impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn new() -> Self {
-        FlatBufferBuilder{
-            owned_buf: Vec::new(),
-            cur_idx: 0,
-            nested: false,
-            num_field_loc: 0,
-            min_align: 0,
-            _phantom: PhantomData,
-        }
+        Self::new_with_capacity(0)
     }
     pub fn new_with_capacity(size: usize) -> Self {
         FlatBufferBuilder{
@@ -103,17 +112,23 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             nested: false,
             num_field_loc: 0,
             min_align: 0,
+            max_voffset: 0,
             _phantom: PhantomData,
         }
     }
     pub fn start_table(&mut self) -> UOffsetT {
-        0
+        self.assert_not_nested();
+        self.nested = true;
+        self.get_size() as UOffsetT
     }
     pub fn get_buf_slice(&self) -> &[u8] {
         &self.owned_buf[..]
     }
     pub fn get_active_buf_slice(&self) -> &[u8] {
         &self.owned_buf[self.cur_idx..]
+    }
+    pub fn get_mut_active_buf_slice(&mut self) -> &mut [u8] {
+        &mut self.owned_buf[self.cur_idx..]
     }
     pub fn reallocate(&mut self, _: usize) {
         unimplemented!()
@@ -174,7 +189,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
   }
     pub fn pre_align(&mut self, n: usize, alignment: usize) {
         self.track_min_align(alignment);
-        let s = self.get_size();
+        let s = self.get_size() as usize;
         self.fill(padding_bytes(s + n, alignment));
     }
     pub fn get_size(&self) -> usize {
@@ -241,9 +256,25 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [T]> {
         LabeledUOffsetT::new(0)
     }
-    pub fn end_table<T>(&mut self, _: T) -> UOffsetT {
+    pub fn end_table(&mut self, start: UOffsetT) -> UOffsetT {
+        self.assert_nested();
+
+        let vtableoffsetloc = self.push_element_scalar::<SOffsetT>(0);
+        self.max_voffset = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
+                                         field_index_to_offset(0));
+        let to_fill = self.max_voffset as usize;
+        self.fill(to_fill);
+
+        let table_object_size = vtableoffsetloc - start;
+        assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
+
+        emplace_scalar::<VOffsetT>(&mut self.get_mut_active_buf_slice()[..SIZE_VOFFSET], table_object_size as VOffsetT);
+
+        self.nested = false;
+
         0
     }
+
     pub fn required<T>(&self, _: &LabeledUOffsetT<T>, _: isize) -> bool {
         unimplemented!()
     }
@@ -279,13 +310,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     pub fn push<T: Sized>(&mut self, x: T) {
-        let data = unsafe {
-            std::slice::from_raw_parts((&x as *const T) as *const u8,
-                                       std::mem::size_of::<T>())
-        };
-
-        let n = self.make_space(data.len());//std::mem::size_of::<T>());
-        self.owned_buf[n..n+data.len()].copy_from_slice(data);
+        let s = std::mem::size_of::<T>();
+        let n = self.make_space(s);
+        emplace_scalar(&mut self.owned_buf[n..n+s], x);
     }
 
     pub fn release(&mut self) {
@@ -317,7 +344,7 @@ pub trait UOffsetTTrait {}
 pub trait OffsetTTrait {}
 pub trait VOffsetTTrait {}
 pub type UOffsetT = u32;
-pub type OffsetT = i32;
+pub type SOffsetT = i32;
 pub type VOffsetT = i16;
 
 //pub type String<'a> = &'a str;
