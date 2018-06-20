@@ -28,6 +28,21 @@ impl ElementScalar for i32 { fn to_le(self) -> i32 { i32::to_le(self) } }
 impl ElementScalar for u64 { fn to_le(self) -> u64 { u64::to_le(self) } }
 impl ElementScalar for i64 { fn to_le(self) -> i64 { i64::to_le(self) } }
 
+pub const SIZE_U8: usize = 1;
+pub const SIZE_I8: usize = 1;
+pub const SIZE_U16: usize = 2;
+pub const SIZE_I16: usize = 2;
+pub const SIZE_U32: usize = 4;
+pub const SIZE_I32: usize = 4;
+pub const SIZE_U64: usize = 8;
+pub const SIZE_I64: usize = 8;
+pub const SIZE_UOFFSET: usize = SIZE_U32;
+
+#[inline]
+pub fn padding_bytes(buf_size: usize, scalar_size: usize) -> usize {
+  ((!buf_size) + 1) & (scalar_size - 1)
+}
+
 pub trait Table {}
 pub struct Verifier {}
 impl Verifier {
@@ -55,8 +70,11 @@ impl Verifier {
 }
 pub struct TypeTable {}
 pub struct FlatBufferBuilder<'fbb> {
-    owned_buf: Vec<u8>,
-    cur_idx: usize,
+    pub owned_buf: Vec<u8>,
+    pub cur_idx: usize,
+    nested: bool,
+    num_field_loc: isize,
+    min_align: usize,
     _phantom: PhantomData<&'fbb ()>,
 }
 //impl<T> AsMut<T> for FlatBufferBuilder {
@@ -69,6 +87,19 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         FlatBufferBuilder{
             owned_buf: Vec::new(),
             cur_idx: 0,
+            nested: false,
+            num_field_loc: 0,
+            min_align: 0,
+            _phantom: PhantomData,
+        }
+    }
+    pub fn new_with_capacity(size: usize) -> Self {
+        FlatBufferBuilder{
+            owned_buf: vec![0u8; size],
+            cur_idx: size,
+            nested: false,
+            num_field_loc: 0,
+            min_align: 0,
             _phantom: PhantomData,
         }
     }
@@ -118,6 +149,43 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //pub fn as_mut(&mut self) -> &mut Self {
     //    self
     //}
+    //
+    pub fn assert_nested(&self) {
+        assert!(self.nested);
+        // TODO: why no num_field_loc?
+    }
+    pub fn assert_not_nested(&self) {
+        assert!(!self.nested);
+        assert_eq!(self.num_field_loc, 0);
+    }
+    pub fn start_vector(&mut self, elemsize: usize, num_elems: usize) {
+        self.assert_not_nested();
+        self.nested = true;
+        self.pre_align(num_elems*elemsize, SIZE_UOFFSET);
+        self.pre_align(num_elems*elemsize, elemsize); // Just in case elemsize > uoffset_t.
+    }
+    pub fn end_vector(&mut self, len: usize) -> UOffsetT {
+      self.assert_nested(); // Hit if no corresponding StartVector.
+      self.nested = false;
+      self.push_element_scalar(len as UOffsetT)
+  }
+    pub fn pre_align(&mut self, n: usize, alignment: usize) {
+        self.track_min_align(alignment);
+        let s = self.get_size();
+        self.fill(padding_bytes(s + n, alignment));
+    }
+    pub fn get_size(&self) -> usize {
+        self.owned_buf.len() - self.cur_idx
+    }
+    pub fn fill(&mut self, zero_pad_bytes: usize) {
+        self.make_space(zero_pad_bytes);
+        for i in 0usize..zero_pad_bytes {
+            self.owned_buf[i] = 0;
+        }
+    }
+    pub fn track_min_align(&mut self, alignment: usize) {
+        self.min_align = std::cmp::max(self.min_align, alignment);
+    }
     pub fn add_element<T>(&mut self, _: isize, _: T, _: T) -> T {
         unimplemented!()
     }

@@ -2093,65 +2093,74 @@ mod test_byte_layouts {
         b.push_element_scalar(0x1122334455667788u64);
         check(&b, &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]);
     }
-//	// test 2: 1xbyte vector
-//
-//	b = flatbuffers.NewBuilder(0)
-//	check([]byte{})
-//	b.StartVector(flatbuffers.SizeByte, 1, 1)
-//	check([]byte{0, 0, 0}) // align to 4bytes
-//	b.PrependByte(1)
-//	check([]byte{1, 0, 0, 0})
-//	b.EndVector(1)
-//	check([]byte{1, 0, 0, 0, 1, 0, 0, 0}) // padding
-//
-//	// test 3: 2xbyte vector
-//
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartVector(flatbuffers.SizeByte, 2, 1)
-//	check([]byte{0, 0}) // align to 4bytes
-//	b.PrependByte(1)
-//	check([]byte{1, 0, 0})
-//	b.PrependByte(2)
-//	check([]byte{2, 1, 0, 0})
-//	b.EndVector(2)
-//	check([]byte{2, 0, 0, 0, 2, 1, 0, 0}) // padding
-//
-//	// test 3b: 11xbyte vector matches builder size
-//
-//	b = flatbuffers.NewBuilder(12)
-//	b.StartVector(flatbuffers.SizeByte, 8, 1)
-//	start := []byte{}
-//	check(start)
-//	for i := 1; i < 12; i++ {
-//		b.PrependByte(byte(i))
-//		start = append([]byte{byte(i)}, start...)
-//		check(start)
-//	}
-//	b.EndVector(8)
-//	check(append([]byte{8, 0, 0, 0}, start...))
-//
-//	// test 4: 1xuint16 vector
-//
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartVector(flatbuffers.SizeUint16, 1, 1)
-//	check([]byte{0, 0}) // align to 4bytes
-//	b.PrependUint16(1)
-//	check([]byte{1, 0, 0, 0})
-//	b.EndVector(1)
-//	check([]byte{1, 0, 0, 0, 1, 0, 0, 0}) // padding
-//
-//	// test 5: 2xuint16 vector
-//
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartVector(flatbuffers.SizeUint16, 2, 1)
-//	check([]byte{}) // align to 4bytes
-//	b.PrependUint16(0xABCD)
-//	check([]byte{0xCD, 0xAB})
-//	b.PrependUint16(0xDCBA)
-//	check([]byte{0xBA, 0xDC, 0xCD, 0xAB})
-//	b.EndVector(2)
-//	check([]byte{2, 0, 0, 0, 0xBA, 0xDC, 0xCD, 0xAB})
-//
+
+    #[test]
+    fn test_2_1xbyte_vector() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        check(&b, &[]);
+        b.start_vector(flatbuffers::SIZE_U8, 1);
+        println!("cap: {}", b.owned_buf.capacity());
+        check(&b, &[0, 0, 0]); // align to 4bytes
+        b.push_element_scalar(1u8);
+        check(&b, &[1, 0, 0, 0]);
+        b.end_vector(1);
+        check(&b, &[1, 0, 0, 0, 1, 0, 0, 0]); // padding
+    }
+
+    #[test]
+    fn test_3_2xbyte_vector() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(flatbuffers::SIZE_U8, 2);
+        check(&b, &[0, 0]); // align to 4bytes
+        b.push_element_scalar(1u8);
+        check(&b, &[1, 0, 0]);
+        b.push_element_scalar(2u8);
+        check(&b, &[2, 1, 0, 0]);
+        b.end_vector(2);
+        check(&b, &[2, 0, 0, 0, 2, 1, 0, 0]); // padding
+    }
+
+    #[test]
+    fn test_3b_11xbyte_vector_matches_builder_size() {
+        let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
+        b.start_vector(flatbuffers::SIZE_U8, 8);
+
+        let mut gold = vec![0u8; 0];
+        check(&b, &gold[..]);
+
+        for i in 1u8..=8 {
+            b.push_element_scalar(i);
+            gold.insert(0, i);
+            check(&b, &gold[..]);
+        }
+        b.end_vector(8);
+        let want = vec![8u8, 0, 0, 0,  8, 7, 6, 5, 4, 3, 2, 1];
+        check(&b, &want[..]);
+    }
+    #[test]
+    fn test_4_1xuint16_vector() {
+        let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
+        b.start_vector(flatbuffers::SIZE_U16, 1);
+        check(&b, &[0, 0]); // align to 4bytes
+        b.push_element_scalar(1u16);
+        check(&b, &[1, 0, 0, 0]);
+        b.end_vector(1);
+        check(&b, &[1, 0, 0, 0, 1, 0, 0, 0]); // padding
+    }
+
+    #[test]
+    fn test_5_2xuint16_vector() {
+        let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
+        b.start_vector(flatbuffers::SIZE_U16, 2);
+        check(&b, &[]); // align to 4bytes
+        b.push_element_scalar(0xABCDu16);
+        check(&b, &[0xCD, 0xAB]);
+        b.push_element_scalar(0xDCBAu16);
+        check(&b, &[0xBA, 0xDC, 0xCD, 0xAB]);
+        b.end_vector(2);
+        check(&b, &[2, 0, 0, 0, 0xBA, 0xDC, 0xCD, 0xAB]);
+    }
+
 //	// test 6: CreateString
 //
 //	b = flatbuffers.NewBuilder(0)
