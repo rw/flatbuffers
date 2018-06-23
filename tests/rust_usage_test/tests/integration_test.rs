@@ -2199,7 +2199,9 @@ mod test_byte_layouts {
         let off = b.start_table();
         check(&b, &[]);
         b.end_table(off);
-        check(&b, &[4, 0, 4, 0, 4, 0, 0, 0]);
+        check(&b, &[4, 0, // vtable length
+                    4, 0, // length of table including vtable offset
+                    4, 0, 0, 0]); // offset for start of vtable
     }
 //	// test 8: vtable with one true bool
 //	b = flatbuffers.NewBuilder(0)
