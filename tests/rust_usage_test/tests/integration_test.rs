@@ -996,19 +996,19 @@ fn fuzz_test1() {
           let choice = lcg.next() % (test_values_max as u64);
           let off = flatbuffers::field_index_to_offset(f);
           match choice {
-           //0 => {builder.push_element_scalar::<u8>(off, bool_val, 0);}
-           _ => {panic!("unknown choice");}
-        //case 1: builder.AddElement<int8_t>(off, char_val, 0); break;
-        //case 2: builder.AddElement<uint8_t>(off, uchar_val, 0); break;
-        //case 3: builder.AddElement<int16_t>(off, short_val, 0); break;
-        //case 4: builder.AddElement<uint16_t>(off, ushort_val, 0); break;
-        //case 5: builder.AddElement<int32_t>(off, int_val, 0); break;
-        //case 6: builder.AddElement<uint32_t>(off, uint_val, 0); break;
-        //case 7: builder.AddElement<int64_t>(off, long_val, 0); break;
-        //case 8: builder.AddElement<uint64_t>(off, ulong_val, 0); break;
-        //case 9: builder.AddElement<float>(off, float_val, 0); break;
-        //case 10: builder.AddElement<double>(off, double_val, 0); break;
-      }
+              //0 => {builder.push_element_scalar::<u8>(off, bool_val, 0);}
+              _ => {panic!("unknown choice");}
+              //case 1: builder.AddElement<int8_t>(off, char_val, 0); break;
+              //case 2: builder.AddElement<uint8_t>(off, uchar_val, 0); break;
+              //case 3: builder.AddElement<int16_t>(off, short_val, 0); break;
+              //case 4: builder.AddElement<uint16_t>(off, ushort_val, 0); break;
+              //case 5: builder.AddElement<int32_t>(off, int_val, 0); break;
+              //case 6: builder.AddElement<uint32_t>(off, uint_val, 0); break;
+              //case 7: builder.AddElement<int64_t>(off, long_val, 0); break;
+              //case 8: builder.AddElement<uint64_t>(off, ulong_val, 0); break;
+              //case 9: builder.AddElement<float>(off, float_val, 0); break;
+              //case 10: builder.AddElement<double>(off, double_val, 0); break;
+          }
       }
       objects[i] = builder.end_table(start);
     }
@@ -2210,10 +2210,10 @@ mod test_byte_layouts {
     fn test_8_vtable_with_one_true_bool() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
-        b.start_table(1);
-        check([]byte{});
+        let off = b.start_table(1);
+        check(&b, &[]);
         b.prepend_bool_slot(0, true, false);
-        b.end_table();
+        b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
               8, 0, // length of object including vtable offset

@@ -99,7 +99,7 @@ pub struct FlatBufferBuilder<'fbb> {
     finished: bool,
 
     min_align: usize,
-    table_end: UOffsetT,
+    //table_end: UOffsetT,
     max_voffset: VOffsetT,
     _phantom: PhantomData<&'fbb ()>,
 }
@@ -124,7 +124,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             finished: false,
 
             min_align: 0,
-            table_end: 0,
+            //table_end: 0,
 
             max_voffset: 0,
             _phantom: PhantomData,
@@ -138,9 +138,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.vtable.truncate(num_fields as usize);
 
         self.min_align = 1;
-        self.table_end = self.rev_cur_idx();
 
-        self.get_size() as UOffsetT
+        self.rev_cur_idx()
+
+        //self.table_end = self.rev_cur_idx();
+
+        //self.get_size() as UOffsetT
     }
     pub fn get_buf_slice(&self) -> &[u8] {
         &self.owned_buf[..]
@@ -302,18 +305,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //    self.push_element_scalar::<SOffsetT>(0);
     //    let object_offset = b.get_size();
     //}
-    pub fn end_table(&mut self, _: UOffsetT) -> UOffsetT {
+    pub fn end_table(&mut self, off: UOffsetT) -> UOffsetT {
         self.assert_nested();
-        let n = self.write_vtable();
+        let n = self.write_vtable(off);
         self.nested = false;
         n
     }
-    pub fn write_vtable(&mut self) -> UOffsetT {
+    pub fn write_vtable(&mut self, off: UOffsetT) -> UOffsetT {
         self.push_element_scalar::<SOffsetT>(0);
         let table_offset = self.rev_cur_idx();
 
         // empty vtable for now
-        let table_size = table_offset - self.table_end;
+        let table_size = table_offset - off;
         self.push_element_scalar::<VOffsetT>(table_size as VOffsetT);
         let vtable_size = (0 + VTABLE_METADATA_FIELDS) * SIZE_VOFFSET;
         self.push_element_scalar::<VOffsetT>(vtable_size as VOffsetT);
