@@ -53,12 +53,12 @@ pub fn field_index_to_offset(field_id: VOffsetT) -> VOffsetT {
     ((field_id + fixed_fields) * (SIZE_VOFFSET as VOffsetT)) as VOffsetT
 }
 pub fn emplace_scalar<T>(s: &mut [u8], x: T) {
-        let data = unsafe {
-            std::slice::from_raw_parts((&x as *const T) as *const u8,
-                                       std::mem::size_of::<T>())
-        };
+    let sz = std::mem::size_of::<T>();
+    let data = unsafe {
+        std::slice::from_raw_parts((&x as *const T) as *const u8, sz)
+    };
 
-        s.copy_from_slice(data);
+    s[..sz].copy_from_slice(data);
 }
 
 pub trait Table {}
@@ -90,8 +90,13 @@ pub struct TypeTable {}
 pub struct FlatBufferBuilder<'fbb> {
     pub owned_buf: Vec<u8>,
     pub cur_idx: usize,
+
+    vtable: Vec<UOffsetT>,
+    vtables: Vec<UOffsetT>,
+
     nested: bool,
-    num_field_loc: isize,
+    finished: bool,
+
     min_align: usize,
     max_voffset: VOffsetT,
     _phantom: PhantomData<&'fbb ()>,
@@ -108,9 +113,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn new_with_capacity(size: usize) -> Self {
         FlatBufferBuilder{
             owned_buf: vec![0u8; size],
+            vtable: Vec::new(),
+            vtables: Vec::new(),
+
             cur_idx: size,
+
             nested: false,
-            num_field_loc: 0,
+            finished: false,
+
             min_align: 0,
             max_voffset: 0,
             _phantom: PhantomData,
@@ -119,6 +129,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn start_table(&mut self) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
+        self.min_align = 1;
         self.get_size() as UOffsetT
     }
     pub fn get_buf_slice(&self) -> &[u8] {
@@ -135,6 +146,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     pub fn grow_owned_buf(&mut self) -> usize {
+        let starting_active_size = self.get_active_buf_slice().len();
         assert!(self.owned_buf.len() * 2 <= FLATBUFFERS_MAX_BUFFER_SIZE,
 		        "cannot grow buffer beyond 2 gigabytes");
 
@@ -144,6 +156,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         self.owned_buf.resize(new_len, 0);
         self.cur_idx += diff;
+        let ending_active_size = self.get_active_buf_slice().len();
+        assert_eq!(starting_active_size, ending_active_size);
         if self.owned_buf.len() == 1 {
             return 1;
         }
@@ -162,6 +176,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             *x = 0;
         }
 
+        let ending_active_size = self.get_active_buf_slice().len();
+        assert_eq!(starting_active_size, ending_active_size);
+
         new_len
 	}
     //pub fn as_mut(&mut self) -> &mut Self {
@@ -170,23 +187,33 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //
     pub fn assert_nested(&self) {
         assert!(self.nested);
-        // TODO: why no num_field_loc?
+        // vtable could be empty (e.g. for all-default values) or in a vector
     }
     pub fn assert_not_nested(&self) {
         assert!(!self.nested);
-        assert_eq!(self.num_field_loc, 0);
+        assert_eq!(self.vtable.len(), 0);
     }
-    pub fn start_vector(&mut self, elemsize: usize, num_elems: usize) {
+    pub fn start_vector(&mut self, elemsize: usize, num_elems: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
         self.pre_align(num_elems*elemsize, SIZE_UOFFSET);
         self.pre_align(num_elems*elemsize, elemsize); // Just in case elemsize > uoffset_t.
+        self.rev_cur_idx()
+    }
+    // Offset relative to the end of the buffer.
+    pub fn rev_cur_idx(&self) -> UOffsetT {
+        (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
     pub fn end_vector(&mut self, len: usize) -> UOffsetT {
-      self.assert_nested(); // Hit if no corresponding StartVector.
+      self.assert_nested();
+      self.push_element_scalar(len as UOffsetT);
       self.nested = false;
-      self.push_element_scalar(len as UOffsetT)
+      self.rev_cur_idx()
   }
+    pub fn emplace_scalar_in_active_buf<T>(&mut self, at: usize, x: T) {
+        let buf = &mut self.get_mut_active_buf_slice();
+        emplace_scalar(&mut buf[at..], x)
+    }
     pub fn pre_align(&mut self, n: usize, alignment: usize) {
         self.track_min_align(alignment);
         let s = self.get_size() as usize;
@@ -197,8 +224,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
-        for i in 0usize..zero_pad_bytes {
-            self.owned_buf[i] = 0;
+        let buf = &mut self.get_mut_active_buf_slice();
+        for i in 0..zero_pad_bytes {
+            buf[i] = 0;
         }
     }
     pub fn track_min_align(&mut self, alignment: usize) {
@@ -256,23 +284,65 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [T]> {
         LabeledUOffsetT::new(0)
     }
-    pub fn end_table(&mut self, start: UOffsetT) -> UOffsetT {
+    pub fn dump_buf(&self, label: &str) {
+        println!("dump_buf {}: {}/{}: {:?}", label, self.get_size(), self.owned_buf.len(), self.get_active_buf_slice());
+    }
+    //pub fn end_table3(&mut self, start: UOffsetT) -> UOffsetT {
+    //    self.assert_nested();
+    //    self.push_element_scalar::<SOffsetT>(0);
+    //    let object_offset = b.get_size();
+    //}
+    pub fn end_table(&mut self, _: UOffsetT) -> UOffsetT {
+        self.assert_nested();
+        let n = self.write_vtable();
+        self.nested = false;
+        n
+    }
+    pub fn write_vtable(&mut self) -> UOffsetT {
+        0
+    }
+    pub fn end_table_old(&mut self, start: UOffsetT) -> UOffsetT {
         self.assert_nested();
 
         let vtableoffsetloc = self.push_element_scalar::<SOffsetT>(0);
+        self.dump_buf(&format!("pushed empty vtableoffsetloc {}", vtableoffsetloc));
         self.max_voffset = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
                                          field_index_to_offset(0));
         let to_fill = self.max_voffset as usize;
         self.fill(to_fill);
+        self.dump_buf(&format!("filled {}", to_fill));
 
         let table_object_size = vtableoffsetloc - start;
         assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
 
-        emplace_scalar::<VOffsetT>(&mut self.get_mut_active_buf_slice()[..SIZE_VOFFSET], table_object_size as VOffsetT);
+        {
+            let n = table_object_size as VOffsetT;
+            emplace_scalar::<VOffsetT>(&mut self.get_mut_active_buf_slice()[SIZE_VOFFSET..], n);
+            self.dump_buf(&format!("after placing table_object_size {}", n));
+        }
+        {
+            let n = self.max_voffset as VOffsetT;
+            emplace_scalar::<VOffsetT>(&mut self.get_mut_active_buf_slice(), n);
+            self.dump_buf(&format!("after placing max_voffset {}", n));
+        }
+
+        let vt_use = self.get_size();
+        println!("vt_use at start: {}", vt_use);
+        // TODO write vtable
+
+        {
+            let n = (vt_use as SOffsetT) - (vtableoffsetloc as SOffsetT);
+            //let i = self.get_size() - vtableoffsetloc as usize;
+            let buf = &mut self.get_mut_active_buf_slice();
+            //let i = buf.len() - vtableoffsetloc as usize;
+            let i = vtableoffsetloc as usize;
+            println!("writing vt_use... {} at {} -- {:?}", n, i, buf);
+            emplace_scalar::<SOffsetT>(&mut buf[i..], n);
+        }
 
         self.nested = false;
 
-        0
+        vtableoffsetloc as UOffsetT
     }
 
     pub fn required<T>(&self, _: &LabeledUOffsetT<T>, _: isize) -> bool {
@@ -289,8 +359,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
        DetachedBuffer{}
     }
 
-    pub fn push_element_bool(&mut self, b: bool) {
-        self.push_element_scalar(b as u8);
+    pub fn push_element_bool(&mut self, b: bool) -> UOffsetT {
+        self.push_element_scalar(b as u8)
     }
     fn align(&mut self, elem_size: usize) {
         let delta = self.cur_idx % elem_size;
@@ -304,15 +374,24 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
         let n = self.make_space(x.len());//std::mem::size_of::<T>());
-        self.owned_buf[n..n+x.len()].copy_from_slice(x);
+        {
+            let buf = &mut self.get_mut_active_buf_slice();
+            buf[..x.len()].copy_from_slice(x);
+        }
 
         self.cur_idx as UOffsetT
     }
 
     pub fn push<T: Sized>(&mut self, x: T) {
+        println!("start of push: {}", self.cur_idx);
         let s = std::mem::size_of::<T>();
+        println!("make space {}", s);
         let n = self.make_space(s);
-        emplace_scalar(&mut self.owned_buf[n..n+s], x);
+        {
+            let buf = &mut self.get_mut_active_buf_slice();
+            emplace_scalar(&mut buf[..s], x);
+        }
+        println!("after push: {} {:?} {:?}", self.cur_idx, self.get_active_buf_slice(), &self.owned_buf[..]);
     }
 
     pub fn release(&mut self) {
@@ -334,8 +413,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         assert!(want <= FLATBUFFERS_MAX_BUFFER_SIZE,
 		        "cannot grow buffer beyond 2 gigabytes");
         while self.cur_idx < want {
-            println!("growing: {} < {}", self.cur_idx, want);
+            println!("growing: {} < {}: {:?}", self.cur_idx, want, self.get_active_buf_slice());
             self.grow_owned_buf();
+            println!("grew to: {}, {}, {:?}", self.cur_idx, self.owned_buf.len(), self.get_active_buf_slice());
         }
         want
     }
