@@ -2068,7 +2068,8 @@ class RustGenerator : public BaseGenerator {
         "  pub fn new"
         "(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> "
         "{{STRUCT_NAME}}Builder<'a, 'b> {";
-    code_ += "    let start = _fbb.start_table();";
+    code_.SetValue("NUM_FIELDS", NumToString(struct_def.fields.vec.size()));
+    code_ += "    let start = _fbb.start_table({{NUM_FIELDS}});";
     code_ += "    {{STRUCT_NAME}}Builder {";
     code_ += "      fbb_: _fbb,";
     code_ += "      start_: start,";

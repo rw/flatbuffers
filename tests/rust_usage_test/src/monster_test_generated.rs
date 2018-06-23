@@ -46,7 +46,7 @@ pub struct InParentNamespaceBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> InParentNamespaceBuilder<'a, 'b> {
-    let start = _fbb.start_table();
+    let start = _fbb.start_table(0);
     InParentNamespaceBuilder {
       fbb_: _fbb,
       start_: start,
@@ -109,7 +109,7 @@ pub struct MonsterBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table();
+    let start = _fbb.start_table(0);
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -366,7 +366,7 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
     self.fbb_.add_element::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, 2);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TestSimpleTableWithEnumBuilder<'a, 'b> {
-    let start = _fbb.start_table();
+    let start = _fbb.start_table(1);
     TestSimpleTableWithEnumBuilder {
       fbb_: _fbb,
       start_: start,
@@ -449,7 +449,7 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
     self.fbb_.add_element::<u16>(Stat::VT_COUNT, count, 0);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> StatBuilder<'a, 'b> {
-    let start = _fbb.start_table();
+    let start = _fbb.start_table(3);
     StatBuilder {
       fbb_: _fbb,
       start_: start,
@@ -906,7 +906,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     self.fbb_.add_offset(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table();
+    let start = _fbb.start_table(35);
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -1114,7 +1114,7 @@ impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
     self.fbb_.add_offset(TypeAliases::VT_VF64, vf64);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TypeAliasesBuilder<'a, 'b> {
-    let start = _fbb.start_table();
+    let start = _fbb.start_table(12);
     TypeAliasesBuilder {
       fbb_: _fbb,
       start_: start,
