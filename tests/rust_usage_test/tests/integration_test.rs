@@ -2205,22 +2205,25 @@ mod test_byte_layouts {
                     4, 0, // length of table including vtable offset
                     4, 0, 0, 0]); // offset for start of vtable
     }
-//	// test 8: vtable with one true bool
-//	b = flatbuffers.NewBuilder(0)
-//	check([]byte{})
-//	b.StartObject(1)
-//	check([]byte{})
-//	b.PrependBoolSlot(0, true, false)
-//	b.EndObject()
-//	check([]byte{
-//		6, 0, // vtable bytes
-//		8, 0, // length of object including vtable offset
-//		7, 0, // start of bool value
-//		6, 0, 0, 0, // offset for start of vtable (int32)
-//		0, 0, 0, // padded to 4 bytes
-//		1, // bool value
-//	})
-//
+	// test 8: vtable with one true bool
+    #[test]
+    fn test_8_vtable_with_one_true_bool() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        check(&b, &[]);
+        b.start_table(1);
+        check([]byte{});
+        b.prepend_bool_slot(0, true, false);
+        b.end_table();
+        check(&b, &[
+              6, 0, // vtable bytes
+              8, 0, // length of object including vtable offset
+              7, 0, // start of bool value
+              6, 0, 0, 0, // offset for start of vtable (int32)
+              0, 0, 0, // padded to 4 bytes
+              1, // bool value
+        ]);
+    }
+
 //	// test 9: vtable with one default bool
 //	b = flatbuffers.NewBuilder(0)
 //	check([]byte{})
