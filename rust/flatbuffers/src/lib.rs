@@ -18,7 +18,7 @@ use std::marker::PhantomData;
 pub type VectorOffset = ();
 pub type StringOffset = ();
 pub type ByteStringOffset = ();
-pub trait ElementScalar : Sized {
+pub trait ElementScalar : Sized + Eq {
     fn to_le(self) -> Self;
 }
 //impl ElementScalar for bool { fn to_le(self) -> bool { u8::to_le(self as u8) as bool } }
@@ -135,7 +135,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.nested = true;
 
         self.vtable.clear();
-        self.vtable.truncate(num_fields as usize);
+        //self.vtable.truncate(num_fields as usize);
+        self.vtable.resize(num_fields as usize, 0);
 
         self.min_align = 1;
 
@@ -145,6 +146,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         //self.get_size() as UOffsetT
     }
+    pub fn store_slot(&mut self, slotnum: usize) {
+        assert!(slotnum < self.vtable.len(), "{} !< {}", self.vtable.len(), slotnum);
+        self.vtable[slotnum] = self.rev_cur_idx() as UOffsetT;
+    }
     pub fn get_buf_slice(&self) -> &[u8] {
         &self.owned_buf[..]
     }
@@ -152,6 +157,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         &self.owned_buf[self.cur_idx..]
     }
     pub fn get_mut_active_buf_slice(&mut self) -> &mut [u8] {
+        unreachable!();
         &mut self.owned_buf[self.cur_idx..]
     }
     pub fn reallocate(&mut self, _: usize) {
@@ -237,9 +243,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
-        let buf = &mut self.get_mut_active_buf_slice();
+        let start = self.cur_idx;
         for i in 0..zero_pad_bytes {
-            buf[i] = 0;
+            self.owned_buf[start + i] = 0;
         }
     }
     pub fn track_min_align(&mut self, alignment: usize) {
@@ -315,21 +321,79 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar::<SOffsetT>(0);
         let table_offset = self.rev_cur_idx();
 
-        // empty vtable for now
-        let table_size = table_offset - off;
-        self.push_element_scalar::<VOffsetT>(table_size as VOffsetT);
-        let vtable_size = (0 + VTABLE_METADATA_FIELDS) * SIZE_VOFFSET;
-        self.push_element_scalar::<VOffsetT>(vtable_size as VOffsetT);
-        let table_start = self.owned_buf.len() as SOffsetT - table_offset as SOffsetT;
-        {
-            let n = self.rev_cur_idx() as SOffsetT - table_offset as SOffsetT;
-            emplace_scalar::<SOffsetT>(&mut self.owned_buf[table_start as usize..],n);
+        // Trim vtable of trailing zeroes.
+        match &self.vtable.iter().rposition(|&x| x != 0) {
+            Some(end) => { self.vtable.truncate(*end); }
+            None => {}
         }
 
+        let existing_vtable = false;
+        if !existing_vtable {
+            // Did not find a vtable, so write this one to the buffer.
+
+            // Write out the current vtable in reverse, because
+            // serialization occurs in last-first order:
+            // (we cannot use an iterator here due to false borrowing.)
+            let mut i = self.vtable.len();
+            while i > 0 {
+                let val = self.vtable[i - 1]; // prevent underflow of unsized type
+                let off = if val == 0 {
+                    0
+                } else {
+                    // Forward reference to field;
+                    // use 32bit number to assert no overflow:
+                    table_offset - val
+                };
+                self.push_element_scalar::<VOffsetT>(off as VOffsetT);
+                i -= 1;
+            }
+
+            // The two metadata fields are written last.
+
+            // First, store the object bytesize:
+            let table_size = table_offset - off;
+            self.push_element_scalar::<VOffsetT>(table_size as VOffsetT);
+
+            // Second, store the vtable bytesize:
+            let vtable_size = (self.vtable.len() + VTABLE_METADATA_FIELDS) * SIZE_VOFFSET;
+            self.push_element_scalar::<VOffsetT>(vtable_size as VOffsetT);
+
+            // Next, write the offset to the new vtable in the
+            // already-allocated SOffsetT at the beginning of this object:
+            let table_start = self.owned_buf.len() as SOffsetT - table_offset as SOffsetT;
+            {
+                let n = self.rev_cur_idx();
+                emplace_scalar(&mut self.owned_buf[table_start as usize..],
+                               n as SOffsetT - table_offset as SOffsetT);
+            }
+
+            // Finally, store this vtable in memory for future
+            // deduplication:
+            {
+                let n = self.rev_cur_idx();
+                self.vtables.push(n);
+            }
+
+            self.vtable.truncate(0);
+
+            return table_offset;
+        }
+
+        //// empty vtable for now
+        //let table_size = table_offset - off;
+        //self.push_element_scalar::<VOffsetT>(table_size as VOffsetT);
+        //let vtable_size = (0 + VTABLE_METADATA_FIELDS) * SIZE_VOFFSET;
+        //self.push_element_scalar::<VOffsetT>(vtable_size as VOffsetT);
+        //let table_start = self.owned_buf.len() as SOffsetT - table_offset as SOffsetT;
+        //{
+        //    let n = self.rev_cur_idx() as SOffsetT - table_offset as SOffsetT;
+        //    emplace_scalar::<SOffsetT>(&mut self.owned_buf[table_start as usize..],n);
+        //}
 
         0
     }
     pub fn end_table_old(&mut self, start: UOffsetT) -> UOffsetT {
+        unreachable!();
         self.assert_nested();
 
         let vtableoffsetloc = self.push_element_scalar::<SOffsetT>(0);
@@ -403,11 +467,20 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
         let n = self.make_space(x.len());//std::mem::size_of::<T>());
         {
-            let buf = &mut self.get_mut_active_buf_slice();
-            buf[..x.len()].copy_from_slice(x);
+            let n = self.cur_idx;
+            &mut self.owned_buf[n..n+x.len()].copy_from_slice(x);
         }
 
         self.cur_idx as UOffsetT
+    }
+    pub fn push_slot_bool(&mut self, slotnum: usize, x: bool, default: bool) {
+        self.push_slot_scalar(slotnum, x as u8, default as u8);
+    }
+    pub fn push_slot_scalar<T: ElementScalar>(&mut self, slotnum: usize, x: T, default: T) {
+        if x != default {
+            self.push_element_scalar(x);
+            self.store_slot(slotnum);
+        }
     }
 
     pub fn push<T: Sized>(&mut self, x: T) {
@@ -416,10 +489,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         println!("make space {}", s);
         let n = self.make_space(s);
         {
-            let buf = &mut self.get_mut_active_buf_slice();
-            emplace_scalar(&mut buf[..s], x);
+            let start = self.cur_idx;
+            emplace_scalar(&mut self.owned_buf[start..start+s], x);
         }
-        println!("after push: {} {:?} {:?}", self.cur_idx, self.get_active_buf_slice(), &self.owned_buf[..]);
+        //println!("after push: {} {:?} {:?}", self.cur_idx, self.get_active_buf_slice(), &self.owned_buf[..]);
     }
 
     pub fn release(&mut self) {

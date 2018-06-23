@@ -2212,7 +2212,7 @@ mod test_byte_layouts {
         check(&b, &[]);
         let off = b.start_table(1);
         check(&b, &[]);
-        //b.prepend_bool_slot(0, true, false);
+        b.push_slot_bool(0, true, false);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
