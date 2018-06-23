@@ -31,6 +31,7 @@ impl ElementScalar for i32 { fn to_le(self) -> i32 { i32::to_le(self) } }
 impl ElementScalar for u64 { fn to_le(self) -> u64 { u64::to_le(self) } }
 impl ElementScalar for i64 { fn to_le(self) -> i64 { i64::to_le(self) } }
 
+pub const VTABLE_METADATA_FIELDS: usize = 2;
 pub const SIZE_U8: usize = 1;
 pub const SIZE_I8: usize = 1;
 pub const SIZE_U16: usize = 2;
@@ -98,6 +99,7 @@ pub struct FlatBufferBuilder<'fbb> {
     finished: bool,
 
     min_align: usize,
+    table_end: UOffsetT,
     max_voffset: VOffsetT,
     _phantom: PhantomData<&'fbb ()>,
 }
@@ -122,14 +124,22 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             finished: false,
 
             min_align: 0,
+            table_end: 0,
+
             max_voffset: 0,
             _phantom: PhantomData,
         }
     }
-    pub fn start_table(&mut self) -> UOffsetT {
+    pub fn start_table(&mut self, num_fields: VOffsetT) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
+
+        self.vtable.clear();
+        self.vtable.truncate(num_fields as usize);
+
         self.min_align = 1;
+        self.table_end = self.rev_cur_idx();
+
         self.get_size() as UOffsetT
     }
     pub fn get_buf_slice(&self) -> &[u8] {
@@ -299,6 +309,21 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         n
     }
     pub fn write_vtable(&mut self) -> UOffsetT {
+        self.push_element_scalar::<SOffsetT>(0);
+        let table_offset = self.rev_cur_idx();
+
+        // empty vtable for now
+        let table_size = table_offset - self.table_end;
+        self.push_element_scalar::<VOffsetT>(table_size as VOffsetT);
+        let vtable_size = (0 + VTABLE_METADATA_FIELDS) * SIZE_VOFFSET;
+        self.push_element_scalar::<VOffsetT>(vtable_size as VOffsetT);
+        let table_start = self.owned_buf.len() as SOffsetT - table_offset as SOffsetT;
+        {
+            let n = self.rev_cur_idx() as SOffsetT - table_offset as SOffsetT;
+            emplace_scalar::<SOffsetT>(&mut self.owned_buf[table_start as usize..],n);
+        }
+
+
         0
     }
     pub fn end_table_old(&mut self, start: UOffsetT) -> UOffsetT {
