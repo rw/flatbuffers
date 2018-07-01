@@ -995,9 +995,12 @@ fn fuzz_test1() {
       for f in 0..fields_per_object {
           let choice = lcg.next() % (test_values_max as u64);
           let off = flatbuffers::field_index_to_offset(f);
+          println!("field_index_to_offset: {} -> {}", f, off);
           match choice {
-              //0 => {builder.push_element_scalar::<u8>(off, bool_val, 0);}
-              _ => {panic!("unknown choice");}
+              //0 => {builder.push_slot_bool(off, bool_val, 0);}
+              //1 => {builder.push_slot_scalar::<i8>(off, char_val, 0);}
+              //2 => {builder.push_slot_scalar::<u8>(off, uchar_val, 0);}
+              _ => {}//panic!("unknown choice");}
               //case 1: builder.AddElement<int8_t>(off, char_val, 0); break;
               //case 2: builder.AddElement<uint8_t>(off, uchar_val, 0); break;
               //case 3: builder.AddElement<int16_t>(off, short_val, 0); break;
@@ -1010,6 +1013,7 @@ fn fuzz_test1() {
               //case 10: builder.AddElement<double>(off, double_val, 0); break;
           }
       }
+      println!("writing {} (of {})", i, objects.len());
       objects[i] = builder.end_table(start);
     }
 //  builder.PreAlign<flatbuffers::largest_scalar_t>(0);  // Align whole buffer.
@@ -2100,7 +2104,7 @@ mod test_byte_layouts {
     fn test_2_1xbyte_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
-        b.start_vector(flatbuffers::SIZE_U8, 1);
+        b.start_vector(flatbuffers::SIZE_U8, 1, 1);
         println!("cap: {}", b.owned_buf.capacity());
         check(&b, &[0, 0, 0]); // align to 4bytes
         b.push_element_scalar(1u8);
@@ -2112,7 +2116,7 @@ mod test_byte_layouts {
     #[test]
     fn test_3_2xbyte_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_U8, 2);
+        b.start_vector(flatbuffers::SIZE_U8, 2, 1);
         check(&b, &[0, 0]); // align to 4bytes
         b.push_element_scalar(1u8);
         check(&b, &[1, 0, 0]);
@@ -2125,7 +2129,7 @@ mod test_byte_layouts {
     #[test]
     fn test_3b_11xbyte_vector_matches_builder_size() {
         let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
-        b.start_vector(flatbuffers::SIZE_U8, 8);
+        b.start_vector(flatbuffers::SIZE_U8, 8, 1);
 
         let mut gold = vec![0u8; 0];
         check(&b, &gold[..]);
@@ -2141,8 +2145,8 @@ mod test_byte_layouts {
     }
     #[test]
     fn test_4_1xuint16_vector() {
-        let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
-        b.start_vector(flatbuffers::SIZE_U16, 1);
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(flatbuffers::SIZE_U16, 1, 1);
         check(&b, &[0, 0]); // align to 4bytes
         b.push_element_scalar(1u16);
         check(&b, &[1, 0, 0, 0]);
@@ -2152,8 +2156,8 @@ mod test_byte_layouts {
 
     #[test]
     fn test_5_2xuint16_vector() {
-        let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
-        b.start_vector(flatbuffers::SIZE_U16, 2);
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(flatbuffers::SIZE_U16, 2, 1);
         check(&b, &[]); // align to 4bytes
         b.push_element_scalar(0xABCDu16);
         check(&b, &[0xCD, 0xAB]);
@@ -2205,7 +2209,7 @@ mod test_byte_layouts {
                     4, 0, // length of table including vtable offset
                     4, 0, 0, 0]); // offset for start of vtable
     }
-	// test 8: vtable with one true bool
+
     #[test]
     fn test_8_vtable_with_one_true_bool() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
@@ -2213,6 +2217,7 @@ mod test_byte_layouts {
         let off = b.start_table(1);
         check(&b, &[]);
         b.push_slot_bool(0, true, false);
+        check(&b, &[1]);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
@@ -2224,319 +2229,350 @@ mod test_byte_layouts {
         ]);
     }
 
-//	// test 9: vtable with one default bool
-//	b = flatbuffers.NewBuilder(0)
-//	check([]byte{})
-//	b.StartObject(1)
-//	check([]byte{})
-//	b.PrependBoolSlot(0, false, false)
-//	b.EndObject()
-//	check([]byte{
-//		4, 0, // vtable bytes
-//		4, 0, // end of object from here
-//		// entry 1 is zero and not stored.
-//		4, 0, 0, 0, // offset for start of vtable (int32)
-//	})
-//
-//	// test 10: vtable with one int16
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(1)
-//	b.PrependInt16Slot(0, 0x789A, 0)
-//	b.EndObject()
-//	check([]byte{
-//		6, 0, // vtable bytes
-//		8, 0, // end of object from here
-//		6, 0, // offset to value
-//		6, 0, 0, 0, // offset for start of vtable (int32)
-//		0, 0, // padding to 4 bytes
-//		0x9A, 0x78,
-//	})
-//
-//	// test 11: vtable with two int16
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(2)
-//	b.PrependInt16Slot(0, 0x3456, 0)
-//	b.PrependInt16Slot(1, 0x789A, 0)
-//	b.EndObject()
-//	check([]byte{
-//		8, 0, // vtable bytes
-//		8, 0, // end of object from here
-//		6, 0, // offset to value 0
-//		4, 0, // offset to value 1
-//		8, 0, 0, 0, // offset for start of vtable (int32)
-//		0x9A, 0x78, // value 1
-//		0x56, 0x34, // value 0
-//	})
-//
-//	// test 12: vtable with int16 and bool
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(2)
-//	b.PrependInt16Slot(0, 0x3456, 0)
-//	b.PrependBoolSlot(1, true, false)
-//	b.EndObject()
-//	check([]byte{
-//		8, 0, // vtable bytes
-//		8, 0, // end of object from here
-//		6, 0, // offset to value 0
-//		5, 0, // offset to value 1
-//		8, 0, 0, 0, // offset for start of vtable (int32)
-//		0,          // padding
-//		1,          // value 1
-//		0x56, 0x34, // value 0
-//	})
-//
-//	// test 12: vtable with empty vector
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartVector(flatbuffers.SizeByte, 0, 1)
-//	vecend := b.EndVector(0)
-//	b.StartObject(1)
-//	b.PrependUOffsetTSlot(0, vecend, 0)
-//	b.EndObject()
-//	check([]byte{
-//		6, 0, // vtable bytes
-//		8, 0,
-//		4, 0, // offset to vector offset
-//		6, 0, 0, 0, // offset for start of vtable (int32)
-//		4, 0, 0, 0,
-//		0, 0, 0, 0, // length of vector (not in struct)
-//	})
-//
-//	// test 12b: vtable with empty vector of byte and some scalars
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartVector(flatbuffers.SizeByte, 0, 1)
-//	vecend = b.EndVector(0)
-//	b.StartObject(2)
-//	b.PrependInt16Slot(0, 55, 0)
-//	b.PrependUOffsetTSlot(1, vecend, 0)
-//	b.EndObject()
-//	check([]byte{
-//		8, 0, // vtable bytes
-//		12, 0,
-//		10, 0, // offset to value 0
-//		4, 0, // offset to vector offset
-//		8, 0, 0, 0, // vtable loc
-//		8, 0, 0, 0, // value 1
-//		0, 0, 55, 0, // value 0
-//
-//		0, 0, 0, 0, // length of vector (not in struct)
-//	})
-//
-//	// test 13: vtable with 1 int16 and 2-vector of int16
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartVector(flatbuffers.SizeInt16, 2, 1)
-//	b.PrependInt16(0x1234)
-//	b.PrependInt16(0x5678)
-//	vecend = b.EndVector(2)
-//	b.StartObject(2)
-//	b.PrependUOffsetTSlot(1, vecend, 0)
-//	b.PrependInt16Slot(0, 55, 0)
-//	b.EndObject()
-//	check([]byte{
-//		8, 0, // vtable bytes
-//		12, 0, // length of object
-//		6, 0, // start of value 0 from end of vtable
-//		8, 0, // start of value 1 from end of buffer
-//		8, 0, 0, 0, // offset for start of vtable (int32)
-//		0, 0, // padding
-//		55, 0, // value 0
-//		4, 0, 0, 0, // vector position from here
-//		2, 0, 0, 0, // length of vector (uint32)
-//		0x78, 0x56, // vector value 1
-//		0x34, 0x12, // vector value 0
-//	})
-//
-//	// test 14: vtable with 1 struct of 1 int8, 1 int16, 1 int32
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(1)
-//	b.Prep(4+4+4, 0)
-//	b.PrependInt8(55)
-//	b.Pad(3)
-//	b.PrependInt16(0x1234)
-//	b.Pad(2)
-//	b.PrependInt32(0x12345678)
-//	structStart := b.Offset()
-//	b.PrependStructSlot(0, structStart, 0)
-//	b.EndObject()
-//	check([]byte{
-//		6, 0, // vtable bytes
-//		16, 0, // end of object from here
-//		4, 0, // start of struct from here
-//		6, 0, 0, 0, // offset for start of vtable (int32)
-//		0x78, 0x56, 0x34, 0x12, // value 2
-//		0, 0, // padding
-//		0x34, 0x12, // value 1
-//		0, 0, 0, // padding
-//		55, // value 0
-//	})
-//
-//	// test 15: vtable with 1 vector of 2 struct of 2 int8
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartVector(flatbuffers.SizeInt8*2, 2, 1)
-//	b.PrependInt8(33)
-//	b.PrependInt8(44)
-//	b.PrependInt8(55)
-//	b.PrependInt8(66)
-//	vecend = b.EndVector(2)
-//	b.StartObject(1)
-//	b.PrependUOffsetTSlot(0, vecend, 0)
-//	b.EndObject()
-//	check([]byte{
-//		6, 0, // vtable bytes
-//		8, 0,
-//		4, 0, // offset of vector offset
-//		6, 0, 0, 0, // offset for start of vtable (int32)
-//		4, 0, 0, 0, // vector start offset
-//
-//		2, 0, 0, 0, // vector length
-//		66, // vector value 1,1
-//		55, // vector value 1,0
-//		44, // vector value 0,1
-//		33, // vector value 0,0
-//	})
-//
-//	// test 16: table with some elements
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(2)
-//	b.PrependInt8Slot(0, 33, 0)
-//	b.PrependInt16Slot(1, 66, 0)
-//	off := b.EndObject()
-//	b.Finish(off)
-//
-//	check([]byte{
-//		12, 0, 0, 0, // root of table: points to vtable offset
-//
-//		8, 0, // vtable bytes
-//		8, 0, // end of object from here
-//		7, 0, // start of value 0
-//		4, 0, // start of value 1
-//
-//		8, 0, 0, 0, // offset for start of vtable (int32)
-//
-//		66, 0, // value 1
-//		0,  // padding
-//		33, // value 0
-//	})
-//
-//	// test 17: one unfinished table and one finished table
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(2)
-//	b.PrependInt8Slot(0, 33, 0)
-//	b.PrependInt8Slot(1, 44, 0)
-//	off = b.EndObject()
-//	b.Finish(off)
-//
-//	b.StartObject(3)
-//	b.PrependInt8Slot(0, 55, 0)
-//	b.PrependInt8Slot(1, 66, 0)
-//	b.PrependInt8Slot(2, 77, 0)
-//	off = b.EndObject()
-//	b.Finish(off)
-//
-//	check([]byte{
-//		16, 0, 0, 0, // root of table: points to object
-//		0, 0, // padding
-//
-//		10, 0, // vtable bytes
-//		8, 0, // size of object
-//		7, 0, // start of value 0
-//		6, 0, // start of value 1
-//		5, 0, // start of value 2
-//		10, 0, 0, 0, // offset for start of vtable (int32)
-//		0,  // padding
-//		77, // value 2
-//		66, // value 1
-//		55, // value 0
-//
-//		12, 0, 0, 0, // root of table: points to object
-//
-//		8, 0, // vtable bytes
-//		8, 0, // size of object
-//		7, 0, // start of value 0
-//		6, 0, // start of value 1
-//		8, 0, 0, 0, // offset for start of vtable (int32)
-//		0, 0, // padding
-//		44, // value 1
-//		33, // value 0
-//	})
-//
-//	// test 18: a bunch of bools
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(8)
-//	b.PrependBoolSlot(0, true, false)
-//	b.PrependBoolSlot(1, true, false)
-//	b.PrependBoolSlot(2, true, false)
-//	b.PrependBoolSlot(3, true, false)
-//	b.PrependBoolSlot(4, true, false)
-//	b.PrependBoolSlot(5, true, false)
-//	b.PrependBoolSlot(6, true, false)
-//	b.PrependBoolSlot(7, true, false)
-//	off = b.EndObject()
-//	b.Finish(off)
-//
-//	check([]byte{
-//		24, 0, 0, 0, // root of table: points to vtable offset
-//
-//		20, 0, // vtable bytes
-//		12, 0, // size of object
-//		11, 0, // start of value 0
-//		10, 0, // start of value 1
-//		9, 0, // start of value 2
-//		8, 0, // start of value 3
-//		7, 0, // start of value 4
-//		6, 0, // start of value 5
-//		5, 0, // start of value 6
-//		4, 0, // start of value 7
-//		20, 0, 0, 0, // vtable offset
-//
-//		1, // value 7
-//		1, // value 6
-//		1, // value 5
-//		1, // value 4
-//		1, // value 3
-//		1, // value 2
-//		1, // value 1
-//		1, // value 0
-//	})
-//
-//	// test 19: three bools
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(3)
-//	b.PrependBoolSlot(0, true, false)
-//	b.PrependBoolSlot(1, true, false)
-//	b.PrependBoolSlot(2, true, false)
-//	off = b.EndObject()
-//	b.Finish(off)
-//
-//	check([]byte{
-//		16, 0, 0, 0, // root of table: points to vtable offset
-//
-//		0, 0, // padding
-//
-//		10, 0, // vtable bytes
-//		8, 0, // size of object
-//		7, 0, // start of value 0
-//		6, 0, // start of value 1
-//		5, 0, // start of value 2
-//		10, 0, 0, 0, // vtable offset from here
-//
-//		0, // padding
-//		1, // value 2
-//		1, // value 1
-//		1, // value 0
-//	})
-//
-//	// test 20: some floats
-//	b = flatbuffers.NewBuilder(0)
-//	b.StartObject(1)
-//	b.PrependFloat32Slot(0, 1.0, 0.0)
-//	off = b.EndObject()
-//
-//	check([]byte{
-//		6, 0, // vtable bytes
-//		8, 0, // size of object
-//		4, 0, // start of value 0
-//		6, 0, 0, 0, // vtable offset
-//
-//		0, 0, 128, 63, // value 0
-//	})
+    #[test]
+    fn test_9_vtable_with_one_default_bool() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        check(&b, &[]);
+        let off = b.start_table(1);
+        check(&b, &[]);
+        b.push_slot_bool(0, false, false);
+        b.end_table(off);
+        check(&b, &[
+             4, 0, // vtable bytes
+             4, 0, // end of object from here
+             // entry 1 is zero and not stored.
+             4, 0, 0, 0, // offset for start of vtable (int32)
+        ]);
+    }
+
+    #[test]
+    fn test_10_vtable_with_one_int16() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        check(&b, &[]);
+        let off = b.start_table(1);
+        b.push_slot_scalar(0, 0x789Ai16, 0);
+        b.end_table(off);
+        check(&b, &[
+              6, 0, // vtable bytes
+              8, 0, // end of object from here
+              6, 0, // offset to value
+              6, 0, 0, 0, // offset for start of vtable (int32)
+              0, 0, // padding to 4 bytes
+              0x9A, 0x78,
+        ]);
+    }
+
+    #[test]
+    fn test_11_vtable_with_two_int16() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.start_table(2);
+        b.push_slot_scalar(0, 0x3456i16, 0);
+        b.push_slot_scalar(1, 0x789Ai16, 0);
+        b.end_table(off);
+        check(&b, &[
+              8, 0, // vtable bytes
+              8, 0, // end of object from here
+              6, 0, // offset to value 0
+              4, 0, // offset to value 1
+              8, 0, 0, 0, // offset for start of vtable (int32)
+              0x9A, 0x78, // value 1
+              0x56, 0x34, // value 0
+        ]);
+    }
+
+    #[test]
+    fn test_12_vtable_with_int16_and_bool() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.start_table(2);
+        b.push_slot_scalar(0, 0x3456i16, 0);
+        b.push_slot_bool(1, true, false);
+        b.end_table(off);
+        check(&b, &[
+            8, 0, // vtable bytes
+            8, 0, // end of object from here
+            6, 0, // offset to value 0
+            5, 0, // offset to value 1
+            8, 0, 0, 0, // offset for start of vtable (int32)
+            0,          // padding
+            1,          // value 1
+            0x56, 0x34, // value 0
+        ]);
+    }
+
+    #[test]
+    fn test_12b_vtable_with_empty_vector() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(flatbuffers::SIZE_U8, 0, 1);
+        let vecend = b.end_vector(0);
+        let off = b.start_table(1);
+        b.push_slot_scalar(0, vecend, 0);
+        b.end_table(off);
+        check(&b, &[
+              6, 0, // vtable bytes
+              8, 0,
+              4, 0, // offset to vector offset
+              6, 0, 0, 0, // offset for start of vtable (int32)
+              4, 0, 0, 0,
+              0, 0, 0, 0, // length of vector (not in struct)
+        ]);
+    }
+
+    #[test]
+    fn test_12c_vtable_with_empty_vector_of_byte_and_some_scalars() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(flatbuffers::SIZE_U8, 0, 1);
+        let vecend = b.end_vector(0);
+        let off = b.start_table(2);
+        b.push_slot_scalar::<i16>(0, 55i16, 0);
+        b.push_slot_scalar_indirect_uoffset(1, vecend, 0);
+        b.end_table(off);
+        check(&b, &[
+              8, 0, // vtable bytes
+              12, 0,
+              10, 0, // offset to value 0
+              4, 0, // offset to vector offset
+              8, 0, 0, 0, // vtable loc
+              8, 0, 0, 0, // value 1
+              0, 0, 55, 0, // value 0
+
+              0, 0, 0, 0, // length of vector (not in struct)
+        ]);
+    }
+    #[test]
+    fn test_13_vtable_with_1_int16_and_2_vector_of_i16() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(flatbuffers::SIZE_I16, 2, 1);
+        b.push_element_scalar(0x1234i16);
+        b.push_element_scalar(0x5678i16);
+        let vecend = b.end_vector(2);
+        let off = b.start_table(2);
+        b.push_slot_scalar_indirect_uoffset(1, vecend, 0);
+        b.push_slot_scalar(0, 55i16, 0);
+        b.end_table(off);
+        check(&b, &[
+              8, 0, // vtable bytes
+              12, 0, // length of object
+              6, 0, // start of value 0 from end of vtable
+              8, 0, // start of value 1 from end of buffer
+              8, 0, 0, 0, // offset for start of vtable (int32)
+              0, 0, // padding
+              55, 0, // value 0
+              4, 0, 0, 0, // vector position from here
+              2, 0, 0, 0, // length of vector (uint32)
+              0x78, 0x56, // vector value 1
+              0x34, 0x12, // vector value 0
+        ]);
+    }
+    #[test]
+    fn test_14_vtable_with_1_struct_of_int8_and_int16_and_int32() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.start_table(1);
+        b.prep(4+4+4, 0);
+        b.push_element_scalar(55i8);
+        b.pad(3);
+        b.push_element_scalar(0x1234i16);
+        b.pad(2);
+        b.push_element_scalar(0x12345678i32);
+        let struct_start = b.rev_cur_idx();
+        b.push_slot_struct(0, struct_start, 0);
+        b.end_table(off);
+        check(&b, &[
+              6, 0, // vtable bytes
+              16, 0, // end of object from here
+              4, 0, // start of struct from here
+              6, 0, 0, 0, // offset for start of vtable (int32)
+              0x78, 0x56, 0x34, 0x12, // value 2
+              0, 0, // padding
+              0x34, 0x12, // value 1
+              0, 0, 0, // padding
+              55, // value 0
+        ]);
+    }
+  	// test 15: vtable with 1 vector of 2 struct of 2 int8
+    #[test]
+    fn test_15_vtable_with_1_vector_of_2_struct_2_int8() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(flatbuffers::SIZE_I8*2, 2, 1);
+        b.push_element_scalar(33i8);
+        b.push_element_scalar(44i8);
+        b.push_element_scalar(55i8);
+        b.push_element_scalar(66i8);
+        let vecend = b.end_vector(2);
+        let off = b.start_table(1);
+        b.push_slot_scalar_indirect_uoffset(0, vecend, 0);
+        b.end_table(off);
+        check(&b, &[
+              6, 0, // vtable bytes
+              8, 0,
+              4, 0, // offset of vector offset
+              6, 0, 0, 0, // offset for start of vtable (int32)
+              4, 0, 0, 0, // vector start offset
+
+              2, 0, 0, 0, // vector length
+              66, // vector value 1,1
+              55, // vector value 1,0
+              44, // vector value 0,1
+              33, // vector value 0,0
+        ]);
+    }
+
+    #[test]
+    fn test_16_table_with_some_elements() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.start_table(2);
+        b.push_slot_scalar(0, 33i8, 0);
+        b.push_slot_scalar(1, 66i16, 0);
+        let off2 = b.end_table(off);
+        b.finish(off2);
+
+        check(&b, &[
+              12, 0, 0, 0, // root of table: points to vtable offset
+
+              8, 0, // vtable bytes
+              8, 0, // end of object from here
+              7, 0, // start of value 0
+              4, 0, // start of value 1
+
+              8, 0, 0, 0, // offset for start of vtable (int32)
+
+              66, 0, // value 1
+              0,  // padding
+              33, // value 0
+        ]);
+    }
+
+    #[test]
+    fn test_17_one_unfinished_table_and_one_finished_table() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        {
+            let off = b.start_table(2);
+            b.push_slot_scalar(0, 33i8, 0);
+            b.push_slot_scalar(1, 44i8, 0);
+            let off2 = b.end_table(off);
+            b.finish(off2);
+        }
+
+        {
+            let off = b.start_table(3);
+            b.push_slot_scalar(0, 55i8, 0);
+            b.push_slot_scalar(1, 66i8, 0);
+            b.push_slot_scalar(2, 77i8, 0);
+            let off2 = b.end_table(off);
+            b.finish(off2);
+        }
+
+        check(&b, &[
+              16, 0, 0, 0, // root of table: points to object
+              0, 0, // padding
+
+              10, 0, // vtable bytes
+              8, 0, // size of object
+              7, 0, // start of value 0
+              6, 0, // start of value 1
+              5, 0, // start of value 2
+              10, 0, 0, 0, // offset for start of vtable (int32)
+              0,  // padding
+              77, // value 2
+              66, // value 1
+              55, // value 0
+
+              12, 0, 0, 0, // root of table: points to object
+
+              8, 0, // vtable bytes
+              8, 0, // size of object
+              7, 0, // start of value 0
+              6, 0, // start of value 1
+              8, 0, 0, 0, // offset for start of vtable (int32)
+              0, 0, // padding
+              44, // value 1
+              33, // value 0
+              ]);
+    }
+
+    #[test]
+    fn test_18_a_bunch_of_bools() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.start_table(8);
+        b.push_slot_bool(0, true, false);
+        b.push_slot_bool(1, true, false);
+        b.push_slot_bool(2, true, false);
+        b.push_slot_bool(3, true, false);
+        b.push_slot_bool(4, true, false);
+        b.push_slot_bool(5, true, false);
+        b.push_slot_bool(6, true, false);
+        b.push_slot_bool(7, true, false);
+        let off2 = b.end_table(off);
+        b.finish(off2);
+
+        check(&b, &[
+              24, 0, 0, 0, // root of table: points to vtable offset
+
+              20, 0, // vtable bytes
+              12, 0, // size of object
+              11, 0, // start of value 0
+              10, 0, // start of value 1
+              9, 0, // start of value 2
+              8, 0, // start of value 3
+              7, 0, // start of value 4
+              6, 0, // start of value 5
+              5, 0, // start of value 6
+              4, 0, // start of value 7
+              20, 0, 0, 0, // vtable offset
+
+              1, // value 7
+              1, // value 6
+              1, // value 5
+              1, // value 4
+              1, // value 3
+              1, // value 2
+              1, // value 1
+              1, // value 0
+              ]);
+    }
+
+    #[test]
+    fn test_19_three_bools() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.start_table(3);
+        b.push_slot_bool(0, true, false);
+        b.push_slot_bool(1, true, false);
+        b.push_slot_bool(2, true, false);
+        let off2 = b.end_table(off);
+        b.finish(off2);
+
+        check(&b, &[
+              16, 0, 0, 0, // root of table: points to vtable offset
+
+              0, 0, // padding
+
+              10, 0, // vtable bytes
+              8, 0, // size of object
+              7, 0, // start of value 0
+              6, 0, // start of value 1
+              5, 0, // start of value 2
+              10, 0, 0, 0, // vtable offset from here
+
+              0, // padding
+              1, // value 2
+              1, // value 1
+              1, // value 0
+        ]);
+    }
+
+    #[test]
+    fn test_20_some_floats() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.start_table(1);
+        b.push_slot_scalar(0, 1.0f32, 0.0);
+        b.end_table(off);
+
+        check(&b, &[
+              6, 0, // vtable bytes
+              8, 0, // size of object
+              4, 0, // start of value 0
+              6, 0, 0, 0, // vtable offset
+
+              0, 0, 128, 63, // value 0
+        ]);
+    }
 }

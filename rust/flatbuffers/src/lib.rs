@@ -18,8 +18,9 @@ use std::marker::PhantomData;
 pub type VectorOffset = ();
 pub type StringOffset = ();
 pub type ByteStringOffset = ();
-pub trait ElementScalar : Sized + Eq {
+pub trait ElementScalar : Sized + PartialEq {
     fn to_le(self) -> Self;
+    //fn eq(&self, rhs: &Self) -> bool;
 }
 //impl ElementScalar for bool { fn to_le(self) -> bool { u8::to_le(self as u8) as bool } }
 impl ElementScalar for u8 { fn to_le(self) -> u8 { u8::to_le(self) } }
@@ -30,6 +31,22 @@ impl ElementScalar for u32 { fn to_le(self) -> u32 { u32::to_le(self) } }
 impl ElementScalar for i32 { fn to_le(self) -> i32 { i32::to_le(self) } }
 impl ElementScalar for u64 { fn to_le(self) -> u64 { u64::to_le(self) } }
 impl ElementScalar for i64 { fn to_le(self) -> i64 { i64::to_le(self) } }
+impl ElementScalar for f32 {
+    fn to_le(self) -> f32 { f32::to_le(self) }
+//  fn eq(&self, rhs: &f32) -> bool {
+//      let a: u32 = unsafe { std::mem::transmute(*self) };
+//      let b: u32 = unsafe { std::mem::transmute(*rhs) };
+//      a == b
+//  }
+}
+impl ElementScalar for f64 {
+    fn to_le(self) -> f64 { f64::to_le(self) }
+//  fn eq(&self, rhs: &f64) -> bool {
+//      let a: u64 = unsafe { std::mem::transmute(*self) };
+//      let b: u64 = unsafe { std::mem::transmute(*rhs) };
+//      a == b
+//  }
+}
 
 pub const VTABLE_METADATA_FIELDS: usize = 2;
 pub const SIZE_U8: usize = 1;
@@ -40,6 +57,8 @@ pub const SIZE_U32: usize = 4;
 pub const SIZE_I32: usize = 4;
 pub const SIZE_U64: usize = 8;
 pub const SIZE_I64: usize = 8;
+pub const SIZE_F32: usize = 4;
+pub const SIZE_F64: usize = 8;
 pub const SIZE_UOFFSET: usize = SIZE_U32;
 pub const SIZE_SOFFSET: usize = SIZE_I32;
 pub const SIZE_VOFFSET: usize = SIZE_I16;
@@ -139,16 +158,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.vtable.resize(num_fields as usize, 0);
 
         self.min_align = 1;
-
         self.rev_cur_idx()
 
         //self.table_end = self.rev_cur_idx();
 
         //self.get_size() as UOffsetT
     }
-    pub fn store_slot(&mut self, slotnum: usize) {
-        assert!(slotnum < self.vtable.len(), "{} !< {}", self.vtable.len(), slotnum);
-        self.vtable[slotnum] = self.rev_cur_idx() as UOffsetT;
+    pub fn store_slot(&mut self, slotnum: VOffsetT) {
+        let i = slotnum as usize;
+        assert!(i < self.vtable.len(), "{} !< {}", self.vtable.len(), i);
+        self.vtable[i] = self.rev_cur_idx() as UOffsetT;
     }
     pub fn get_buf_slice(&self) -> &[u8] {
         &self.owned_buf[..]
@@ -163,22 +182,27 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn reallocate(&mut self, _: usize) {
         unimplemented!()
     }
+    pub fn pad(&mut self, n: usize) {
+        self.cur_idx -= n;
+        for i in 0..n {
+            self.owned_buf[self.cur_idx + i] = 0;
+        }
+    }
 
-    pub fn grow_owned_buf(&mut self) -> usize {
-        let starting_active_size = self.get_active_buf_slice().len();
-        assert!(self.owned_buf.len() * 2 <= FLATBUFFERS_MAX_BUFFER_SIZE,
-		        "cannot grow buffer beyond 2 gigabytes");
-
+    pub fn grow_owned_buf(&mut self) {
         let old_len = self.owned_buf.len();
-        let new_len = std::cmp::max(1, self.owned_buf.len() * 2);
-        let diff = new_len - old_len;
+        let new_len = std::cmp::max(1, old_len * 2);
+
+        assert!(new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
+		        "cannot grow buffer beyond 2 gigabytes");
+        //let diff = new_len - old_len;
 
         self.owned_buf.resize(new_len, 0);
-        self.cur_idx += diff;
-        let ending_active_size = self.get_active_buf_slice().len();
-        assert_eq!(starting_active_size, ending_active_size);
-        if self.owned_buf.len() == 1 {
-            return 1;
+        //self.cur_idx += diff;
+        //let ending_active_size = self.get_active_buf_slice().len();
+        //assert_eq!(starting_active_size, ending_active_size);
+        if new_len == 1 {
+            return;
         }
 
 		// calculate the midpoint, and safely copy the old end data to the new
@@ -195,10 +219,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             *x = 0;
         }
 
-        let ending_active_size = self.get_active_buf_slice().len();
-        assert_eq!(starting_active_size, ending_active_size);
+        //let ending_active_size = self.get_active_buf_slice().len();
+        //assert_eq!(starting_active_size, ending_active_size);
 
-        new_len
+        //new_len
 	}
     //pub fn as_mut(&mut self) -> &mut Self {
     //    self
@@ -212,20 +236,22 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         assert!(!self.nested);
         assert_eq!(self.vtable.len(), 0);
     }
-    pub fn start_vector(&mut self, elemsize: usize, num_elems: usize) -> UOffsetT {
+    pub fn start_vector(&mut self, elemsize: usize, num_elems: usize, alignment: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
-        self.pre_align(num_elems*elemsize, SIZE_UOFFSET);
-        self.pre_align(num_elems*elemsize, elemsize); // Just in case elemsize > uoffset_t.
+        self.prep(SIZE_UOFFSET, elemsize*num_elems);
+        self.prep(alignment, elemsize*num_elems); // Just in case elemsize is wider than uoffset_t.
         self.rev_cur_idx()
     }
     // Offset relative to the end of the buffer.
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector(&mut self, len: usize) -> UOffsetT {
+    pub fn end_vector(&mut self, num_elems: usize) -> UOffsetT {
       self.assert_nested();
-      self.push_element_scalar(len as UOffsetT);
+
+      // we already made space for this, so write without PrependUint32
+      self.push_element_scalar_no_prep(num_elems as UOffsetT);
       self.nested = false;
       self.rev_cur_idx()
   }
@@ -237,6 +263,34 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.track_min_align(alignment);
         let s = self.get_size() as usize;
         self.fill(padding_bytes(s + n, alignment));
+    }
+    pub fn prep(&mut self, sz: usize, additional_bytes: usize) {
+        // Track the biggest thing we've ever aligned to.
+        self.min_align = std::cmp::max(self.min_align, sz);
+
+        // Find the amount of alignment needed such that `size` is properly
+        // aligned after `additionalBytes`:
+        //println!("prep: sz: {}, addl: {}, owned_buf: {}, cur_idx: {}", sz, additional_bytes, self.owned_buf.len(), self.cur_idx);
+        let mut align_size = !(self.owned_buf.len() - self.cur_idx + additional_bytes);
+        //println!("prep2: align_size == {}", align_size);
+        align_size = {
+            let (x, _) = align_size.overflowing_add(1);
+            x
+        };
+        align_size &= (sz - 1);
+        //println!("align_size: {}", align_size);
+
+        // Reallocate the buffer if needed:
+        while self.cur_idx <= align_size+sz+additional_bytes {
+            let old_buf_size = self.owned_buf.len();
+            self.grow_owned_buf();
+            self.cur_idx += self.owned_buf.len() - old_buf_size;
+        }
+        for i in 0..align_size {
+            self.cur_idx -= 1;
+            self.owned_buf[self.cur_idx] = 0;
+        }
+        println!("final prep: {}, {}, {}", self.owned_buf.len(), self.cur_idx, align_size);
     }
     pub fn get_size(&self) -> usize {
         self.owned_buf.len() - self.cur_idx
@@ -266,11 +320,22 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn create_byte_string<'a>(&mut self, data: &[u8]) -> LabeledUOffsetT<ByteStringOffset> {
         self.assert_not_nested();
-        self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
-        self.fill(1);
-        self.push_bytes(data);
-        self.push_element_scalar(data.len() as UOffsetT);
-        LabeledUOffsetT::new(self.get_size() as u32)
+        self.nested = true;
+        self.prep(SIZE_UOFFSET, data.len() + 1);
+
+        self.push_element_scalar_no_prep(0u8);
+        self.push_bytes_no_prep(data);
+        //self.cur_idx -= SIZE_U8;
+        //self.owned_buf[self.cur_idx] = 0;
+        //self.cur_idx -= data.len();
+        //self.owned_buf[self.cur_idx..self.cur_idx+data.len()].copy_from_slice(data);
+
+        LabeledUOffsetT::new(self.end_vector(data.len()))
+
+        ////self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
+        //self.push_bytes(data);
+        //self.push_element_scalar(data.len() as UOffsetT);
+        //LabeledUOffsetT::new(self.get_size() as u32)
     }
     pub fn create_shared_string<'a>(&mut self, _: &'a str) -> LabeledUOffsetT<StringOffset> {
         LabeledUOffsetT::new(0)
@@ -312,20 +377,40 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //    let object_offset = b.get_size();
     //}
     pub fn end_table(&mut self, off: UOffsetT) -> UOffsetT {
+        println!("1/3");
         self.assert_nested();
+        println!("2/3");
         let n = self.write_vtable(off);
+        println!("3/3");
         self.nested = false;
         n
     }
     pub fn write_vtable(&mut self, off: UOffsetT) -> UOffsetT {
-        self.push_element_scalar::<SOffsetT>(0);
+        self.push_soffset_relative(0);
+
         let table_offset = self.rev_cur_idx();
 
         // Trim vtable of trailing zeroes.
-        match &self.vtable.iter().rposition(|&x| x != 0) {
-            Some(end) => { self.vtable.truncate(*end); }
-            None => {}
+        if self.vtable.len() > 0 {
+            let mut i = self.vtable.len() - 1;
+            // TODO: slow, but obviously correct
+            while true {
+                if self.vtable[i] == 0 {
+                    self.vtable.remove(i);
+                }
+                if i == 0 {
+                    break;
+                }
+                i -= 1;
+            }
+            //self.vtable.truncate(i);
         }
+        println!("vtable a: {:?}", self.vtable);
+        //match &self.vtable.iter().rposition(|&x| x == 0) {
+        //    Some(end) => { self.vtable.truncate(*end); }
+        //    None => {}
+        //}
+        println!("vtable b: {:?}", self.vtable);
 
         let existing_vtable = false;
         if !existing_vtable {
@@ -344,6 +429,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
                     // use 32bit number to assert no overflow:
                     table_offset - val
                 };
+                println!("pushing VOffsetT {} at index {} (val = {}, table_offset = {})", off, i, val, table_offset);
                 self.push_element_scalar::<VOffsetT>(off as VOffsetT);
                 i -= 1;
             }
@@ -361,11 +447,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             // Next, write the offset to the new vtable in the
             // already-allocated SOffsetT at the beginning of this object:
             let table_start = self.owned_buf.len() as SOffsetT - table_offset as SOffsetT;
+            let cur_idx = self.cur_idx;
+            println!("before emplace: {} {:?}", cur_idx, &self.owned_buf[..]);
             {
                 let n = self.rev_cur_idx();
                 emplace_scalar(&mut self.owned_buf[table_start as usize..],
                                n as SOffsetT - table_offset as SOffsetT);
             }
+            println!("after emplace:  {} {:?}", cur_idx, &self.owned_buf[..]);
 
             // Finally, store this vtable in memory for future
             // deduplication:
@@ -440,7 +529,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn required<T>(&self, _: &LabeledUOffsetT<T>, _: isize) -> bool {
         unimplemented!()
     }
-    pub fn finish<T>(&mut self, _root: LabeledUOffsetT<T>)  {
+    pub fn finish(&mut self, root: UOffsetT)  {
+        self.assert_not_nested();
+        let min_align = self.min_align;
+        self.prep(min_align, SIZE_UOFFSET);
+        self.push_element_scalar_indirect_uoffset(root);
+        self.finished = true;
     }
     pub fn finish_with_identifier<'a, T>(&'a mut self, _root: LabeledUOffsetT<T>, _name: &'static str) {
     }
@@ -454,31 +548,83 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn push_element_bool(&mut self, b: bool) -> UOffsetT {
         self.push_element_scalar(b as u8)
     }
+    pub fn push_slot_struct(&mut self, slotnum: VOffsetT, x: UOffsetT, d: UOffsetT)  {
+        if x != d {
+            self.assert_nested();
+            assert!(x == self.rev_cur_idx(), "inline data write outside of table");
+            self.store_slot(slotnum);
+        }
+    }
     fn align(&mut self, elem_size: usize) {
         let delta = self.cur_idx % elem_size;
         self.cur_idx -= delta;
     }
-    pub fn push_element_scalar<T: ElementScalar>(&mut self, t: T) -> UOffsetT {
-        let t = t.to_le(); // convert to little-endian
-        self.align(std::mem::size_of::<T>());
-        self.push(t); // TODO: push_small
+    pub fn push_element_scalar_no_prep<T: ElementScalar>(&mut self, t: T) -> UOffsetT {
+        //let t = t.to_le(); // convert to little-endian
+        self.cur_idx -= std::mem::size_of::<T>();
+        emplace_scalar::<T>(&mut self.owned_buf[self.cur_idx..], t);
         self.cur_idx as UOffsetT
     }
-    pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
-        let n = self.make_space(x.len());//std::mem::size_of::<T>());
-        {
-            let n = self.cur_idx;
-            &mut self.owned_buf[n..n+x.len()].copy_from_slice(x);
-        }
+    pub fn push_element_scalar<T: ElementScalar>(&mut self, t: T) -> UOffsetT {
+        self.prep(std::mem::size_of::<T>(), 0);
+        self.cur_idx -= std::mem::size_of::<T>();
+        emplace_scalar::<T>(&mut self.owned_buf[self.cur_idx..], t);
+        self.cur_idx as UOffsetT
+    }
+    pub fn place_element_scalar<T: ElementScalar>(&mut self, t: T) {
+        let t = t.to_le(); // convert to little-endian
+        self.cur_idx -= std::mem::size_of::<T>();
+        let cur_idx = self.cur_idx;
+        emplace_scalar(&mut self.owned_buf[cur_idx..], t);
+
+    }
+    pub fn push_soffset_relative(&mut self, off: SOffsetT) {
+        self.prep(SIZE_SOFFSET, 0);
+        //self.pre_align(SIZE_SOFFSET, 0);
+        //self.align(SIZE_SOFFSET);
+        //self.align(std::mem::size_of::<SOffsetT>());
+        assert!(off <= self.rev_cur_idx() as SOffsetT, "logic error in offsets");
+        let off2 = (self.rev_cur_idx() as SOffsetT) - (off as SOffsetT) + (SIZE_SOFFSET as SOffsetT);
+        println!("off2: {}", off2);
+        self.dump_buf("emplace off2");
+        self.push_element_scalar_no_prep(off2);
+        //emplace_scalar(&mut self.owned_buf[start..start+SIZE_SOFFSET], off2);
+    }
+    pub fn push_bytes_no_prep(&mut self, x: &[u8]) -> UOffsetT {
+        let l = x.len();
+        self.cur_idx -= l;
+        &mut self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(x);
 
         self.cur_idx as UOffsetT
     }
-    pub fn push_slot_bool(&mut self, slotnum: usize, x: bool, default: bool) {
+    pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
+        let n = self.make_space(x.len());
+        &mut self.owned_buf[n..n+x.len()].copy_from_slice(x);
+
+        n as UOffsetT
+    }
+    pub fn push_slot_scalar_indirect_uoffset(&mut self, slotnum: VOffsetT, x: UOffsetT, default: UOffsetT) {
+        if x != default {
+            self.push_element_scalar_indirect_uoffset(x);
+            self.store_slot(slotnum);
+        }
+    }
+    pub fn push_element_scalar_indirect_uoffset(&mut self, x: UOffsetT) {
+        self.prep(std::mem::size_of::<UOffsetT>(), 0);
+        assert!(x <= self.rev_cur_idx() as UOffsetT, "logic error");
+        let off2 = self.rev_cur_idx() as UOffsetT - x + SIZE_UOFFSET as UOffsetT;
+        self.push_element_scalar_no_prep::<UOffsetT>(off2);
+    }
+    pub fn push_slot_bool(&mut self, slotnum: VOffsetT, x: bool, default: bool) {
         self.push_slot_scalar(slotnum, x as u8, default as u8);
     }
-    pub fn push_slot_scalar<T: ElementScalar>(&mut self, slotnum: usize, x: T, default: T) {
+    pub fn push_slot_scalar<T: ElementScalar + std::fmt::Display>(&mut self, slotnum: VOffsetT, x: T, default: T) {
         if x != default {
+            println!("pushing slot scalar {} != {}", x, default);
             self.push_element_scalar(x);
+            //self.prep(std::mem::size_of::<T>(), 0);
+            //emplace_scalar(&mut self.owned_buf[self.cur_idx..], x);
+            //self.push_element_scalar(x);
             self.store_slot(slotnum);
         }
     }
