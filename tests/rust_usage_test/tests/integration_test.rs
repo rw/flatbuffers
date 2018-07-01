@@ -2060,6 +2060,32 @@ fn error_test() {
 //  }
 //}
 
+#[test]
+fn test_create_byte_vector() {
+    let raw = {
+        let mut x = vec![0u8, 30];
+        for i in 0..x.len() {
+            x[i] = i as u8;
+        }
+        x
+    };
+
+    for size in 0..raw.len() {
+        println!("size == {}", size);
+        let mut b1 = flatbuffers::FlatBufferBuilder::new();
+        b1.start_vector(1, size, 1);
+
+        for i in (0..size).rev() {
+            b1.push_element_scalar(raw[i]);
+        }
+        b1.end_vector(size);
+
+        let mut b2 = flatbuffers::FlatBufferBuilder::new();
+        b2.create_byte_vector(&raw[..size]);
+        assert_eq!(&b1.owned_buf[..], &b2.owned_buf[..]);
+    }
+}
+
 #[cfg(test)]
 mod test_byte_layouts {
     extern crate flatbuffers;
