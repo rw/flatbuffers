@@ -337,6 +337,17 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.push_element_scalar(data.len() as UOffsetT);
         //LabeledUOffsetT::new(self.get_size() as u32)
     }
+    pub fn create_byte_vector(&mut self, data: &[u8]) -> LabeledUOffsetT<ByteStringOffset> {
+        self.assert_not_nested();
+        self.nested = true;
+        let l = data.len();
+        self.prep(SIZE_UOFFSET, l);
+
+        self.cur_idx -= l;
+        self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(data);
+
+        LabeledUOffsetT::new(self.end_vector(data.len()))
+    }
     pub fn create_shared_string<'a>(&mut self, _: &'a str) -> LabeledUOffsetT<StringOffset> {
         LabeledUOffsetT::new(0)
     }
