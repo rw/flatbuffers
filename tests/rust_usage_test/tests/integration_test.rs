@@ -2085,6 +2085,45 @@ fn error_test() {
 //}
 
 #[test]
+#[should_panic]
+fn test_end_table_should_panic_when_not_in_table() {
+    let mut b = flatbuffers::FlatBufferBuilder::new();
+    b.end_table(0);
+}
+
+#[test]
+#[should_panic]
+fn test_create_string_should_panic_when_in_table() {
+    let mut b = flatbuffers::FlatBufferBuilder::new();
+    b.start_table(0);
+    b.create_string("foo");
+}
+
+#[test]
+#[should_panic]
+fn test_create_byte_string_should_panic_when_in_table() {
+    let mut b = flatbuffers::FlatBufferBuilder::new();
+    b.start_table(0);
+    b.create_byte_string(b"foo");
+}
+
+#[test]
+#[should_panic]
+fn test_push_struct_slot_should_panic_when_not_in_table() {
+    let mut b = flatbuffers::FlatBufferBuilder::new();
+    b.start_table(0);
+    b.push_slot_struct(0, 1, 0);
+}
+
+#[test]
+#[should_panic]
+fn test_finished_bytes_should_panic_when_table_is_not_finished() {
+    let mut b = flatbuffers::FlatBufferBuilder::new();
+    b.start_table(0);
+    b.finished_bytes();
+}
+
+#[test]
 fn test_create_byte_vector() {
     let raw = {
         let mut x = vec![0u8, 30];
