@@ -57,7 +57,7 @@
 
 ../flatc -r -I include_test -o rust_usage_test/src monster_test.fbs
 cd ./rust_usage_test
-cargo test 
+time cargo test
 TEST_RESULT=$?
 #rm -rf ${go_path}/{pkg,src}
 if [[ $TEST_RESULT  == 0 ]]; then

@@ -22,7 +22,7 @@ pub type InParentNamespaceOffset = ();
 pub struct InParentNamespace<'a> {
   _phantom: PhantomData<&'a ()>,
 }
-impl<'a> flatbuffers::Table for InParentNamespace<'a> {}
+// impl<'a> flatbuffers::Table for InParentNamespace<'a> {}
 impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -85,7 +85,7 @@ pub type MonsterOffset = ();
 pub struct Monster<'a> {
   _phantom: PhantomData<&'a ()>,
 }
-impl<'a> flatbuffers::Table for Monster<'a> {}
+// impl<'a> flatbuffers::Table for Monster<'a> {}
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
     return flatbuffers::verify_table_start(verifier) &&
@@ -331,7 +331,7 @@ pub type TestSimpleTableWithEnumOffset = ();
 pub struct TestSimpleTableWithEnum<'a> {
   _phantom: PhantomData<&'a ()>,
 }
-impl<'a> flatbuffers::Table for TestSimpleTableWithEnum<'a> {}
+// impl<'a> flatbuffers::Table for TestSimpleTableWithEnum<'a> {}
 impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
     const VT_COLOR: isize = 4;
 
@@ -393,7 +393,7 @@ pub type StatOffset = ();
 pub struct Stat<'a> {
   _phantom: PhantomData<&'a ()>,
 }
-impl<'a> flatbuffers::Table for Stat<'a> {}
+// impl<'a> flatbuffers::Table for Stat<'a> {}
 impl<'a> Stat<'a> /* private flatbuffers::Table */ {
     const VT_ID: isize = 4;
     const VT_VAL: isize = 6;
@@ -479,7 +479,7 @@ pub type MonsterOffset = ();
 pub struct Monster<'a> {
   _phantom: PhantomData<&'a ()>,
 }
-impl<'a> flatbuffers::Table for Monster<'a> {}
+// impl<'a> flatbuffers::Table for Monster<'a> {}
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     const VT_POS: isize = 4;
     const VT_MANA: isize = 6;
@@ -967,7 +967,7 @@ pub type TypeAliasesOffset = ();
 pub struct TypeAliases<'a> {
   _phantom: PhantomData<&'a ()>,
 }
-impl<'a> flatbuffers::Table for TypeAliases<'a> {}
+// impl<'a> flatbuffers::Table for TypeAliases<'a> {}
 impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
     const VT_I8_: isize = 4;
     const VT_U8_: isize = 6;
@@ -1203,7 +1203,7 @@ pub fn VerifyAnyVector(_verifier: &mut flatbuffers::Verifier, values: &[flatbuff
 }
 
 #[inline]
-pub fn GetMonster(buf: &[u8]) -> &Monster  {
+pub fn GetRootAsMonster(buf: &[u8]) -> &Monster  {
   return flatbuffers::get_root::<&Monster>(buf);
 }
 
