@@ -387,7 +387,7 @@ class RustGenerator : public BaseGenerator {
         // The root datatype accessor:
         code_ += "#[inline]";
         code_ +=
-            "pub fn Get{{STRUCT_NAME}}(buf: &[u8])"
+            "pub fn GetRootAs{{STRUCT_NAME}}(buf: &[u8])"
             " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
         code_ += "  return flatbuffers::get_root::<&{{CPP_NAME}}>(buf);";
         code_ += "}";
@@ -1679,7 +1679,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
     code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
-    code_ += "impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {}";
+    code_ += "// impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {}";
     code_ += "impl<'a> {{STRUCT_NAME}}<'a> /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
     //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";

@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2018 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +15,7 @@
  * limitations under the License.
  */
 
+use std::collections::HashMap;
 extern crate flatbuffers;
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::MyGame;
@@ -489,7 +491,13 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //  // anything.
 //  AccessFlatBufferTest(flatbuf, length);
 //}
-//
+fn check_read_buffer(buf: &[u8]) {
+	let monster1 = MyGame::Example::GetRootAsMonster(buf);
+	//let monster2 = {
+    //    let mut x = MyGame::Example::Monster::(..Default::default());
+    //};
+}
+
 //// Unpack a FlatBuffer into objects.
 //void ObjectFlatBuffersTest(uint8_t *flatbuf) {
 //  // Optional: we can specify resolver and rehasher functions to turn hashed
@@ -959,92 +967,108 @@ fn json_default_test() {
 //  TEST_EQ(read, val);
 //}
 
-// Low level stress/fuzz test: serialize/deserialize a variety of
-// different kinds of data in different combinations
 #[test]
-fn fuzz_test1() {
-    return;
-  // Values we're testing against: chosen to ensure no bits get chopped
-  // off anywhere, and also be different from eachother.
-  let bool_val: u8 = 1;
+fn fuzz_scalar_table_serialization() {
+    // Values we're testing against: chosen to ensure no bits get chopped
+    // off anywhere, and also be different from eachother.
+    let bool_val: bool = true;
+    let char_val: i8 = -127;  // 0x81
+    let uchar_val: u8 = 0xFF;
+    let short_val: i16 = -32222;  // 0x8222;
+    let ushort_val: u16 = 0xFEEE;
+    let int_val: i32 = unsafe { std::mem::transmute(0x83333333u32) };
+    let uint_val: u32 = 0xFDDDDDDD;
+    let long_val: i64 = unsafe { std::mem::transmute(0x8444444444444444u64) }; // TODO: byte literal?
+    let ulong_val: u64 = 0xFCCCCCCCCCCCCCCCu64;
+    let float_val: f32 = 3.14159;
+    let double_val: f64 = 3.14159265359;
 
-  let char_val: i8 = -127;  // 0x81
-  let uchar_val: u8 = 0xFF;
-  let short_val: i16 = -32222;  // 0x8222;
-  let ushort_val: u16 = 0xFEEE;
-  let int_val: i32 = unsafe { std::mem::transmute(0x83333333u32) };
-  let uint_val: u32 = 0xFDDDDDDD;
-  let long_val: i64 = unsafe { std::mem::transmute(0x8444444444444444u64) }; // TODO: byte literal?
-  let ulong_val: u64 = 0xFCCCCCCCCCCCCCCCu64;
-  let float_val: f32 = 3.14159;
-  let double_val: f64 = 3.14159265359;
+    let test_values_max: isize = 11;
+    let max_fields_per_object: flatbuffers::VOffsetT = 20;
+    let num_fuzz_objects: isize = 10000;  // The higher, the more thorough :)
 
-  let test_values_max: isize = 11;
-  let fields_per_object: flatbuffers::VOffsetT = 4;
-  let num_fuzz_objects: isize = 1000;  // The higher, the more thorough :)
+    let mut builder = flatbuffers::FlatBufferBuilder::new();
+    let mut lcg = LCG::new();
 
-  let mut builder = flatbuffers::FlatBufferBuilder::new();
-  let mut lcg = LCG::new();
+    let mut objects: Vec<flatbuffers::UOffsetT> = vec![0; num_fuzz_objects as usize];
 
-  let mut objects: Vec<flatbuffers::UOffsetT> = vec![0; num_fuzz_objects as usize];
+    // Generate num_fuzz_objects random objects each consisting of
+    // fields_per_object fields, each of a random type.
+    for i in 0..(num_fuzz_objects as usize) {
+        let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
+        let start = builder.start_table(fields_per_object);
 
-  // Generate num_fuzz_objects random objects each consisting of
-  // fields_per_object fields, each of a random type.
-  for i in 0..(num_fuzz_objects as usize) {
-      let start = builder.start_table(fields_per_object);
-      for f in 0..fields_per_object {
-          let choice = lcg.next() % (test_values_max as u64);
-          let off = flatbuffers::field_index_to_offset(f);
-          println!("field_index_to_offset: {} -> {}", f, off);
-          match choice {
-              //0 => {builder.push_slot_bool(off, bool_val, 0);}
-              //1 => {builder.push_slot_scalar::<i8>(off, char_val, 0);}
-              //2 => {builder.push_slot_scalar::<u8>(off, uchar_val, 0);}
-              _ => {}//panic!("unknown choice");}
-              //case 1: builder.AddElement<int8_t>(off, char_val, 0); break;
-              //case 2: builder.AddElement<uint8_t>(off, uchar_val, 0); break;
-              //case 3: builder.AddElement<int16_t>(off, short_val, 0); break;
-              //case 4: builder.AddElement<uint16_t>(off, ushort_val, 0); break;
-              //case 5: builder.AddElement<int32_t>(off, int_val, 0); break;
-              //case 6: builder.AddElement<uint32_t>(off, uint_val, 0); break;
-              //case 7: builder.AddElement<int64_t>(off, long_val, 0); break;
-              //case 8: builder.AddElement<uint64_t>(off, ulong_val, 0); break;
-              //case 9: builder.AddElement<float>(off, float_val, 0); break;
-              //case 10: builder.AddElement<double>(off, double_val, 0); break;
-          }
-      }
-      println!("writing {} (of {})", i, objects.len());
-      objects[i] = builder.end_table(start);
+        for f in 0..fields_per_object {
+            let choice = lcg.next() % (test_values_max as u64);
+
+            match choice {
+                0 => {builder.push_slot_scalar(f, bool_val, false);}
+                1 => {builder.push_slot_scalar::<i8>(f, char_val, 0);}
+                2 => {builder.push_slot_scalar::<u8>(f, uchar_val, 0);}
+                3 => {builder.push_slot_scalar::<i16>(f, short_val, 0);}
+                4 => {builder.push_slot_scalar::<u16>(f, ushort_val, 0);}
+                5 => {builder.push_slot_scalar::<i32>(f, int_val, 0);}
+                6 => {builder.push_slot_scalar::<u32>(f, uint_val, 0);}
+                7 => {builder.push_slot_scalar::<i64>(f, long_val, 0);}
+                8 => {builder.push_slot_scalar::<u64>(f, ulong_val, 0);}
+                9 => {builder.push_slot_scalar::<f32>(f, float_val, 0.0);}
+                10 => {builder.push_slot_scalar::<f64>(f, double_val, 0.0);}
+                _ => { panic!("unknown choice: {}", choice); }
+            }
+        }
+        objects[i] = builder.end_table(start);
     }
-//  builder.PreAlign<flatbuffers::largest_scalar_t>(0);  // Align whole buffer.
-//
-    lcg.reset(); // Reset.
 
-//  uint8_t *eob = builder.GetCurrentBufferPointer() + builder.GetSize();
-//
-//  // Test that all objects we generated are readable and return the
-//  // expected values. We generate random objects in the same order
-//  // so this is deterministic.
-//  for (int i = 0; i < num_fuzz_objects; i++) {
-//    auto table = reinterpret_cast<flatbuffers::Table *>(eob - objects[i]);
-//    for (flatbuffers::voffset_t f = 0; f < fields_per_object; f++) {
-//      int choice = lcg_rand() % test_values_max;
-//      flatbuffers::voffset_t off = flatbuffers::FieldIndexToOffset(f);
-//      switch (choice) {
-//        case 0: CompareTableFieldValue(table, off, bool_val); break;
-//        case 1: CompareTableFieldValue(table, off, char_val); break;
-//        case 2: CompareTableFieldValue(table, off, uchar_val); break;
-//        case 3: CompareTableFieldValue(table, off, short_val); break;
-//        case 4: CompareTableFieldValue(table, off, ushort_val); break;
-//        case 5: CompareTableFieldValue(table, off, int_val); break;
-//        case 6: CompareTableFieldValue(table, off, uint_val); break;
-//        case 7: CompareTableFieldValue(table, off, long_val); break;
-//        case 8: CompareTableFieldValue(table, off, ulong_val); break;
-//        case 9: CompareTableFieldValue(table, off, float_val); break;
-//        case 10: CompareTableFieldValue(table, off, double_val); break;
-//      }
-//    }
-//  }
+    // Do some bookkeeping to generate stats on fuzzes:
+    let mut stats: HashMap<u64, u64> = HashMap::new();
+    let mut values_generated: u64 = 0;
+
+    // Embrace RNG determinism:
+    lcg.reset();
+
+    // Test that all objects we generated are readable and return the
+    // expected values. We generate random objects in the same order
+    // so this is deterministic:
+    for i in 0..(num_fuzz_objects as usize) {
+        let table = {
+            let buf = builder.get_buf_slice();
+            let pos = buf.len() as flatbuffers::UOffsetT - objects[i];
+            flatbuffers::Table::new(buf, pos)
+        };
+
+        let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
+        for j in 0..fields_per_object {
+            let choice = lcg.next() % (test_values_max as u64);
+
+            *stats.entry(choice).or_insert(0) += 1;
+            values_generated += 1;
+
+            let f = flatbuffers::field_index_to_offset(j);
+            match choice {
+                0 => { assert_eq!(bool_val, table.get_slot_scalar(f, false)); }
+                1 => { assert_eq!(char_val, table.get_slot_scalar::<i8>(f, 0)); }
+                2 => { assert_eq!(uchar_val, table.get_slot_scalar::<u8>(f, 0)); }
+                3 => { assert_eq!(short_val, table.get_slot_scalar::<i16>(f, 0)); }
+                4 => { assert_eq!(ushort_val, table.get_slot_scalar::<u16>(f, 0)); }
+                5 => { assert_eq!(int_val, table.get_slot_scalar::<i32>(f, 0)); }
+                6 => { assert_eq!(uint_val, table.get_slot_scalar::<u32>(f, 0)); }
+                7 => { assert_eq!(long_val, table.get_slot_scalar::<i64>(f, 0)); }
+                8 => { assert_eq!(ulong_val, table.get_slot_scalar::<u64>(f, 0)); }
+                9 => { assert_eq!(float_val, table.get_slot_scalar::<f32>(f, 0.0)); }
+                10 => { assert_eq!(double_val, table.get_slot_scalar::<f64>(f, 0.0)); }
+                _ => { panic!("unknown choice: {}", choice); }
+            }
+        }
+    }
+
+    // Assert that we tested all the fuzz cases, at least 5% each:
+    let min_tests_per_choice = values_generated / 20;
+    assert!(values_generated > 0);
+    assert!(min_tests_per_choice > 0);
+    for i in 0..test_values_max as u64 {
+        assert!(stats[&i] >= min_tests_per_choice,
+                format!("inadequately-tested fuzz case: {}", i));
+    }
 }
 
 // High level stress/fuzz test: generate a big schema and
@@ -2103,7 +2127,7 @@ mod test_byte_layouts {
     #[test]
     fn test_1_basic_numbers() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.push_element_bool(true);
+        b.push_element_scalar(true);
         check(&b, &[1]);
         b.push_element_scalar(-127i8);
         check(&b, &[129, 1]);
@@ -2242,7 +2266,7 @@ mod test_byte_layouts {
         check(&b, &[]);
         let off = b.start_table(1);
         check(&b, &[]);
-        b.push_slot_bool(0, true, false);
+        b.push_slot_scalar(0, true, false);
         check(&b, &[1]);
         b.end_table(off);
         check(&b, &[
@@ -2261,7 +2285,7 @@ mod test_byte_layouts {
         check(&b, &[]);
         let off = b.start_table(1);
         check(&b, &[]);
-        b.push_slot_bool(0, false, false);
+        b.push_slot_scalar(0, false, false);
         b.end_table(off);
         check(&b, &[
              4, 0, // vtable bytes
@@ -2311,7 +2335,7 @@ mod test_byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(2);
         b.push_slot_scalar(0, 0x3456i16, 0);
-        b.push_slot_bool(1, true, false);
+        b.push_slot_scalar(1, true, false);
         b.end_table(off);
         check(&b, &[
             8, 0, // vtable bytes
@@ -2519,14 +2543,14 @@ mod test_byte_layouts {
     fn test_18_a_bunch_of_bools() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(8);
-        b.push_slot_bool(0, true, false);
-        b.push_slot_bool(1, true, false);
-        b.push_slot_bool(2, true, false);
-        b.push_slot_bool(3, true, false);
-        b.push_slot_bool(4, true, false);
-        b.push_slot_bool(5, true, false);
-        b.push_slot_bool(6, true, false);
-        b.push_slot_bool(7, true, false);
+        b.push_slot_scalar(0, true, false);
+        b.push_slot_scalar(1, true, false);
+        b.push_slot_scalar(2, true, false);
+        b.push_slot_scalar(3, true, false);
+        b.push_slot_scalar(4, true, false);
+        b.push_slot_scalar(5, true, false);
+        b.push_slot_scalar(6, true, false);
+        b.push_slot_scalar(7, true, false);
         let off2 = b.end_table(off);
         b.finish(off2);
 
@@ -2560,9 +2584,9 @@ mod test_byte_layouts {
     fn test_19_three_bools() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(3);
-        b.push_slot_bool(0, true, false);
-        b.push_slot_bool(1, true, false);
-        b.push_slot_bool(2, true, false);
+        b.push_slot_scalar(0, true, false);
+        b.push_slot_scalar(1, true, false);
+        b.push_slot_scalar(2, true, false);
         let off2 = b.end_table(off);
         b.finish(off2);
 
