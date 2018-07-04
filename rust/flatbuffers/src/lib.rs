@@ -317,6 +317,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         assert!(!self.nested);
         assert_eq!(self.vtable.len(), 0);
     }
+    pub fn assert_finished(&self) {
+        assert!(self.finished);
+    }
     pub fn start_vector(&mut self, elemsize: usize, num_elems: usize, alignment: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
@@ -640,13 +643,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn push_element_bool(&mut self, b: bool) -> UOffsetT {
         self.push_element_scalar(b as u8)
     }
-    pub fn push_slot_struct(&mut self, slotnum: VOffsetT, x: UOffsetT, d: UOffsetT)  {
-        if x != d {
-            self.assert_nested();
-            assert!(x == self.rev_cur_idx(), "inline data write outside of table");
-            self.store_slot(slotnum);
-        }
-    }
     fn align(&mut self, elem_size: usize) {
         let delta = self.cur_idx % elem_size;
         self.cur_idx -= delta;
@@ -711,6 +707,15 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         unimplemented!();
         self.push_slot_scalar(slotnum, x as u8, default as u8);
     }
+    pub fn push_slot_struct(&mut self, slotnum: VOffsetT, x: UOffsetT, default: UOffsetT) {
+        self.assert_nested();
+        if x != default {
+            if x != self.rev_cur_idx() {
+                panic!("structs must be written inside a table");
+            }
+            self.store_slot(slotnum);
+        }
+    }
     pub fn push_slot_scalar<T: ElementScalar + std::fmt::Display>(&mut self, slotnum: VOffsetT, x: T, default: T) {
         if x != default {
            //// println!("pushing slot scalar {} != {}", x, default);
@@ -758,6 +763,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             //println!("grew to: {}, {}, {:?}", self.cur_idx, self.owned_buf.len(), self.get_active_buf_slice());
         }
         want
+    }
+    pub fn finished_bytes(&self) -> &[u8] {
+        self.assert_finished();
+        &self.owned_buf[self.cur_idx..]
     }
 }
 pub trait UOffsetTTrait {}
