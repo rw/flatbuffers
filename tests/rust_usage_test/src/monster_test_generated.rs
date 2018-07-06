@@ -341,7 +341,8 @@ impl Ability {
     flatbuffers::endian_scalar(self.id_)
   }
   fn KeyCompareLessThan(&self, o: &Ability) -> bool {
-    self.id() < o.id()
+    unimplemented!();
+    //self.id() < o.id()
   }
   fn KeyCompareWithValue(&self, val: u32) -> isize {
     let key = self.id();
@@ -451,8 +452,8 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
     const VT_VAL: flatbuffers::VOffsetT = 6;
     const VT_COUNT: flatbuffers::VOffsetT = 8;
 
-  pub fn id(&self) -> &flatbuffers::StringOffset  {
-    self._tab.get_string_unsafe::<&flatbuffers::StringOffset>(Stat::VT_ID)
+  pub fn id(&self) -> Option<&str> {
+    self._tab.get_string_unsafe(Stat::VT_ID)
   }
   pub fn val(&self) -> i64  {
     self._tab.get_slot_scalar::<i64>(Stat::VT_VAL, 0)
@@ -590,13 +591,15 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn hp(&self) -> i16  {
     self._tab.get_slot_scalar::<i16>(Monster::VT_HP, 100)
   }
-  pub fn name(&self) -> &flatbuffers::StringOffset  {
-    self._tab.get_string_unsafe::<&flatbuffers::StringOffset>(Monster::VT_NAME)
+  pub fn name(&self) -> Option<&str> {
+    self._tab.get_string_unsafe(Monster::VT_NAME)
   }
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
-    return *self.name() < *o.name();
+    unimplemented!()
+    //return *self.name() < *o.name();
   }
   fn KeyCompareWithValue(&self, _val: &str) -> Ordering {
+    unimplemented!();
     Ordering::Equal
     // TODO(rw): self.name().cmp(val)
   }

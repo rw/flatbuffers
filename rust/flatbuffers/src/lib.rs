@@ -145,8 +145,21 @@ impl<'a> Table<'a> {
         unimplemented!();
         return true;
     }
-    pub fn get_string_unsafe<T>(&'a self, slotnum: VOffsetT) -> &'a str {
-        unimplemented!()
+    pub fn get_string_unsafe(&'a self, slotnum: VOffsetT) -> Option<&'a str> {
+        let o = self.compute_vtable_offset(slotnum) as usize;
+        if o == 0 {
+            return None;
+        }
+        let mut off = o + self.pos;
+        off += read_scalar_at::<UOffsetT>(self.data, off) as usize;
+        let start = off + SIZE_UOFFSET as usize;
+        let length = read_scalar_at::<UOffsetT>(self.data, off) as usize;
+        let buf = &self.data[start..start+length];
+        let s: &str = unsafe {
+            let v = std::slice::from_raw_parts(buf.as_ptr(), length);
+            &*(v as *const [u8] as *const str)
+        };
+        Some(s)
     }
     pub fn get_struct_unsafe<T>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
         let off = self.compute_vtable_offset(slotnum) as usize;
