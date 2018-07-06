@@ -302,11 +302,11 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
                 }
             }
         }
-        let maybe_pos = m.pos();
-        if let None = maybe_pos {
-            return Err("bad pos");
+        let pos = match m.pos() {
+            None => { return Err("bad pos"); }
+            Some(x) => { x; }
         }
-        let pos = maybe_pos.unwrap();
+        //let pos = maybe_pos.unwrap();
         if pos.x() != 1.0f32 { return Err("bad pos.x"); }
         if pos.y() != 2.0f32 { return Err("bad pos.y"); }
         if pos.z() != 3.0f32 { return Err("bad pos.z"); }
