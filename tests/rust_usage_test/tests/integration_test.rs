@@ -293,7 +293,15 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
     for m in vec![monster1] {
         if m.hp() != 80 { return Err("bad hp"); }
         if m.mana() != 150 { return Err("bad mana"); }
-        if m.name() != "MyMonster" { return Err("bad name"); }
+        match m.name() {
+            None => {return Err("bad name"); }
+            Some(s) => {
+                println!("name: {}", s);
+                if s != "MyMonster" {
+                    return Err("bad name");
+                }
+            }
+        }
         let maybe_pos = m.pos();
         if let None = maybe_pos {
             return Err("bad pos");

@@ -1750,8 +1750,8 @@ class RustGenerator : public BaseGenerator {
         offset_type =  GenTypeGet(field.value.type, "", "", "", false) + ">(";
         offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       } else if (field.value.type.base_type == BASE_TYPE_STRING) {
-        accessor = "self._tab.get_string_unsafe::<";
-        offset_type = GenTypeGet(field.value.type, "", "&", "", false) + ">(";
+        accessor = "self._tab.get_string_unsafe";
+        offset_type = "(";
         offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       } else {
         accessor = "flatbuffers::get_pointer::<";
@@ -1772,6 +1772,8 @@ class RustGenerator : public BaseGenerator {
                                      GenTypeGet(field.value.type, " ", "&",
                                                 afterptr.c_str(), true) + \
                                      ">");
+      } else if (field.value.type.base_type == BASE_TYPE_STRING) {
+        code_.SetValue("FIELD_TYPE", "Option<&str>");
       } else {
         code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "&",
                                                 afterptr.c_str(), true));
@@ -1890,15 +1892,17 @@ class RustGenerator : public BaseGenerator {
         const bool is_string = (field.value.type.base_type == BASE_TYPE_STRING);
 
         code_ += "  fn KeyCompareLessThan(&self, o: &{{STRUCT_NAME}}) -> bool {";
+        code_ += "    unimplemented!()";
         if (is_string) {
-          code_ += "    return *self.{{FIELD_NAME}}() < *o.{{FIELD_NAME}}();";
+          code_ += "    //return *self.{{FIELD_NAME}}() < *o.{{FIELD_NAME}}();";
         } else {
-          code_ += "    return self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}();";
+          code_ += "    //return self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}();";
         }
         code_ += "  }";
 
         if (is_string) {
           code_ += "  fn KeyCompareWithValue(&self, _val: &str) -> Ordering {";
+          code_ += "    unimplemented!();";
           code_ += "    Ordering::Equal";
           code_ += "    // TODO(rw): self.{{FIELD_NAME}}().cmp(val)";
           code_ += "  }";
@@ -1911,14 +1915,15 @@ class RustGenerator : public BaseGenerator {
 
           code_.SetValue("KEY_TYPE", type);
           code_ += "  fn KeyCompareWithValue(&self, val: {{KEY_TYPE}}) -> isize {";
-          code_ += "    let key = {{FIELD_NAME}}();";
-          code_ += "    if (key < val) {";
-          code_ += "      return -1;";
-          code_ += "    } else if (key > val) {";
-          code_ += "      return 1;";
-          code_ += "    } else {";
-          code_ += "      return 0;";
-          code_ += "    }";
+          code_ += "    unimplemented!();";
+          code_ += "    //let key = {{FIELD_NAME}}();";
+          code_ += "    //if (key < val) {";
+          code_ += "    //  return -1;";
+          code_ += "    //} else if (key > val) {";
+          code_ += "    //  return 1;";
+          code_ += "    //} else {";
+          code_ += "    //  return 0;";
+          code_ += "    //}";
           code_ += "  }";
         }
       }
@@ -2768,7 +2773,8 @@ class RustGenerator : public BaseGenerator {
       // Generate a comparison function for this field if it is a key.
       if (field.key) {
         code_ += "  fn KeyCompareLessThan(&self, o: &{{STRUCT_NAME}}) -> bool {";
-        code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
+        code_ += "    unimplemented!();";
+        code_ += "    //self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
         code_ += "  }";
         auto type = GenTypeBasic(field.value.type, false);
         if (parser_.opts.scoped_enums && field.value.type.enum_def &&
