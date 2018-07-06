@@ -37,10 +37,12 @@ impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
     }
 }
 impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
-  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
-    return flatbuffers::verify_table_start(verifier) &&
-           verifier.end_table();
-  }
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
+        InParentNamespace {
+            _tab: table,
+            _phantom: PhantomData,
+        }
+    }
 }
 
 pub struct InParentNamespaceArgs<'a> {
@@ -113,10 +115,12 @@ impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
     }
 }
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
-  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
-    return flatbuffers::verify_table_start(verifier) &&
-           verifier.end_table();
-  }
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
+        Monster {
+            _tab: table,
+            _phantom: PhantomData,
+        }
+    }
 }
 
 pub struct MonsterArgs<'a> {
@@ -173,7 +177,7 @@ pub mod Example {
   use std::cmp::Ordering;
 
 #[repr(i8)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Color {
   Red = 1,
   Green = 2,
@@ -203,7 +207,7 @@ pub fn EnumNameColor(e: Color) -> &'static str {
 }
 
 #[repr(u8)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Any {
   NONE = 0,
   Monster = 1,
@@ -232,7 +236,7 @@ pub fn EnumNameAny(e: Any) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(2)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct Test {
   a_: i16,
   b_: i8,
@@ -263,7 +267,7 @@ impl Test {
 
 // MANUALLY_ALIGNED_STRUCT(16)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct Vec3 {
   x_: f32,
   y_: f32,
@@ -320,7 +324,7 @@ impl Vec3 {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default)]
+#[derive(Clone, Copy, Default, Debug)]
 pub struct Ability {
   id_: u32,
   distance_: u32,
@@ -373,15 +377,16 @@ impl<'a> flatbuffers::BufferBacked<'a> for TestSimpleTableWithEnum<'a> {
     }
 }
 impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
+        TestSimpleTableWithEnum {
+            _tab: table,
+            _phantom: PhantomData,
+        }
+    }
     const VT_COLOR: flatbuffers::VOffsetT = 4;
 
-  pub fn color(&self) -> Color  {
+  pub fn color(&'a self) -> Color  {
     unsafe { ::std::mem::transmute(self._tab.get_slot_scalar::<i8>(TestSimpleTableWithEnum::VT_COLOR, 2)) }
-  }
-  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
-    return flatbuffers::verify_table_start(verifier) &&
-           flatbuffers::verify_field::<i8>(verifier, TestSimpleTableWithEnum::VT_COLOR) &&
-           verifier.end_table();
   }
 }
 
@@ -448,26 +453,24 @@ impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
     }
 }
 impl<'a> Stat<'a> /* private flatbuffers::Table */ {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
+        Stat {
+            _tab: table,
+            _phantom: PhantomData,
+        }
+    }
     const VT_ID: flatbuffers::VOffsetT = 4;
     const VT_VAL: flatbuffers::VOffsetT = 6;
     const VT_COUNT: flatbuffers::VOffsetT = 8;
 
-  pub fn id(&self) -> Option<&str> {
-    self._tab.get_string_unsafe(Stat::VT_ID)
+  pub fn id(&'a self) -> Option<&str> {
+    self._tab.get_slot_string_unsafe(Stat::VT_ID)
   }
-  pub fn val(&self) -> i64  {
+  pub fn val(&'a self) -> i64  {
     self._tab.get_slot_scalar::<i64>(Stat::VT_VAL, 0)
   }
-  pub fn count(&self) -> u16  {
+  pub fn count(&'a self) -> u16  {
     self._tab.get_slot_scalar::<u16>(Stat::VT_COUNT, 0)
-  }
-  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
-    return flatbuffers::verify_table_start(verifier) &&
-           flatbuffers::verify_offset(verifier, Stat::VT_ID) &&
-           verifier.verify(self.id()) &&
-           flatbuffers::verify_field::<i64>(verifier, Stat::VT_VAL) &&
-           flatbuffers::verify_field::<u16>(verifier, Stat::VT_COUNT) &&
-           verifier.end_table();
   }
 }
 
@@ -547,6 +550,12 @@ impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
     }
 }
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
+        Monster {
+            _tab: table,
+            _phantom: PhantomData,
+        }
+    }
     const VT_POS: flatbuffers::VOffsetT = 4;
     const VT_MANA: flatbuffers::VOffsetT = 6;
     const VT_HP: flatbuffers::VOffsetT = 8;
@@ -582,17 +591,17 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     const VT_VECTOR_OF_DOUBLES: flatbuffers::VOffsetT = 70;
     const VT_PARENT_NAMESPACE_TEST: flatbuffers::VOffsetT = 72;
 
-  pub fn pos(&self) -> Option<&Vec3/* foo */ > {
+  pub fn pos(&'a self) -> Option<&Vec3/* foo */ > {
     self._tab.get_struct_unsafe::<Vec3/* foo */>(Monster::VT_POS)
   }
-  pub fn mana(&self) -> i16  {
+  pub fn mana(&'a self) -> i16  {
     self._tab.get_slot_scalar::<i16>(Monster::VT_MANA, 150)
   }
-  pub fn hp(&self) -> i16  {
+  pub fn hp(&'a self) -> i16  {
     self._tab.get_slot_scalar::<i16>(Monster::VT_HP, 100)
   }
-  pub fn name(&self) -> Option<&str> {
-    self._tab.get_string_unsafe(Monster::VT_NAME)
+  pub fn name(&'a self) -> Option<&str> {
+    self._tab.get_slot_string_unsafe(Monster::VT_NAME)
   }
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
     unimplemented!()
@@ -603,17 +612,17 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     Ordering::Equal
     // TODO(rw): self.name().cmp(val)
   }
-  pub fn inventory(&self) -> &&'a[u8]  {
-    flatbuffers::get_pointer::<&&'a[u8]>(Monster::VT_INVENTORY)
+  pub fn inventory(&'a self) -> Option< &'a[u8] > {
+    self._tab.get_slot_vector::<u8>(Monster::VT_INVENTORY)
   }
-  pub fn color(&self) -> Color  {
+  pub fn color(&'a self) -> Color  {
     unsafe { ::std::mem::transmute(self._tab.get_slot_scalar::<i8>(Monster::VT_COLOR, 8)) }
   }
-  pub fn test_type(&self) -> Any  {
+  pub fn test_type(&'a self) -> Any  {
     unsafe { ::std::mem::transmute(self._tab.get_slot_scalar::<u8>(Monster::VT_TEST_TYPE, 0)) }
   }
-  pub fn test(&self) -> &flatbuffers::Void<'a>  {
-    flatbuffers::get_pointer::<&flatbuffers::Void<'a>>(Monster::VT_TEST)
+  pub fn test(&'a self) -> Option<flatbuffers::Table> {
+    self._tab.get_slot_union(Monster::VT_TEST)
   }
   // TODO(?) template<typename T> const T *test_as() const;
   // TODO: fn test_as_Monster() -> &Monster {
@@ -625,148 +634,90 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   // TODO: fn test_as_MyGame_Example2_Monster() -> &super::Example2::Monster {
 // TODO:     if test_type() == Any::MyGame_Example2_Monster { static_cast::<&super::Example2::Monster>(test()) } else { nullptr }
 // TODO:   }
-  pub fn test4(&self) -> &&'a[&'a Test/* foo */]  {
-    flatbuffers::get_pointer::<&&'a[&'a Test/* foo */]>(Monster::VT_TEST4)
+  pub fn test4(&'a self) -> Option< &'a[&'a Test/* foo */] > {
+    self._tab.get_slot_vector::<& Test/* foo */>(Monster::VT_TEST4)
   }
-  pub fn testarrayofstring(&self) -> &&'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]  {
-    flatbuffers::get_pointer::<&&'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]>(Monster::VT_TESTARRAYOFSTRING)
+  pub fn testarrayofstring(&'a self) -> Option< &'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>] > {
+    self._tab.get_slot_vector::<flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>>(Monster::VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
-  pub fn testarrayoftables(&self) -> &&'a[flatbuffers::LabeledUOffsetT<Monster<'a>>]  {
-    flatbuffers::get_pointer::<&&'a[flatbuffers::LabeledUOffsetT<Monster<'a>>]>(Monster::VT_TESTARRAYOFTABLES)
+  pub fn testarrayoftables(&'a self) -> Option< &'a[flatbuffers::LabeledUOffsetT<Monster<'a>>] > {
+    self._tab.get_slot_vector::<flatbuffers::LabeledUOffsetT<Monster<>>>(Monster::VT_TESTARRAYOFTABLES)
   }
-  pub fn enemy(&self) -> &Monster<'a>  {
+  pub fn enemy(&'a self) -> &Monster<'a>  {
     flatbuffers::get_pointer::<&Monster<'a>>(Monster::VT_ENEMY)
   }
-  pub fn testnestedflatbuffer(&self) -> &&'a[u8]  {
-    flatbuffers::get_pointer::<&&'a[u8]>(Monster::VT_TESTNESTEDFLATBUFFER)
+  pub fn testnestedflatbuffer(&'a self) -> Option< &'a[u8] > {
+    self._tab.get_slot_vector::<u8>(Monster::VT_TESTNESTEDFLATBUFFER)
   }
 //TODO: mutable nested root
   fn testnestedflatbuffer_nested_root(&self) -> &Monster{
     unimplemented!()
     // TODO(rw): return flatbuffers::get_root::<Monster>(self.testnestedflatbuffer().Data());
   }
-  pub fn testempty(&self) -> &Stat<'a>  {
+  pub fn testempty(&'a self) -> &Stat<'a>  {
     flatbuffers::get_pointer::<&Stat<'a>>(Monster::VT_TESTEMPTY)
   }
-  pub fn testbool(&self) -> bool  {
+  pub fn testbool(&'a self) -> bool  {
     self._tab.get_slot_scalar::<u8>(Monster::VT_TESTBOOL, 0) != 0
   }
-  pub fn testhashs32_fnv1(&self) -> i32  {
+  pub fn testhashs32_fnv1(&'a self) -> i32  {
     self._tab.get_slot_scalar::<i32>(Monster::VT_TESTHASHS32_FNV1, 0)
   }
-  pub fn testhashu32_fnv1(&self) -> u32  {
+  pub fn testhashu32_fnv1(&'a self) -> u32  {
     self._tab.get_slot_scalar::<u32>(Monster::VT_TESTHASHU32_FNV1, 0)
   }
-  pub fn testhashs64_fnv1(&self) -> i64  {
+  pub fn testhashs64_fnv1(&'a self) -> i64  {
     self._tab.get_slot_scalar::<i64>(Monster::VT_TESTHASHS64_FNV1, 0)
   }
-  pub fn testhashu64_fnv1(&self) -> u64  {
+  pub fn testhashu64_fnv1(&'a self) -> u64  {
     self._tab.get_slot_scalar::<u64>(Monster::VT_TESTHASHU64_FNV1, 0)
   }
-  pub fn testhashs32_fnv1a(&self) -> i32  {
+  pub fn testhashs32_fnv1a(&'a self) -> i32  {
     self._tab.get_slot_scalar::<i32>(Monster::VT_TESTHASHS32_FNV1A, 0)
   }
-  pub fn testhashu32_fnv1a(&self) -> u32  {
+  pub fn testhashu32_fnv1a(&'a self) -> u32  {
     self._tab.get_slot_scalar::<u32>(Monster::VT_TESTHASHU32_FNV1A, 0)
   }
-  pub fn testhashs64_fnv1a(&self) -> i64  {
+  pub fn testhashs64_fnv1a(&'a self) -> i64  {
     self._tab.get_slot_scalar::<i64>(Monster::VT_TESTHASHS64_FNV1A, 0)
   }
-  pub fn testhashu64_fnv1a(&self) -> u64  {
+  pub fn testhashu64_fnv1a(&'a self) -> u64  {
     self._tab.get_slot_scalar::<u64>(Monster::VT_TESTHASHU64_FNV1A, 0)
   }
-  pub fn testarrayofbools(&self) -> &&'a[u8]  {
-    flatbuffers::get_pointer::<&&'a[u8]>(Monster::VT_TESTARRAYOFBOOLS)
+  pub fn testarrayofbools(&'a self) -> Option< &'a[u8] > {
+    self._tab.get_slot_vector::<u8>(Monster::VT_TESTARRAYOFBOOLS)
   }
-  pub fn testf(&self) -> f32  {
+  pub fn testf(&'a self) -> f32  {
     self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF, 3.14159)
   }
-  pub fn testf2(&self) -> f32  {
+  pub fn testf2(&'a self) -> f32  {
     self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF2, 3.0)
   }
-  pub fn testf3(&self) -> f32  {
+  pub fn testf3(&'a self) -> f32  {
     self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF3, 0.0)
   }
-  pub fn testarrayofstring2(&self) -> &&'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]  {
-    flatbuffers::get_pointer::<&&'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]>(Monster::VT_TESTARRAYOFSTRING2)
+  pub fn testarrayofstring2(&'a self) -> Option< &'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>] > {
+    self._tab.get_slot_vector::<flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>>(Monster::VT_TESTARRAYOFSTRING2)
   }
-  pub fn testarrayofsortedstruct(&self) -> &&'a[&'a Ability/* foo */]  {
-    flatbuffers::get_pointer::<&&'a[&'a Ability/* foo */]>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
+  pub fn testarrayofsortedstruct(&'a self) -> Option< &'a[&'a Ability/* foo */] > {
+    self._tab.get_slot_vector::<& Ability/* foo */>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
   }
-  pub fn flex(&self) -> &&'a[u8]  {
-    flatbuffers::get_pointer::<&&'a[u8]>(Monster::VT_FLEX)
+  pub fn flex(&'a self) -> Option< &'a[u8] > {
+    self._tab.get_slot_vector::<u8>(Monster::VT_FLEX)
   }
-  pub fn test5(&self) -> &&'a[&'a Test/* foo */]  {
-    flatbuffers::get_pointer::<&&'a[&'a Test/* foo */]>(Monster::VT_TEST5)
+  pub fn test5(&'a self) -> Option< &'a[&'a Test/* foo */] > {
+    self._tab.get_slot_vector::<& Test/* foo */>(Monster::VT_TEST5)
   }
-  pub fn vector_of_longs(&self) -> &&'a[i64]  {
-    flatbuffers::get_pointer::<&&'a[i64]>(Monster::VT_VECTOR_OF_LONGS)
+  pub fn vector_of_longs(&'a self) -> Option< &'a[i64] > {
+    self._tab.get_slot_vector::<i64>(Monster::VT_VECTOR_OF_LONGS)
   }
-  pub fn vector_of_doubles(&self) -> &&'a[f64]  {
-    flatbuffers::get_pointer::<&&'a[f64]>(Monster::VT_VECTOR_OF_DOUBLES)
+  pub fn vector_of_doubles(&'a self) -> Option< &'a[f64] > {
+    self._tab.get_slot_vector::<f64>(Monster::VT_VECTOR_OF_DOUBLES)
   }
-  pub fn parent_namespace_test(&self) -> &super::InParentNamespace<'a>  {
+  pub fn parent_namespace_test(&'a self) -> &super::InParentNamespace<'a>  {
     flatbuffers::get_pointer::<&super::InParentNamespace<'a>>(Monster::VT_PARENT_NAMESPACE_TEST)
-  }
-  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
-    return flatbuffers::verify_table_start(verifier) &&
-           flatbuffers::verify_field::<Vec3/* foo */>(verifier, Monster::VT_POS) &&
-           flatbuffers::verify_field::<i16>(verifier, Monster::VT_MANA) &&
-           flatbuffers::verify_field::<i16>(verifier, Monster::VT_HP) &&
-           flatbuffers::verify_offset_required(verifier, Monster::VT_NAME) &&
-           verifier.verify(self.name()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_INVENTORY) &&
-           verifier.verify(self.inventory()) &&
-           flatbuffers::verify_field::<i8>(verifier, Monster::VT_COLOR) &&
-           flatbuffers::verify_field::<u8>(verifier, Monster::VT_TEST_TYPE) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TEST) &&
-           VerifyAny(verifier, self.test(), self.test_type()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TEST4) &&
-           verifier.verify(self.test4()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFSTRING) &&
-           verifier.verify(self.testarrayofstring()) &&
-           verifier.verify_vector_of_strings(self.testarrayofstring()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFTABLES) &&
-           verifier.verify(self.testarrayoftables()) &&
-           verifier.verify_vector_of_tables(self.testarrayoftables()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_ENEMY) &&
-           verifier.verify_table(self.enemy()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TESTNESTEDFLATBUFFER) &&
-           verifier.verify(self.testnestedflatbuffer()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TESTEMPTY) &&
-           verifier.verify_table(self.testempty()) &&
-           flatbuffers::verify_field::<u8>(verifier, Monster::VT_TESTBOOL) &&
-           flatbuffers::verify_field::<i32>(verifier, Monster::VT_TESTHASHS32_FNV1) &&
-           flatbuffers::verify_field::<u32>(verifier, Monster::VT_TESTHASHU32_FNV1) &&
-           flatbuffers::verify_field::<i64>(verifier, Monster::VT_TESTHASHS64_FNV1) &&
-           flatbuffers::verify_field::<u64>(verifier, Monster::VT_TESTHASHU64_FNV1) &&
-           flatbuffers::verify_field::<i32>(verifier, Monster::VT_TESTHASHS32_FNV1A) &&
-           flatbuffers::verify_field::<u32>(verifier, Monster::VT_TESTHASHU32_FNV1A) &&
-           flatbuffers::verify_field::<i64>(verifier, Monster::VT_TESTHASHS64_FNV1A) &&
-           flatbuffers::verify_field::<u64>(verifier, Monster::VT_TESTHASHU64_FNV1A) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFBOOLS) &&
-           verifier.verify(self.testarrayofbools()) &&
-           flatbuffers::verify_field::<f32>(verifier, Monster::VT_TESTF) &&
-           flatbuffers::verify_field::<f32>(verifier, Monster::VT_TESTF2) &&
-           flatbuffers::verify_field::<f32>(verifier, Monster::VT_TESTF3) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFSTRING2) &&
-           verifier.verify(self.testarrayofstring2()) &&
-           verifier.verify_vector_of_strings(self.testarrayofstring2()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TESTARRAYOFSORTEDSTRUCT) &&
-           verifier.verify(self.testarrayofsortedstruct()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_FLEX) &&
-           verifier.verify(self.flex()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_TEST5) &&
-           verifier.verify(self.test5()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_VECTOR_OF_LONGS) &&
-           verifier.verify(self.vector_of_longs()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_VECTOR_OF_DOUBLES) &&
-           verifier.verify(self.vector_of_doubles()) &&
-           flatbuffers::verify_offset(verifier, Monster::VT_PARENT_NAMESPACE_TEST) &&
-           verifier.verify_table(self.parent_namespace_test()) &&
-           verifier.end_table();
   }
 }
 
@@ -1050,6 +1001,12 @@ impl<'a> flatbuffers::BufferBacked<'a> for TypeAliases<'a> {
     }
 }
 impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
+        TypeAliases {
+            _tab: table,
+            _phantom: PhantomData,
+        }
+    }
     const VT_I8_: flatbuffers::VOffsetT = 4;
     const VT_U8_: flatbuffers::VOffsetT = 6;
     const VT_I16_: flatbuffers::VOffsetT = 8;
@@ -1063,59 +1020,41 @@ impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
     const VT_V8: flatbuffers::VOffsetT = 24;
     const VT_VF64: flatbuffers::VOffsetT = 26;
 
-  pub fn i8_(&self) -> i8  {
+  pub fn i8_(&'a self) -> i8  {
     self._tab.get_slot_scalar::<i8>(TypeAliases::VT_I8_, 0)
   }
-  pub fn u8_(&self) -> u8  {
+  pub fn u8_(&'a self) -> u8  {
     self._tab.get_slot_scalar::<u8>(TypeAliases::VT_U8_, 0)
   }
-  pub fn i16_(&self) -> i16  {
+  pub fn i16_(&'a self) -> i16  {
     self._tab.get_slot_scalar::<i16>(TypeAliases::VT_I16_, 0)
   }
-  pub fn u16_(&self) -> u16  {
+  pub fn u16_(&'a self) -> u16  {
     self._tab.get_slot_scalar::<u16>(TypeAliases::VT_U16_, 0)
   }
-  pub fn i32_(&self) -> i32  {
+  pub fn i32_(&'a self) -> i32  {
     self._tab.get_slot_scalar::<i32>(TypeAliases::VT_I32_, 0)
   }
-  pub fn u32_(&self) -> u32  {
+  pub fn u32_(&'a self) -> u32  {
     self._tab.get_slot_scalar::<u32>(TypeAliases::VT_U32_, 0)
   }
-  pub fn i64_(&self) -> i64  {
+  pub fn i64_(&'a self) -> i64  {
     self._tab.get_slot_scalar::<i64>(TypeAliases::VT_I64_, 0)
   }
-  pub fn u64_(&self) -> u64  {
+  pub fn u64_(&'a self) -> u64  {
     self._tab.get_slot_scalar::<u64>(TypeAliases::VT_U64_, 0)
   }
-  pub fn f32_(&self) -> f32  {
+  pub fn f32_(&'a self) -> f32  {
     self._tab.get_slot_scalar::<f32>(TypeAliases::VT_F32_, 0.0)
   }
-  pub fn f64_(&self) -> f64  {
+  pub fn f64_(&'a self) -> f64  {
     self._tab.get_slot_scalar::<f64>(TypeAliases::VT_F64_, 0.0)
   }
-  pub fn v8(&self) -> &&'a[i8]  {
-    flatbuffers::get_pointer::<&&'a[i8]>(TypeAliases::VT_V8)
+  pub fn v8(&'a self) -> Option< &'a[i8] > {
+    self._tab.get_slot_vector::<i8>(TypeAliases::VT_V8)
   }
-  pub fn vf64(&self) -> &&'a[f64]  {
-    flatbuffers::get_pointer::<&&'a[f64]>(TypeAliases::VT_VF64)
-  }
-  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {
-    return flatbuffers::verify_table_start(verifier) &&
-           flatbuffers::verify_field::<i8>(verifier, TypeAliases::VT_I8_) &&
-           flatbuffers::verify_field::<u8>(verifier, TypeAliases::VT_U8_) &&
-           flatbuffers::verify_field::<i16>(verifier, TypeAliases::VT_I16_) &&
-           flatbuffers::verify_field::<u16>(verifier, TypeAliases::VT_U16_) &&
-           flatbuffers::verify_field::<i32>(verifier, TypeAliases::VT_I32_) &&
-           flatbuffers::verify_field::<u32>(verifier, TypeAliases::VT_U32_) &&
-           flatbuffers::verify_field::<i64>(verifier, TypeAliases::VT_I64_) &&
-           flatbuffers::verify_field::<u64>(verifier, TypeAliases::VT_U64_) &&
-           flatbuffers::verify_field::<f32>(verifier, TypeAliases::VT_F32_) &&
-           flatbuffers::verify_field::<f64>(verifier, TypeAliases::VT_F64_) &&
-           flatbuffers::verify_offset(verifier, TypeAliases::VT_V8) &&
-           verifier.verify(self.v8()) &&
-           flatbuffers::verify_offset(verifier, TypeAliases::VT_VF64) &&
-           verifier.verify(self.vf64()) &&
-           verifier.end_table();
+  pub fn vf64(&'a self) -> Option< &'a[f64] > {
+    self._tab.get_slot_vector::<f64>(TypeAliases::VT_VF64)
   }
 }
 

@@ -949,7 +949,7 @@ class RustGenerator : public BaseGenerator {
 
     GenComment(enum_def.doc_comment);
     code_ += "#[repr({{BASE_TYPE}})]";
-    code_ += "#[derive(Clone, Copy, PartialEq)]";
+    code_ += "#[derive(Clone, Copy, PartialEq, Debug)]";
     code_ += GenEnumDecl(enum_def) + "\\";
     //if (parser_.opts.scoped_enums) code_ += " : {{BASE_TYPE}}\\";
     code_ += " {";
@@ -1697,6 +1697,12 @@ class RustGenerator : public BaseGenerator {
     code_ += "    }";
     code_ += "}";
     code_ += "impl<'a> {{STRUCT_NAME}}<'a> /* private flatbuffers::Table */ {";
+    code_ += "    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {";
+    code_ += "        {{STRUCT_NAME}} {";
+    code_ += "            _tab: table,";
+    code_ += "            _phantom: PhantomData,";
+    code_ += "        }";
+    code_ += "    }";
     //if (parser_.opts.generate_object_based_api) {
     //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
     //}
@@ -1750,8 +1756,17 @@ class RustGenerator : public BaseGenerator {
         offset_type =  GenTypeGet(field.value.type, "", "", "", false) + ">(";
         offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       } else if (field.value.type.base_type == BASE_TYPE_STRING) {
-        accessor = "self._tab.get_string_unsafe";
+        accessor = "self._tab.get_slot_string_unsafe";
         offset_type = "(";
+        offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
+      } else if (field.value.type.base_type == BASE_TYPE_UNION) {
+        accessor = "self._tab.get_slot_union";
+        offset_type = "(";
+        offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
+      } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
+        accessor = "self._tab.get_slot_vector::<";
+        //offset_type = GenTypeGet(field.value.type, " ", "", "", false) + ">(";
+        offset_type = GenTypeWire(field.value.type.VectorType(), "", "", false) + ">(";
         offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       } else {
         accessor = "flatbuffers::get_pointer::<";
@@ -1774,6 +1789,11 @@ class RustGenerator : public BaseGenerator {
                                      ">");
       } else if (field.value.type.base_type == BASE_TYPE_STRING) {
         code_.SetValue("FIELD_TYPE", "Option<&str>");
+      } else if (field.value.type.base_type == BASE_TYPE_UNION) {
+        code_.SetValue("FIELD_TYPE", "Option<flatbuffers::Table>");
+      } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
+        code_.SetValue("FIELD_TYPE", "Option<" + GenTypeGet(field.value.type, " ", " ",
+                                                afterptr.c_str(), true) + ">");
       } else {
         code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "&",
                                                 afterptr.c_str(), true));
@@ -1781,7 +1801,7 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
-      code_ += "  pub fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
+      code_ += "  pub fn {{FIELD_NAME}}(&'a self) -> {{FIELD_TYPE}} {";
       code_ += "    {{FIELD_VALUE}}";
       code_ += "  }";
 
@@ -1929,19 +1949,19 @@ class RustGenerator : public BaseGenerator {
       }
     }
 
-    // Generate a verifier function that can check a buffer from an untrusted
-    // source will never cause reads outside the buffer.
-    code_ += "  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {";
-    code_ += "    return flatbuffers::verify_table_start(verifier)\\";
-    for (auto it = struct_def.fields.vec.begin();
-         it != struct_def.fields.vec.end(); ++it) {
-      const auto &field = **it;
-      if (field.deprecated) { continue; }
-      GenVerifyCall(field, " &&\n           ");
-    }
+//  // Generate a verifier function that can check a buffer from an untrusted
+//  // source will never cause reads outside the buffer.
+//  code_ += "  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {";
+//  code_ += "    return flatbuffers::verify_table_start(verifier)\\";
+//  for (auto it = struct_def.fields.vec.begin();
+//       it != struct_def.fields.vec.end(); ++it) {
+//    const auto &field = **it;
+//    if (field.deprecated) { continue; }
+//    GenVerifyCall(field, " &&\n           ");
+//  }
 
-    code_ += " &&\n           verifier.end_table();";
-    code_ += "  }";
+//  code_ += " &&\n           verifier.end_table();";
+//  code_ += "  }";
 
     //if (parser_.opts.generate_object_based_api) {
     //  // Generate the UnPack() pre declaration.
@@ -2641,7 +2661,7 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
     code_ += "#[repr(C, packed)]";
-    code_ += "#[derive(Clone, Copy, Default)]";
+    code_ += "#[derive(Clone, Copy, Default, Debug)]";
 
     // TODO: maybe only use lifetimes when needed by members, and skip
     //       PhantomData? use TypeNeedsLifetime.

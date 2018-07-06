@@ -145,19 +145,54 @@ impl<'a> Table<'a> {
         unimplemented!();
         return true;
     }
-    pub fn get_string_unsafe(&'a self, slotnum: VOffsetT) -> Option<&'a str> {
+    pub fn get_slot_union(&self, slotnum: VOffsetT) -> Option<Table> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
         }
-        let mut off = o + self.pos;
-        off += read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        let start = off + SIZE_UOFFSET as usize;
-        let length = read_scalar_at::<UOffsetT>(self.data, off) as usize;
+        let off = o + self.pos;
+        let off2 = read_scalar_at::<UOffsetT>(self.data, off) as usize;
+        let t2 = Table {
+            data: self.data,
+            pos: off + off2,
+        };
+        Some(t2)
+    }
+    pub fn get_slot_string_unsafe(&'a self, slotnum: VOffsetT) -> Option<&'a str> {
+        let o = self.compute_vtable_offset(slotnum) as usize;
+        if o == 0 {
+            return None;
+        }
+        let off = o + self.pos;
+        let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
+        let start = off2 + SIZE_UOFFSET as usize;
+        let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
         let buf = &self.data[start..start+length];
         let s: &str = unsafe {
             let v = std::slice::from_raw_parts(buf.as_ptr(), length);
+            // from str::from_utf8_unchecked which is nightly
             &*(v as *const [u8] as *const str)
+        };
+        Some(s)
+    }
+    pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
+        let o = self.compute_vtable_offset(slotnum) as usize;
+        if o == 0 {
+            return None;
+        }
+        let off = o + self.pos;
+        let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
+        let start = off2 + SIZE_UOFFSET as usize;
+        let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
+        let length_u8 = length * std::mem::size_of::<T>();
+        println!("start: {}, length: {}, length_u8: {}", start, length, length_u8);
+        let buf = &self.data[start..start+length_u8];
+        println!("buf: {:?}", buf);
+        let ptr = buf.as_ptr() as *const T;
+        let s: &[T] = unsafe {
+            std::slice::from_raw_parts(ptr, length)
+            // from str::from_utf8_unchecked which is nightly
+            //&*(v as *const [u8] as *const str)
         };
         Some(s)
     }

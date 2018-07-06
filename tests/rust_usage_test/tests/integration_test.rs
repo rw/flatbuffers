@@ -291,22 +291,17 @@ fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::
 fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'static str> {
     let monster1 = MyGame::Example::GetRootAsMonster(bytes);
     for m in vec![monster1] {
-        if m.hp() != 80 { return Err("bad hp"); }
-        if m.mana() != 150 { return Err("bad mana"); }
+        if m.hp() != 80 { return Err("bad m.hp"); }
+        if m.mana() != 150 { return Err("bad m.mana"); }
         match m.name() {
-            None => {return Err("bad name"); }
-            Some(s) => {
-                println!("name: {}", s);
-                if s != "MyMonster" {
-                    return Err("bad name");
-                }
-            }
+            None => { return Err("bad m.name"); }
+            Some("MyMonster") => { }
+            Some(_) => { return Err("bad m.name"); }
         }
         let pos = match m.pos() {
-            None => { return Err("bad pos"); }
-            Some(x) => { x; }
-        }
-        //let pos = maybe_pos.unwrap();
+            None => { return Err("bad m.pos"); }
+            Some(x) => { x }
+        };
         if pos.x() != 1.0f32 { return Err("bad pos.x"); }
         if pos.y() != 2.0f32 { return Err("bad pos.y"); }
         if pos.z() != 3.0f32 { return Err("bad pos.z"); }
@@ -317,7 +312,43 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
         if pos_test3.a() != 5i16 { return Err("bad pos_test3.a"); }
         if pos_test3.b() != 6i8 { return Err("bad pos_test3.b"); }
 
-        if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_Type()"); }
+        if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
+
+        let table2 = match m.test() {
+            None => { return Err("bad m.test"); }
+            Some(x) => { x }
+        };
+
+        let monster2 = MyGame::Example::Monster::init_from_table(table2);
+
+        match monster2.name() {
+            None => { return Err("bad monster2.name"); }
+            Some("Fred") => { }
+            Some(_) => { return Err("bad monster2.name"); }
+        }
+
+        let inv = match m.inventory() {
+            None => { return Err("bad monster2.inventory"); }
+            Some(x) => { x }
+        };
+
+        if inv.len() != 5 { return Err("bad monster.inventory len"); }
+        let invsum: u8 = inv.iter().sum();
+        if invsum != 10 { return Err("bad monster.inventory sum"); }
+
+        let test4 = match m.test4() {
+            None => { return Err("bad monster2.test4"); }
+            Some(x) => { x }
+        };
+        assert!(false);
+        if test4.len() != 2 { return Err("bad monster.test4 len"); }
+        //println!("{:?}", test4);
+
+        //let x = test4[0];
+        //let y = test4[1];
+        //let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
+        //if xy_sum != 100 { return Err("bad monster.test4 item sum"); }
+
 
     }
     Ok(())
