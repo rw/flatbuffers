@@ -183,16 +183,15 @@ impl<'a> Table<'a> {
         let off = o + self.pos;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
         let start = off2 + SIZE_UOFFSET as usize;
+
         let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
         let length_u8 = length * std::mem::size_of::<T>();
-        println!("start: {}, length: {}, length_u8: {}", start, length, length_u8);
+
         let buf = &self.data[start..start+length_u8];
-        println!("buf: {:?}", buf);
         let ptr = buf.as_ptr() as *const T;
+
         let s: &[T] = unsafe {
             std::slice::from_raw_parts(ptr, length)
-            // from str::from_utf8_unchecked which is nightly
-            //&*(v as *const [u8] as *const str)
         };
         Some(s)
     }
@@ -534,10 +533,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 //      LabeledUOffsetT::new(0)
 //  }
 //  // TODO probably should not be returning [&T]
-    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [&'fbb T]> {
+    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [T]> {
         LabeledUOffsetT::new(0)
     }
-    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> LabeledUOffsetT<&'fbb [&'fbb T]>
+    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> LabeledUOffsetT<&'fbb [T]>
         where F: FnMut(usize, &mut T) {
         LabeledUOffsetT::new(0)
     }

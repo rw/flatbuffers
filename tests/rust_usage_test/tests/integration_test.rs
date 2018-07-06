@@ -227,7 +227,7 @@ fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::
 //
     // shortcut for creating monster with all fields set:
     let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{
-        pos: Some(&_vec),
+        pos: Some(_vec),
         mana: 150,
         hp: 80,
         name: _name,
@@ -328,28 +328,32 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
         }
 
         let inv = match m.inventory() {
-            None => { return Err("bad monster2.inventory"); }
+            None => { return Err("bad m.inventory"); }
             Some(x) => { x }
         };
 
-        if inv.len() != 5 { return Err("bad monster.inventory len"); }
+        if inv.len() != 5 { return Err("bad m.inventory len"); }
         let invsum: u8 = inv.iter().sum();
-        if invsum != 10 { return Err("bad monster.inventory sum"); }
+        if invsum != 10 { return Err("bad m.inventory sum"); }
 
         let test4 = match m.test4() {
-            None => { return Err("bad monster2.test4"); }
+            None => { return Err("bad m.test4"); }
             Some(x) => { x }
         };
-        assert!(false);
-        if test4.len() != 2 { return Err("bad monster.test4 len"); }
-        //println!("{:?}", test4);
+        if test4.len() != 2 { return Err("bad m.test4 len"); }
 
-        //let x = test4[0];
-        //let y = test4[1];
-        //let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
-        //if xy_sum != 100 { return Err("bad monster.test4 item sum"); }
+        let x = test4[0];
+        let y = test4[1];
+        let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
+        if xy_sum != 100 { return Err("bad m.test4 item sum"); }
 
-
+        let testarrayofstring = match m.testarrayofstring() {
+            None => { return Err("bad m.testarrayofstring"); }
+            Some(x) => { x }
+        };
+        if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
+        //TODO if testarrayofstring[0] != "test1" { return Err("bad monster.testarrayofstring[0]"); }
+        //TODO if testarrayofstring[1] != "test2" { return Err("bad monster.testarrayofstring[1]"); }
     }
     Ok(())
 }
