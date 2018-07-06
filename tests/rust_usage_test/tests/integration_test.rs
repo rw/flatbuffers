@@ -16,6 +16,7 @@
  */
 
 use std::collections::HashMap;
+
 extern crate flatbuffers;
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::MyGame;
@@ -121,9 +122,7 @@ fn Bar<'a, 'b, 'c: 'a>(
     args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset> {
     flatbuffers::LabeledUOffsetT::new(0)
 }
-fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
-  let mut builder = flatbuffers::FlatBufferBuilder::new();
-
+fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::FlatBufferBuilder) {
   let x = MyGame::Example::Test::new(10, 20);
   let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, x);
   let _name = builder.create_string("MyMonster");
@@ -284,9 +283,36 @@ fn CreateFlatBufferTest(buffer: &mut String) -> flatbuffers::DetachedBuffer {
 //      reinterpret_cast<const char *>(builder.GetBufferPointer());
 //  buffer.assign(bufferpointer, bufferpointer + builder.GetSize());
 //
-  return builder.release_buffer_pointer();
+  //return builder.get_active_buf_slice();
+  //return builder.release_buffer_pointer();
 
   //return flatbuffers::DetachedBuffer{};
+}
+fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'static str> {
+    let monster1 = MyGame::Example::GetRootAsMonster(bytes);
+    for m in vec![monster1] {
+        if m.hp() != 80 { return Err("bad hp"); }
+        if m.mana() != 150 { return Err("bad mana"); }
+        if m.name() != "MyMonster" { return Err("bad name"); }
+        let maybe_pos = m.pos();
+        if let None = maybe_pos {
+            return Err("bad pos");
+        }
+        let pos = maybe_pos.unwrap();
+        if pos.x() != 1.0f32 { return Err("bad pos.x"); }
+        if pos.y() != 2.0f32 { return Err("bad pos.y"); }
+        if pos.z() != 3.0f32 { return Err("bad pos.z"); }
+        if pos.test1() != 3.0f64 { return Err("bad pos.test1"); }
+        if pos.test2() != MyGame::Example::Color::Green { return Err("bad pos.test2"); }
+
+        let pos_test3 = pos.test3();
+        if pos_test3.a() != 5i16 { return Err("bad pos_test3.a"); }
+        if pos_test3.b() != 6i8 { return Err("bad pos_test3.b"); }
+
+        if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_Type()"); }
+
+    }
+    Ok(())
 }
 
 ////  example of accessing a buffer loaded in memory:
@@ -2084,6 +2110,85 @@ fn error_test() {
 //  }
 //}
 
+#[test]
+fn test_emplace_and_read_scalar_fuzz() {
+    // TODO(rw): random generate values, probably with a macro
+    // because num traits are annoying.
+        for n in u8::min_value()..=u8::max_value() {
+            let mut buf = vec![0u8; 1];
+            flatbuffers::emplace_scalar(&mut buf[..], n);
+            let m = flatbuffers::read_scalar(&buf[..]);
+            assert_eq!(n, m);
+        }
+        for n in i8::min_value()..=i8::max_value() {
+            let mut buf = vec![0u8; 1];
+            flatbuffers::emplace_scalar(&mut buf[..], n);
+            let m = flatbuffers::read_scalar(&buf[..]);
+            assert_eq!(n, m);
+        }
+        for n in u16::min_value()..=u16::max_value() {
+            let mut buf = vec![0u8; 2];
+            flatbuffers::emplace_scalar(&mut buf[..], n);
+            let m = flatbuffers::read_scalar(&buf[..]);
+            assert_eq!(n, m);
+        }
+        for n in i16::min_value()..=i16::max_value() {
+            let mut buf = vec![0u8; 2];
+            flatbuffers::emplace_scalar(&mut buf[..], n);
+            let m = flatbuffers::read_scalar(&buf[..]);
+            assert_eq!(n, m);
+        }
+
+    //fn doit<T: flatbuffers::ElementScalar>() {
+    //    let mut lcg = LCG::new();
+    //    //let mut rng = rand::thread_rng();
+
+    //    for i in 0..1000 {
+    //        let sz = std::mem::size_of::<T>();
+    //        let n = T::From(i);
+    //        //let x = lcg.next();
+    //        //let mut xx = vec![0u8; sz];
+    //        //for i in 0..sz {
+    //        //    xx[i] = x as u8;
+    //        //    x = x >> 8;
+    //        //}
+    //        //let n: T = unsafe {
+    //        //    std::mem::transmute(xx.as_ptr())
+    //        //};
+    //        //let n = (lcg.next() % std::mem::size_of::<T>()) as T;
+    //        //let n = rng.gen::<T>();
+    //        let mut buf = vec![0u8; sz];
+    //        flatbuffers::emplace_scalar(&mut buf[..], n);
+    //        let m: T = flatbuffers::read_scalar(&buf[..]);
+    //        assert!(n == m);
+    //    }
+    //}
+    //doit::<u8>();
+    //doit::<i8>();
+    //doit::<u16>();
+    //doit::<i16>();
+    //doit::<u32>();
+    //doit::<i32>();
+    //doit::<u64>();
+    //doit::<i64>();
+}
+
+#[test]
+fn test_gold_cpp_example_is_accessible_and_correct() {
+    use std::io::Read;
+    let mut f = std::fs::File::open("../monsterdata_test.mon").expect("missing java wire format example");
+    let mut buf = Vec::new();
+    f.read_to_end(&mut buf).unwrap();
+    //let mut builder = flatbuffers::FlatBufferBuilder::new();
+    //create_serialized_example_with_generated_code(&mut builder);
+    //let data = builder.get_active_buf_slice();
+    match serialized_example_is_accessible_and_correct(&buf[..]) {
+        Ok(()) => {}
+        Err(msg) => {
+            assert!(false, msg);
+        }
+    }
+}
 #[test]
 #[should_panic]
 fn test_end_table_should_panic_when_not_in_table() {

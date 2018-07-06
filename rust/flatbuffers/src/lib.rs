@@ -113,7 +113,7 @@ pub fn emplace_scalar<T>(s: &mut [u8], x: T) {
     s[..sz].copy_from_slice(data);
 }
 pub fn read_scalar_at<T: ElementScalar>(x: &[u8], loc: usize) -> T {
-    let buf = &x[loc..loc];
+    let buf = &x[loc..loc+std::mem::size_of::<T>()];
     read_scalar(buf)
 }
 pub fn read_scalar<T: ElementScalar>(x: &[u8]) -> T {
@@ -125,9 +125,14 @@ pub fn read_scalar<T: ElementScalar>(x: &[u8]) -> T {
     x.from_le()
 }
 
+pub trait BufferBacked<'a>{
+    // TODO: why isn't a default impl working here?
+    fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self;
+}
+
 pub struct Table<'a> {
-    data: &'a [u8],
-    pos: usize,
+    pub data: &'a [u8],
+    pub pos: usize,
 }
 impl<'a> Table<'a> {
     pub fn new<'b: 'a>(data: &'b [u8], pos: UOffsetT) -> Self {
@@ -140,6 +145,26 @@ impl<'a> Table<'a> {
         unimplemented!();
         return true;
     }
+    pub fn get_string_unsafe<T>(&'a self, slotnum: VOffsetT) -> &'a str {
+        unimplemented!()
+    }
+    pub fn get_struct_unsafe<T>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
+        let off = self.compute_vtable_offset(slotnum) as usize;
+        if off == 0 {
+            return None;
+        }
+
+        let loc = self.pos + off;
+        let buf = &self.data[loc..];//loc+std::mem::size_of::<T>()];
+        let ptr = buf.as_ptr() as *const T;
+        let x: &T = unsafe {
+            &*ptr
+        };
+        Some(x)
+
+
+        //read_scalar_at::<T>(self.data, self.pos + off)
+    }
     pub fn get_slot_scalar<T: ElementScalar>(&self, slotnum: VOffsetT, default: T) -> T {
         let off = self.compute_vtable_offset(slotnum) as usize;
         if off == 0 {
@@ -147,10 +172,17 @@ impl<'a> Table<'a> {
         }
         read_scalar_at::<T>(self.data, self.pos + off)
     }
+    //pub fn get_struct<T: Sized>(&'a self, slotnum: VOffsetT) -> &'a T {
+    //    let field_offset = GetOptionalFieldOffset(field);
+    //    auto p = const_cast<uint8_t *>(data_ + field_offset);
+    //    return field_offset ? reinterpret_cast<P>(p) : nullptr;
+    //}
     pub fn compute_vtable_offset(&self, vtable_offset: VOffsetT) -> VOffsetT {
         let vtable_start = {
             let a = self.pos as SOffsetT;
             let b = read_scalar_at::<SOffsetT>(self.data, self.pos);
+            //a - b
+            assert!(a - b >= 0, format!("vtable_offset: {}, a: {}, b: {}, self.pos: {}", vtable_offset, a, b, self.pos));
             (a - b) as usize
         };
         let rhs = read_scalar_at::<VOffsetT>(self.data, vtable_start);
@@ -393,10 +425,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         unimplemented!()
     }
     pub fn add_offset<T>(&mut self, _: isize, _: LabeledUOffsetT<T>) -> usize {
+
         unimplemented!()
     }
-    pub fn add_struct<T>(&mut self, _: isize, _: T) {
-        unimplemented!()
+    pub fn add_struct<T>(&mut self, _: VOffsetT, _: T) {
+        // TODO: unimplemented!()
     }
     // utf-8 string creation
     pub fn create_string(&mut self, s: &str) -> LabeledUOffsetT<StringOffset> {
@@ -621,8 +654,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         vtableoffsetloc as UOffsetT
     }
 
-    pub fn required<T>(&self, _: &LabeledUOffsetT<T>, _: isize) -> bool {
-        unimplemented!()
+    pub fn required<T>(&self, _: &LabeledUOffsetT<T>, _: VOffsetT) {
+        //TODO: unimplemented!()
     }
     pub fn finish(&mut self, root: UOffsetT) {
         self.assert_not_nested();
@@ -715,6 +748,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             }
             self.store_slot(slotnum);
         }
+    }
+    pub fn push_slot_labeled_uoffset<T>(&mut self, slotnum: VOffsetT, x: LabeledUOffsetT<T>) {
+        self.push_slot_scalar::<u32>(slotnum, x.0, 0)
     }
     pub fn push_slot_scalar<T: ElementScalar + std::fmt::Display>(&mut self, slotnum: VOffsetT, x: T, default: T) {
         if x != default {
@@ -850,29 +886,41 @@ pub fn write_scalar<S, T>(_: S, _: T) -> ! {
 pub fn set_field<T>(_: isize, _: T, _: T) -> bool {
     unimplemented!()
 }
-pub fn verify_field<T>(_: &Verifier, _: isize) -> bool {
+pub fn verify_field<T>(_: &Verifier, _: VOffsetT) -> bool {
     false
 }
-pub fn verify_offset(_: &Verifier, _: isize) -> ! {
+pub fn verify_offset(_: &Verifier, _: VOffsetT) -> ! {
     unimplemented!()
 }
-pub fn verify_offset_required(_: &Verifier, _: isize) -> ! {
+pub fn verify_offset_required(_: &Verifier, _: VOffsetT) -> ! {
     unimplemented!()
 }
-pub fn get_root<T>(_: &[u8]) -> T {
-    unimplemented!()
+//pub fn get_root<'a, 'b: 'a, T: BufferBacked<'a>>(bytes: &'b [u8]) -> T {
+pub fn get_root<'a, T: BufferBacked<'a> + 'a>(bytes: &'a [u8]) -> T {
+	let n = read_scalar::<UOffsetT>(bytes) as usize;
+    println!("get_root n: {}, len of bytes: {}", n, bytes.len());
+    T::init_from_bytes(bytes, n)
+
+    //let ptr = obj_bytes.as_ptr() as *const T;
+    //println!("bytes: {}, n: {}, xx: {:?}, ptr: {}", bytes.len(), n, &bytes[..8], ptr as usize);
+    ////unimplemented!();
+    //unsafe {
+    //    &*ptr
+    //}
 }
 pub fn get_mutable_root<T>(_: &[u8]) -> T {
     unimplemented!()
 }
-pub fn get_struct<T>(_: isize) -> T {
+pub fn get_struct_mut<T>(_: VOffsetT) -> T {
     unimplemented!()
 }
-pub fn get_struct_mut<T>(_: isize) -> T {
-    unimplemented!()
-}
-pub fn get_field<T>(_: isize, _: T) -> T {
-    unimplemented!()
+pub fn get_field<T: ElementScalar>(slotnum: VOffsetT, default: T) -> T {
+    unreachable!();
+    //let off = self.compute_vtable_offset(slotnum);
+    //if off == 0 {
+    //    return default;
+    //}
+    //read_scalar_at::<T>(&self.data, off as usize)
 }
 //pub fn get_field<T: num_traits::Num>(_: isize, _: T) -> T {
 //    unimplemented!()
@@ -880,10 +928,10 @@ pub fn get_field<T>(_: isize, _: T) -> T {
 //pub fn get_field_mut<T: num_traits::Num>(_: isize, _: T) -> T {
 //    unimplemented!()
 //}
-pub fn get_pointer<'a, T: 'a>(_: isize) -> &'a T {
+pub fn get_pointer<'a, T: 'a>(_: VOffsetT) -> &'a T {
     unimplemented!()
 }
-pub fn get_pointer_mut<'a, T: 'a>(_: isize) -> &'a mut T {
+pub fn get_pointer_mut<'a, T: 'a>(_: VOffsetT) -> &'a mut T {
     unimplemented!()
 }
 pub fn buffer_has_identifier<S, T>(_: S, _: T) -> bool {
