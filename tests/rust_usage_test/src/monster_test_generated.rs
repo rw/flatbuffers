@@ -634,8 +634,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   // TODO: fn test_as_MyGame_Example2_Monster() -> &super::Example2::Monster {
 // TODO:     if test_type() == Any::MyGame_Example2_Monster { static_cast::<&super::Example2::Monster>(test()) } else { nullptr }
 // TODO:   }
-  pub fn test4(&'a self) -> Option< &'a[&'a Test/* foo */] > {
-    self._tab.get_slot_vector::<& Test/* foo */>(Monster::VT_TEST4)
+  pub fn test4(&'a self) -> Option< &'a[Test/* foo */] > {
+    self._tab.get_slot_vector::<Test/* foo */>(Monster::VT_TEST4)
   }
   pub fn testarrayofstring(&'a self) -> Option< &'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>] > {
     self._tab.get_slot_vector::<flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>>(Monster::VT_TESTARRAYOFSTRING)
@@ -701,14 +701,14 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn testarrayofstring2(&'a self) -> Option< &'a[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>] > {
     self._tab.get_slot_vector::<flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>>(Monster::VT_TESTARRAYOFSTRING2)
   }
-  pub fn testarrayofsortedstruct(&'a self) -> Option< &'a[&'a Ability/* foo */] > {
-    self._tab.get_slot_vector::<& Ability/* foo */>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
+  pub fn testarrayofsortedstruct(&'a self) -> Option< &'a[Ability/* foo */] > {
+    self._tab.get_slot_vector::<Ability/* foo */>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
   }
   pub fn flex(&'a self) -> Option< &'a[u8] > {
     self._tab.get_slot_vector::<u8>(Monster::VT_FLEX)
   }
-  pub fn test5(&'a self) -> Option< &'a[&'a Test/* foo */] > {
-    self._tab.get_slot_vector::<& Test/* foo */>(Monster::VT_TEST5)
+  pub fn test5(&'a self) -> Option< &'a[Test/* foo */] > {
+    self._tab.get_slot_vector::<Test/* foo */>(Monster::VT_TEST5)
   }
   pub fn vector_of_longs(&'a self) -> Option< &'a[i64] > {
     self._tab.get_slot_vector::<i64>(Monster::VT_VECTOR_OF_LONGS)
@@ -740,7 +740,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
 //}
 //
 pub struct MonsterArgs<'a> {
-    pub pos: Option<&'a  Vec3/* foo */ >,
+    pub pos: Option<Vec3/* foo */>,
     pub mana: i16 ,
     pub hp: i16 ,
     pub name: flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset> ,
@@ -748,7 +748,7 @@ pub struct MonsterArgs<'a> {
     pub color: Color ,
     pub test_type: Any ,
     pub test: flatbuffers::LabeledUOffsetT<flatbuffers::Void<'a >> ,
-    pub test4: flatbuffers::LabeledUOffsetT<&'a [&'a  Test/* foo */]> ,
+    pub test4: flatbuffers::LabeledUOffsetT<&'a [Test/* foo */]> ,
     pub testarrayofstring: flatbuffers::LabeledUOffsetT<&'a [flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]> ,
     pub testarrayoftables: flatbuffers::LabeledUOffsetT<&'a [flatbuffers::LabeledUOffsetT<Monster<'a >>]> ,
     pub enemy: flatbuffers::LabeledUOffsetT<Monster<'a >> ,
@@ -768,9 +768,9 @@ pub struct MonsterArgs<'a> {
     pub testf2: f32 ,
     pub testf3: f32 ,
     pub testarrayofstring2: flatbuffers::LabeledUOffsetT<&'a [flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]> ,
-    pub testarrayofsortedstruct: flatbuffers::LabeledUOffsetT<&'a [&'a  Ability/* foo */]> ,
+    pub testarrayofsortedstruct: flatbuffers::LabeledUOffsetT<&'a [Ability/* foo */]> ,
     pub flex: flatbuffers::LabeledUOffsetT<&'a [u8]> ,
-    pub test5: flatbuffers::LabeledUOffsetT<&'a [&'a  Test/* foo */]> ,
+    pub test5: flatbuffers::LabeledUOffsetT<&'a [Test/* foo */]> ,
     pub vector_of_longs: flatbuffers::LabeledUOffsetT<&'a [i64]> ,
     pub vector_of_doubles: flatbuffers::LabeledUOffsetT<&'a [f64]> ,
     pub parent_namespace_test: flatbuffers::LabeledUOffsetT<super::InParentNamespace<'a >> ,
@@ -822,7 +822,7 @@ pub struct MonsterBuilder<'a: 'b, 'b> {
   start_: flatbuffers::UOffsetT,
 }
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
-  pub fn add_pos(&mut self, pos: Option<& Vec3/* foo */ >) {
+  pub fn add_pos(&mut self, pos: Option<Vec3/* foo */>) {
     self.fbb_.add_struct(Monster::VT_POS, pos);
   }
   pub fn add_mana(&mut self, mana: i16 ) {
@@ -846,7 +846,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_test(&mut self, test: flatbuffers::LabeledUOffsetT<flatbuffers::Void<>> ) {
     self.fbb_.push_slot_labeled_uoffset(Monster::VT_TEST, test);
   }
-  pub fn add_test4(&mut self, test4: flatbuffers::LabeledUOffsetT<&[& Test/* foo */]> ) {
+  pub fn add_test4(&mut self, test4: flatbuffers::LabeledUOffsetT<&[Test/* foo */]> ) {
     self.fbb_.push_slot_labeled_uoffset(Monster::VT_TEST4, test4);
   }
   pub fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::LabeledUOffsetT<&[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]> ) {
@@ -906,13 +906,13 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::LabeledUOffsetT<&[flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset>]> ) {
     self.fbb_.push_slot_labeled_uoffset(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
   }
-  pub fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::LabeledUOffsetT<&[& Ability/* foo */]> ) {
+  pub fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::LabeledUOffsetT<&[Ability/* foo */]> ) {
     self.fbb_.push_slot_labeled_uoffset(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct);
   }
   pub fn add_flex(&mut self, flex: flatbuffers::LabeledUOffsetT<&[u8]> ) {
     self.fbb_.push_slot_labeled_uoffset(Monster::VT_FLEX, flex);
   }
-  pub fn add_test5(&mut self, test5: flatbuffers::LabeledUOffsetT<&[& Test/* foo */]> ) {
+  pub fn add_test5(&mut self, test5: flatbuffers::LabeledUOffsetT<&[Test/* foo */]> ) {
     self.fbb_.push_slot_labeled_uoffset(Monster::VT_TEST5, test5);
   }
   pub fn add_vector_of_longs(&mut self, vector_of_longs: flatbuffers::LabeledUOffsetT<&[i64]> ) {

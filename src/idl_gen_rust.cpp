@@ -536,6 +536,7 @@ class RustGenerator : public BaseGenerator {
   std::string GenTypePointer(const Type &type, const std::string &lifetime) const {
     switch (type.base_type) {
       case BASE_TYPE_STRING: {
+        //return "&str";
         return "flatbuffers::StringOffset";
         //return "flatbuffers::String<" + lifetime + ">";
       }
@@ -575,7 +576,8 @@ class RustGenerator : public BaseGenerator {
       // TODO distinguish between struct and table
       //return "&'xxx" + GenTypePointer(type, lifetime);
       //return "&" + lifetime + GenTypePointer(type, lifetime);
-      return "&" + lifetime + " " + GenTypePointer(type, lifetime) + postfix;
+      return GenTypePointer(type, lifetime);
+      //return "&" + lifetime + " " + GenTypePointer(type, lifetime) + postfix;
     } else {
       return "flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
