@@ -5,6 +5,7 @@ authors = ["rw <me@rwinslow.com>"]
 
 [dependencies]
 flatbuffers = { path = "../../rust/flatbuffers" }
+rand = "0.5"
 
 [profile.test]
 # run tests faster, while preserving debug asserts:

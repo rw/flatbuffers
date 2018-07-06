@@ -388,8 +388,9 @@ class RustGenerator : public BaseGenerator {
         code_ += "#[inline]";
         code_ +=
             "pub fn GetRootAs{{STRUCT_NAME}}(buf: &[u8])"
-            " -> &{{CPP_NAME}} {{NULLABLE_EXT}} {";
-        code_ += "  return flatbuffers::get_root::<&{{CPP_NAME}}>(buf);";
+            " -> {{CPP_NAME}} {{NULLABLE_EXT}} {";
+        code_ += "  //return flatbuffers::get_root::<&{{CPP_NAME}}>(buf);";
+        code_ += "  return flatbuffers::get_root::<{{CPP_NAME}}>(buf);";
         code_ += "}";
         code_ += "";
 
@@ -939,6 +940,7 @@ class RustGenerator : public BaseGenerator {
 
   // Generate an enum declaration,
   // an enum string lookup table,
+  // an enum match function,
   // and an enum array of values
   void GenEnum(const EnumDef &enum_def) {
     code_.SetValue("ENUM_NAME", Name(enum_def));
@@ -947,7 +949,7 @@ class RustGenerator : public BaseGenerator {
 
     GenComment(enum_def.doc_comment);
     code_ += "#[repr({{BASE_TYPE}})]";
-    code_ += "#[derive(Clone, Copy)]";
+    code_ += "#[derive(Clone, Copy, PartialEq)]";
     code_ += GenEnumDecl(enum_def) + "\\";
     //if (parser_.opts.scoped_enums) code_ += " : {{BASE_TYPE}}\\";
     code_ += " {";
@@ -1373,9 +1375,10 @@ class RustGenerator : public BaseGenerator {
     } else if ((field.value.type.enum_def &&
                 IsScalar(field.value.type.base_type)) ||
                field.value.type.base_type == BASE_TYPE_BOOL) {
-      // TOD(rw): handle enums in other namespaces
+      // TODO(rw): handle enums in other namespaces
       if (from) {
-        return "EnumValues" + GenTypeBasic(field.value.type, from) + "[" + val + " as usize]";
+        //return "EnumValues" + GenTypeBasic(field.value.type, from) + "[" + val + " as usize]";
+        return "unsafe { ::std::mem::transmute(" + val + ") }";
       } else {
         return val + " as " + GenTypeBasic(field.value.type, from);
       }
@@ -1677,9 +1680,22 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
     code_ += "pub type {{OFFSET_TYPELABEL}} = ();";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
+    code_ += "  pub _tab: flatbuffers::Table<'a>,";
     code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
-    code_ += "// impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {}";
+    code_ += "// impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {";
+    code_ += "//impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
+    code_ += "impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
+    code_ += "    fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self {";
+    code_ += "        {{STRUCT_NAME}} {";
+    code_ += "            _tab: flatbuffers::Table {";
+    code_ += "                data: bytes,";
+    code_ += "                pos: pos,";
+    code_ += "            },";
+    code_ += "            _phantom: PhantomData,";
+    code_ += "        }";
+    code_ += "    }";
+    code_ += "}";
     code_ += "impl<'a> {{STRUCT_NAME}}<'a> /* private flatbuffers::Table */ {";
     //if (parser_.opts.generate_object_based_api) {
     //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
@@ -1701,7 +1717,7 @@ class RustGenerator : public BaseGenerator {
 
         code_.SetValue("OFFSET_NAME", GenFieldOffsetName(field));
         code_.SetValue("OFFSET_VALUE", NumToString(field.value.offset));
-        code_ += "    const {{OFFSET_NAME}}: isize = {{OFFSET_VALUE}};";
+        code_ += "    const {{OFFSET_NAME}}: flatbuffers::VOffsetT = {{OFFSET_VALUE}};";
         //code_.SetValue("SEP", ",\n");
       }
       code_ += "";
@@ -1723,26 +1739,43 @@ class RustGenerator : public BaseGenerator {
 
       // Call a different accessor for pointers, that indirects.
       std::string accessor = "";
+      std::string offset_str = "";
+      std::string offset_type = "";
       if (is_scalar) {
-        accessor = "flatbuffers::get_field::<";
+        accessor = "self._tab.get_slot_scalar::<";
+        offset_type = GenTypeGet(field.value.type, "", "&", "", false) + ">(";
+        offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       } else if (is_struct) {
-        accessor = "flatbuffers::get_struct::<";
+        accessor = "self._tab.get_struct_unsafe::<";
+        offset_type =  GenTypeGet(field.value.type, "", "", "", false) + ">(";
+        offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
+      } else if (field.value.type.base_type == BASE_TYPE_STRING) {
+        accessor = "self._tab.get_string_unsafe::<";
+        offset_type = GenTypeGet(field.value.type, "", "&", "", false) + ">(";
+        offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       } else {
         accessor = "flatbuffers::get_pointer::<";
+        offset_type = GenTypeGet(field.value.type, "", "&", "", false) + ">(";
+        offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
       }
-      auto offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
-      auto offset_type =
-          GenTypeGet(field.value.type, "", "&", "", false);
 
-      auto call = accessor + offset_type + ">(" + offset_str;
+      auto call = accessor + offset_type + offset_str;
       // Default value as second arg for non-pointer types.
       if (is_scalar) { call += ", " + GenDefaultConstant(field); }
       call += ")";
 
       std::string afterptr = " " + NullableExtension();
       GenComment(field.doc_comment, "  ");
-      code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "&",
-                                              afterptr.c_str(), true));
+
+      if (is_struct) {
+        code_.SetValue("FIELD_TYPE", std::string("Option<") + \
+                                     GenTypeGet(field.value.type, " ", "&",
+                                                afterptr.c_str(), true) + \
+                                     ">");
+      } else {
+        code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "&",
+                                                afterptr.c_str(), true));
+      }
       code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
       code_.SetValue("NULLABLE_EXT", NullableExtension());
 
@@ -2045,11 +2078,12 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("ADD_VALUE", value);
         if (is_scalar) {
           const auto type = GenTypeWire(field.value.type, "", "", false);
-          code_.SetValue("ADD_FN", "add_element::<" + type + ">");
+          code_.SetValue("ADD_FN", "push_slot_scalar::<" + type + ">");
         } else if (IsStruct(field.value.type)) {
           code_.SetValue("ADD_FN", "add_struct");
         } else {
-          code_.SetValue("ADD_FN", "add_offset");
+          //code_.SetValue("ADD_FN", "push_slot_scalar::<flatbuffers::LabeledUOffsetT<" + type + ">>");
+          code_.SetValue("ADD_FN", "push_slot_labeled_uoffset");
         }
 
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
@@ -2707,7 +2741,7 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("REF", IsStruct(field.value.type) ? "&" : "");
 
       GenComment(field.doc_comment, "  ");
-      code_ += "  fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
+      code_ += "  pub fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
       code_ += "    {{REF}}{{FIELD_VALUE}}";
       code_ += "  }";
 
