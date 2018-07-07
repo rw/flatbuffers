@@ -130,6 +130,50 @@ pub trait BufferBacked<'a>{
     fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self;
 }
 
+pub trait VectorGettable {
+    fn get(&self, i: usize) -> Self;
+}
+
+pub struct Vector<'a, T: Sized + 'a> {
+    data: &'a [T],
+}
+impl<'a, T> Vector<'a, T> {
+    pub fn new_from_buf(buf: &'a [u8]) -> Self {
+        let len = {
+            let p = buf.as_ptr() as *const u32;
+            let x = unsafe { *p };
+            x.from_le() as usize
+        };
+        let slice = {
+            let p = buf[SIZE_UOFFSET..].as_ptr() as *const T;
+            unsafe {
+                std::slice::from_raw_parts(p, len)
+            }
+        };
+        Self {
+            data: slice,
+        }
+    }
+    pub fn get(&self, idx: usize) -> &T {
+        &self.data[idx]
+    }
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+    //pub fn get(&self, idx: usize) -> &T {
+    //    let stride = std::mem::size_of::<T>();
+    //    let start = SIZE_UOFFSET;
+    //    let loc = start + idx * stride;
+    //    let p = self.data[loc..loc + stride].as_ptr() as *const T;
+    //    unsafe { &*p }
+
+    //}
+    //pub fn len(&self) -> u32 {
+    //    let p = self.data.as_ptr() as *const u32;
+    //    unsafe { *p }
+    //}
+}
+
 pub struct Table<'a> {
     pub data: &'a [u8],
     pub pos: usize,
@@ -861,9 +905,9 @@ pub type VOffsetT = i16;
 
 //pub type String<'a> = &'a str;
 pub type Void<'a> = &'a [u8];
-pub struct Vector<T>  {
-    phantom: PhantomData<T>,
-}
+//pub struct Vector<T>  {
+//    phantom: PhantomData<T>,
+//}
 
 //pub struct LabeledUOffsetT<T> (usize, PhantomData<T>);
 pub struct VectorLabeledUOffsetT<T> (usize, PhantomData<T>);
@@ -890,12 +934,21 @@ impl<T> Clone for LabeledUOffsetT<T> {
     }
 }
 
+impl<T> std::ops::Deref for LabeledUOffsetT<T> {
+    type Target = UOffsetT;
+    fn deref(&self) -> &UOffsetT {
+        &self.0
+    }
+}
 impl<T> LabeledUOffsetT<T> {
     pub fn new(o: UOffsetT) -> Self {
         LabeledUOffsetT(o, PhantomData)
     }
     pub fn union(&self) -> LabeledUOffsetT<Void> {
         LabeledUOffsetT::new(self.0)
+    }
+    pub fn value(&self) -> UOffsetT {
+        self.0
     }
 }
 
