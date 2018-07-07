@@ -385,7 +385,7 @@ mod vector_read_scalar_tests {
     }
 
     #[test]
-    fn test_all() {
+    fn fuzz() {
         let n = 20;
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<bool> as fn(Vec<_>));
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u8> as fn(Vec<_>));
@@ -431,7 +431,7 @@ mod vector_read_obj_tests {
     }
 
     #[test]
-    fn test_all() {
+    fn fuzz() {
         let n = 20;
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop_strings as fn(Vec<_>));
     }
@@ -1416,8 +1416,8 @@ fn fuzz_test_2() {
 
 // Test that parsing errors occur as we'd expect.
 // Also useful for coverage, making sure these paths are run.
-#[test]
-fn error_test() {
+//#[test]
+//fn error_test() {
 //  // In order they appear in idl_parser.cpp
 //  TestError("table X { Y:byte; } root_type X; { Y: 999 }", "does not fit");
 //  TestError(".0", "floating point");
@@ -1465,7 +1465,7 @@ fn error_test() {
 //  TestError("union Z { X } struct X { Y:int; }", "only tables");
 //  TestError("table X { Y:[int]; YLength:int; }", "clash");
 //  TestError("table X { Y:byte; } root_type X; { Y:1, Y:2 }", "more than once");
-}
+//}
 
 //template<typename T> T TestValue(const char *json, const char *type_name) {
 //  flatbuffers::Parser parser;
@@ -2297,18 +2297,22 @@ fn test_emplace_and_read_scalar_fuzz() {
 }
 
 #[test]
-fn gold_cpp_example_is_accessible_and_correct() {
-    assert_example_is_accessible_and_correct("../monsterdata_test.mon");
+fn gold_cpp_example_data_is_accessible_and_correct() {
+    assert_example_data_is_accessible_and_correct("../monsterdata_test.mon");
 }
 #[test]
-fn java_wire_example_is_accessible_and_correct() {
-    assert_example_is_accessible_and_correct("../monsterdata_java_wire.mon");
+fn java_wire_example_data_is_accessible_and_correct() {
+    assert_example_data_is_accessible_and_correct("../monsterdata_java_wire.mon");
 }
 #[test]
-fn go_wire_example_is_accessible_and_correct() {
-    assert_example_is_accessible_and_correct("../monsterdata_go_wire.mon");
+fn go_wire_example_data_is_accessible_and_correct() {
+    assert_example_data_is_accessible_and_correct("../monsterdata_go_wire.mon");
 }
-fn assert_example_is_accessible_and_correct(filename: &'static str) {
+#[test]
+fn python_wire_example_data_is_accessible_and_correct() {
+    assert_example_data_is_accessible_and_correct("../monsterdata_python_wire.mon");
+}
+fn assert_example_data_is_accessible_and_correct(filename: &'static str) {
     use std::io::Read;
     let mut f = std::fs::File::open(filename).expect("missing wire format example");
     let mut buf = Vec::new();
