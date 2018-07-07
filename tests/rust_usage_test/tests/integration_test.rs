@@ -2297,15 +2297,15 @@ fn test_emplace_and_read_scalar_fuzz() {
 }
 
 #[test]
-fn test_gold_cpp_example_is_accessible_and_correct() {
+fn gold_cpp_example_is_accessible_and_correct() {
     assert_example_is_accessible_and_correct("../monsterdata_test.mon");
 }
 #[test]
-fn test_java_wire_example_is_accessible_and_correct() {
+fn java_wire_example_is_accessible_and_correct() {
     assert_example_is_accessible_and_correct("../monsterdata_java_wire.mon");
 }
 #[test]
-fn test_go_wire_example_is_accessible_and_correct() {
+fn go_wire_example_is_accessible_and_correct() {
     assert_example_is_accessible_and_correct("../monsterdata_go_wire.mon");
 }
 fn assert_example_is_accessible_and_correct(filename: &'static str) {
@@ -2325,14 +2325,14 @@ fn assert_example_is_accessible_and_correct(filename: &'static str) {
 }
 #[test]
 #[should_panic]
-fn test_end_table_should_panic_when_not_in_table() {
+fn end_table_should_panic_when_not_in_table() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     b.end_table(0);
 }
 
 #[test]
 #[should_panic]
-fn test_create_string_should_panic_when_in_table() {
+fn create_string_should_panic_when_in_table() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     b.start_table(0);
     b.create_string("foo");
@@ -2340,7 +2340,7 @@ fn test_create_string_should_panic_when_in_table() {
 
 #[test]
 #[should_panic]
-fn test_create_byte_string_should_panic_when_in_table() {
+fn create_byte_string_should_panic_when_in_table() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     b.start_table(0);
     b.create_byte_string(b"foo");
@@ -2348,7 +2348,7 @@ fn test_create_byte_string_should_panic_when_in_table() {
 
 #[test]
 #[should_panic]
-fn test_push_struct_slot_should_panic_when_not_in_table() {
+fn push_struct_slot_should_panic_when_not_in_table() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     b.start_table(0);
     b.push_slot_struct(0, 1, 0);
@@ -2356,14 +2356,14 @@ fn test_push_struct_slot_should_panic_when_not_in_table() {
 
 #[test]
 #[should_panic]
-fn test_finished_bytes_should_panic_when_table_is_not_finished() {
+fn finished_bytes_should_panic_when_table_is_not_finished() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     b.start_table(0);
     b.finished_bytes();
 }
 
 #[test]
-fn test_create_byte_vector() {
+fn create_byte_vector_fuzz() {
     fn prop(vec: Vec<u8>) {
         let xs = &vec[..];
 
@@ -2384,7 +2384,7 @@ fn test_create_byte_vector() {
 }
 
 #[cfg(test)]
-mod test_byte_layouts {
+mod byte_layouts {
     extern crate flatbuffers;
 
     fn check(b: &flatbuffers::FlatBufferBuilder, want: &[u8]) {
