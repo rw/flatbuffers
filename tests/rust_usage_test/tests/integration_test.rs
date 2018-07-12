@@ -138,13 +138,16 @@ fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::
     MyGame::Example::FinishMonsterBuffer(builder, mon);
 }
 fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::FlatBufferBuilder) {
+    let pos = Some(MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(10, 20)));
+
+    // begin building
     let name = builder.create_string("MyMonster");
-    println!("name val: {}", name.value());
 
     let table_start = builder.start_table(34);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_MANA, 150, 150);
     builder.push_slot_labeled_uoffset(MyGame::Example::Monster::VT_NAME, name);
+    builder.add_struct(Monster::VT_POS, pos);
     let root = builder.end_table(table_start);
     builder.finish(root);
 }
