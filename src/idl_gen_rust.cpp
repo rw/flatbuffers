@@ -558,10 +558,16 @@ class RustGenerator : public BaseGenerator {
         }
         return s;
       }
-      case BASE_TYPE_UNION:
+      case BASE_TYPE_UNION: {
+        return "flatbuffers::UnionOffset";
+      }
+      default: {
+        assert(false);
+      }
       // fall through
       //default: { return "&" + lifetime + "flatbuffers::Void"; }
-      default: { return "flatbuffers::Void<" + lifetime + ">"; }
+      //default: { return "flatbuffers::Void<" + lifetime + ">"; }
+      //default: { return "flatbuffers::UnionOffset"; }
     }
   }
 
@@ -578,6 +584,8 @@ class RustGenerator : public BaseGenerator {
       //return "&" + lifetime + GenTypePointer(type, lifetime);
       return GenTypePointer(type, lifetime);
       //return "&" + lifetime + " " + GenTypePointer(type, lifetime) + postfix;
+    } else if (type.base_type == BASE_TYPE_UNION) {
+      return "Option<flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">>" + postfix;
     } else {
       return "flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
@@ -1499,8 +1507,11 @@ class RustGenerator : public BaseGenerator {
       }
       code_.SetValue("PARAM_VALUE", "nullptr");
     } else if (IsStruct(field.value.type)) {
-      code_.SetValue("PARAM_TYPE", "Option<" + GenTypeWire(field.value.type, " ", lifetime, true) + ">");
+      code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + " " + GenTypeWire(field.value.type, " ", lifetime, true) + ">");
       code_.SetValue("PARAM_VALUE", "/* sup */" + GetDefaultScalarValue(field));
+    } else if (field.value.type.base_type == BASE_TYPE_UNION) {
+      code_.SetValue("PARAM_TYPE", "Option<flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset>>");
+      code_.SetValue("PARAM_VALUE", "None");
     } else {
       code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", lifetime, true));
       const std::string type_suffix = GenTypeBasic(field.value.type, true);
@@ -2072,7 +2083,7 @@ class RustGenerator : public BaseGenerator {
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
     code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "  start_: flatbuffers::UOffsetT,";
+    code_ += "  start_: flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset>,";
     code_ += "}";
 
     // Generate builder functions:
@@ -2098,25 +2109,31 @@ class RustGenerator : public BaseGenerator {
         // }
         code_.SetValue("FIELD_NAME", Name(field));
         if (IsStruct(field.value.type)) {
-          code_.SetValue("FIELD_TYPE", "Option<" + GenTypeWire(field.value.type, " ", "", true) + ">");
+          code_.SetValue("FIELD_TYPE", "Option<&" + GenTypeWire(field.value.type, " ", "", true) + ">");
         } else {
           code_.SetValue("FIELD_TYPE", GenTypeWire(field.value.type, " ", "", true));
         }
         code_.SetValue("ADD_OFFSET", Name(struct_def) + "::" + offset);
         code_.SetValue("ADD_NAME", name);
-        code_.SetValue("ADD_VALUE", value);
         if (is_scalar) {
           const auto type = GenTypeWire(field.value.type, "", "", false);
-          code_.SetValue("ADD_FN", "push_slot_scalar::<" + type + ">");
+          code_.SetValue("ADD_VALUE", value);
+          code_.SetValue("ADD_FN", "self.fbb_.push_slot_scalar::<" + type + ">");
         } else if (IsStruct(field.value.type)) {
-          code_.SetValue("ADD_FN", "add_struct");
-        } else {
+          const auto type = GenTypeWire(field.value.type, "", "", false);
+          code_.SetValue("ADD_VALUE", value);
+          code_.SetValue("ADD_FN", "self.fbb_.push_slot_struct::<" + type + ">");
+        } else if (field.value.type.base_type == BASE_TYPE_UNION) {
           //code_.SetValue("ADD_FN", "push_slot_scalar::<flatbuffers::LabeledUOffsetT<" + type + ">>");
-          code_.SetValue("ADD_FN", "push_slot_labeled_uoffset");
+          code_.SetValue("ADD_VALUE", value);
+          code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative_from_option");
+        } else {
+          code_.SetValue("ADD_VALUE", value);
+          code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative");
         }
 
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
-        code_ += "    self.fbb_.{{ADD_FN}}(\\";
+        code_ += "    {{ADD_FN}}(\\";
         if (is_scalar) {
           code_ += "{{ADD_OFFSET}}, {{ADD_NAME}}, {{ADD_VALUE}});";
         } else {
@@ -2146,8 +2163,8 @@ class RustGenerator : public BaseGenerator {
 
     // Finish() function.
     code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}> {";
-    code_ += "    let end = self.fbb_.end_table(self.start_);";
-    code_ += "    let o = flatbuffers::LabeledUOffsetT::<{{OFFSET_TYPELABEL}}>::new(end);";
+    code_ += "    let o = self.fbb_.end_table(self.start_);";
+    code_ += "    //let o = flatbuffers::LabeledUOffsetT::<{{OFFSET_TYPELABEL}}>::new(end);";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2691,6 +2708,10 @@ class RustGenerator : public BaseGenerator {
     }
 
     code_ += "} // pub struct {{STRUCT_NAME}}";
+
+    // Impl the dummy GeneratedStruct trait to help users write structs
+    // correctly:
+		code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
 
     // Generate GetFullyQualifiedName
     code_ += "";
