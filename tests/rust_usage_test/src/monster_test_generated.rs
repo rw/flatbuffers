@@ -2,9 +2,6 @@
 
 
 
-// #include "include_test1_generated.rs"
-// #include "include_test2_generated.rs"
-
 pub mod MyGame {
   #[allow(unused_imports)]
   use std::mem;
@@ -17,72 +14,6 @@ pub mod MyGame {
   use self::flatbuffers::flexbuffers;
   #[allow(unused_imports)]
   use std::cmp::Ordering;
-
-pub type InParentNamespaceOffset = ();
-pub struct InParentNamespace<'a> {
-  pub _tab: flatbuffers::Table<'a>,
-  _phantom: PhantomData<&'a ()>,
-}
-// impl<'a> flatbuffers::Table for InParentNamespace<'a> {
-//impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
-impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
-    fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self {
-        InParentNamespace {
-            _tab: flatbuffers::Table {
-                data: bytes,
-                pos: pos,
-            },
-            _phantom: PhantomData,
-        }
-    }
-}
-impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
-    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
-        InParentNamespace {
-            _tab: table,
-            _phantom: PhantomData,
-        }
-    }
-}
-
-pub struct InParentNamespaceArgs<'a> {
-    pub _phantom: PhantomData<&'a ()>, // pub for default trait
-}
-impl<'a> Default for InParentNamespaceArgs<'a> {
-    fn default() -> Self {
-        InParentNamespaceArgs {
-            _phantom: PhantomData,
-        }
-    }
-}
-pub struct InParentNamespaceBuilder<'a: 'b, 'b> {
-  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::UOffsetT,
-}
-impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
-  pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> InParentNamespaceBuilder<'a, 'b> {
-    let start = _fbb.start_table(0);
-    InParentNamespaceBuilder {
-      fbb_: _fbb,
-      start_: start,
-    }
-  }
-  // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
-  pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<InParentNamespaceOffset> {
-    let end = self.fbb_.end_table(self.start_);
-    let o = flatbuffers::LabeledUOffsetT::<InParentNamespaceOffset>::new(end);
-    o
-  }
-}
-
-#[inline]
-pub fn CreateInParentNamespace<'a: 'b, 'b>(
-    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &InParentNamespaceArgs) -> flatbuffers::LabeledUOffsetT<InParentNamespaceOffset> {
-  let mut builder = InParentNamespaceBuilder::new(_fbb);
-  builder.finish()
-}
-
 pub mod Example2 {
   #[allow(unused_imports)]
   use std::mem;
@@ -383,7 +314,7 @@ impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
-    const VT_COLOR: flatbuffers::VOffsetT = 4;
+    pub const VT_COLOR: flatbuffers::VOffsetT = 4;
 
   pub fn color(&'a self) -> Color  {
     unsafe { ::std::mem::transmute(self._tab.get_slot_scalar::<i8>(TestSimpleTableWithEnum::VT_COLOR, 2)) }
@@ -459,9 +390,9 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
-    const VT_ID: flatbuffers::VOffsetT = 4;
-    const VT_VAL: flatbuffers::VOffsetT = 6;
-    const VT_COUNT: flatbuffers::VOffsetT = 8;
+    pub const VT_ID: flatbuffers::VOffsetT = 4;
+    pub const VT_VAL: flatbuffers::VOffsetT = 6;
+    pub const VT_COUNT: flatbuffers::VOffsetT = 8;
 
   pub fn id(&'a self) -> Option<&str> {
     self._tab.get_slot_string_unsafe(Stat::VT_ID)
@@ -556,40 +487,39 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
-    const VT_POS: flatbuffers::VOffsetT = 4;
-    const VT_MANA: flatbuffers::VOffsetT = 6;
-    const VT_HP: flatbuffers::VOffsetT = 8;
-    const VT_NAME: flatbuffers::VOffsetT = 10;
-    const VT_INVENTORY: flatbuffers::VOffsetT = 14;
-    const VT_COLOR: flatbuffers::VOffsetT = 16;
-    const VT_TEST_TYPE: flatbuffers::VOffsetT = 18;
-    const VT_TEST: flatbuffers::VOffsetT = 20;
-    const VT_TEST4: flatbuffers::VOffsetT = 22;
-    const VT_TESTARRAYOFSTRING: flatbuffers::VOffsetT = 24;
-    const VT_TESTARRAYOFTABLES: flatbuffers::VOffsetT = 26;
-    const VT_ENEMY: flatbuffers::VOffsetT = 28;
-    const VT_TESTNESTEDFLATBUFFER: flatbuffers::VOffsetT = 30;
-    const VT_TESTEMPTY: flatbuffers::VOffsetT = 32;
-    const VT_TESTBOOL: flatbuffers::VOffsetT = 34;
-    const VT_TESTHASHS32_FNV1: flatbuffers::VOffsetT = 36;
-    const VT_TESTHASHU32_FNV1: flatbuffers::VOffsetT = 38;
-    const VT_TESTHASHS64_FNV1: flatbuffers::VOffsetT = 40;
-    const VT_TESTHASHU64_FNV1: flatbuffers::VOffsetT = 42;
-    const VT_TESTHASHS32_FNV1A: flatbuffers::VOffsetT = 44;
-    const VT_TESTHASHU32_FNV1A: flatbuffers::VOffsetT = 46;
-    const VT_TESTHASHS64_FNV1A: flatbuffers::VOffsetT = 48;
-    const VT_TESTHASHU64_FNV1A: flatbuffers::VOffsetT = 50;
-    const VT_TESTARRAYOFBOOLS: flatbuffers::VOffsetT = 52;
-    const VT_TESTF: flatbuffers::VOffsetT = 54;
-    const VT_TESTF2: flatbuffers::VOffsetT = 56;
-    const VT_TESTF3: flatbuffers::VOffsetT = 58;
-    const VT_TESTARRAYOFSTRING2: flatbuffers::VOffsetT = 60;
-    const VT_TESTARRAYOFSORTEDSTRUCT: flatbuffers::VOffsetT = 62;
-    const VT_FLEX: flatbuffers::VOffsetT = 64;
-    const VT_TEST5: flatbuffers::VOffsetT = 66;
-    const VT_VECTOR_OF_LONGS: flatbuffers::VOffsetT = 68;
-    const VT_VECTOR_OF_DOUBLES: flatbuffers::VOffsetT = 70;
-    const VT_PARENT_NAMESPACE_TEST: flatbuffers::VOffsetT = 72;
+    pub const VT_POS: flatbuffers::VOffsetT = 4;
+    pub const VT_MANA: flatbuffers::VOffsetT = 6;
+    pub const VT_HP: flatbuffers::VOffsetT = 8;
+    pub const VT_NAME: flatbuffers::VOffsetT = 10;
+    pub const VT_INVENTORY: flatbuffers::VOffsetT = 14;
+    pub const VT_COLOR: flatbuffers::VOffsetT = 16;
+    pub const VT_TEST_TYPE: flatbuffers::VOffsetT = 18;
+    pub const VT_TEST: flatbuffers::VOffsetT = 20;
+    pub const VT_TEST4: flatbuffers::VOffsetT = 22;
+    pub const VT_TESTARRAYOFSTRING: flatbuffers::VOffsetT = 24;
+    pub const VT_TESTARRAYOFTABLES: flatbuffers::VOffsetT = 26;
+    pub const VT_ENEMY: flatbuffers::VOffsetT = 28;
+    pub const VT_TESTNESTEDFLATBUFFER: flatbuffers::VOffsetT = 30;
+    pub const VT_TESTEMPTY: flatbuffers::VOffsetT = 32;
+    pub const VT_TESTBOOL: flatbuffers::VOffsetT = 34;
+    pub const VT_TESTHASHS32_FNV1: flatbuffers::VOffsetT = 36;
+    pub const VT_TESTHASHU32_FNV1: flatbuffers::VOffsetT = 38;
+    pub const VT_TESTHASHS64_FNV1: flatbuffers::VOffsetT = 40;
+    pub const VT_TESTHASHU64_FNV1: flatbuffers::VOffsetT = 42;
+    pub const VT_TESTHASHS32_FNV1A: flatbuffers::VOffsetT = 44;
+    pub const VT_TESTHASHU32_FNV1A: flatbuffers::VOffsetT = 46;
+    pub const VT_TESTHASHS64_FNV1A: flatbuffers::VOffsetT = 48;
+    pub const VT_TESTHASHU64_FNV1A: flatbuffers::VOffsetT = 50;
+    pub const VT_TESTARRAYOFBOOLS: flatbuffers::VOffsetT = 52;
+    pub const VT_TESTF: flatbuffers::VOffsetT = 54;
+    pub const VT_TESTF2: flatbuffers::VOffsetT = 56;
+    pub const VT_TESTF3: flatbuffers::VOffsetT = 58;
+    pub const VT_TESTARRAYOFSTRING2: flatbuffers::VOffsetT = 60;
+    pub const VT_TESTARRAYOFSORTEDSTRUCT: flatbuffers::VOffsetT = 62;
+    pub const VT_FLEX: flatbuffers::VOffsetT = 64;
+    pub const VT_TEST5: flatbuffers::VOffsetT = 66;
+    pub const VT_VECTOR_OF_LONGS: flatbuffers::VOffsetT = 68;
+    pub const VT_VECTOR_OF_DOUBLES: flatbuffers::VOffsetT = 70;
 
   pub fn pos(&'a self) -> Option<&Vec3/* foo */ > {
     self._tab.get_struct_unsafe::<Vec3/* foo */>(Monster::VT_POS)
@@ -716,9 +646,6 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn vector_of_doubles(&'a self) -> Option< &'a[f64] > {
     self._tab.get_slot_vector::<f64>(Monster::VT_VECTOR_OF_DOUBLES)
   }
-  pub fn parent_namespace_test(&'a self) -> &super::InParentNamespace<'a>  {
-    flatbuffers::get_pointer::<&super::InParentNamespace<'a>>(Monster::VT_PARENT_NAMESPACE_TEST)
-  }
 }
 
 //TODO: inject these functions into impl for type
@@ -773,7 +700,6 @@ pub struct MonsterArgs<'a> {
     pub test5: flatbuffers::LabeledUOffsetT<&'a [Test/* foo */]> ,
     pub vector_of_longs: flatbuffers::LabeledUOffsetT<&'a [i64]> ,
     pub vector_of_doubles: flatbuffers::LabeledUOffsetT<&'a [f64]> ,
-    pub parent_namespace_test: flatbuffers::LabeledUOffsetT<super::InParentNamespace<'a >> ,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for MonsterArgs<'a> {
@@ -812,7 +738,6 @@ impl<'a> Default for MonsterArgs<'a> {
             test5: /* yo *//* E */ flatbuffers::LabeledUOffsetT::new(0),
             vector_of_longs: /* yo *//* E */ flatbuffers::LabeledUOffsetT::new(0),
             vector_of_doubles: /* yo *//* E */ flatbuffers::LabeledUOffsetT::new(0),
-            parent_namespace_test: /* yo *//* E */ flatbuffers::LabeledUOffsetT::new(0),
             _phantom: PhantomData,
         }
     }
@@ -921,11 +846,8 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_vector_of_doubles(&mut self, vector_of_doubles: flatbuffers::LabeledUOffsetT<&[f64]> ) {
     self.fbb_.push_slot_labeled_uoffset(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
   }
-  pub fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::LabeledUOffsetT<super::InParentNamespace<>> ) {
-    self.fbb_.push_slot_labeled_uoffset(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
-  }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table(35);
+    let start = _fbb.start_table(34);
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -949,7 +871,6 @@ pub fn CreateMonster<'a: 'b, 'b>(
   builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
   builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
   builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
-  builder.add_parent_namespace_test(args.parent_namespace_test);
   builder.add_vector_of_doubles(args.vector_of_doubles);
   builder.add_vector_of_longs(args.vector_of_longs);
   builder.add_test5(args.test5);
@@ -1007,18 +928,18 @@ impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
-    const VT_I8_: flatbuffers::VOffsetT = 4;
-    const VT_U8_: flatbuffers::VOffsetT = 6;
-    const VT_I16_: flatbuffers::VOffsetT = 8;
-    const VT_U16_: flatbuffers::VOffsetT = 10;
-    const VT_I32_: flatbuffers::VOffsetT = 12;
-    const VT_U32_: flatbuffers::VOffsetT = 14;
-    const VT_I64_: flatbuffers::VOffsetT = 16;
-    const VT_U64_: flatbuffers::VOffsetT = 18;
-    const VT_F32_: flatbuffers::VOffsetT = 20;
-    const VT_F64_: flatbuffers::VOffsetT = 22;
-    const VT_V8: flatbuffers::VOffsetT = 24;
-    const VT_VF64: flatbuffers::VOffsetT = 26;
+    pub const VT_I8_: flatbuffers::VOffsetT = 4;
+    pub const VT_U8_: flatbuffers::VOffsetT = 6;
+    pub const VT_I16_: flatbuffers::VOffsetT = 8;
+    pub const VT_U16_: flatbuffers::VOffsetT = 10;
+    pub const VT_I32_: flatbuffers::VOffsetT = 12;
+    pub const VT_U32_: flatbuffers::VOffsetT = 14;
+    pub const VT_I64_: flatbuffers::VOffsetT = 16;
+    pub const VT_U64_: flatbuffers::VOffsetT = 18;
+    pub const VT_F32_: flatbuffers::VOffsetT = 20;
+    pub const VT_F64_: flatbuffers::VOffsetT = 22;
+    pub const VT_V8: flatbuffers::VOffsetT = 24;
+    pub const VT_VF64: flatbuffers::VOffsetT = 26;
 
   pub fn i8_(&'a self) -> i8  {
     self._tab.get_slot_scalar::<i8>(TypeAliases::VT_I8_, 0)
