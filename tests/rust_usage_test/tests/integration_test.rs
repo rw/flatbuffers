@@ -125,20 +125,37 @@ fn Bar<'a, 'b, 'c: 'a>(
     flatbuffers::LabeledUOffsetT::new(0)
 }
 fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::FlatBufferBuilder) {
+    let mon2 = {
+        let args = MyGame::Example::MonsterArgs{
+            name: builder.create_string("Fred"),
+            ..Default::default()
+        };
+        MyGame::Example::CreateMonster(builder, &args)
+    };
     let mon = {
+        let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
         let args = MyGame::Example::MonsterArgs{
             hp: 80,
             mana: 150,
             name: builder.create_string("MyMonster"),
-            pos: Some(MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(10, 20))),
+            pos: Some(&pos),
+            test_type: MyGame::Example::Any::Monster,
+            test: Some(mon2),
             ..Default::default()
         };
         MyGame::Example::CreateMonster(builder, &args)
     };
     MyGame::Example::FinishMonsterBuffer(builder, mon);
+    println!("finished writing");
 }
 fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::FlatBufferBuilder) {
-    let pos = Some(MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(10, 20)));
+    let nested_union_mon = {
+        let name = builder.create_string("Fred");
+        let table_start = builder.start_table(34);
+        builder.push_slot_labeled_uoffset_relative(MyGame::Example::Monster::VT_NAME, name);
+        builder.end_table(table_start)
+    };
+    let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
 
     // begin building
     let name = builder.create_string("MyMonster");
@@ -146,8 +163,10 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
     let table_start = builder.start_table(34);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_MANA, 150, 150);
-    builder.push_slot_labeled_uoffset(MyGame::Example::Monster::VT_NAME, name);
-    builder.add_struct(Monster::VT_POS, pos);
+    builder.push_slot_labeled_uoffset_relative(MyGame::Example::Monster::VT_NAME, name);
+    builder.push_slot_struct(MyGame::Example::Monster::VT_POS, Some(&pos));
+    builder.push_slot_scalar::<u8>(MyGame::Example::Monster::VT_TEST_TYPE, MyGame::Example::Any::Monster as u8, 0);
+    builder.push_slot_labeled_uoffset_relative_from_option(MyGame::Example::Monster::VT_TEST, Some(nested_union_mon));
     let root = builder.end_table(table_start);
     builder.finish(root);
 }
@@ -257,14 +276,14 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
 //
     // shortcut for creating monster with all fields set:
     let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{
-        pos: Some(_vec),
+        pos: Some(&_vec),
         mana: 150,
         hp: 80,
         name: _name,
         inventory: inventory,
         color: MyGame::Example::Color::Blue,
         test_type: MyGame::Example::Any::Monster,
-        test: mlocs[1].union(),  // Store a union.
+        test: Some(mlocs[1].union()),  // Store a union.
         test4: testv,
         testarrayofstring: vecofstrings,
         //testarrayoftables: vecoftables, // TODO
@@ -1197,7 +1216,7 @@ fn fuzz_scalar_table_serialization() {
                 _ => { panic!("unknown choice: {}", choice); }
             }
         }
-        objects[i] = builder.end_table(start);
+        objects[i] = builder.end_table(start).value();
     }
 
     // Do some bookkeeping to generate stats on fuzzes:
@@ -2391,7 +2410,7 @@ fn assert_example_data_is_accessible_and_correct(filename: &'static str) {
 #[should_panic]
 fn end_table_should_panic_when_not_in_table() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
-    b.end_table(0);
+    b.end_table(flatbuffers::LabeledUOffsetT::new(0));
 }
 
 #[test]
@@ -2413,9 +2432,13 @@ fn create_byte_string_should_panic_when_in_table() {
 #[test]
 #[should_panic]
 fn push_struct_slot_should_panic_when_not_in_table() {
+    #[repr(C, packed)]
+    struct foo { }
+    impl flatbuffers::GeneratedStruct for foo {}
     let mut b = flatbuffers::FlatBufferBuilder::new();
     b.start_table(0);
-    b.push_slot_struct(0, 1, 0);
+    let x = foo{};
+    b.push_slot_struct(0, Some(&x));
 }
 
 #[test]
@@ -2598,7 +2621,7 @@ mod byte_layouts {
         let off = b.start_table(0);
         check(&b, &[]);
         let off0 = b.end_table(off);
-        assert_eq!(4, off0);
+        assert_eq!(4, off0.value());
         check(&b, &[4, 0, // vtable length
                     4, 0, // length of table including vtable offset
                     4, 0, 0, 0]); // offset for start of vtable
@@ -2609,12 +2632,12 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
         let off0 = b.start_table(1);
-        assert_eq!(0, off0);
+        assert_eq!(0, off0.value());
         check(&b, &[]);
         b.push_slot_scalar(fi2fo(0), true, false);
         check(&b, &[1]);
         let off1 = b.end_table(off0);
-        assert_eq!(8, off1);
+        assert_eq!(8, off1.value());
         check(&b, &[
               6, 0, // vtable bytes
               8, 0, // length of object including vtable offset
@@ -2701,7 +2724,7 @@ mod byte_layouts {
         b.start_vector(flatbuffers::SIZE_U8, 0, 1);
         let vecend = b.end_vector(0);
         let off = b.start_table(1);
-        b.push_slot_labeled_uoffset(fi2fo(0), vecend);
+        b.push_slot_labeled_uoffset_relative(fi2fo(0), vecend);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
@@ -2761,16 +2784,28 @@ mod byte_layouts {
     }
     #[test]
     fn test_14_vtable_with_1_struct_of_int8_and_int16_and_int32() {
+        #[repr(C, packed)]
+        struct foo {
+            a: i32,
+            _pad0: [u8; 2],
+            b: i16,
+            _pad1: [u8; 3],
+            c: i8,
+        }
+        impl flatbuffers::GeneratedStruct for foo {}
+
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(1);
-        b.prep(4+4+4, 0);
-        b.push_element_scalar(55i8);
-        b.pad(3);
-        b.push_element_scalar(0x1234i16);
-        b.pad(2);
-        b.push_element_scalar(0x12345678i32);
-        let struct_start = b.rev_cur_idx();
-        b.push_slot_struct(fi2fo(0), struct_start, 0);
+        //b.prep(::std::mem::size_of::<foo>(), 0);
+        //b.prep(4+4+4, 0);
+        //b.push_element_scalar(55i8);
+        //b.pad(3);
+        //b.push_element_scalar(0x1234i16);
+        //b.pad(2);
+        //b.push_element_scalar(0x12345678i32);
+        //let struct_start = b.rev_cur_idx();
+        let x = foo{a: 0x12345678i32.to_le(), _pad0: [0,0], b: 0x1234i16.to_le(), _pad1: [0, 0, 0], c: 55i8.to_le()};
+        b.push_slot_struct(fi2fo(0), Some(&x));
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
