@@ -1725,7 +1725,9 @@ class RustGenerator : public BaseGenerator {
 
         code_.SetValue("OFFSET_NAME", GenFieldOffsetName(field));
         code_.SetValue("OFFSET_VALUE", NumToString(field.value.offset));
-        code_ += "    const {{OFFSET_NAME}}: flatbuffers::VOffsetT = {{OFFSET_VALUE}};";
+        //code_.SetValue("OFFSET_VALUE", NumToString(field.value.offset / 2 - 2 ));
+        code_ += "    pub const {{OFFSET_NAME}}: flatbuffers::VOffsetT = {{OFFSET_VALUE}};";
+        //code_ += "    pub const {{OFFSET_NAME}}: flatbuffers::VOffsetT = {{OFFSET_VALUE}}; // TODO(rw): reconsider offset calc";
         //code_.SetValue("SEP", ",\n");
       }
       code_ += "";

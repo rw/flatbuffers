@@ -1,10 +1,10 @@
 // test schema file
 
-include "include_test1.fbs";
+//include "include_test1.fbs";
 
 namespace MyGame;
 
-table InParentNamespace {}
+//table InParentNamespace {}
 
 namespace MyGame.Example2;
 
@@ -81,7 +81,7 @@ table Monster {
   flex:[ubyte] (id:30, flexbuffer);
   vector_of_longs:[long] (id:32);
   vector_of_doubles:[double] (id:33);
-  parent_namespace_test:InParentNamespace (id:34);
+  //parent_namespace_test:InParentNamespace (id:34);
 }
 
 table TypeAliases {
