@@ -144,7 +144,7 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
     let table_start = builder.start_table(34);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_MANA, 150, 150);
-    builder.push_slot_labeled_uoffset(MyGame::Example::Monster::VT_NAME, name);
+    builder.push_slot_labeled_uoffset(MyGame::Example::Monster::VT_NAME, flatbuffers::LabeledUOffsetT::new(0));
     let root = builder.end_table(table_start);
     builder.finish(root);
 }
