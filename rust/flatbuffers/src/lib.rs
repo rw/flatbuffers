@@ -823,6 +823,15 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar_no_prep(off2);
         //emplace_scalar(&mut self.owned_buf[start..start+SIZE_SOFFSET], off2);
     }
+    fn push_uoffset_relative(&mut self, off: UOffsetT) {
+        self.prep(SIZE_UOFFSET, 0);
+        assert!(off <= self.rev_cur_idx() as UOffsetT, "logic error in offsets");
+        let off2 = (self.rev_cur_idx() as UOffsetT) - (off as UOffsetT) + (SIZE_UOFFSET as UOffsetT);
+        //println!("off2: {}", off2);
+        //self.dump_buf("emplace off2");
+        self.push_element_scalar_no_prep(off2);
+        //emplace_scalar(&mut self.owned_buf[start..start+SIZE_SOFFSET], off2);
+    }
     pub fn push_bytes_no_prep(&mut self, x: &[u8]) -> UOffsetT {
         let l = x.len();
         self.cur_idx -= l;
@@ -862,7 +871,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
     }
     pub fn push_slot_labeled_uoffset<T>(&mut self, slotoff: VOffsetT, x: LabeledUOffsetT<T>) {
-        self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
+        self.push_uoffset_relative(x.value());
+        self.store_slot(slotoff);
+        //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
     pub fn push_slot_scalar<T: ElementScalar + std::fmt::Display>(&mut self, slotoff: VOffsetT, x: T, default: T) {
         //println!("push_slot_scalar: slotnum={}, x={}, default={}, get_active_buf_slice={:?}", slotnum, x, default, self.get_active_buf_slice());
