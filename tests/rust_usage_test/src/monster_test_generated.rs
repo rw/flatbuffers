@@ -27,7 +27,7 @@ pub mod Example2 {
   #[allow(unused_imports)]
   use std::cmp::Ordering;
 
-pub type MonsterOffset = ();
+pub enum MonsterOffset {}
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -77,10 +77,11 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
+  //pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset> {
   pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<MonsterOffset> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::LabeledUOffsetT::<MonsterOffset>::new(end);
-    o
+    flatbuffers::LabeledUOffsetT::new(o.value())
   }
 }
 
@@ -292,7 +293,7 @@ impl Ability {
 }
 // STRUCT_END(Ability, 8);
 
-pub type TestSimpleTableWithEnumOffset = ();
+pub enum TestSimpleTableWithEnumOffset {}
 pub struct TestSimpleTableWithEnum<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -352,10 +353,11 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
     }
   }
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
+  //pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset> {
   pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<TestSimpleTableWithEnumOffset> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::LabeledUOffsetT::<TestSimpleTableWithEnumOffset>::new(end);
-    o
+    flatbuffers::LabeledUOffsetT::new(o.value())
   }
 }
 
@@ -368,7 +370,7 @@ pub fn CreateTestSimpleTableWithEnum<'a: 'b, 'b>(
   builder.finish()
 }
 
-pub type StatOffset = ();
+pub enum StatOffset {}
 pub struct Stat<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -446,10 +448,11 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
     }
   }
   // StatBuilder &operator=(const StatBuilder &);
+  //pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset> {
   pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<StatOffset> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::LabeledUOffsetT::<StatOffset>::new(end);
-    o
+    flatbuffers::LabeledUOffsetT::new(o.value())
   }
 }
 
@@ -465,7 +468,7 @@ pub fn CreateStat<'a: 'b, 'b>(
 }
 
 /// an example documentation comment: monster object
-pub type MonsterOffset = ();
+pub enum MonsterOffset {}
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -745,6 +748,18 @@ impl<'a> Default for MonsterArgs<'a> {
         }
     }
 }
+//type ASDF = flatbuffers::LabeledUOffsetT<MonsterOffset>;
+//type GHJK = flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset>;
+//    impl From<ASDF> for GHJK {
+//        fn from(o: ASDF) -> Self {
+//            flatbuffers::LabeledUOffsetT::new(o.value())
+//        }
+//    }
+    //impl Into<flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset>> for flatbuffers::LabeledUOffsetT<MonsterOffset> {
+    //    fn into(self) -> flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset> {
+    //        flatbuffers::LabeledUOffsetT::new(self.value())
+    //    }
+    //}
 pub struct MonsterBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
   start_: flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset>,
@@ -857,11 +872,12 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
+  //pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset> {
   pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<MonsterOffset> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::LabeledUOffsetT::<MonsterOffset>::new(end);
     self.fbb_.required(&o, Monster::VT_NAME);
-    o
+    flatbuffers::LabeledUOffsetT::new(o.value())
   }
 }
 
@@ -906,7 +922,7 @@ pub fn CreateMonster<'a: 'b, 'b>(
   builder.finish()
 }
 
-pub type TypeAliasesOffset = ();
+pub enum TypeAliasesOffset {}
 pub struct TypeAliases<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -1065,10 +1081,11 @@ impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
     }
   }
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
+  //pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset> {
   pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<TypeAliasesOffset> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::LabeledUOffsetT::<TypeAliasesOffset>::new(end);
-    o
+    flatbuffers::LabeledUOffsetT::new(o.value())
   }
 }
 

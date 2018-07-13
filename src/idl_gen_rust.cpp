@@ -1691,7 +1691,13 @@ class RustGenerator : public BaseGenerator {
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
     code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
-    code_ += "pub type {{OFFSET_TYPELABEL}} = ();";
+    code_ += "pub enum {{OFFSET_TYPELABEL}} {}";
+    //code_ += "impl From<{{OFFSET_TYPELABEL}}> for flatbuffers::TableOffset {";
+    //code_ += "  fn from(o: {{OFFSET_TYPELABEL}}) -> Self {";
+    //code_ += "    o.";
+    ////code_ += "    flatbuffers::LabeledUOffsetT::new(o.value())";
+    //code_ += "  }";
+    //code_ += "}";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
     code_ += "  pub _tab: flatbuffers::Table<'a>,";
     code_ += "  _phantom: PhantomData<&'a ()>,";
@@ -2162,6 +2168,7 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
+    code_ += "  //pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset> {";
     code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
     code_ += "    //let o = flatbuffers::LabeledUOffsetT::<{{OFFSET_TYPELABEL}}>::new(end);";
@@ -2175,7 +2182,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "    self.fbb_.required(&o, {{STRUCT_NAME}}::{{OFFSET_NAME}});";
       }
     }
-    code_ += "    o";
+    code_ += "    flatbuffers::LabeledUOffsetT::new(o.value())";
     code_ += "  }";
     code_ += "}";
     code_ += "";
