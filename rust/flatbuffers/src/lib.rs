@@ -15,11 +15,12 @@ const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
 use std::marker::PhantomData;
 //use std::iter::FromIterator;
 
-pub type VectorOffset = ();
-pub type StringOffset = ();
-pub type ByteStringOffset = ();
-pub type UnionOffset = ();
-pub type TableOffset = ();
+// enum causes compile error on type mismatch, whereas newtype () would not.
+pub enum VectorOffset {}
+pub enum StringOffset {}
+pub enum ByteStringOffset {}
+pub enum UnionOffset {}
+pub enum TableOffset {}
 pub trait GeneratedStruct {}
 pub trait ElementScalar : Sized + PartialEq + Clone {
     fn to_le(self) -> Self;
@@ -561,7 +562,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     // utf-8 string creation
     pub fn create_string(&mut self, s: &str) -> LabeledUOffsetT<StringOffset> {
-        self.create_byte_string(s.as_bytes())
+        LabeledUOffsetT::new(self.create_byte_string(s.as_bytes()).value())
     }
     pub fn create_byte_string<'a>(&mut self, data: &[u8]) -> LabeledUOffsetT<ByteStringOffset> {
         self.assert_not_nested();
@@ -575,7 +576,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.cur_idx -= data.len();
         //self.owned_buf[self.cur_idx..self.cur_idx+data.len()].copy_from_slice(data);
 
-        self.end_vector(data.len())
+        LabeledUOffsetT::new(self.end_vector(data.len()).value())
 
         ////self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
         //self.push_bytes(data);
@@ -591,7 +592,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.cur_idx -= l;
         self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(data);
 
-        self.end_vector(data.len())
+        LabeledUOffsetT::new(self.end_vector(data.len()).value())
     }
     pub fn create_shared_string<'a>(&mut self, _: &'a str) -> LabeledUOffsetT<StringOffset> {
         LabeledUOffsetT::new(0)
