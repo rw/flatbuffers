@@ -116,6 +116,12 @@ pub fn field_offset_to_field_index(field_o: VOffsetT) -> VOffsetT {
     let fixed_fields = 2;  // Vtable size and Object Size.
     (field_o / (SIZE_VOFFSET as VOffsetT)) - fixed_fields
 }
+pub fn to_bytes<'a, T: 'a + Sized>(t: &'a T) -> &'a [u8] {
+    let sz = std::mem::size_of::<T>();
+    unsafe {
+        std::slice::from_raw_parts((t as *const T) as *const u8, sz)
+    }
+}
 pub fn emplace_scalar<T>(s: &mut [u8], x: T) {
     let sz = std::mem::size_of::<T>();
     let data = unsafe {
@@ -232,6 +238,7 @@ impl<'a> Table<'a> {
         };
         Some(s)
     }
+    //pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
     pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
@@ -603,8 +610,17 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         LabeledUOffsetT::new(0)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
-    pub fn create_vector<'a, T: 'a>(&'a mut self, _: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-        LabeledUOffsetT::new(0)
+    // by construction, all items used with this function will already be in little endian format.
+    // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
+    //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
+    pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<LabeledVectorUOffsetT<T>> {
+        let elemsize = std::mem::size_of::<T>();
+        let start_off = self.start_vector(elemsize, items.len(), elemsize);
+        self.start_vector(elemsize, items.len(), elemsize);
+        for i in items.iter().rev() {
+            self.push_bytes_no_prep(to_bytes(i));
+        }
+        LabeledUOffsetT::new(self.end_vector(items.len()).value())
     }
 //  //pub fn create_vector_from_fn<'a: 'fbb, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'fbb mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
     pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> LabeledUOffsetT<&'fbb [T]>
@@ -838,7 +854,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar_no_prep(off2);
         //emplace_scalar(&mut self.owned_buf[start..start+SIZE_SOFFSET], off2);
     }
-    pub fn push_bytes_no_prep(&mut self, x: &[u8]) -> UOffsetT {
+    // push_bytes_no_prep must not be used when endian-ness is not guaranteed
+    // (e.g. with vectors of elements)
+    fn push_bytes_no_prep(&mut self, x: &[u8]) -> UOffsetT {
         let l = x.len();
         self.cur_idx -= l;
         &mut self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(x);
@@ -978,23 +996,31 @@ pub type Void<'a> = &'a [u8];
 //    phantom: PhantomData<T>,
 //}
 
-//pub struct LabeledUOffsetT<T> (usize, PhantomData<T>);
-pub struct VectorLabeledUOffsetT<T> (usize, PhantomData<T>);
-//pub struct ULabeledUOffsetT<T> (u32, PhantomData<T>);
+pub struct LabeledVectorUOffsetT<T> (UOffsetT, PhantomData<T>);
+impl<T> Copy for LabeledVectorUOffsetT<T> { } // TODO: why does deriving Copy cause ownership errors?
+impl<T> Clone for LabeledVectorUOffsetT<T> {
+    fn clone(&self) -> LabeledVectorUOffsetT<T> {
+        LabeledVectorUOffsetT::new(self.0.clone())
+    }
+}
 
-//impl<T> LabeledUOffsetT<T> {
-//    pub fn new(o: usize) -> Self {
-//        Offset(o, PhantomData)
-//    }
-//    pub fn union(&self) -> Offset<Void> {
-//        LabeledUOffsetT::new(self.0)
-//    }
-//}
-//impl<T> ULabeledUOffsetT<T> {
-//    pub fn new(o: u32) -> Self {
-//        UOffset(o, PhantomData)
-//    }
-//}
+impl<T> std::ops::Deref for LabeledVectorUOffsetT<T> {
+    type Target = UOffsetT;
+    fn deref(&self) -> &UOffsetT {
+        &self.0
+    }
+}
+impl<T> LabeledVectorUOffsetT<T> {
+    pub fn new(o: UOffsetT) -> Self {
+        LabeledVectorUOffsetT(o, PhantomData)
+    }
+    //pub fn union(&self) -> LabeledVectorUOffsetT<UnionOffset> {
+    //    LabeledVectorUOffsetT::new(self.0)
+    //}
+    pub fn value(&self) -> UOffsetT {
+        self.0
+    }
+}
 pub struct LabeledUOffsetT<T> (UOffsetT, PhantomData<T>);
 impl<T> Copy for LabeledUOffsetT<T> { } // TODO: why does deriving Copy cause ownership errors?
 impl<T> Clone for LabeledUOffsetT<T> {
