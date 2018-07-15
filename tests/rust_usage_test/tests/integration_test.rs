@@ -131,6 +131,7 @@ fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::
     //    }
     //}
     let fred_name = builder.create_string("Fred");
+    let inventory = builder.create_vector(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
     let mon = {
         let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
         let args = MyGame::Example::MonsterArgs{
@@ -139,10 +140,12 @@ fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::
             name: builder.create_string("MyMonster"),
             pos: Some(&pos),
             test_type: MyGame::Example::Any::Monster,
+            // TODO(rw): better offset ergonomics
             test: Some(flatbuffers::LabeledUOffsetT::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
                 name: fred_name,
                 ..Default::default()
             }).value())),
+            inventory: inventory,
             ..Default::default()
         };
         MyGame::Example::CreateMonster(builder, &args)
@@ -158,6 +161,7 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
         builder.end_table(table_start)
     };
     let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
+    let inv = builder.create_vector(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
 
     // begin building
     let name = builder.create_string("MyMonster");
@@ -169,8 +173,7 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
     builder.push_slot_struct(MyGame::Example::Monster::VT_POS, Some(&pos));
     builder.push_slot_scalar::<u8>(MyGame::Example::Monster::VT_TEST_TYPE, MyGame::Example::Any::Monster as u8, 0);
     builder.push_slot_labeled_uoffset_relative_from_option(MyGame::Example::Monster::VT_TEST, Some(nested_union_mon));
-    //builder.push_slot_labeled_uoffset_relative_from_option(MyGame::Example::Monster::VT_INVENTORY,
-    //                                                       Some(builder.create_vector(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9])));
+    builder.push_slot_labeled_uoffset_relative_from_option(MyGame::Example::Monster::VT_INVENTORY, Some(inv));
     let root = builder.end_table(table_start);
     builder.finish(root);
 }
