@@ -393,13 +393,13 @@ impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
 }
 
 pub struct TestSimpleTableWithEnumArgs<'a> {
-    pub color: Option<Color>,
+    pub color: Color,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for TestSimpleTableWithEnumArgs<'a> {
     fn default() -> Self {
         TestSimpleTableWithEnumArgs {
-            color: None,
+            color: /* A */Color::Green,
             _phantom: PhantomData,
         }
     }
@@ -433,7 +433,7 @@ pub fn CreateTestSimpleTableWithEnum<'a: 'b, 'b>(
     _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     args: &TestSimpleTableWithEnumArgs) -> flatbuffers::LabeledUOffsetT<TestSimpleTableWithEnumOffset> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
-  if let Some(x) = args.color { builder.add_color(x); }
+  builder.add_color(args.color);
   builder.finish()
 }
 
@@ -479,16 +479,16 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
 
 pub struct StatArgs<'a> {
     pub id: Option<StringOffset>,
-    pub val: Option<i64>,
-    pub count: Option<u16>,
+    pub val: i64,
+    pub count: u16,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for StatArgs<'a> {
     fn default() -> Self {
         StatArgs {
             id: None,
-            val: None,
-            count: None,
+            val: /* C */0,
+            count: /* C */0,
             _phantom: PhantomData,
         }
     }
@@ -528,9 +528,9 @@ pub fn CreateStat<'a: 'b, 'b>(
     _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     args: &StatArgs) -> flatbuffers::LabeledUOffsetT<StatOffset> {
   let mut builder = StatBuilder::new(_fbb);
-  if let Some(x) = args.val { builder.add_val(x); }
+  builder.add_val(args.val);
   if let Some(x) = args.id { builder.add_id(x); }
-  if let Some(x) = args.count { builder.add_count(x); }
+  builder.add_count(args.count);
   builder.finish()
 }
 
@@ -745,32 +745,32 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
 //
 pub struct MonsterArgs<'a> {
     pub pos: Option<&'a Vec3>,
-    pub mana: Option<i16>,
-    pub hp: Option<i16>,
+    pub mana: i16,
+    pub hp: i16,
     pub name: Option<StringOffset>,
     pub inventory: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
-    pub color: Option<Color>,
-    pub test_type: Option<Any>,
-    pub test: Option<Any>,
+    pub color: Color,
+    pub test_type: Any,
+    pub test: Any,
     pub test4: Option<flatbuffers::VectorLabeledUOffsetT<&'a Test>>,
     pub testarrayofstring: Option<flatbuffers::VectorLabeledUOffsetT<StringOffset>>,
     pub testarrayoftables: Option<flatbuffers::VectorLabeledUOffsetT<MonsterOffset>>,
     pub enemy: Option<MonsterOffset>,
     pub testnestedflatbuffer: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
     pub testempty: Option<StatOffset>,
-    pub testbool: Option<bool>,
-    pub testhashs32_fnv1: Option<i32>,
-    pub testhashu32_fnv1: Option<u32>,
-    pub testhashs64_fnv1: Option<i64>,
-    pub testhashu64_fnv1: Option<u64>,
-    pub testhashs32_fnv1a: Option<i32>,
-    pub testhashu32_fnv1a: Option<u32>,
-    pub testhashs64_fnv1a: Option<i64>,
-    pub testhashu64_fnv1a: Option<u64>,
+    pub testbool: bool,
+    pub testhashs32_fnv1: i32,
+    pub testhashu32_fnv1: u32,
+    pub testhashs64_fnv1: i64,
+    pub testhashu64_fnv1: u64,
+    pub testhashs32_fnv1a: i32,
+    pub testhashu32_fnv1a: u32,
+    pub testhashs64_fnv1a: i64,
+    pub testhashu64_fnv1a: u64,
     pub testarrayofbools: Option<flatbuffers::VectorLabeledUOffsetT<bool>>,
-    pub testf: Option<f32>,
-    pub testf2: Option<f32>,
-    pub testf3: Option<f32>,
+    pub testf: f32,
+    pub testf2: f32,
+    pub testf3: f32,
     pub testarrayofstring2: Option<flatbuffers::VectorLabeledUOffsetT<StringOffset>>,
     pub testarrayofsortedstruct: Option<flatbuffers::VectorLabeledUOffsetT<&'a Ability>>,
     pub flex: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
@@ -784,33 +784,33 @@ impl<'a> Default for MonsterArgs<'a> {
     fn default() -> Self {
         MonsterArgs {
             pos: None,
-            mana: None,
-            hp: None,
+            mana: /* C */150,
+            hp: /* C */100,
  // required
             name: None,
             inventory: None,
-            color: None,
-            test_type: None,
-            test: None,
+            color: /* A */Color::Blue,
+            test_type: /* A */Any::NONE,
+            test: /* E */ None,
             test4: None,
             testarrayofstring: None,
             testarrayoftables: None,
             enemy: None,
             testnestedflatbuffer: None,
             testempty: None,
-            testbool: None,
-            testhashs32_fnv1: None,
-            testhashu32_fnv1: None,
-            testhashs64_fnv1: None,
-            testhashu64_fnv1: None,
-            testhashs32_fnv1a: None,
-            testhashu32_fnv1a: None,
-            testhashs64_fnv1a: None,
-            testhashu64_fnv1a: None,
+            testbool: false,
+            testhashs32_fnv1: /* C */0,
+            testhashu32_fnv1: /* C */0,
+            testhashs64_fnv1: /* C */0,
+            testhashu64_fnv1: /* C */0,
+            testhashs32_fnv1a: /* C */0,
+            testhashu32_fnv1a: /* C */0,
+            testhashs64_fnv1a: /* C */0,
+            testhashu64_fnv1a: /* C */0,
             testarrayofbools: None,
-            testf: None,
-            testf2: None,
-            testf3: None,
+            testf: /* C */3.14159,
+            testf2: /* C */3.0,
+            testf3: /* C */0.0,
             testarrayofstring2: None,
             testarrayofsortedstruct: None,
             flex: None,
@@ -827,7 +827,7 @@ pub struct MonsterBuilder<'a: 'b, 'b> {
   start_: flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
-  pub fn add_pos(&mut self, pos: Option<&Vec3/* foo */>) {
+  pub fn add_pos(&mut self, pos: &Vec3/* foo */) {
     self.fbb_.push_slot_struct::<Vec3/* foo */>(Monster::VT_POS, pos);
   }
   pub fn add_mana(&mut self, mana: i16 ) {
@@ -848,8 +848,8 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_test_type(&mut self, test_type: Any ) {
     self.fbb_.push_slot_scalar::<u8>(Monster::VT_TEST_TYPE, test_type as u8, 0);
   }
-  pub fn add_test(&mut self, test: Option<flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset>> ) {
-    self.fbb_.push_slot_labeled_uoffset_relative_from_option(Monster::VT_TEST, test);
+  pub fn add_test(&mut self, test: flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset> ) {
+    self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_TEST, test);
   }
   pub fn add_test4(&mut self, test4: flatbuffers::LabeledUOffsetT<&[Test/* foo */]> ) {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_TEST4, test4);
@@ -951,10 +951,10 @@ pub fn CreateMonster<'a: 'b, 'b>(
     _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     args: &MonsterArgs) -> flatbuffers::LabeledUOffsetT<MonsterOffset> {
   let mut builder = MonsterBuilder::new(_fbb);
-  if let Some(x) = args.testhashu64_fnv1a { builder.add_testhashu64_fnv1a(x); }
-  if let Some(x) = args.testhashs64_fnv1a { builder.add_testhashs64_fnv1a(x); }
-  if let Some(x) = args.testhashu64_fnv1 { builder.add_testhashu64_fnv1(x); }
-  if let Some(x) = args.testhashs64_fnv1 { builder.add_testhashs64_fnv1(x); }
+  builder.add_testhashu64_fnv1a(args.testhashu64_fnv1a);
+  builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
+  builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
+  builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
   if let Some(x) = args.parent_namespace_test { builder.add_parent_namespace_test(x); }
   if let Some(x) = args.vector_of_doubles { builder.add_vector_of_doubles(x); }
   if let Some(x) = args.vector_of_longs { builder.add_vector_of_longs(x); }
@@ -962,29 +962,29 @@ pub fn CreateMonster<'a: 'b, 'b>(
   if let Some(x) = args.flex { builder.add_flex(x); }
   if let Some(x) = args.testarrayofsortedstruct { builder.add_testarrayofsortedstruct(x); }
   if let Some(x) = args.testarrayofstring2 { builder.add_testarrayofstring2(x); }
-  if let Some(x) = args.testf3 { builder.add_testf3(x); }
-  if let Some(x) = args.testf2 { builder.add_testf2(x); }
-  if let Some(x) = args.testf { builder.add_testf(x); }
+  builder.add_testf3(args.testf3);
+  builder.add_testf2(args.testf2);
+  builder.add_testf(args.testf);
   if let Some(x) = args.testarrayofbools { builder.add_testarrayofbools(x); }
-  if let Some(x) = args.testhashu32_fnv1a { builder.add_testhashu32_fnv1a(x); }
-  if let Some(x) = args.testhashs32_fnv1a { builder.add_testhashs32_fnv1a(x); }
-  if let Some(x) = args.testhashu32_fnv1 { builder.add_testhashu32_fnv1(x); }
-  if let Some(x) = args.testhashs32_fnv1 { builder.add_testhashs32_fnv1(x); }
+  builder.add_testhashu32_fnv1a(args.testhashu32_fnv1a);
+  builder.add_testhashs32_fnv1a(args.testhashs32_fnv1a);
+  builder.add_testhashu32_fnv1(args.testhashu32_fnv1);
+  builder.add_testhashs32_fnv1(args.testhashs32_fnv1);
   if let Some(x) = args.testempty { builder.add_testempty(x); }
   if let Some(x) = args.testnestedflatbuffer { builder.add_testnestedflatbuffer(x); }
   if let Some(x) = args.enemy { builder.add_enemy(x); }
   if let Some(x) = args.testarrayoftables { builder.add_testarrayoftables(x); }
   if let Some(x) = args.testarrayofstring { builder.add_testarrayofstring(x); }
   if let Some(x) = args.test4 { builder.add_test4(x); }
-  if let Some(x) = args.test { builder.add_test(x); }
+  builder.add_test(args.test);
   if let Some(x) = args.inventory { builder.add_inventory(x); }
   if let Some(x) = args.name { builder.add_name(x); }
   if let Some(x) = args.pos { builder.add_pos(x); }
-  if let Some(x) = args.hp { builder.add_hp(x); }
-  if let Some(x) = args.mana { builder.add_mana(x); }
-  if let Some(x) = args.testbool { builder.add_testbool(x); }
-  if let Some(x) = args.test_type { builder.add_test_type(x); }
-  if let Some(x) = args.color { builder.add_color(x); }
+  builder.add_hp(args.hp);
+  builder.add_mana(args.mana);
+  builder.add_testbool(args.testbool);
+  builder.add_test_type(args.test_type);
+  builder.add_color(args.color);
   builder.finish()
 }
 
@@ -1065,16 +1065,16 @@ impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
 }
 
 pub struct TypeAliasesArgs<'a> {
-    pub i8_: Option<i8>,
-    pub u8_: Option<u8>,
-    pub i16_: Option<i16>,
-    pub u16_: Option<u16>,
-    pub i32_: Option<i32>,
-    pub u32_: Option<u32>,
-    pub i64_: Option<i64>,
-    pub u64_: Option<u64>,
-    pub f32_: Option<f32>,
-    pub f64_: Option<f64>,
+    pub i8_: i8,
+    pub u8_: u8,
+    pub i16_: i16,
+    pub u16_: u16,
+    pub i32_: i32,
+    pub u32_: u32,
+    pub i64_: i64,
+    pub u64_: u64,
+    pub f32_: f32,
+    pub f64_: f64,
     pub v8: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
     pub vf64: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
@@ -1082,16 +1082,16 @@ pub struct TypeAliasesArgs<'a> {
 impl<'a> Default for TypeAliasesArgs<'a> {
     fn default() -> Self {
         TypeAliasesArgs {
-            i8_: None,
-            u8_: None,
-            i16_: None,
-            u16_: None,
-            i32_: None,
-            u32_: None,
-            i64_: None,
-            u64_: None,
-            f32_: None,
-            f64_: None,
+            i8_: /* C */0,
+            u8_: /* C */0,
+            i16_: /* C */0,
+            u16_: /* C */0,
+            i32_: /* C */0,
+            u32_: /* C */0,
+            i64_: /* C */0,
+            u64_: /* C */0,
+            f32_: /* C */0.0,
+            f64_: /* C */0.0,
             v8: None,
             vf64: None,
             _phantom: PhantomData,
@@ -1160,18 +1160,18 @@ pub fn CreateTypeAliases<'a: 'b, 'b>(
     _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     args: &TypeAliasesArgs) -> flatbuffers::LabeledUOffsetT<TypeAliasesOffset> {
   let mut builder = TypeAliasesBuilder::new(_fbb);
-  if let Some(x) = args.f64_ { builder.add_f64_(x); }
-  if let Some(x) = args.u64_ { builder.add_u64_(x); }
-  if let Some(x) = args.i64_ { builder.add_i64_(x); }
+  builder.add_f64_(args.f64_);
+  builder.add_u64_(args.u64_);
+  builder.add_i64_(args.i64_);
   if let Some(x) = args.vf64 { builder.add_vf64(x); }
   if let Some(x) = args.v8 { builder.add_v8(x); }
-  if let Some(x) = args.f32_ { builder.add_f32_(x); }
-  if let Some(x) = args.u32_ { builder.add_u32_(x); }
-  if let Some(x) = args.i32_ { builder.add_i32_(x); }
-  if let Some(x) = args.u16_ { builder.add_u16_(x); }
-  if let Some(x) = args.i16_ { builder.add_i16_(x); }
-  if let Some(x) = args.u8_ { builder.add_u8_(x); }
-  if let Some(x) = args.i8_ { builder.add_i8_(x); }
+  builder.add_f32_(args.f32_);
+  builder.add_u32_(args.u32_);
+  builder.add_i32_(args.i32_);
+  builder.add_u16_(args.u16_);
+  builder.add_i16_(args.i16_);
+  builder.add_u8_(args.u8_);
+  builder.add_i8_(args.i8_);
   builder.finish()
 }
 
