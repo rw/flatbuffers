@@ -886,20 +886,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         unimplemented!();
         self.push_slot_scalar(slotnum, x as u8, default as u8);
     }
-    pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: Option<&T>) {
+    pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: &T) {
         self.assert_nested();
-        if let Some(ref valref) = x {
-            let ptr = *valref as *const T as *const u8;
-            let bytes: &[u8] = unsafe {
-                std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<T>())
-            };
-            self.prep(bytes.len(), 0);
-            self.push_bytes_no_prep(bytes);
-            //if x != self.rev_cur_idx() {
-            //    panic!("structs must be written inside a table");
-            //}
-            self.store_slot(slotoff);
-        }
+        let ptr = &*x as *const T as *const u8;
+        let bytes: &[u8] = unsafe {
+            std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<T>())
+        };
+        self.prep(bytes.len(), 0);
+        self.push_bytes_no_prep(bytes);
+        //if x != self.rev_cur_idx() {
+        //    panic!("structs must be written inside a table");
+        //}
+        self.store_slot(slotoff);
     }
     // Offsets initially are relative to the end of the buffer (downwards).
     // This function converts them to be relative to the current location
