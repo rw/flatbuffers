@@ -654,7 +654,7 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  enum class ElementType { Struct, Table, Number, String, Union }; // TODO: bytestring
+  enum class ElementType { Struct, Table, Number, Bool, String, Union }; // TODO: bytestring
   ElementType GetElementType(const Type &origin_type) const {
     Type type = origin_type;
     if (GetContainerType(origin_type) == ContainerType::Vector) {
@@ -667,12 +667,14 @@ class RustGenerator : public BaseGenerator {
       } else {
         return ElementType::Table;
       }
-    } else if (IsScalar(type.base_type)) {
-      return ElementType::Number;
     } else if (type.base_type == BASE_TYPE_STRING) {
       return ElementType::String;
     } else if (type.base_type == BASE_TYPE_UNION) {
       return ElementType::Union;
+    } else if (type.base_type == BASE_TYPE_BOOL) {
+      return ElementType::Bool;
+    } else if (IsScalar(type.base_type)) {
+      return ElementType::Number;
     } else {
       assert(false);
     }
@@ -1540,6 +1542,10 @@ class RustGenerator : public BaseGenerator {
             const auto typname = GenTypeBasic(type, false);
             return "Option<flatbuffers::VectorLabeledUOffsetT<" + typname + ">>";
           }
+          case ElementType::Bool: {
+            const auto typname = GenTypeBasic(type, false);
+            return "Option<flatbuffers::VectorLabeledUOffsetT<bool>>";
+          }
           case ElementType::String: {
             return "Option<flatbuffers::VectorLabeledUOffsetT<StringOffset>>";
           }
@@ -1566,8 +1572,10 @@ class RustGenerator : public BaseGenerator {
           }
           case ElementType::Number: {
             const auto typname = GenTypeBasic(type, false);
-            //code_.SetValue("PARAM_TYPE", "Option<" + typname + ">");
-            return typname;
+            return "Option<" + typname + ">";
+          }
+          case ElementType::Bool: {
+            return "Option<bool>";
           }
           case ElementType::String: {
             return "Option<StringOffset>";
@@ -1582,40 +1590,43 @@ class RustGenerator : public BaseGenerator {
     return "FAIL";
   }
 
-  std::string GenBuilderArgsDefaultValue(const FieldDef &field) {
-    const Type& type = field.value.type;
+  //std::string GenBuilderArgsDefaultValue(const FieldDef &field) {
+  //  const Type& type = field.value.type;
 
-    const auto ct = GetContainerType(type);
-    const auto et = GetElementType(type);
+  //  const auto ct = GetContainerType(type);
+  //  const auto et = GetElementType(type);
 
-    switch (ct) {
-      case ContainerType::Vector: {
-        return "None";
-      }
-      case ContainerType::Enum: {
-        return "None";
-      }
-      case ContainerType::None: {
-        switch (et) {
-          case ElementType::Struct: {
-            return "None";
-          }
-          case ElementType::Table: {
-            return "None";
-          }
-          case ElementType::Number: {
-            return GetDefaultScalarValue(field);
-          }
-          case ElementType::String: {
-            return "None";
-          }
-          case ElementType::Union: {
-            return "None";
-          }
-        }
-      }
-    }
-  }
+  //  switch (ct) {
+  //    case ContainerType::Vector: {
+  //      return "None";
+  //    }
+  //    case ContainerType::Enum: {
+  //      return "None";
+  //    }
+  //    case ContainerType::None: {
+  //      switch (et) {
+  //        case ElementType::Bool: {
+  //          return "None";
+  //        }
+  //        case ElementType::Struct: {
+  //          return "None";
+  //        }
+  //        case ElementType::Table: {
+  //          return "None";
+  //        }
+  //        case ElementType::Number: {
+  //          return GetDefaultScalarValue(field);
+  //        }
+  //        case ElementType::String: {
+  //          return "None";
+  //        }
+  //        case ElementType::Union: {
+  //          return "None";
+  //        }
+  //      }
+  //    }
+  //  }
+  //}
 
   void GenParam(const FieldDef &field, bool direct, const char *prefix,
                 const std::string &lifetime, const std::string tmpl) {
@@ -2213,12 +2224,14 @@ class RustGenerator : public BaseGenerator {
         it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated) {
-        code_.SetValue("PARAM_VALUE", GenBuilderArgsDefaultValue(field));
-        std::string tmpl = "{{PRE}}{{PARAM_NAME}}: {{PARAM_VALUE}},";
+        //code_.SetValue("PARAM_VALUE", GenBuilderArgsDefaultValue(field));
+        code_.SetValue("PARAM_VALUE", "None");
         if (field.required) {
-          tmpl += " // required";
+          code_ += " // required";
         }
-        GenParam(field, false, "            ", "", tmpl);
+        code_.SetValue("PARAM_NAME", Name(field));
+        code_ += "            {{PARAM_NAME}}: {{PARAM_VALUE}},";
+        //GenParam(field, false, "            ", "", tmpl);
       }
     }
     code_ += "            _phantom: PhantomData,";
@@ -2349,7 +2362,7 @@ class RustGenerator : public BaseGenerator {
         if (!field.deprecated && (!struct_def.sortbysize ||
                                   size == SizeOf(field.value.type.base_type))) {
           code_.SetValue("FIELD_NAME", Name(field));
-          code_ += "  builder.add_{{FIELD_NAME}}(args.{{FIELD_NAME}});";
+          code_ += "  if let Some(x) = args.{{FIELD_NAME}} { builder.add_{{FIELD_NAME}}(x); }";
         }
       }
     }
