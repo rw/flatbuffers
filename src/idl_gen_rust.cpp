@@ -644,22 +644,26 @@ class RustGenerator : public BaseGenerator {
     return ptr_type == "naked" ? "" : ".get()";
   }
 
-  enum class ContainerType { None, Vector, Enum };
+  enum class ContainerType { None, Vector, Enum, Union };
   ContainerType GetContainerType(const Type &type) const {
     if (type.base_type == BASE_TYPE_VECTOR) {
       return ContainerType::Vector;
     } else if (type.enum_def != nullptr) {
-      return ContainerType::Enum;
+      if (type.enum_def->is_union) {
+        return ContainerType::Union;
+      } else {
+        return ContainerType::Enum;
+      }
     } else {
       return ContainerType::None;
     }
   }
 
-  enum class ElementType { Struct, Table, Number, Bool, String, Union }; // TODO: bytestring
+  enum class ElementType { Struct, Table, Number, EnumValue, Bool, String, Union }; // TODO: bytestring
   ElementType GetElementType(const Type &origin_type) const {
     Type type = origin_type;
     if (GetContainerType(origin_type) == ContainerType::Vector) {
-      type = origin_type.VectorType();
+        type = origin_type.VectorType();
     }
 
     if (type.base_type == BASE_TYPE_STRUCT) {
@@ -670,6 +674,8 @@ class RustGenerator : public BaseGenerator {
       }
     } else if (type.base_type == BASE_TYPE_STRING) {
       return ElementType::String;
+    } else if (origin_type.enum_def != nullptr && !origin_type.enum_def->is_union) {
+      return ElementType::EnumValue;
     } else if (type.base_type == BASE_TYPE_UNION) {
       return ElementType::Union;
     } else if (type.base_type == BASE_TYPE_BOOL) {
@@ -1523,7 +1529,6 @@ class RustGenerator : public BaseGenerator {
   // But the UX of Flatbuffers is that the user doesn't get to know if the value is default or not.
   std::string GenBuilderArgsDefnType(const FieldDef &field, const std::string lifetime) {
     const Type& type = field.value.type;
-    code_.SetValue("PARAM_NAME", Name(field));
     //const bool is_struct = IsStruct(field.value.type);
     //const bool is_scalar = IsScalar(field.value.type.base_type);
 
@@ -1531,6 +1536,24 @@ class RustGenerator : public BaseGenerator {
     const auto et = GetElementType(type);
 
     switch (ct) {
+      //case ContainerType::Enum: {
+      //  switch (et) {
+      //    case ElementType::Struct: { assert(false); }
+      //    case ElementType::Table: { assert(false); }
+      //    case ElementType::Number: { assert(false); }
+      //    case ElementType::Bool: { assert(false); }
+      //    case ElementType::String: { assert(false); }
+      //    case ElementType::Union: { assert(false); }
+
+      //    case ElementType::EnumValue: {
+      //      const auto typname = WrapInNameSpace(*type.struct_def);
+      //      return "Option<" + typname + ">";
+      //    }
+      //  }
+      //}
+      case ContainerType::Union: {
+                                   return "foo";
+      }
       case ContainerType::Vector: {
         switch (et) {
           case ElementType::Struct: {
@@ -1552,9 +1575,12 @@ class RustGenerator : public BaseGenerator {
           case ElementType::String: {
             return "Option<flatbuffers::VectorLabeledUOffsetT<StringOffset>>";
           }
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return "Option<" + typname + ">";
+          }
           case ElementType::Union: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "Option<flatbuffers::VectorLabeledUOffsetT<" + typname + "UnionOffset>>";
+            assert(false);
           }
         }
       }
@@ -1578,6 +1604,10 @@ class RustGenerator : public BaseGenerator {
             const auto typname = GenTypeBasic(type, false);
             //return "Option<" + typname + ">";
             return typname;
+          }
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return "Option<" + typname + ">";
           }
           case ElementType::Bool: {
             //return "Option<bool>";
@@ -1606,6 +1636,9 @@ class RustGenerator : public BaseGenerator {
       case ContainerType::Vector: {
         return "None";
       }
+      case ContainerType::Union: {
+        return "None";
+      }
       case ContainerType::Enum: {
         return GetDefaultScalarValue(field);
       }
@@ -1621,6 +1654,9 @@ class RustGenerator : public BaseGenerator {
             return "None";
           }
           case ElementType::Number: {
+            return GetDefaultScalarValue(field);
+          }
+          case ElementType::EnumValue: {
             return GetDefaultScalarValue(field);
           }
           case ElementType::String: {
@@ -1641,6 +1677,9 @@ class RustGenerator : public BaseGenerator {
       case ContainerType::Vector: {
         return true;
       }
+      case ContainerType::Union: {
+        return true;
+      }
       case ContainerType::Enum: {
         return false;
       }
@@ -1656,6 +1695,9 @@ class RustGenerator : public BaseGenerator {
             return true;
           }
           case ElementType::Number: {
+            return false;
+          }
+          case ElementType::EnumValue: {
             return false;
           }
           case ElementType::String: {
@@ -2250,6 +2292,7 @@ class RustGenerator : public BaseGenerator {
       const auto &field = **it;
       if (!field.deprecated) {
         // TODO: required-ness
+        code_.SetValue("PARAM_NAME", Name(field));
         code_.SetValue("PARAM_TYPE", GenBuilderArgsDefnType(field, "'a "));
         code_ += "    pub {{PARAM_NAME}}: {{PARAM_TYPE}},";
       }

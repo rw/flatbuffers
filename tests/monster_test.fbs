@@ -15,6 +15,7 @@ namespace MyGame.Example;
 attribute "priority";
 
 enum Color:byte (bit_flags) { Red = 0, Green, Blue = 3, }
+enum Farts:bool { Red , Blue }
 
 union Any { Monster, TestSimpleTableWithEnum, MyGame.Example2.Monster }
 
@@ -82,7 +83,7 @@ table Monster {
   vector_of_longs:[long] (id:32);
   vector_of_doubles:[double] (id:33);
   parent_namespace_test:InParentNamespace (id:34);
-  //foo0:[Vec3] (id:34);
+  foo0:[Color] (id:35);
   //foo1:[ubyte] (id:35);
 }
 
