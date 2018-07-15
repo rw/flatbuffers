@@ -207,6 +207,28 @@ pub fn EnumNameColor(e: Color) -> &'static str {
 
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Debug)]
+pub enum Farts {
+  Red = 0,
+  Blue = 1
+}
+
+const EnumValuesFarts:[Farts; 2] = [
+  Farts::Red,
+  Farts::Blue
+];
+
+const EnumNamesFarts:[&'static str; 2] = [
+    "Red",
+    "Blue"
+];
+
+pub fn EnumNameFarts(e: Farts) -> &'static str {
+  let index: usize = e as usize;
+  EnumNamesFarts[index]
+}
+
+#[repr(u8)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Any {
   NONE = 0,
   Monster = 1,
@@ -594,6 +616,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub const VT_VECTOR_OF_LONGS: flatbuffers::VOffsetT = 68;
     pub const VT_VECTOR_OF_DOUBLES: flatbuffers::VOffsetT = 70;
     pub const VT_PARENT_NAMESPACE_TEST: flatbuffers::VOffsetT = 72;
+    pub const VT_FOO0: flatbuffers::VOffsetT = 74;
 
   pub fn pos(&'a self) -> Option<&Vec3/* foo */ > {
     self._tab.get_struct_unsafe::<Vec3/* foo */>(Monster::VT_POS)
@@ -723,6 +746,9 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn parent_namespace_test(&'a self) -> &super::InParentNamespace<'a>  {
     flatbuffers::get_pointer::<&super::InParentNamespace<'a>>(Monster::VT_PARENT_NAMESPACE_TEST)
   }
+  pub fn foo0(&'a self) -> Option< &'a[i8] > {
+    self._tab.get_slot_vector::<i8>(Monster::VT_FOO0)
+  }
 }
 
 //TODO: inject these functions into impl for type
@@ -750,8 +776,8 @@ pub struct MonsterArgs<'a> {
     pub name: Option<StringOffset>,
     pub inventory: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
     pub color: Color,
-    pub test_type: Any,
-    pub test: Any,
+    pub test_type: foo,
+    pub test: foo,
     pub test4: Option<flatbuffers::VectorLabeledUOffsetT<&'a Test>>,
     pub testarrayofstring: Option<flatbuffers::VectorLabeledUOffsetT<StringOffset>>,
     pub testarrayoftables: Option<flatbuffers::VectorLabeledUOffsetT<MonsterOffset>>,
@@ -778,6 +804,7 @@ pub struct MonsterArgs<'a> {
     pub vector_of_longs: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
     pub vector_of_doubles: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset>>,
     pub parent_namespace_test: Option<MyGame::InParentNamespaceOffset>,
+    pub foo0: Option<Color>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for MonsterArgs<'a> {
@@ -790,8 +817,8 @@ impl<'a> Default for MonsterArgs<'a> {
             name: None,
             inventory: None,
             color: /* A */Color::Blue,
-            test_type: /* A */Any::NONE,
-            test: /* E */ None,
+            test_type: None,
+            test: None,
             test4: None,
             testarrayofstring: None,
             testarrayoftables: None,
@@ -818,6 +845,7 @@ impl<'a> Default for MonsterArgs<'a> {
             vector_of_longs: None,
             vector_of_doubles: None,
             parent_namespace_test: None,
+            foo0: None,
             _phantom: PhantomData,
         }
     }
@@ -929,8 +957,11 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::LabeledUOffsetT<super::InParentNamespace<>> ) {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
+  pub fn add_foo0(&mut self, foo0: flatbuffers::LabeledUOffsetT<&[i8]> ) {
+    self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_FOO0, foo0);
+  }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table(35);
+    let start = _fbb.start_table(36);
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -955,6 +986,7 @@ pub fn CreateMonster<'a: 'b, 'b>(
   builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
   builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
   builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
+  if let Some(x) = args.foo0 { builder.add_foo0(x); }
   if let Some(x) = args.parent_namespace_test { builder.add_parent_namespace_test(x); }
   if let Some(x) = args.vector_of_doubles { builder.add_vector_of_doubles(x); }
   if let Some(x) = args.vector_of_longs { builder.add_vector_of_longs(x); }
@@ -976,14 +1008,14 @@ pub fn CreateMonster<'a: 'b, 'b>(
   if let Some(x) = args.testarrayoftables { builder.add_testarrayoftables(x); }
   if let Some(x) = args.testarrayofstring { builder.add_testarrayofstring(x); }
   if let Some(x) = args.test4 { builder.add_test4(x); }
-  builder.add_test(args.test);
+  if let Some(x) = args.test { builder.add_test(x); }
   if let Some(x) = args.inventory { builder.add_inventory(x); }
   if let Some(x) = args.name { builder.add_name(x); }
   if let Some(x) = args.pos { builder.add_pos(x); }
   builder.add_hp(args.hp);
   builder.add_mana(args.mana);
   builder.add_testbool(args.testbool);
-  builder.add_test_type(args.test_type);
+  if let Some(x) = args.test_type { builder.add_test_type(x); }
   builder.add_color(args.color);
   builder.finish()
 }
