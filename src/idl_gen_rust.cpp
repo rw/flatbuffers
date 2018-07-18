@@ -524,10 +524,10 @@ class RustGenerator : public BaseGenerator {
     #undef FLATBUFFERS_TD
       // clang-format on
     };
-    if (user_facing_type) {
-      if (type.enum_def) return WrapInNameSpace(*type.enum_def);
-      if (type.base_type == BASE_TYPE_BOOL) return "bool";
-    }
+    //if (user_facing_type) {
+    //  if (type.enum_def) return WrapInNameSpace(*type.enum_def);
+    //  if (type.base_type == BASE_TYPE_BOOL) return "bool";
+    //}
     return ctypename[type.base_type];
   }
 
@@ -659,7 +659,7 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  enum class ElementType { Struct, Table, Number, EnumValue, Bool, String, Union }; // TODO: bytestring
+  enum class ElementType { Struct, Table, Number, EnumValue, Bool, String, UnionMember, UnionEnumValue }; // TODO: bytestring
   ElementType GetElementType(const Type &origin_type) const {
     Type type = origin_type;
     if (GetContainerType(origin_type) == ContainerType::Vector) {
@@ -674,10 +674,14 @@ class RustGenerator : public BaseGenerator {
       }
     } else if (type.base_type == BASE_TYPE_STRING) {
       return ElementType::String;
-    } else if (origin_type.enum_def != nullptr && !origin_type.enum_def->is_union) {
+    } else if (type.enum_def && !type.enum_def->is_union) {
       return ElementType::EnumValue;
+    } else if (type.enum_def && type.enum_def->is_union && type.base_type == BASE_TYPE_UNION) {
+      return ElementType::UnionMember;
+    } else if (type.enum_def && type.enum_def->is_union && type.base_type == BASE_TYPE_UTYPE) {
+      return ElementType::UnionEnumValue;
     } else if (type.base_type == BASE_TYPE_UNION) {
-      return ElementType::Union;
+      assert(false);
     } else if (type.base_type == BASE_TYPE_BOOL) {
       return ElementType::Bool;
     } else if (IsScalar(type.base_type)) {
@@ -1528,6 +1532,7 @@ class RustGenerator : public BaseGenerator {
   // Note: we could make all inputs be an Option, as well as all outputs.
   // But the UX of Flatbuffers is that the user doesn't get to know if the value is default or not.
   std::string GenBuilderArgsDefnType(const FieldDef &field, const std::string lifetime) {
+    //assert(false, "note to self: use real lifetimes for written objects--just give the returned offsets a lifetime compatible with the builder, not the original thing. then the offset can be dereferenced to read (or mutate?) the original object.");
     const Type& type = field.value.type;
     //const bool is_struct = IsStruct(field.value.type);
     //const bool is_scalar = IsScalar(field.value.type.base_type);
@@ -1536,23 +1541,25 @@ class RustGenerator : public BaseGenerator {
     const auto et = GetElementType(type);
 
     switch (ct) {
-      //case ContainerType::Enum: {
-      //  switch (et) {
-      //    case ElementType::Struct: { assert(false); }
-      //    case ElementType::Table: { assert(false); }
-      //    case ElementType::Number: { assert(false); }
-      //    case ElementType::Bool: { assert(false); }
-      //    case ElementType::String: { assert(false); }
-      //    case ElementType::Union: { assert(false); }
-
-      //    case ElementType::EnumValue: {
-      //      const auto typname = WrapInNameSpace(*type.struct_def);
-      //      return "Option<" + typname + ">";
-      //    }
-      //  }
-      //}
       case ContainerType::Union: {
-                                   return "foo";
+        switch (et) {
+          case ElementType::Number: // why?
+          case ElementType::UnionEnumValue:
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname;
+          }
+          case ElementType::UnionMember:
+          case ElementType::Table: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return "Option<" + typname + "TableOffset>";
+          }
+          case ElementType::Struct:
+          case ElementType::Bool:
+          case ElementType::String: {
+            assert(false);
+          }
+        }
       }
       case ContainerType::Vector: {
         switch (et) {
@@ -1562,11 +1569,12 @@ class RustGenerator : public BaseGenerator {
           }
           case ElementType::Table: {
             const auto typname = WrapInNameSpace(*type.struct_def);
-            return "Option<flatbuffers::VectorLabeledUOffsetT<" + typname + "Offset>>";
+            return "Option<flatbuffers::VectorLabeledUOffsetT<" + typname + "<'a>>>";
           }
           case ElementType::Number: {
             const auto typname = GenTypeBasic(type, false);
-            return "Option<flatbuffers::VectorLabeledUOffsetT<" + typname + ">>";
+            const auto basetype = GenTypeBasic(type.VectorType(), false);
+            return "Option<flatbuffers::VectorLabeledUOffsetT<" + typname + "<" + basetype + ">>>";
           }
           case ElementType::Bool: {
             const auto typname = GenTypeBasic(type, false);
@@ -1579,8 +1587,13 @@ class RustGenerator : public BaseGenerator {
             const auto typname = WrapInNameSpace(*type.enum_def);
             return "Option<" + typname + ">";
           }
-          case ElementType::Union: {
-            assert(false);
+          case ElementType::UnionEnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname;
+          }
+          case ElementType::UnionMember: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return "Option<" + typname + "_UnionOffset>";
           }
         }
       }
@@ -1598,7 +1611,7 @@ class RustGenerator : public BaseGenerator {
           }
           case ElementType::Table: {
             const auto typname = WrapInNameSpace(*type.struct_def);
-            return "Option<" + typname + "Offset>";
+            return "Option<" + typname + "<'a>>";
           }
           case ElementType::Number: {
             const auto typname = GenTypeBasic(type, false);
@@ -1607,23 +1620,27 @@ class RustGenerator : public BaseGenerator {
           }
           case ElementType::EnumValue: {
             const auto typname = WrapInNameSpace(*type.struct_def);
-            return "Option<" + typname + ">";
+            //return "Option<" + typname + ">";
+            return typname;
           }
           case ElementType::Bool: {
             //return "Option<bool>";
             return "bool";
           }
           case ElementType::String: {
-            return "Option<StringOffset>";
+            return "Option<flatbuffers::StringOffset>";
           }
-          case ElementType::Union: {
+          case ElementType::UnionEnumValue: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return typname;
+          }
+          case ElementType::UnionMember: {
             const auto typname = WrapInNameSpace(*type.struct_def);
             return "Option<" + typname + "UnionOffset>";
           }
         }
       }
     }
-    return "FAIL";
   }
 
   std::string GenBuilderArgsDefaultValue(const FieldDef &field) {
@@ -1637,32 +1654,31 @@ class RustGenerator : public BaseGenerator {
         return "None";
       }
       case ContainerType::Union: {
-        return "None";
+        switch (GetElementType(type)) {
+          case ElementType::UnionEnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname + "::NONE";
+          }
+          default: {
+            return "None";
+          }
+        }
       }
       case ContainerType::Enum: {
         return GetDefaultScalarValue(field);
       }
       case ContainerType::None: {
         switch (et) {
-          case ElementType::Bool: {
-            return GetDefaultScalarValue(field);
-          }
-          case ElementType::Struct: {
-            return "None";
-          }
+          case ElementType::Struct:
+          case ElementType::String:
+          case ElementType::UnionMember:
           case ElementType::Table: {
             return "None";
           }
-          case ElementType::Number: {
-            return GetDefaultScalarValue(field);
-          }
-          case ElementType::EnumValue: {
-            return GetDefaultScalarValue(field);
-          }
-          case ElementType::String: {
-            return "None";
-          }
-          case ElementType::Union: {
+          case ElementType::EnumValue:
+          case ElementType::UnionEnumValue:
+          case ElementType::Number:
+          case ElementType::Bool: {
             return GetDefaultScalarValue(field);
           }
         }
@@ -1670,41 +1686,286 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
+  std::string GenBuilderArgsAddFuncType(const FieldDef &field, const std::string lifetime) {
+    const Type& type = field.value.type;
+
+    const auto ct = GetContainerType(type);
+    const auto et = GetElementType(type);
+
+    switch (ct) {
+      case ContainerType::Union: {
+        switch (et) {
+          case ElementType::Number: // why?
+          case ElementType::UnionEnumValue:
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname;
+          }
+          case ElementType::UnionMember:
+          case ElementType::Table: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return "Option<" + typname + "TableOffset>";
+          }
+          case ElementType::Struct:
+          case ElementType::Bool:
+          case ElementType::String: {
+            assert(false);
+          }
+        }
+      }
+      case ContainerType::Vector: {
+        switch (et) {
+          case ElementType::Struct: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return "Option<flatbuffers::VectorLabeledUOffsetT<&" + lifetime + "" + typname + ">>";
+          }
+          case ElementType::Table: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return "flatbuffers::VectorLabeledUOffsetT<" + typname + "<'a>>";
+          }
+          case ElementType::Number: {
+            const auto typname = GenTypeBasic(type, false);
+            const auto basetype = GenTypeBasic(type.VectorType(), false);
+            return "flatbuffers::VectorLabeledUOffsetT<" + typname + "<" + basetype + ">>";
+          }
+          case ElementType::Bool: {
+            const auto typname = GenTypeBasic(type, false);
+            return "flatbuffers::VectorLabeledUOffsetT<bool>";
+          }
+          case ElementType::String: {
+            return "flatbuffers::VectorLabeledUOffsetT<StringOffset>";
+          }
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname;
+          }
+          case ElementType::UnionEnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname;
+          }
+          case ElementType::UnionMember: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname + "_UnionOffset";
+          }
+        }
+      }
+      case ContainerType::Enum: {
+        //const auto typname = GenTypeBasic(type, false);
+        const auto typname = WrapInNameSpace(*type.enum_def);
+        //return "Option<" + typname + ">";
+        return typname;
+      }
+      case ContainerType::None: {
+        switch (et) {
+          case ElementType::Struct: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return "&" + lifetime + "" + typname + "";
+          }
+          case ElementType::Table: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return typname + "<'a>";
+          }
+          case ElementType::Number: {
+            const auto typname = GenTypeBasic(type, false);
+            //return "Option<" + typname + ">";
+            return typname;
+          }
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            //return "Option<" + typname + ">";
+            return typname;
+          }
+          case ElementType::Bool: {
+            //return "Option<bool>";
+            return "bool";
+          }
+          case ElementType::String: {
+            return "flatbuffers::StringOffset";
+          }
+          case ElementType::UnionEnumValue: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return typname;
+          }
+          case ElementType::UnionMember: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return typname + "UnionOffset";
+          }
+        }
+      }
+    }
+  }
+
+  std::string GenBuilderArgsAddFuncBody(const FieldDef &field) {
+    const Type& type = field.value.type;
+
+    const auto ct = GetContainerType(type);
+    const auto et = GetElementType(type);
+
+    switch (ct) {
+      case ContainerType::Union: {
+        switch (et) {
+          case ElementType::Number: // why?
+          case ElementType::UnionEnumValue:
+          case ElementType::EnumValue: {
+            const auto underlying_typname = GenTypeBasic(type, false);
+            return "self.fbb_.push_slot_scalar::<" + underlying_typname + ">";
+            //const auto typname = WrapInNameSpace(*type.enum_def);
+            ////fbb_.AddElement<uint8_t>(Monster::VT_TEST_TYPE, static_cast<uint8_t>(test_type), 0);
+            //const auto typname = WrapInNameSpace(*type.enum_def);
+            //return typname;
+          }
+          case ElementType::UnionMember:
+          case ElementType::Table: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return "self.fbb_.push_slot_labeled_uoffset_relative::<flatbuffersLabeledUOffsetT<" + typname + ">>";
+    //fbb_.AddOffset(Monster::VT_TEST, test);
+            //const auto typname = GenTypeWire(type);
+        //    return "Option<" + typname + "TableOffset>";
+            //return "self.fbb_.push_slot_scalar::<flatbuffers::LabeledUOffsetT<" + typname + ">>";
+          }
+          case ElementType::Struct:
+          case ElementType::Bool:
+          case ElementType::String: {
+            assert(false);
+          }
+        }
+      }
+      case ContainerType::Vector: {
+        return "self.fbb_.push_slot_labeled_uoffset_relative";
+        return "self.fbb_.push_vector_todo";
+        switch (et) {
+          case ElementType::Struct: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            //return "Option<flatbuffers::VectorLabeledUOffsetT<&" + lifetime + "" + typname + ">>";
+          }
+          case ElementType::Table: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return "flatbuffers::VectorLabeledUOffsetT<" + typname + "<'a>>";
+          }
+          case ElementType::Number: {
+            const auto typname = GenTypeBasic(type, false);
+            const auto basetype = GenTypeBasic(type.VectorType(), false);
+            return "flatbuffers::VectorLabeledUOffsetT<" + typname + "<" + basetype + ">>";
+          }
+          case ElementType::Bool: {
+            const auto typname = GenTypeBasic(type, false);
+            return "flatbuffers::VectorLabeledUOffsetT<bool>";
+          }
+          case ElementType::String: {
+            return "flatbuffers::VectorLabeledUOffsetT<StringOffset>";
+          }
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname;
+          }
+          case ElementType::UnionEnumValue: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname;
+          }
+          case ElementType::UnionMember: {
+            const auto typname = WrapInNameSpace(*type.enum_def);
+            return typname + "_UnionOffset";
+          }
+        }
+      }
+      case ContainerType::Enum: {
+        const auto underlying_typname = GenTypeWire(field.value.type, "", "", false);
+        return "self.fbb_.push_slot_scalar::<" + underlying_typname + ">";
+        //return "self.fbb_.push_enum_todo";
+        ////const auto typname = GenTypeBasic(type, false);
+        //const auto typname = WrapInNameSpace(*type.enum_def);
+        ////return "Option<" + typname + ">";
+        //return typname;
+      }
+      case ContainerType::None: {
+        switch (et) {
+          case ElementType::Struct: {
+            //const auto typname = WrapInNameSpace(*type.struct_def);
+            //return "&" + lifetime + "" + typname + "";
+            const auto typname = GenTypeWire(field.value.type, "", "", false);
+            return "self.fbb_.push_slot_struct::<" + typname + ">";
+          }
+          case ElementType::Table: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return typname + "<'a>";
+          }
+          case ElementType::Number: {
+            //const auto typname = GenTypeBasic(type, false);
+            ////return "Option<" + typname + ">";
+            const auto typname = GenTypeWire(field.value.type, "", "", false);
+            return "self.fbb_.push_slot_scalar::<" + typname + ">";
+          }
+          case ElementType::EnumValue: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            //return "Option<" + typname + ">";
+            return typname;
+          }
+          case ElementType::Bool: {
+            //return "Option<bool>";
+            return "bool";
+          }
+          case ElementType::String: {
+            return "flatbuffers::StringOffset";
+          }
+          case ElementType::UnionEnumValue: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return typname;
+          }
+          case ElementType::UnionMember: {
+            const auto typname = WrapInNameSpace(*type.struct_def);
+            return typname + "UnionOffset";
+          }
+        }
+      }
+    }
+  }
+
+  std::string GenBuilderArgsAddFuncFieldCast(const FieldDef &field) {
+    const Type& type = field.value.type;
+
+    const auto ct = GetContainerType(type);
+    const auto et = GetElementType(type);
+
+    if (ct == ContainerType::Union && et == ElementType::UnionEnumValue) {
+      return " as " + GenTypeBasic(type, false);
+    }
+    if (ct == ContainerType::Enum && et == ElementType::EnumValue) {
+      return " as " + GenTypeBasic(type, false);
+    }
+    return "";
+  }
+
   bool ElementTypeUsesOption(const Type& type) {
     const auto et = GetElementType(type);
 
     switch (GetContainerType(type)) {
-      case ContainerType::Vector: {
-        return true;
-      }
+      case ContainerType::Vector:
       case ContainerType::Union: {
-        return true;
+        switch (GetElementType(type)) {
+          case ElementType::UnionEnumValue: {
+            return false;
+          }
+          default: {
+            return true;
+          }
+        }
       }
       case ContainerType::Enum: {
         return false;
       }
       case ContainerType::None: {
         switch (et) {
-          case ElementType::Bool: {
+          case ElementType::Struct:
+          case ElementType::Table:
+          case ElementType::String:
+          case ElementType::UnionMember: {
+            return true;
+          }
+          case ElementType::Bool:
+          case ElementType::Number:
+          case ElementType::EnumValue:
+          case ElementType::UnionEnumValue: {
             return false;
-          }
-          case ElementType::Struct: {
-            return true;
-          }
-          case ElementType::Table: {
-            return true;
-          }
-          case ElementType::Number: {
-            return false;
-          }
-          case ElementType::EnumValue: {
-            return false;
-          }
-          case ElementType::String: {
-            return true;
-          }
-          case ElementType::Union: {
-            return true;
           }
         }
       }
@@ -2351,39 +2612,60 @@ class RustGenerator : public BaseGenerator {
         //   fbb_.AddElement::<type>(offset, name, default);
         // }
         code_.SetValue("FIELD_NAME", Name(field));
-        if (IsStruct(field.value.type)) {
-          code_.SetValue("FIELD_TYPE", "&" + GenTypeWire(field.value.type, " ", "", true));
-        } else {
-          code_.SetValue("FIELD_TYPE", GenTypeWire(field.value.type, " ", "", true));
-        }
-        code_.SetValue("ADD_OFFSET", Name(struct_def) + "::" + offset);
-        code_.SetValue("ADD_NAME", name);
-        if (is_scalar) {
-          const auto type = GenTypeWire(field.value.type, "", "", false);
-          code_.SetValue("ADD_VALUE", value);
-          code_.SetValue("ADD_FN", "self.fbb_.push_slot_scalar::<" + type + ">");
-        } else if (IsStruct(field.value.type)) {
-          const auto type = GenTypeWire(field.value.type, "", "", false);
-          code_.SetValue("ADD_VALUE", value);
-          code_.SetValue("ADD_FN", "self.fbb_.push_slot_struct::<" + type + ">");
-        } else if (field.value.type.base_type == BASE_TYPE_UNION) {
-          //code_.SetValue("ADD_FN", "push_slot_scalar::<flatbuffers::LabeledUOffsetT<" + type + ">>");
-          code_.SetValue("ADD_VALUE", value);
-          //code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative_from_option");
-          code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative");
-        } else {
-          code_.SetValue("ADD_VALUE", value);
-          code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative");
-        }
-
+        code_.SetValue("FIELD_CAST", GenBuilderArgsAddFuncFieldCast(field));
+        code_.SetValue("FIELD_OFFSET", Name(struct_def) + "::" + offset);
+        code_.SetValue("FIELD_TYPE", GenBuilderArgsAddFuncType(field, "'a "));
+        code_.SetValue("FUNC_BODY", GenBuilderArgsAddFuncBody(field));
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
-        code_ += "    {{ADD_FN}}(\\";
         if (is_scalar) {
-          code_ += "{{ADD_OFFSET}}, {{ADD_NAME}}, {{ADD_VALUE}});";
+          code_.SetValue("FIELD_DEFAULT_VALUE", "default");//GenDefaultValue(field));
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}{{FIELD_CAST}}, {{FIELD_DEFAULT_VALUE}});";
         } else {
-          code_ += "{{ADD_OFFSET}}, {{ADD_NAME}});";
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}{{FIELD_CAST}});";
         }
         code_ += "  }";
+        //XXcode_ += "  }";
+        //XXcode_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
+        //XXcode_ += "    {{ADD_FN}}(\\";
+        //XXif (is_scalar) {
+        //XX  code_ += "{{ADD_OFFSET}}, {{ADD_NAME}}, {{ADD_VALUE}});";
+        //XX} else {
+        //XX  code_ += "{{ADD_OFFSET}}, {{ADD_NAME}});";
+        //XX}
+        //XXcode_ += "  }";
+        //XXif (IsStruct(field.value.type)) {
+        //XX  code_.SetValue("FIELD_TYPE", "&" + GenTypeWire(field.value.type, " ", "", true));
+        //XX} else {
+        //XX  code_.SetValue("FIELD_TYPE", GenTypeWire(field.value.type, " ", "", true));
+        //XX}
+        //XXcode_.SetValue("ADD_OFFSET", Name(struct_def) + "::" + offset);
+        //XXcode_.SetValue("ADD_NAME", name);
+        //XXif (is_scalar) {
+        //XX  const auto type = GenTypeWire(field.value.type, "", "", false);
+        //XX  code_.SetValue("ADD_VALUE", value);
+        //XX  code_.SetValue("ADD_FN", "self.fbb_.push_slot_scalar::<" + type + ">");
+        //XX} else if (IsStruct(field.value.type)) {
+        //XX  const auto type = GenTypeWire(field.value.type, "", "", false);
+        //XX  code_.SetValue("ADD_VALUE", value);
+        //XX  code_.SetValue("ADD_FN", "self.fbb_.push_slot_struct::<" + type + ">");
+        //XX} else if (field.value.type.base_type == BASE_TYPE_UNION) {
+        //XX  //code_.SetValue("ADD_FN", "push_slot_scalar::<flatbuffers::LabeledUOffsetT<" + type + ">>");
+        //XX  code_.SetValue("ADD_VALUE", value);
+        //XX  //code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative_from_option");
+        //XX  code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative");
+        //XX} else {
+        //XX  code_.SetValue("ADD_VALUE", value);
+        //XX  code_.SetValue("ADD_FN", "self.fbb_.push_slot_labeled_uoffset_relative");
+        //XX}
+
+        //XXcode_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
+        //XXcode_ += "    {{ADD_FN}}(\\";
+        //XXif (is_scalar) {
+        //XX  code_ += "{{ADD_OFFSET}}, {{ADD_NAME}}, {{ADD_VALUE}});";
+        //XX} else {
+        //XX  code_ += "{{ADD_OFFSET}}, {{ADD_NAME}});";
+        //XX}
+        //XXcode_ += "  }";
       }
     }
 
@@ -3027,7 +3309,8 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
 
-      auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
+      //auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
+      auto field_type = GenBuilderArgsAddFuncType(field, "");
       auto is_scalar = IsScalar(field.value.type.base_type) &&
                        !IsFloat(field.value.type.base_type);
       auto member = "self." + Name(field) + "_";
