@@ -432,7 +432,7 @@ pub struct TestSimpleTableWithEnumBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
   pub fn add_color(&mut self, color: Color) {
-    self.fbb_.push_slot_scalar::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, /* yo */Color::Green);
+    self.fbb_.push_slot_scalar::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, /* yo */Color::Green as i8);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TestSimpleTableWithEnumBuilder<'a, 'b> {
     let start = _fbb.start_table(1);
@@ -620,6 +620,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub const VT_FOO1: flatbuffers::VOffsetT = 76;
     pub const VT_FOO2: flatbuffers::VOffsetT = 78;
     pub const VT_FOO3: flatbuffers::VOffsetT = 80;
+    pub const VT_FOO4: flatbuffers::VOffsetT = 82;
 
   pub fn pos(&self) -> Option<&'a Vec3> {
     self._tab.get_slot_struct::<Vec3>(Monster::VT_POS)
@@ -746,6 +747,9 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn foo3(&self) -> Option<flatbuffers::Vector<&'a Vec3>> {
     Option<flatbuffers::Offset<flatbuffers::Vector<&'a Vec3>>>
   }
+  pub fn foo4(&self) -> Color {
+    self._tab.get_slot_scalar::<i8>(Monster::VT_FOO4) as Color
+  }
 }
 
 //TODO: inject these functions into impl for type
@@ -805,6 +809,7 @@ pub struct MonsterArgs<'a> {
     pub foo1: Option<&'a  Test>,
     pub foo2: Option<flatbuffers::VectorLabeledUOffsetT<MyGame::InParentNamespace<'a>>>,
     pub foo3: Option<flatbuffers::VectorLabeledUOffsetT<&'a  Vec3>>,
+    pub foo4: Color,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for MonsterArgs<'a> {
@@ -817,7 +822,7 @@ impl<'a> Default for MonsterArgs<'a> {
             name: None,
             inventory: None,
             color: /* yo */Color::Blue,
-            test_type: Any::NONE,
+            test_type: /* yo */Any::NONE,
             test: None,
             test4: None,
             testarrayofstring: None,
@@ -849,6 +854,7 @@ impl<'a> Default for MonsterArgs<'a> {
             foo1: None,
             foo2: None,
             foo3: None,
+            foo4: /* yo */Color::Green,
             _phantom: PhantomData,
         }
     }
@@ -874,10 +880,10 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_INVENTORY, inventory);
   }
   pub fn add_color(&mut self, color: Color) {
-    self.fbb_.push_slot_scalar::<i8>(Monster::VT_COLOR, color as i8, /* yo */Color::Blue);
+    self.fbb_.push_slot_scalar::<i8>(Monster::VT_COLOR, color as i8, /* yo */Color::Blue as i8);
   }
   pub fn add_test_type(&mut self, test_type: Any) {
-    self.fbb_.push_slot_scalar::<u8>(Monster::VT_TEST_TYPE, test_type as u8, /* yo */Any::NONE);
+    self.fbb_.push_slot_scalar::<u8>(Monster::VT_TEST_TYPE, test_type as u8, /* yo */Any::NONE as u8);
   }
   pub fn add_test(&mut self, test: Option<AnyTableOffset>) {
     self.fbb_.push_slot_labeled_uoffset_relative::<flatbuffersLabeledUOffsetT<Any>>(Monster::VT_TEST, test);
@@ -972,8 +978,11 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_foo3(&mut self, foo3: flatbuffers::Offset<flatbuffers::Vector<&'a  Vec3>>) {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_FOO3, foo3);
   }
+  pub fn add_foo4(&mut self, foo4: Color) {
+    self.fbb_.push_slot_scalar::<i8>(Monster::VT_FOO4, foo4 as i8, /* yo */Color::Green as i8);
+  }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table(39);
+    let start = _fbb.start_table(40);
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -1029,6 +1038,7 @@ pub fn CreateMonster<'a: 'b, 'b>(
   if let Some(x) = args.pos { builder.add_pos(x); }
   builder.add_hp(args.hp);
   builder.add_mana(args.mana);
+  builder.add_foo4(args.foo4);
   builder.add_testbool(args.testbool);
   builder.add_test_type(args.test_type);
   builder.add_color(args.color);

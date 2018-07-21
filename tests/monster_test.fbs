@@ -87,6 +87,7 @@ table Monster {
   foo1:Test (id:36);
   foo2:[InParentNamespace] (id:37);
   foo3:[Vec3] (id:38);
+  foo4:Color = Green (id:39);
   //foo3:[Any] (id:38);
 }
 

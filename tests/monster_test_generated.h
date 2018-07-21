@@ -634,6 +634,7 @@ struct MonsterT : public flatbuffers::NativeTable {
   flatbuffers::unique_ptr<Test> foo1;
   std::vector<flatbuffers::unique_ptr<MyGame::InParentNamespaceT>> foo2;
   std::vector<Vec3> foo3;
+  Color foo4;
   MonsterT()
       : mana(150),
         hp(100),
@@ -649,7 +650,8 @@ struct MonsterT : public flatbuffers::NativeTable {
         testhashu64_fnv1a(0),
         testf(3.14159f),
         testf2(3.0f),
-        testf3(0.0f) {
+        testf3(0.0f),
+        foo4(Color_Green) {
   }
 };
 
@@ -694,7 +696,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_FOO0 = 74,
     VT_FOO1 = 76,
     VT_FOO2 = 78,
-    VT_FOO3 = 80
+    VT_FOO3 = 80,
+    VT_FOO4 = 82
   };
   const Vec3 *pos() const {
     return GetStruct<const Vec3 *>(VT_POS);
@@ -949,6 +952,12 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<const Vec3 *> *mutable_foo3() {
     return GetPointer<flatbuffers::Vector<const Vec3 *> *>(VT_FOO3);
   }
+  Color foo4() const {
+    return static_cast<Color>(GetField<int8_t>(VT_FOO4, 2));
+  }
+  bool mutate_foo4(Color _foo4) {
+    return SetField<int8_t>(VT_FOO4, static_cast<int8_t>(_foo4), 2);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<Vec3>(verifier, VT_POS) &&
@@ -1013,6 +1022,7 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(foo2()) &&
            VerifyOffset(verifier, VT_FOO3) &&
            verifier.Verify(foo3()) &&
+           VerifyField<int8_t>(verifier, VT_FOO4) &&
            verifier.EndTable();
   }
   MonsterT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -1149,6 +1159,9 @@ struct MonsterBuilder {
   void add_foo3(flatbuffers::Offset<flatbuffers::Vector<const Vec3 *>> foo3) {
     fbb_.AddOffset(Monster::VT_FOO3, foo3);
   }
+  void add_foo4(Color foo4) {
+    fbb_.AddElement<int8_t>(Monster::VT_FOO4, static_cast<int8_t>(foo4), 2);
+  }
   explicit MonsterBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -1201,7 +1214,8 @@ inline flatbuffers::Offset<Monster> CreateMonster(
     flatbuffers::Offset<flatbuffers::Vector<int8_t>> foo0 = 0,
     const Test *foo1 = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MyGame::InParentNamespace>>> foo2 = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const Vec3 *>> foo3 = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<const Vec3 *>> foo3 = 0,
+    Color foo4 = Color_Green) {
   MonsterBuilder builder_(_fbb);
   builder_.add_testhashu64_fnv1a(testhashu64_fnv1a);
   builder_.add_testhashs64_fnv1a(testhashs64_fnv1a);
@@ -1238,6 +1252,7 @@ inline flatbuffers::Offset<Monster> CreateMonster(
   builder_.add_pos(pos);
   builder_.add_hp(hp);
   builder_.add_mana(mana);
+  builder_.add_foo4(foo4);
   builder_.add_testbool(testbool);
   builder_.add_test_type(test_type);
   builder_.add_color(color);
@@ -1283,7 +1298,8 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
     const std::vector<int8_t> *foo0 = nullptr,
     const Test *foo1 = 0,
     const std::vector<flatbuffers::Offset<MyGame::InParentNamespace>> *foo2 = nullptr,
-    const std::vector<Vec3> *foo3 = nullptr) {
+    const std::vector<Vec3> *foo3 = nullptr,
+    Color foo4 = Color_Green) {
   return MyGame::Example::CreateMonster(
       _fbb,
       pos,
@@ -1323,7 +1339,8 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
       foo0 ? _fbb.CreateVector<int8_t>(*foo0) : 0,
       foo1,
       foo2 ? _fbb.CreateVector<flatbuffers::Offset<MyGame::InParentNamespace>>(*foo2) : 0,
-      foo3 ? _fbb.CreateVectorOfStructs<Vec3>(*foo3) : 0);
+      foo3 ? _fbb.CreateVectorOfStructs<Vec3>(*foo3) : 0,
+      foo4);
 }
 
 flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -1739,6 +1756,7 @@ inline void Monster::UnPackTo(MonsterT *_o, const flatbuffers::resolver_function
   { auto _e = foo1(); if (_e) _o->foo1 = flatbuffers::unique_ptr<Test>(new Test(*_e)); };
   { auto _e = foo2(); if (_e) { _o->foo2.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->foo2[_i] = flatbuffers::unique_ptr<MyGame::InParentNamespaceT>(_e->Get(_i)->UnPack(_resolver)); } } };
   { auto _e = foo3(); if (_e) { _o->foo3.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->foo3[_i] = *_e->Get(_i); } } };
+  { auto _e = foo4(); _o->foo4 = _e; };
 }
 
 inline flatbuffers::Offset<Monster> Monster::Pack(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -1787,6 +1805,7 @@ inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder
   auto _foo1 = _o->foo1 ? _o->foo1.get() : 0;
   auto _foo2 = _o->foo2.size() ? _fbb.CreateVector<flatbuffers::Offset<MyGame::InParentNamespace>> (_o->foo2.size(), [](size_t i, _VectorArgs *__va) { return CreateInParentNamespace(*__va->__fbb, __va->__o->foo2[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _foo3 = _o->foo3.size() ? _fbb.CreateVectorOfStructs(_o->foo3) : 0;
+  auto _foo4 = _o->foo4;
   return MyGame::Example::CreateMonster(
       _fbb,
       _pos,
@@ -1826,7 +1845,8 @@ inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder
       _foo0,
       _foo1,
       _foo2,
-      _foo3);
+      _foo3,
+      _foo4);
 }
 
 inline TypeAliasesT *TypeAliases::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
@@ -2243,7 +2263,8 @@ inline flatbuffers::TypeTable *MonsterTypeTable() {
     { flatbuffers::ET_CHAR, 1, 1 },
     { flatbuffers::ET_SEQUENCE, 0, 3 },
     { flatbuffers::ET_SEQUENCE, 1, 7 },
-    { flatbuffers::ET_SEQUENCE, 1, 0 }
+    { flatbuffers::ET_SEQUENCE, 1, 0 },
+    { flatbuffers::ET_CHAR, 0, 1 }
   };
   static flatbuffers::TypeFunction type_refs[] = {
     Vec3TypeTable,
@@ -2294,10 +2315,11 @@ inline flatbuffers::TypeTable *MonsterTypeTable() {
     "foo0",
     "foo1",
     "foo2",
-    "foo3"
+    "foo3",
+    "foo4"
   };
   static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 39, type_codes, type_refs, nullptr, names
+    flatbuffers::ST_TABLE, 40, type_codes, type_refs, nullptr, names
   };
   return &tt;
 }
