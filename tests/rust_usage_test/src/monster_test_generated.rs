@@ -492,7 +492,7 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
     pub const VT_COUNT: flatbuffers::VOffsetT = 8;
 
   pub fn id(&self) -> flatbuffers::Offset<flatbuffers::String<'a>> {
-    flatbuffers::StringOffset
+    self._tab.get_slot_string(Stat::VT_ID)
   }
   pub fn val(&self) -> i64 {
     self._tab.get_slot_scalar::<i64>(Stat::VT_VAL, 0)
@@ -629,13 +629,13 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get_slot_struct::<Vec3>(Monster::VT_POS)
   }
   pub fn mana(&self) -> i16 {
-    self._tab.get_slot_scalar::<i16>(Monster::VT_MANA, 150)
+    self._tab.get_slot_scalar::<i16>(Monster::VT_MANA, 0)
   }
   pub fn hp(&self) -> i16 {
-    self._tab.get_slot_scalar::<i16>(Monster::VT_HP, 100)
+    self._tab.get_slot_scalar::<i16>(Monster::VT_HP, 0)
   }
   pub fn name(&self) -> flatbuffers::Offset<flatbuffers::String<'a>> {
-    flatbuffers::StringOffset
+    self._tab.get_slot_string(Monster::VT_NAME)
   }
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
     unimplemented!()
@@ -656,30 +656,30 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get_slot_scalar::<u8>(Monster::VT_TEST_TYPE) as Any
   }
   pub fn test(&self) -> Option<&'a Any> {
-    foo
+    self._tab.get_slot_struct::<Any_UnionTable>(Monster::VT_TEST)
   }
   pub fn test4(&self) -> Option<flatbuffers::Vector<&'a Test>> {
-    Option<flatbuffers::Offset<flatbuffers::Vector<&'a Test>>>
+    self._tab.get_slot_vector::<&'a Test>(Monster::VT_TEST4)
   }
   pub fn testarrayofstring(&self) -> flatbuffers::Vector<flatbuffers::String<'a>> {
-    flatbuffers::Offset<flatbuffers::Vector<&'a flatbuffers::String<'a>>>
+    self._tab.get_slot_vector::<&'a flatbuffers::String<'a>>(Monster::VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
   pub fn testarrayoftables(&self) -> Option<flatbuffers::Vector<&'a Monster<'a>>> {
-    Option<flatbuffers::Offset<flatbuffers::Vector<&'a Monster<'a>>>>
+    self._tab.get_slot_vector::<&'a Monster<'a>>(Monster::VT_TESTARRAYOFTABLES)
   }
   pub fn enemy(&self) -> Option<&'a Monster<'a>> {
-    Monster<'a>
+    self._tab.get_slot_struct::<Monster>(Monster::VT_ENEMY)
   }
   pub fn testnestedflatbuffer(&self) -> Option<flatbuffers::Vector<&'a u8>> {
     self._tab.get_slot_vector::<&'a u8>(Monster::VT_TESTNESTEDFLATBUFFER)
   }
   pub fn testempty(&self) -> Option<&'a Stat<'a>> {
-    Stat<'a>
+    self._tab.get_slot_struct::<Stat>(Monster::VT_TESTEMPTY)
   }
   pub fn testbool(&self) -> bool {
-    bool
+    self._tab.get_slot_scalar::<u8>(Monster::VT_TESTBOOL, 0)
   }
   pub fn testhashs32_fnv1(&self) -> i32 {
     self._tab.get_slot_scalar::<i32>(Monster::VT_TESTHASHS32_FNV1, 0)
@@ -706,28 +706,28 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get_slot_scalar::<u64>(Monster::VT_TESTHASHU64_FNV1A, 0)
   }
   pub fn testarrayofbools(&self) -> flatbuffers::Vector<&'abool> {
-    flatbuffers::Vector<&'a bool>
+    self._tab.get_slot_vector::<&'a bool>(Monster::VT_TESTARRAYOFBOOLS)
   }
   pub fn testf(&self) -> f32 {
-    self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF, 3.14159)
+    self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF, 0)
   }
   pub fn testf2(&self) -> f32 {
-    self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF2, 3.0)
+    self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF2, 0)
   }
   pub fn testf3(&self) -> f32 {
-    self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF3, 0.0)
+    self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF3, 0)
   }
   pub fn testarrayofstring2(&self) -> flatbuffers::Vector<flatbuffers::String<'a>> {
-    flatbuffers::Offset<flatbuffers::Vector<&'a flatbuffers::String<'a>>>
+    self._tab.get_slot_vector::<&'a flatbuffers::String<'a>>(Monster::VT_TESTARRAYOFSTRING2)
   }
   pub fn testarrayofsortedstruct(&self) -> Option<flatbuffers::Vector<&'a Ability>> {
-    Option<flatbuffers::Offset<flatbuffers::Vector<&'a Ability>>>
+    self._tab.get_slot_vector::<&'a Ability>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
   }
   pub fn flex(&self) -> Option<flatbuffers::Vector<&'a u8>> {
     self._tab.get_slot_vector::<&'a u8>(Monster::VT_FLEX)
   }
   pub fn test5(&self) -> Option<flatbuffers::Vector<&'a Test>> {
-    Option<flatbuffers::Offset<flatbuffers::Vector<&'a Test>>>
+    self._tab.get_slot_vector::<&'a Test>(Monster::VT_TEST5)
   }
   pub fn vector_of_longs(&self) -> Option<flatbuffers::Vector<&'a i64>> {
     self._tab.get_slot_vector::<&'a i64>(Monster::VT_VECTOR_OF_LONGS)
@@ -736,19 +736,19 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get_slot_vector::<&'a f64>(Monster::VT_VECTOR_OF_DOUBLES)
   }
   pub fn parent_namespace_test(&self) -> Option<&'a MyGame::InParentNamespace<'a>> {
-    MyGame::InParentNamespace<'a>
+    self._tab.get_slot_struct::<MyGame::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST)
   }
   pub fn foo0(&self) -> Option<flatbuffers::Vector<&'a Color>> {
-    flatbuffers::Offset<flatbuffers::Vector<&'a Color flatbuffers::String<'a>>>
+    self._tab.get_slot_vector::<&'a Color>(Monster::VT_FOO0)
   }
   pub fn foo1(&self) -> Option<&'a Test> {
     self._tab.get_slot_struct::<Test>(Monster::VT_FOO1)
   }
   pub fn foo2(&self) -> Option<flatbuffers::Vector<&'a MyGame::InParentNamespace<'a>>> {
-    Option<flatbuffers::Offset<flatbuffers::Vector<&'a MyGame::InParentNamespace<'a>>>>
+    self._tab.get_slot_vector::<&'a MyGame::InParentNamespace<'a>>(Monster::VT_FOO2)
   }
   pub fn foo3(&self) -> Option<flatbuffers::Vector<&'a Vec3>> {
-    Option<flatbuffers::Offset<flatbuffers::Vector<&'a Vec3>>>
+    self._tab.get_slot_vector::<&'a Vec3>(Monster::VT_FOO3)
   }
   pub fn foo4(&self) -> Color {
     self._tab.get_slot_scalar::<i8>(Monster::VT_FOO4) as Color
@@ -1111,10 +1111,10 @@ impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
     self._tab.get_slot_scalar::<u64>(TypeAliases::VT_U64_, 0)
   }
   pub fn f32_(&self) -> f32 {
-    self._tab.get_slot_scalar::<f32>(TypeAliases::VT_F32_, 0.0)
+    self._tab.get_slot_scalar::<f32>(TypeAliases::VT_F32_, 0)
   }
   pub fn f64_(&self) -> f64 {
-    self._tab.get_slot_scalar::<f64>(TypeAliases::VT_F64_, 0.0)
+    self._tab.get_slot_scalar::<f64>(TypeAliases::VT_F64_, 0)
   }
   pub fn v8(&self) -> Option<flatbuffers::Vector<&'a i8>> {
     self._tab.get_slot_vector::<&'a i8>(TypeAliases::VT_V8)
