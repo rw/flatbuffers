@@ -617,14 +617,14 @@ class RustGenerator : public BaseGenerator {
     Struct,
     Table,
 
+    EnumKey,
+    UnionKey,
+
+    UnionValue,
+
     String, // todo: bytestring
     VectorOfInteger, VectorOfFloat, VectorOfBool, VectorOfEnumKey, VectorOfStruct,
     VectorOfTable, VectorOfString, VectorOfUnionValue,
-
-    EnumKey,
-
-    UnionKey,
-    UnionValue,
   };
 
   FullElementType GetFullElementType(const Type &type) const {
@@ -1932,115 +1932,59 @@ class RustGenerator : public BaseGenerator {
                                              const std::string lifetime) {
     const Type& type = field.value.type;
 
-    const auto ct = GetContainerType(type);
-    const auto et = GetElementType(type);
-
-    switch (ct) {
-      case ContainerType::Union: {
-        switch (et) {
-          case ElementType::Number: // why?
-          case ElementType::UnionEnumValue:
-          case ElementType::EnumValue: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return typname;
-          }
-          case ElementType::UnionMember:
-          case ElementType::Table: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return "Option<&" + lifetime + " " + typname + ">";
-            //return "Option<" + typname + "TableOffset>";
-          }
-          case ElementType::Struct:
-          case ElementType::Bool:
-          case ElementType::String: {
-            assert(false);
-          }
-        }
-      }
-      case ContainerType::Vector: {
-        switch (et) {
-          case ElementType::Struct: {
-            //const auto typname = WrapInNameSpace(*type.struct_def);
-            const auto typname = WrapInNameSpace(*type.VectorType().struct_def);
-            //const auto basetype = GenTypeBasic(type.VectorType(), false);
-            return "Option<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
-          }
-          case ElementType::Table: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "Option<flatbuffers::Vector<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
-          }
-          case ElementType::Number: {
-            //const auto typname = GenTypeBasic(type, false);
-            const auto basetype = GenTypeBasic(type.VectorType(), false);
-            return "Option<flatbuffers::Vector<&" + lifetime + " " + basetype + ">>";
-            //return "flatbuffers::Vector<" + typname + "<" + basetype + ">>";
-          }
-          case ElementType::Bool: {
-            const auto typname = GenTypeBasic(type, false);
-            return "flatbuffers::Vector<&" + lifetime + "bool>";
-          }
-          case ElementType::String: {
-            return "flatbuffers::Vector<flatbuffers::String<" + lifetime + ">>";
-          }
-          case ElementType::EnumValue: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return "Option<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
-          }
-          case ElementType::UnionEnumValue: {
-            assert(false); // not applicable
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return typname;
-          }
-          case ElementType::UnionMember: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return typname + "_UnionOffset";
-          }
-        }
-      }
-      case ContainerType::Enum: {
-        //const auto typname = GenTypeBasic(type, false);
-        const auto typname = WrapInNameSpace(*type.enum_def);
-        //return "Option<" + typname + ">";
+    switch (GetFullElementType(field.value.type)) {
+      case FullElementType::Integer:
+      case FullElementType::Float: {
+        const auto typname = GenTypeBasic(type, false);
         return typname;
       }
-      case ContainerType::None: {
-        switch (et) {
-          case ElementType::Struct: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "Option<&" + lifetime + " " + typname + ">";
-          }
-          case ElementType::Table: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "Option<&" + lifetime + " " + typname + "<" + lifetime + ">>";
-          }
-          case ElementType::Number: {
-            const auto typname = GenTypeBasic(type, false);
-            //return "Option<" + typname + ">";
-            return typname;
-          }
-          case ElementType::EnumValue: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            //return "Option<" + typname + ">";
-            return typname;
-          }
-          case ElementType::Bool: {
-            //return "Option<bool>";
-            return "bool";
-          }
-          case ElementType::String: {
-            return "flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>";
-            //return "&" + lifetime + " flatbuffers::String<" + lifetime + ">";
-          }
-          case ElementType::UnionEnumValue: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return typname;
-          }
-          case ElementType::UnionMember: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return typname + "UnionOffset";
-            return "Option<&" + lifetime + " " + typname + "<" + lifetime + ">>";
-          }
-        }
+      case FullElementType::Bool: {
+        return "bool";
+      }
+      case FullElementType::Struct: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "Option<&" + lifetime + " " + typname + ">";
+      }
+      case FullElementType::Table: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "Option<&" + lifetime + " " + typname + "<" + lifetime + ">>";
+      }
+      case FullElementType::EnumKey:
+      case FullElementType::UnionKey: { const auto typname = WrapInNameSpace(*type.enum_def); return typname; }
+
+      case FullElementType::UnionValue: {
+        const auto typname = WrapInNameSpace(*type.enum_def);
+        return "Option<&" + lifetime + " " + typname + "_UnionTable<" + lifetime + ">>";
+      }
+      case FullElementType::String: {
+         return "Some<flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>";
+      }
+      case FullElementType::VectorOfInteger:
+      case FullElementType::VectorOfFloat: {
+        const auto typname = GenTypeBasic(type, false);
+        return "Option<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
+      }
+      case FullElementType::VectorOfBool: {
+        return "Option<flatbuffers::Vector<&" + lifetime + " bool>>";
+      }
+      case FullElementType::VectorOfEnumKey: {
+        const auto typname = WrapInNameSpace(*type.enum_def);
+        return "Option<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
+      }
+      case FullElementType::VectorOfStruct: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "Option<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
+      }
+      case FullElementType::VectorOfTable: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "Option<flatbuffers::Vector<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
+      }
+      case FullElementType::VectorOfString: {
+        return "Option<flatbuffers::Vector<&" + lifetime + " flatbuffers::String<" + lifetime + ">>>";
+      }
+      case FullElementType::VectorOfUnionValue: {
+        const auto typname = WrapInNameSpace(*type.enum_def) + "_UnionTable";
+        return "Option<flatbuffers::Vector<&" + lifetime + " Into<" + typname + "<" + lifetime + ">>>>";
       }
     }
   }
@@ -2085,7 +2029,7 @@ class RustGenerator : public BaseGenerator {
 
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type, false);
+        const auto typname = GenTypeBasic(type.VectorType(), false);
         return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + ">(" + offset_name + ")";
       }
       case FullElementType::VectorOfBool: {
