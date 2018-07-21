@@ -618,8 +618,8 @@ class RustGenerator : public BaseGenerator {
     Table,
 
     String, // todo: bytestring
-    VectorOfInteger, VectorOfFloat, VectorOfBool, VectorOfEnumValue, VectorOfStruct,
-    VectorOfTable, VectorOfString, VectorOfUnionMember,
+    VectorOfInteger, VectorOfFloat, VectorOfBool, VectorOfEnumKey, VectorOfStruct,
+    VectorOfTable, VectorOfString, VectorOfUnionValue,
 
     EnumKey,
 
@@ -628,6 +628,7 @@ class RustGenerator : public BaseGenerator {
   };
 
   FullElementType GetFullElementType(const Type &type) const {
+    // order matters for some of these conditionals
     if (type.base_type == BASE_TYPE_STRING) {
       return FullElementType::String;
     } else if (type.base_type == BASE_TYPE_STRUCT) {
@@ -635,6 +636,18 @@ class RustGenerator : public BaseGenerator {
         return FullElementType::Struct;
       } else {
         return FullElementType::Table;
+      }
+    } else if (type.base_type == BASE_TYPE_VECTOR) {
+      switch (GetFullElementType(type.VectorType())) {
+        case FullElementType::Integer: { return FullElementType::VectorOfInteger; }
+        case FullElementType::Float: { return FullElementType::VectorOfFloat; }
+        case FullElementType::Bool: { return FullElementType::VectorOfBool; }
+        case FullElementType::Struct: { return FullElementType::VectorOfStruct; }
+        case FullElementType::Table: { return FullElementType::VectorOfTable; }
+        case FullElementType::String: { return FullElementType::VectorOfString; }
+        case FullElementType::EnumKey: { return FullElementType::VectorOfEnumKey; }
+        case FullElementType::UnionValue: { return FullElementType::VectorOfUnionValue; }
+        default: { assert(false); }
       }
     } else if (type.enum_def != nullptr) {
       if (type.enum_def->is_union) {
@@ -655,7 +668,11 @@ class RustGenerator : public BaseGenerator {
         return FullElementType::Integer;
       } else if (IsFloat(type.base_type)) {
         return FullElementType::Float;
+      } else {
+        assert(false);
       }
+    } else {
+      assert(false);
     }
     assert(false);
     //TODO what is this? "or for an integral type derived from an enum."
@@ -1557,8 +1574,12 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::EnumKey: {
         auto ev = field.value.type.enum_def->ReverseLookup(
             StringToInt(field.value.constant.c_str()), false);
-        return "/* yo */" + WrapInNameSpace(field.value.type.enum_def->defined_namespace,
+        if (ev) {
+          return "/* yo */" + WrapInNameSpace(field.value.type.enum_def->defined_namespace,
                                GetEnumValUse(*field.value.type.enum_def, *ev));
+        } else {
+          return "/* B */" + GenUnderlyingCast(field, true, field.value.constant);
+        }
       }
 
       default: { return "None"; }
@@ -1680,45 +1701,22 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string GenBuilderArgsDefaultValue(const FieldDef &field) {
-    const Type& type = field.value.type;
+      return GetDefaultScalarValue(field);
+  }
+  std::string GenBuilderAddFuncDefaultValue(const FieldDef &field) {
+    switch (GetFullElementType(field.value.type)) {
 
-    const auto ct = GetContainerType(type);
-    const auto et = GetElementType(type);
+      case FullElementType::UnionKey:
+      case FullElementType::EnumKey: {
+        const std::string basetype = GenTypeBasic(field.value.type, false);
+        return GetDefaultScalarValue(field) + " as " + basetype;
+      }
 
-    switch (ct) {
-      case ContainerType::Vector: {
-        return "None";
-      }
-      case ContainerType::Union: {
-        switch (GetElementType(type)) {
-          case ElementType::UnionEnumValue: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return typname + "::NONE";
-          }
-          default: {
-            return "None";
-          }
-        }
-      }
-      case ContainerType::Enum: {
-        return GetDefaultScalarValue(field);
-      }
-      case ContainerType::None: {
-        switch (et) {
-          case ElementType::Struct:
-          case ElementType::String:
-          case ElementType::UnionMember:
-          case ElementType::Table: {
-            return "None";
-          }
-          case ElementType::EnumValue:
-          case ElementType::UnionEnumValue:
-          case ElementType::Number:
-          case ElementType::Bool: {
-            return GetDefaultScalarValue(field);
-          }
-        }
-      }
+      default: { return GetDefaultScalarValue(field); }
+      //case FullElementType::Integer:
+      //case FullElementType::Float:
+      //case FullElementType::Bool: { return GetDefaultScalarValue(field); }
+      //default: { return "None"; }
     }
   }
 
@@ -2932,7 +2930,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("FUNC_BODY", GenBuilderArgsAddFuncBody(field));
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         if (is_scalar) {
-          code_.SetValue("FIELD_DEFAULT_VALUE", GetDefaultScalarValue(field));
+          code_.SetValue("FIELD_DEFAULT_VALUE", GenBuilderAddFuncDefaultValue(field));
           code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}{{FIELD_CAST}}, {{FIELD_DEFAULT_VALUE}});";
         } else {
           code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}{{FIELD_CAST}});";
