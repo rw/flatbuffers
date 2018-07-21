@@ -209,17 +209,20 @@ pub fn EnumNameColor(e: Color) -> &'static str {
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Farts {
   Red = 0,
-  Blue = 1
+  Blue = 1,
+  Green = 2
 }
 
-const EnumValuesFarts:[Farts; 2] = [
+const EnumValuesFarts:[Farts; 3] = [
   Farts::Red,
-  Farts::Blue
+  Farts::Blue,
+  Farts::Green
 ];
 
-const EnumNamesFarts:[&'static str; 2] = [
+const EnumNamesFarts:[&'static str; 3] = [
     "Red",
-    "Blue"
+    "Blue",
+    "Green"
 ];
 
 pub fn EnumNameFarts(e: Farts) -> &'static str {
@@ -421,7 +424,7 @@ pub struct TestSimpleTableWithEnumArgs<'a> {
 impl<'a> Default for TestSimpleTableWithEnumArgs<'a> {
     fn default() -> Self {
         TestSimpleTableWithEnumArgs {
-            color: /* yo */Color::Green,
+            color: Color::Green,
             _phantom: PhantomData,
         }
     }
@@ -432,7 +435,7 @@ pub struct TestSimpleTableWithEnumBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
   pub fn add_color(&mut self, color: Color) {
-    self.fbb_.push_slot_scalar::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, /* yo */Color::Green as i8);
+    self.fbb_.push_slot_scalar::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, Color::Green as i8);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TestSimpleTableWithEnumBuilder<'a, 'b> {
     let start = _fbb.start_table(1);
@@ -775,17 +778,17 @@ pub struct MonsterArgs<'a> {
     pub mana: i16,
     pub hp: i16,
     pub name: Option<flatbuffers::StringOffset>,
-    pub inventory: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset<u8>>>,
+    pub inventory: Option<flatbuffers::Vector<&'a  VectorOffset>>,
     pub color: Color,
     pub test_type: Any,
-    pub test: Option<AnyTableOffset>,
-    pub test4: Option<flatbuffers::VectorLabeledUOffsetT<&'a  Test>>,
-    pub testarrayofstring: Option<flatbuffers::VectorLabeledUOffsetT<StringOffset>>,
-    pub testarrayoftables: Option<flatbuffers::VectorLabeledUOffsetT<Monster<'a>>>,
-    pub enemy: Option<Monster<'a>>,
-    pub testnestedflatbuffer: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset<u8>>>,
-    pub testempty: Option<Stat<'a>>,
-    pub testbool: bool,
+    pub test: Option<AnyUnionOffset>,
+    pub test4: Option<flatbuffers::Vector<&'a  Test>>,
+    pub testarrayofstring: Option<flatbuffers::Vector<&'a  flatbuffers::String<'a >>>,
+    pub testarrayoftables: Option<flatbuffers::Vector<&'a  Monster<'a >>>,
+    pub enemy: Option<&'a  Monster<'a >>,
+    pub testnestedflatbuffer: Option<flatbuffers::Vector<&'a  VectorOffset>>,
+    pub testempty: Option<&'a  Stat<'a >>,
+    pub testbool: u8,
     pub testhashs32_fnv1: i32,
     pub testhashu32_fnv1: u32,
     pub testhashs64_fnv1: i64,
@@ -794,21 +797,21 @@ pub struct MonsterArgs<'a> {
     pub testhashu32_fnv1a: u32,
     pub testhashs64_fnv1a: i64,
     pub testhashu64_fnv1a: u64,
-    pub testarrayofbools: Option<flatbuffers::VectorLabeledUOffsetT<bool>>,
+    pub testarrayofbools: Option<flatbuffers::Vector<&'a  bool>>,
     pub testf: f32,
     pub testf2: f32,
     pub testf3: f32,
-    pub testarrayofstring2: Option<flatbuffers::VectorLabeledUOffsetT<StringOffset>>,
-    pub testarrayofsortedstruct: Option<flatbuffers::VectorLabeledUOffsetT<&'a  Ability>>,
-    pub flex: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset<u8>>>,
-    pub test5: Option<flatbuffers::VectorLabeledUOffsetT<&'a  Test>>,
-    pub vector_of_longs: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset<i64>>>,
-    pub vector_of_doubles: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset<f64>>>,
-    pub parent_namespace_test: Option<MyGame::InParentNamespace<'a>>,
-    pub foo0: Option<Color>,
+    pub testarrayofstring2: Option<flatbuffers::Vector<&'a  flatbuffers::String<'a >>>,
+    pub testarrayofsortedstruct: Option<flatbuffers::Vector<&'a  Ability>>,
+    pub flex: Option<flatbuffers::Vector<&'a  VectorOffset>>,
+    pub test5: Option<flatbuffers::Vector<&'a  Test>>,
+    pub vector_of_longs: Option<flatbuffers::Vector<&'a  VectorOffset>>,
+    pub vector_of_doubles: Option<flatbuffers::Vector<&'a  VectorOffset>>,
+    pub parent_namespace_test: Option<&'a  MyGame::InParentNamespace<'a >>,
+    pub foo0: Option<flatbuffers::Vector<&'a  Color>>,
     pub foo1: Option<&'a  Test>,
-    pub foo2: Option<flatbuffers::VectorLabeledUOffsetT<MyGame::InParentNamespace<'a>>>,
-    pub foo3: Option<flatbuffers::VectorLabeledUOffsetT<&'a  Vec3>>,
+    pub foo2: Option<flatbuffers::Vector<&'a  MyGame::InParentNamespace<'a >>>,
+    pub foo3: Option<flatbuffers::Vector<&'a  Vec3>>,
     pub foo4: Color,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
@@ -821,8 +824,8 @@ impl<'a> Default for MonsterArgs<'a> {
  // required
             name: None,
             inventory: None,
-            color: /* yo */Color::Blue,
-            test_type: /* yo */Any::NONE,
+            color: Color::Blue,
+            test_type: Any::NONE,
             test: None,
             test4: None,
             testarrayofstring: None,
@@ -854,7 +857,7 @@ impl<'a> Default for MonsterArgs<'a> {
             foo1: None,
             foo2: None,
             foo3: None,
-            foo4: /* yo */Color::Green,
+            foo4: Color::Green,
             _phantom: PhantomData,
         }
     }
@@ -880,10 +883,10 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_INVENTORY, inventory);
   }
   pub fn add_color(&mut self, color: Color) {
-    self.fbb_.push_slot_scalar::<i8>(Monster::VT_COLOR, color as i8, /* yo */Color::Blue as i8);
+    self.fbb_.push_slot_scalar::<i8>(Monster::VT_COLOR, color as i8, Color::Blue as i8);
   }
   pub fn add_test_type(&mut self, test_type: Any) {
-    self.fbb_.push_slot_scalar::<u8>(Monster::VT_TEST_TYPE, test_type as u8, /* yo */Any::NONE as u8);
+    self.fbb_.push_slot_scalar::<u8>(Monster::VT_TEST_TYPE, test_type as u8, Any::NONE as u8);
   }
   pub fn add_test(&mut self, test: Option<AnyTableOffset>) {
     self.fbb_.push_slot_labeled_uoffset_relative::<flatbuffersLabeledUOffsetT<Any>>(Monster::VT_TEST, test);
@@ -979,7 +982,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_FOO3, foo3);
   }
   pub fn add_foo4(&mut self, foo4: Color) {
-    self.fbb_.push_slot_scalar::<i8>(Monster::VT_FOO4, foo4 as i8, /* yo */Color::Green as i8);
+    self.fbb_.push_slot_scalar::<i8>(Monster::VT_FOO4, foo4 as i8, Color::Green as i8);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
     let start = _fbb.start_table(40);
@@ -1132,8 +1135,8 @@ pub struct TypeAliasesArgs<'a> {
     pub u64_: u64,
     pub f32_: f32,
     pub f64_: f64,
-    pub v8: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset<i8>>>,
-    pub vf64: Option<flatbuffers::VectorLabeledUOffsetT<VectorOffset<f64>>>,
+    pub v8: Option<flatbuffers::Vector<&'a  VectorOffset>>,
+    pub vf64: Option<flatbuffers::Vector<&'a  VectorOffset>>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for TypeAliasesArgs<'a> {
