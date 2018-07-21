@@ -2085,7 +2085,7 @@ class RustGenerator : public BaseGenerator {
 
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type.VectorType(), false);
+        const auto typname = GenTypeBasic(type, false);
         return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + ">(" + offset_name + ")";
       }
       case FullElementType::VectorOfBool: {
