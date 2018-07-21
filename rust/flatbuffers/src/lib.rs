@@ -153,44 +153,55 @@ pub trait VectorGettable {
 }
 
 pub struct Vector<'a, T: Sized + 'a> {
-    data: &'a [T],
+    data: &'a [u8],
+    _phantom: PhantomData<T>,
 }
-impl<'a, T> Vector<'a, T> {
-    pub fn new_from_buf(buf: &'a [u8]) -> Self {
-        let len = {
-            let p = buf.as_ptr() as *const u32;
-            let x = unsafe { *p };
-            x.from_le() as usize
-        };
-        let slice = {
-            let p = buf[SIZE_UOFFSET..].as_ptr() as *const T;
-            unsafe {
-                std::slice::from_raw_parts(p, len)
-            }
-        };
+
+impl<'a, T: 'a> Vector<'a, T> {
+    pub fn new(buf: &'a [u8]) -> Self {
         Self {
-            data: slice,
+            data: buf,
+            _phantom: PhantomData,
         }
     }
-    pub fn get(&self, idx: usize) -> &T {
-        &self.data[idx]
-    }
-    pub fn len(&self) -> usize {
-        self.data.len()
-    }
-    //pub fn get(&self, idx: usize) -> &T {
-    //    let stride = std::mem::size_of::<T>();
-    //    let start = SIZE_UOFFSET;
-    //    let loc = start + idx * stride;
-    //    let p = self.data[loc..loc + stride].as_ptr() as *const T;
-    //    unsafe { &*p }
-
-    //}
-    //pub fn len(&self) -> u32 {
-    //    let p = self.data.as_ptr() as *const u32;
-    //    unsafe { *p }
-    //}
 }
+
+//impl<'a, T> Vector<'a, T> {
+//    pub fn new_from_buf(buf: &'a [u8]) -> Self {
+//        let len = {
+//            let p = buf.as_ptr() as *const u32;
+//            let x = unsafe { *p };
+//            x.from_le() as usize
+//        };
+//        let slice = {
+//            let p = buf[SIZE_UOFFSET..].as_ptr() as *const T;
+//            unsafe {
+//                std::slice::from_raw_parts(p, len)
+//            }
+//        };
+//        Self {
+//            data: slice,
+//        }
+//    }
+//    pub fn get(&self, idx: usize) -> &T {
+//        &self.data[idx]
+//    }
+//    pub fn len(&self) -> usize {
+//        self.data.len()
+//    }
+//    //pub fn get(&self, idx: usize) -> &T {
+//    //    let stride = std::mem::size_of::<T>();
+//    //    let start = SIZE_UOFFSET;
+//    //    let loc = start + idx * stride;
+//    //    let p = self.data[loc..loc + stride].as_ptr() as *const T;
+//    //    unsafe { &*p }
+//
+//    //}
+//    //pub fn len(&self) -> u32 {
+//    //    let p = self.data.as_ptr() as *const u32;
+//    //    unsafe { *p }
+//    //}
+//}
 
 pub struct Table<'a> {
     pub data: &'a [u8],
@@ -239,7 +250,7 @@ impl<'a> Table<'a> {
         Some(s)
     }
     //pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
-    pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
+    pub fn get_slot_vector<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<&'a T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
@@ -252,14 +263,18 @@ impl<'a> Table<'a> {
         let length_u8 = length * std::mem::size_of::<T>();
 
         let buf = &self.data[start..start+length_u8];
-        let ptr = buf.as_ptr() as *const T;
+        //let ptr = buf.as_ptr() as *const T;
 
-        let s: &[T] = unsafe {
-            std::slice::from_raw_parts(ptr, length)
-        };
-        Some(s)
+        //let s: &[T] = unsafe {
+        //    std::slice::from_raw_parts(ptr, length)
+        //};
+        let v = Vector::new(buf);
+        Some(v)
     }
-    pub fn get_struct_unsafe<T>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
+    pub fn get_slot_struct<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
+        self.get_slot_struct_unsafe(slotnum)
+    }
+    pub fn get_slot_struct_unsafe<T>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
         let off = self.compute_vtable_offset(slotnum) as usize;
         if off == 0 {
             return None;

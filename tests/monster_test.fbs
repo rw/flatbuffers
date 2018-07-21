@@ -84,7 +84,10 @@ table Monster {
   vector_of_doubles:[double] (id:33);
   parent_namespace_test:InParentNamespace (id:34);
   foo0:[Color] (id:35);
-  //foo1:[ubyte] (id:35);
+  foo1:Test (id:36);
+  foo2:[InParentNamespace] (id:37);
+  foo3:[Vec3] (id:38);
+  //foo3:[Any] (id:38);
 }
 
 table TypeAliases {

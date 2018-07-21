@@ -631,6 +631,9 @@ struct MonsterT : public flatbuffers::NativeTable {
   std::vector<double> vector_of_doubles;
   flatbuffers::unique_ptr<MyGame::InParentNamespaceT> parent_namespace_test;
   std::vector<Color> foo0;
+  flatbuffers::unique_ptr<Test> foo1;
+  std::vector<flatbuffers::unique_ptr<MyGame::InParentNamespaceT>> foo2;
+  std::vector<Vec3> foo3;
   MonsterT()
       : mana(150),
         hp(100),
@@ -688,7 +691,10 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_VECTOR_OF_LONGS = 68,
     VT_VECTOR_OF_DOUBLES = 70,
     VT_PARENT_NAMESPACE_TEST = 72,
-    VT_FOO0 = 74
+    VT_FOO0 = 74,
+    VT_FOO1 = 76,
+    VT_FOO2 = 78,
+    VT_FOO3 = 80
   };
   const Vec3 *pos() const {
     return GetStruct<const Vec3 *>(VT_POS);
@@ -925,6 +931,24 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<int8_t> *mutable_foo0() {
     return GetPointer<flatbuffers::Vector<int8_t> *>(VT_FOO0);
   }
+  const Test *foo1() const {
+    return GetStruct<const Test *>(VT_FOO1);
+  }
+  Test *mutable_foo1() {
+    return GetStruct<Test *>(VT_FOO1);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<MyGame::InParentNamespace>> *foo2() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<MyGame::InParentNamespace>> *>(VT_FOO2);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<MyGame::InParentNamespace>> *mutable_foo2() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<MyGame::InParentNamespace>> *>(VT_FOO2);
+  }
+  const flatbuffers::Vector<const Vec3 *> *foo3() const {
+    return GetPointer<const flatbuffers::Vector<const Vec3 *> *>(VT_FOO3);
+  }
+  flatbuffers::Vector<const Vec3 *> *mutable_foo3() {
+    return GetPointer<flatbuffers::Vector<const Vec3 *> *>(VT_FOO3);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<Vec3>(verifier, VT_POS) &&
@@ -983,6 +1007,12 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyTable(parent_namespace_test()) &&
            VerifyOffset(verifier, VT_FOO0) &&
            verifier.Verify(foo0()) &&
+           VerifyField<Test>(verifier, VT_FOO1) &&
+           VerifyOffset(verifier, VT_FOO2) &&
+           verifier.Verify(foo2()) &&
+           verifier.VerifyVectorOfTables(foo2()) &&
+           VerifyOffset(verifier, VT_FOO3) &&
+           verifier.Verify(foo3()) &&
            verifier.EndTable();
   }
   MonsterT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -1110,6 +1140,15 @@ struct MonsterBuilder {
   void add_foo0(flatbuffers::Offset<flatbuffers::Vector<int8_t>> foo0) {
     fbb_.AddOffset(Monster::VT_FOO0, foo0);
   }
+  void add_foo1(const Test *foo1) {
+    fbb_.AddStruct(Monster::VT_FOO1, foo1);
+  }
+  void add_foo2(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MyGame::InParentNamespace>>> foo2) {
+    fbb_.AddOffset(Monster::VT_FOO2, foo2);
+  }
+  void add_foo3(flatbuffers::Offset<flatbuffers::Vector<const Vec3 *>> foo3) {
+    fbb_.AddOffset(Monster::VT_FOO3, foo3);
+  }
   explicit MonsterBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -1159,12 +1198,18 @@ inline flatbuffers::Offset<Monster> CreateMonster(
     flatbuffers::Offset<flatbuffers::Vector<int64_t>> vector_of_longs = 0,
     flatbuffers::Offset<flatbuffers::Vector<double>> vector_of_doubles = 0,
     flatbuffers::Offset<MyGame::InParentNamespace> parent_namespace_test = 0,
-    flatbuffers::Offset<flatbuffers::Vector<int8_t>> foo0 = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<int8_t>> foo0 = 0,
+    const Test *foo1 = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<MyGame::InParentNamespace>>> foo2 = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Vec3 *>> foo3 = 0) {
   MonsterBuilder builder_(_fbb);
   builder_.add_testhashu64_fnv1a(testhashu64_fnv1a);
   builder_.add_testhashs64_fnv1a(testhashs64_fnv1a);
   builder_.add_testhashu64_fnv1(testhashu64_fnv1);
   builder_.add_testhashs64_fnv1(testhashs64_fnv1);
+  builder_.add_foo3(foo3);
+  builder_.add_foo2(foo2);
+  builder_.add_foo1(foo1);
   builder_.add_foo0(foo0);
   builder_.add_parent_namespace_test(parent_namespace_test);
   builder_.add_vector_of_doubles(vector_of_doubles);
@@ -1235,7 +1280,10 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
     const std::vector<int64_t> *vector_of_longs = nullptr,
     const std::vector<double> *vector_of_doubles = nullptr,
     flatbuffers::Offset<MyGame::InParentNamespace> parent_namespace_test = 0,
-    const std::vector<int8_t> *foo0 = nullptr) {
+    const std::vector<int8_t> *foo0 = nullptr,
+    const Test *foo1 = 0,
+    const std::vector<flatbuffers::Offset<MyGame::InParentNamespace>> *foo2 = nullptr,
+    const std::vector<Vec3> *foo3 = nullptr) {
   return MyGame::Example::CreateMonster(
       _fbb,
       pos,
@@ -1272,7 +1320,10 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
       vector_of_longs ? _fbb.CreateVector<int64_t>(*vector_of_longs) : 0,
       vector_of_doubles ? _fbb.CreateVector<double>(*vector_of_doubles) : 0,
       parent_namespace_test,
-      foo0 ? _fbb.CreateVector<int8_t>(*foo0) : 0);
+      foo0 ? _fbb.CreateVector<int8_t>(*foo0) : 0,
+      foo1,
+      foo2 ? _fbb.CreateVector<flatbuffers::Offset<MyGame::InParentNamespace>>(*foo2) : 0,
+      foo3 ? _fbb.CreateVectorOfStructs<Vec3>(*foo3) : 0);
 }
 
 flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -1685,6 +1736,9 @@ inline void Monster::UnPackTo(MonsterT *_o, const flatbuffers::resolver_function
   { auto _e = vector_of_doubles(); if (_e) { _o->vector_of_doubles.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->vector_of_doubles[_i] = _e->Get(_i); } } };
   { auto _e = parent_namespace_test(); if (_e) _o->parent_namespace_test = flatbuffers::unique_ptr<MyGame::InParentNamespaceT>(_e->UnPack(_resolver)); };
   { auto _e = foo0(); if (_e) { _o->foo0.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->foo0[_i] = (Color)_e->Get(_i); } } };
+  { auto _e = foo1(); if (_e) _o->foo1 = flatbuffers::unique_ptr<Test>(new Test(*_e)); };
+  { auto _e = foo2(); if (_e) { _o->foo2.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->foo2[_i] = flatbuffers::unique_ptr<MyGame::InParentNamespaceT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = foo3(); if (_e) { _o->foo3.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->foo3[_i] = *_e->Get(_i); } } };
 }
 
 inline flatbuffers::Offset<Monster> Monster::Pack(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -1730,6 +1784,9 @@ inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder
   auto _vector_of_doubles = _o->vector_of_doubles.size() ? _fbb.CreateVector(_o->vector_of_doubles) : 0;
   auto _parent_namespace_test = _o->parent_namespace_test ? CreateInParentNamespace(_fbb, _o->parent_namespace_test.get(), _rehasher) : 0;
   auto _foo0 = _o->foo0.size() ? _fbb.CreateVector((const int8_t*)_o->foo0.data(), _o->foo0.size()) : 0;
+  auto _foo1 = _o->foo1 ? _o->foo1.get() : 0;
+  auto _foo2 = _o->foo2.size() ? _fbb.CreateVector<flatbuffers::Offset<MyGame::InParentNamespace>> (_o->foo2.size(), [](size_t i, _VectorArgs *__va) { return CreateInParentNamespace(*__va->__fbb, __va->__o->foo2[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _foo3 = _o->foo3.size() ? _fbb.CreateVectorOfStructs(_o->foo3) : 0;
   return MyGame::Example::CreateMonster(
       _fbb,
       _pos,
@@ -1766,7 +1823,10 @@ inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder
       _vector_of_longs,
       _vector_of_doubles,
       _parent_namespace_test,
-      _foo0);
+      _foo0,
+      _foo1,
+      _foo2,
+      _foo3);
 }
 
 inline TypeAliasesT *TypeAliases::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
@@ -2180,7 +2240,10 @@ inline flatbuffers::TypeTable *MonsterTypeTable() {
     { flatbuffers::ET_LONG, 1, -1 },
     { flatbuffers::ET_DOUBLE, 1, -1 },
     { flatbuffers::ET_SEQUENCE, 0, 7 },
-    { flatbuffers::ET_CHAR, 1, 1 }
+    { flatbuffers::ET_CHAR, 1, 1 },
+    { flatbuffers::ET_SEQUENCE, 0, 3 },
+    { flatbuffers::ET_SEQUENCE, 1, 7 },
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
   };
   static flatbuffers::TypeFunction type_refs[] = {
     Vec3TypeTable,
@@ -2228,10 +2291,13 @@ inline flatbuffers::TypeTable *MonsterTypeTable() {
     "vector_of_longs",
     "vector_of_doubles",
     "parent_namespace_test",
-    "foo0"
+    "foo0",
+    "foo1",
+    "foo2",
+    "foo3"
   };
   static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 36, type_codes, type_refs, nullptr, names
+    flatbuffers::ST_TABLE, 39, type_codes, type_refs, nullptr, names
   };
   return &tt;
 }
