@@ -79,14 +79,16 @@ inline const char *EnumNameColor(Color e) {
 enum Farts {
   Farts_Red = 0,
   Farts_Blue = 1,
+  Farts_Green = 2,
   Farts_MIN = Farts_Red,
-  Farts_MAX = Farts_Blue
+  Farts_MAX = Farts_Green
 };
 
-inline Farts (&EnumValuesFarts())[2] {
+inline Farts (&EnumValuesFarts())[3] {
   static Farts values[] = {
     Farts_Red,
-    Farts_Blue
+    Farts_Blue,
+    Farts_Green
   };
   return values;
 }
@@ -95,6 +97,7 @@ inline const char **EnumNamesFarts() {
   static const char *names[] = {
     "Red",
     "Blue",
+    "Green",
     nullptr
   };
   return names;
@@ -2069,6 +2072,7 @@ inline flatbuffers::TypeTable *ColorTypeTable() {
 inline flatbuffers::TypeTable *FartsTypeTable() {
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_BOOL, 0, 0 },
+    { flatbuffers::ET_BOOL, 0, 0 },
     { flatbuffers::ET_BOOL, 0, 0 }
   };
   static flatbuffers::TypeFunction type_refs[] = {
@@ -2076,10 +2080,11 @@ inline flatbuffers::TypeTable *FartsTypeTable() {
   };
   static const char *names[] = {
     "Red",
-    "Blue"
+    "Blue",
+    "Green"
   };
   static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_ENUM, 2, type_codes, type_refs, nullptr, names
+    flatbuffers::ST_ENUM, 3, type_codes, type_refs, nullptr, names
   };
   return &tt;
 }
