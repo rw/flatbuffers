@@ -1674,116 +1674,96 @@ class RustGenerator : public BaseGenerator {
   std::string GenBuilderArgsAddFuncType(const FieldDef &field, const std::string lifetime) {
     const Type& type = field.value.type;
 
-    const auto ct = GetContainerType(type);
-    const auto et = GetElementType(type);
-
-    switch (ct) {
-      case ContainerType::Union: {
-        switch (et) {
-          case ElementType::Number: // why?
-          case ElementType::UnionEnumValue:
-          case ElementType::EnumValue: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return typname;
-          }
-          case ElementType::UnionMember:
-          case ElementType::Table: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return "Option<" + typname + "TableOffset>";
-          }
-          case ElementType::Struct:
-          case ElementType::Bool:
-          case ElementType::String: {
-            assert(false);
-          }
-        }
+    //switch (ct) {
+    //  case ContainerType::Union: {
+    //    switch (et) {
+    //      case ElementType::Number: // why?
+    //      case ElementType::UnionEnumValue:
+    //      case ElementType::EnumValue: {
+    //        const auto typname = WrapInNameSpace(*type.enum_def);
+    //        return typname;
+    //      }
+    //      case ElementType::UnionMember:
+    //      case ElementType::Table: {
+    //        const auto typname = WrapInNameSpace(*type.enum_def);
+    //        return "Option<" + typname + "TableOffset>";
+    //      }
+    //      case ElementType::Struct:
+    //      case ElementType::Bool:
+    //      case ElementType::String: {
+    //        assert(false);
+    //      }
+    //    }
+    //  }
+    //  case ContainerType::Vector: {
+    //    switch (et) {
+    switch (GetFullElementType(field.value.type)) {
+      case FullElementType::VectorOfStruct: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
       }
-      case ContainerType::Vector: {
-        switch (et) {
-          case ElementType::Struct: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
-          }
-          case ElementType::Table: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
-          }
-          case ElementType::Number: {
-            const auto typname = GenTypeBasic(type, false);
-            //const auto basetype = GenTypeBasic(type.VectorType(), false);
-            //return "flatbuffers::Vector<" + typname + "<" + basetype + ">>";
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
-          }
-          case ElementType::Bool: {
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " bool>>";
-          }
-          case ElementType::String: {
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " flatbuffers::String<" + lifetime + ">>>";
-          }
-          case ElementType::EnumValue: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
-            //return typname;
-            //const auto typname = GenTypeBasic(type, false);
-            //const auto basetype = GenTypeBasic(type.VectorType(), false);
-            //return "flatbuffers::VectorLabeledUOffsetT<" + typname + "<" + basetype + ">>";
-          }
-          case ElementType::UnionEnumValue: {
-            const auto typname = WrapInNameSpace(*type.enum_def);
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
-            //const auto typname = WrapInNameSpace(*type.enum_def);
-            //return typname;
-          }
-          case ElementType::UnionMember: {
-            //const auto typname = WrapInNameSpace(*type.enum_def);
-            //return typname + "_UnionOffset";
-            const auto typname = WrapInNameSpace(*type.struct_def) + "UnionTable";
-            return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
-          }
-        }
+      case FullElementType::VectorOfTable: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
       }
-      case ContainerType::Enum: {
-        //const auto typname = GenTypeBasic(type, false);
+      case FullElementType::VectorOfInteger:
+      case FullElementType::VectorOfFloat: {
+        const auto typname = GenTypeBasic(type, false);
+        //const auto basetype = GenTypeBasic(type.VectorType(), false);
+        //return "flatbuffers::Vector<" + typname + "<" + basetype + ">>";
+        return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
+      }
+      case FullElementType::VectorOfBool: {
+        return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " bool>>";
+      }
+      case FullElementType::VectorOfString: {
+        return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " flatbuffers::String<" + lifetime + ">>>";
+      }
+      case FullElementType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
+        return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
+        //return typname;
+        //const auto typname = GenTypeBasic(type, false);
+        //const auto basetype = GenTypeBasic(type.VectorType(), false);
+        //return "flatbuffers::VectorLabeledUOffsetT<" + typname + "<" + basetype + ">>";
+      }
+      case FullElementType::VectorOfUnionValue: {
+        const auto typname = WrapInNameSpace(*type.enum_def);
+        return "flatbuffers::Offset<flatbuffers::Vector<&" + lifetime + " " + typname + ">>";
+        //const auto typname = WrapInNameSpace(*type.enum_def);
+        //return typname;
+      }
+      case FullElementType::EnumKey: {
+        const auto typname = WrapInNameSpace(*type.enum_def);
+        return typname;
+      }
+      case FullElementType::Struct: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "&" + lifetime + " " + typname + "";
+      }
+      case FullElementType::Table: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "&" + lifetime + " " + typname + "<'a>";
+      }
+      case FullElementType::Integer:
+      case FullElementType::Float: {
+        const auto typname = GenTypeBasic(type, false);
         //return "Option<" + typname + ">";
         return typname;
       }
-      case ContainerType::None: {
-        switch (et) {
-          case ElementType::Struct: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "&" + lifetime + " " + typname + "";
-          }
-          case ElementType::Table: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return typname + "<'a>";
-          }
-          case ElementType::Number: {
-            const auto typname = GenTypeBasic(type, false);
-            //return "Option<" + typname + ">";
-            return typname;
-          }
-          case ElementType::EnumValue: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            //return "Option<" + typname + ">";
-            return typname;
-          }
-          case ElementType::Bool: {
-            //return "Option<bool>";
-            return "bool";
-          }
-          case ElementType::String: {
-            return "flatbuffers::StringOffset";
-          }
-          case ElementType::UnionEnumValue: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return typname;
-          }
-          case ElementType::UnionMember: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return typname + "UnionOffset";
-          }
-        }
+      case FullElementType::Bool: {
+        return "bool";
+      }
+      case FullElementType::String: {
+        return "flatbuffers::StringOffset";
+      }
+      case FullElementType::UnionKey: {
+        const auto typname = WrapInNameSpace(*type.enum_def);
+        return typname;
+      }
+      case FullElementType::UnionValue: {
+        const auto typname = WrapInNameSpace(*type.enum_def);
+        return typname + "UnionOffset";
       }
     }
   }

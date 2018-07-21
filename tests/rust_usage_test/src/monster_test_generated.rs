@@ -624,6 +624,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub const VT_FOO2: flatbuffers::VOffsetT = 78;
     pub const VT_FOO3: flatbuffers::VOffsetT = 80;
     pub const VT_FOO4: flatbuffers::VOffsetT = 82;
+    pub const VT_FOO5: flatbuffers::VOffsetT = 84;
 
   pub fn pos(&self) -> Option<&'a Vec3> {
     self._tab.get_slot_struct::<Vec3>(Monster::VT_POS)
@@ -753,6 +754,9 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn foo4(&self) -> Color {
     self._tab.get_slot_scalar::<i8>(Monster::VT_FOO4) as Color
   }
+  pub fn foo5(&self) -> Option<&'a Monster<'a>> {
+    self._tab.get_slot_struct::<Monster>(Monster::VT_FOO5)
+  }
 }
 
 //TODO: inject these functions into impl for type
@@ -813,6 +817,7 @@ pub struct MonsterArgs<'a> {
     pub foo2: Option<flatbuffers::Vector<&'a  MyGame::InParentNamespace<'a >>>,
     pub foo3: Option<flatbuffers::Vector<&'a  Vec3>>,
     pub foo4: Color,
+    pub foo5: Option<&'a  Monster<'a >>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for MonsterArgs<'a> {
@@ -858,6 +863,7 @@ impl<'a> Default for MonsterArgs<'a> {
             foo2: None,
             foo3: None,
             foo4: Color::Green,
+            foo5: None,
             _phantom: PhantomData,
         }
     }
@@ -888,7 +894,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_test_type(&mut self, test_type: Any) {
     self.fbb_.push_slot_scalar::<u8>(Monster::VT_TEST_TYPE, test_type as u8, Any::NONE as u8);
   }
-  pub fn add_test(&mut self, test: Option<AnyTableOffset>) {
+  pub fn add_test(&mut self, test: AnyUnionOffset) {
     self.fbb_.push_slot_labeled_uoffset_relative::<flatbuffersLabeledUOffsetT<Any>>(Monster::VT_TEST, test);
   }
   pub fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<&'a  Test>>) {
@@ -900,13 +906,13 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<&'a  Monster<'a >>>) {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
   }
-  pub fn add_enemy(&mut self, enemy: Monster<'a>) {
+  pub fn add_enemy(&mut self, enemy: &'a  Monster<'a>) {
     Monster<'a>(Monster::VT_ENEMY, enemy);
   }
   pub fn add_testnestedflatbuffer(&mut self, testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<&'a  VectorOffset>>) {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer);
   }
-  pub fn add_testempty(&mut self, testempty: Stat<'a>) {
+  pub fn add_testempty(&mut self, testempty: &'a  Stat<'a>) {
     Stat<'a>(Monster::VT_TESTEMPTY, testempty);
   }
   pub fn add_testbool(&mut self, testbool: bool) {
@@ -966,7 +972,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_vector_of_doubles(&mut self, vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<&'a  VectorOffset>>) {
     self.fbb_.push_slot_labeled_uoffset_relative(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
   }
-  pub fn add_parent_namespace_test(&mut self, parent_namespace_test: MyGame::InParentNamespace<'a>) {
+  pub fn add_parent_namespace_test(&mut self, parent_namespace_test: &'a  MyGame::InParentNamespace<'a>) {
     MyGame::InParentNamespace<'a>(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
   pub fn add_foo0(&mut self, foo0: flatbuffers::Offset<flatbuffers::Vector<&'a  Color>>) {
@@ -984,8 +990,11 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_foo4(&mut self, foo4: Color) {
     self.fbb_.push_slot_scalar::<i8>(Monster::VT_FOO4, foo4 as i8, Color::Green as i8);
   }
+  pub fn add_foo5(&mut self, foo5: &'a  Monster<'a>) {
+    Monster<'a>(Monster::VT_FOO5, foo5);
+  }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table(40);
+    let start = _fbb.start_table(41);
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -1010,6 +1019,7 @@ pub fn CreateMonster<'a: 'b, 'b>(
   builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
   builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
   builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
+  if let Some(x) = args.foo5 { builder.add_foo5(x); }
   if let Some(x) = args.foo3 { builder.add_foo3(x); }
   if let Some(x) = args.foo2 { builder.add_foo2(x); }
   if let Some(x) = args.foo1 { builder.add_foo1(x); }
