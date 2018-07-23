@@ -498,6 +498,20 @@ class RustGenerator : public BaseGenerator {
     return ctypename[type.base_type];
   }
 
+  std::string GenTypeBasicForRepr(const Type &type) const {
+    static const char *ctypename[] = {
+    // clang-format off
+    #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE, \
+                           RTYPE) \
+            #RTYPE,
+        FLATBUFFERS_GEN_TYPES(FLATBUFFERS_TD)
+    #undef FLATBUFFERS_TD
+      // clang-format on
+    };
+    if (type.base_type == BASE_TYPE_BOOL) return "u8";
+    return ctypename[type.base_type];
+  }
+
   // Return a C++ pointer type, specialized to the actual struct/table types,
   // and vector element types.
   std::string GenTypePointer(const Type &type, const std::string &lifetime) const {
@@ -1039,7 +1053,7 @@ class RustGenerator : public BaseGenerator {
   // and an enum array of values
   void GenEnum(const EnumDef &enum_def) {
     code_.SetValue("ENUM_NAME", Name(enum_def));
-    code_.SetValue("BASE_TYPE", GenTypeBasic(enum_def.underlying_type, false));
+    code_.SetValue("BASE_TYPE", GenTypeBasicForRepr(enum_def.underlying_type));
     code_.SetValue("SEP", "");
 
     GenComment(enum_def.doc_comment);
@@ -1604,7 +1618,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<&" + lifetime + " " + typname + "<" + lifetime + ">>";
+        return "Option<flatbuffers::Offset<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
       }
       case FullElementType::String: {
         return "Option<flatbuffers::StringOffset>";
@@ -1722,7 +1736,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "&" + lifetime + " " + typname + "<'a>";
+        return "flatbuffers::Offset<&" + lifetime + " " + typname + "<'a>>";
       }
       case FullElementType::Integer:
       case FullElementType::Float: {
@@ -1762,11 +1776,11 @@ class RustGenerator : public BaseGenerator {
 
           case FullElementType::Struct: {
             const auto typname = GenTypeWire(field.value.type, "", "", false);
-            return "self.fbb_.push_slot_struct::<&" + typname + ">";
+            return "self.fbb_.push_slot_struct::<" + typname + ">";
           }
           case FullElementType::Table: {
             const auto typname = WrapInNameSpace(*type.struct_def);
-            return "self.fbb_.push_slot_struct::<&" + typname + ">";
+            return "self.fbb_.push_slot_uoffset_relative::<&" + typname + ">";
           }
 
           case FullElementType::EnumKey:
@@ -1923,7 +1937,8 @@ class RustGenerator : public BaseGenerator {
         const auto typname = GenTypeBasic(type, false);
         //const auto typname = WrapInNameSpace(*type.struct_def);
         //return "self._tab.get_slot_struct::<&" + lifetime + " " + typname + ">(" + offset_name + ")";
-        return "self._tab.get_slot_scalar::<" + typname + ">(" + offset_name + ", 0)";
+        const std::string default_value = GetDefaultScalarValue(field);
+        return "self._tab.get_slot_scalar::<" + typname + ">(" + offset_name + ", " + default_value + ")";
       }
       case FullElementType::Struct: {
         const auto typname = WrapInNameSpace(*type.struct_def);

@@ -21,7 +21,15 @@ pub enum StringOffset {}
 pub enum ByteStringOffset {}
 pub enum UnionOffset {}
 pub enum TableOffset {}
-pub trait GeneratedStruct {}
+pub trait GeneratedStruct : Sized {
+    fn to_bytes(&self) -> &[u8] {
+        let ptr = &*self as *const Self as *const u8;
+        let bytes: &[u8] = unsafe {
+            std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<Self>())
+        };
+	bytes
+    }
+}
 pub trait ElementScalar : Sized + PartialEq + Clone {
     fn to_le(self) -> Self;
     fn from_le(self) -> Self;
@@ -901,12 +909,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         unimplemented!();
         self.push_slot_scalar(slotnum, x as u8, default as u8);
     }
-    pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: &T) {
+    pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: T) {
+	// using to_bytes as a trait makes it easier to mix references into T
         self.assert_nested();
-        let ptr = &*x as *const T as *const u8;
-        let bytes: &[u8] = unsafe {
-            std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<T>())
-        };
+        //let ptr = &*x as *const T as *const u8;
+        //let bytes: &[u8] = unsafe {
+        //    std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<T>())
+        //};
+	let bytes = x.to_bytes();
         self.prep(bytes.len(), 0);
         self.push_bytes_no_prep(bytes);
         //if x != self.rev_cur_idx() {
@@ -929,6 +939,17 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         if let Some(o) = x {
             self.push_slot_labeled_uoffset_relative(slotoff, o)
         }
+    }
+    pub fn push_slot_uoffset_relative<T>(&mut self, slotoff: VOffsetT, x: Offset<T>) {
+        if x.value() == 0 {
+            return;
+        }
+        let rel_off = self.refer_to(x.value());
+        self.push_slot_scalar::<UOffsetT>(slotoff, rel_off, 0);
+        //AddElement(field, ReferTo(off.o), static_cast<uoffset_t>(0));
+        //self.push_uoffset_relative(x.value());
+        self.store_slot(slotoff);
+        //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
     pub fn push_slot_labeled_uoffset_relative<T>(&mut self, slotoff: VOffsetT, x: LabeledUOffsetT<T>) {
         if x.value() == 0 {
@@ -1054,6 +1075,32 @@ impl<T> LabeledUOffsetT<T> {
     }
     pub fn union(&self) -> LabeledUOffsetT<UnionOffset> {
         LabeledUOffsetT::new(self.0)
+    }
+    pub fn value(&self) -> UOffsetT {
+        self.0
+    }
+}
+
+pub struct Offset<T> (UOffsetT, PhantomData<T>);
+impl<T> Copy for Offset<T> { } // TODO: why does deriving Copy cause ownership errors?
+impl<T> Clone for Offset<T> {
+    fn clone(&self) -> Offset<T> {
+        Offset::new(self.0.clone())
+    }
+}
+
+impl<T> std::ops::Deref for Offset<T> {
+    type Target = UOffsetT;
+    fn deref(&self) -> &UOffsetT {
+        &self.0
+    }
+}
+impl<T> Offset<T> {
+    pub fn new(o: UOffsetT) -> Self {
+        Offset(o, PhantomData)
+    }
+    pub fn union(&self) -> Offset<UnionOffset> {
+        Offset::new(self.0)
     }
     pub fn value(&self) -> UOffsetT {
         self.0
