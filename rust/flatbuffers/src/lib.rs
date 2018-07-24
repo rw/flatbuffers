@@ -262,8 +262,14 @@ impl<'a> Table<'a> {
         Some(s)
     }
     //pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
-    pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<&'a str> {
-        self.get_slot_vector(slotnum)
+    pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<String<'a>> {
+        return None;
+        //let x: Option<Vector<u8>> = self.get_slot_vector(slotnum);
+        //x
+        //match x {
+        //    None => { return None; }
+        //    Some(v) => { return None; }
+        //}
     }
     pub fn get_slot_vector<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
