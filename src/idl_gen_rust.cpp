@@ -1701,8 +1701,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type, false);
-        //const auto basetype = GenTypeBasic(type.VectorType(), false);
+        //const auto typname = GenTypeBasic(type, false);
+        const auto typname = GenTypeBasic(type.VectorType(), false);
         //return "flatbuffers::Vector<" + typname + "<" + basetype + ">>";
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
       }
@@ -1710,7 +1710,7 @@ class RustGenerator : public BaseGenerator {
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " bool>>";
       }
       case FullElementType::VectorOfString: {
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " flatbuffers::String<" + lifetime + ">>>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<&" + lifetime + " flatbuffers::String<" + lifetime + ">>>>";
       }
       case FullElementType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
@@ -1893,11 +1893,11 @@ class RustGenerator : public BaseGenerator {
         return "Option<&" + lifetime + " " + typname + "_UnionTable<" + lifetime + ">>";
       }
       case FullElementType::String: {
-         return "Some<flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>";
+         return "Option<flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>";
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type, false);
+        const auto typname = GenTypeBasic(type.VectorType(), false);
         return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
       }
       case FullElementType::VectorOfBool: {
