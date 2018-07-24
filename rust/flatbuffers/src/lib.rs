@@ -909,7 +909,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         unimplemented!();
         self.push_slot_scalar(slotnum, x as u8, default as u8);
     }
-    pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: T) {
+    pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: &T) {
 	// using to_bytes as a trait makes it easier to mix references into T
         self.assert_nested();
         //let ptr = &*x as *const T as *const u8;
