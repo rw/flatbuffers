@@ -174,6 +174,10 @@ impl<'a, T: 'a> Vector<'a, T> {
     }
 }
 
+pub struct String<'a> {
+    data: &'a [u8],
+}
+
 //impl<'a, T> Vector<'a, T> {
 //    pub fn new_from_buf(buf: &'a [u8]) -> Self {
 //        let len = {
