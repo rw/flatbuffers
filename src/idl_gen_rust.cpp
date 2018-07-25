@@ -415,7 +415,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "#[inline]";
         code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'a: 'b, 'b>(";
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-        code_ += "    root: flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}>) {";
+        code_ += "    root: flatbuffers::Offset<{{OFFSET_TYPELABEL}}>) {";
         if (parser_.file_identifier_.length()) {
           code_ += "  fbb.finish_with_identifier(root, "
                    "{{STRUCT_NAME}}Identifier());";
@@ -491,10 +491,10 @@ class RustGenerator : public BaseGenerator {
     #undef FLATBUFFERS_TD
       // clang-format on
     };
-    //if (user_facing_type) {
-    //  if (type.enum_def) return WrapInNameSpace(*type.enum_def);
-    //  if (type.base_type == BASE_TYPE_BOOL) return "bool";
-    //}
+    if (user_facing_type) {
+      if (type.enum_def) return WrapInNameSpace(*type.enum_def);
+      if (type.base_type == BASE_TYPE_BOOL) return "bool";
+    }
     return ctypename[type.base_type];
   }
 
@@ -567,10 +567,10 @@ class RustGenerator : public BaseGenerator {
       return GenTypePointer(type, lifetime);
       //return "&" + lifetime + " " + GenTypePointer(type, lifetime) + postfix;
     } else if (type.base_type == BASE_TYPE_UNION) {
-      return "flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">" + postfix;
+      return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
       //return "Option<flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">>" + postfix;
     } else {
-      return "flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">" + postfix;
+      return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
   }
 
@@ -840,7 +840,7 @@ class RustGenerator : public BaseGenerator {
           ev.union_type.struct_def->defined_namespace, name)
                   : name;
     } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
-      return actual_type ? (native_type ? "std::string" : "flatbuffers::String")
+      return actual_type ? (native_type ? "std::string" : "flatbuffers::FBString")
                          : Name(ev);
     } else {
       assert(false);
@@ -857,7 +857,7 @@ class RustGenerator : public BaseGenerator {
   std::string UnionVectorVerifySignature(const EnumDef &enum_def) {
     return "pub fn Verify" + Name(enum_def) + "Vector" +
            "(_verifier: &mut flatbuffers::Verifier, " +
-           "values: &[flatbuffers::LabeledUOffsetT<flatbuffers::Void>], " +
+           "values: &[flatbuffers::Offset<flatbuffers::Void>], " +
            "types: &[u8]) -> bool";
   }
 
@@ -869,7 +869,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string UnionPackSignature(const EnumDef &enum_def, bool inclass) {
-    return "flatbuffers::LabeledUOffsetT<flatbuffers::Void> " +
+    return "flatbuffers::Offset<flatbuffers::Void> " +
            (inclass ? "" : Name(enum_def) + "Union::") +
            "Pack(flatbuffers::FlatBufferBuilder &_fbb, " +
            "const flatbuffers::rehasher_function_t *_rehasher" +
@@ -878,7 +878,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string TableCreateSignature(const StructDef &struct_def, bool predecl,
                                    const IDLOptions &opts) {
-    return "flatbuffers::LabeledUOffsetT<" + Name(struct_def) + "> Create" +
+    return "flatbuffers::Offset<" + Name(struct_def) + "> Create" +
            Name(struct_def) + "(flatbuffers::FlatBufferBuilder &_fbb, const " +
            NativeName(Name(struct_def), &struct_def, opts) +
            " *_o, const flatbuffers::rehasher_function_t *_rehasher" +
@@ -887,7 +887,7 @@ class RustGenerator : public BaseGenerator {
 
   std::string TablePackSignature(const StructDef &struct_def, bool inclass,
                                  const IDLOptions &opts) {
-    return std::string(inclass ? "static " : "") + "flatbuffers::LabeledUOffsetT<" +
+    return std::string(inclass ? "static " : "") + "flatbuffers::Offset<" +
            Name(struct_def) + "> " + (inclass ? "" : Name(struct_def) + "::") +
            "Pack(flatbuffers::FlatBufferBuilder &_fbb, " + "const " +
            NativeName(Name(struct_def), &struct_def, opts) + "* _o, " +
@@ -1627,7 +1627,7 @@ class RustGenerator : public BaseGenerator {
         return "Option<flatbuffers::Offset<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
       }
       case FullElementType::String: {
-        return "Option<flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>";
+        return "Option<flatbuffers::Offset<flatbuffers::FBString<" + lifetime + ">>>";
         //return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", u8>>>";
         //return "Option<flatbuffers::Offset<flatbuffers::StringOffset>>";
       }
@@ -1645,28 +1645,28 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::VectorOfFloat: {
         const auto typname = GenTypeBasic(type.VectorType(), false);
         //const auto basetype = GenTypeBasic(type.VectorType(), false);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ",  &" + lifetime + " " + typname + ">>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ",  " + typname + ">>>";
       }
       case FullElementType::VectorOfBool: {
         const auto typname = GenTypeBasic(type, false);
         //const auto basetype = GenTypeBasic(type.VectorType(), false);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " bool>>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>>";
       }
       case FullElementType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
         //const auto basetype = GenTypeBasic(type.VectorType(), false);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>";
       }
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>";
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + "<" + lifetime + ">>>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + "<" + lifetime + ">>>>>";
       }
       case FullElementType::VectorOfString: {
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<flatbuffers::FBString<" + lifetime + ">>>>>";
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
@@ -1701,28 +1701,28 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullElementType(field.value.type)) {
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + "<" + lifetime + ">>>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + "<" + lifetime + ">>>>";
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
         //const auto typname = GenTypeBasic(type, false);
         const auto typname = GenTypeBasic(type.VectorType(), false);
         //return "flatbuffers::Vector<" + typname + "<" + basetype + ">>";
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullElementType::VectorOfBool: {
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " bool>>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>";
       }
       case FullElementType::VectorOfString: {
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<flatbuffers::FBString<" + lifetime + ">>>>";
       }
       case FullElementType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
         //return typname;
         //const auto typname = GenTypeBasic(type, false);
         //const auto basetype = GenTypeBasic(type.VectorType(), false);
@@ -1730,7 +1730,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + ">>>";
         //const auto typname = WrapInNameSpace(*type.enum_def);
         //return typname;
       }
@@ -1757,7 +1757,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::String: {
         //return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", u8>>";
-        return "flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>";
+        return "flatbuffers::Offset<flatbuffers::FBString<" + lifetime + ">>";
       }
       case FullElementType::UnionKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
@@ -1789,7 +1789,7 @@ class RustGenerator : public BaseGenerator {
           }
           case FullElementType::Table: {
             const auto typname = WrapInNameSpace(*type.struct_def);
-            return "self.fbb_.push_slot_uoffset_relative::<&" + typname + ">";
+            return "self.fbb_.push_slot_offset_relative::<&" + typname + ">";
           }
 
           case FullElementType::EnumKey:
@@ -1808,7 +1808,7 @@ class RustGenerator : public BaseGenerator {
           case FullElementType::VectorOfTable:
           case FullElementType::VectorOfString:
           case FullElementType::VectorOfUnionValue: {
-            return "self.fbb_.push_slot_uoffset_relative";
+            return "self.fbb_.push_slot_offset_relative";
           }
         }
 
@@ -1904,31 +1904,31 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::String: {
          //return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", u8>>>";// + lifetime + ">>>";
-         return "Option<flatbuffers::String<" + lifetime + ">>";
+         return "Option<flatbuffers::FBString<" + lifetime + ">>";
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
         const auto typname = GenTypeBasic(type.VectorType(), false);
-        return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
+        return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullElementType::VectorOfBool: {
-        return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " bool>>";
+        return "Option<flatbuffers::Vector<" + lifetime + ", bool>>";
       }
       case FullElementType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
+        return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + ">>";
+        return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " " + typname + "<" + lifetime + ">>>";
+        return "Option<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + "<" + lifetime + ">>>>";
       }
       case FullElementType::VectorOfString: {
         //return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " flatbuffers::String<" + lifetime + ">>>";
-        return "Option<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>>";
+        return "Option<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<flatbuffers::FBString<" + lifetime + ">>>>";
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
@@ -1981,33 +1981,34 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
         const auto typname = GenTypeBasic(type.VectorType(), false);
-        return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + ">(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<" + typname + ">(" + offset_name + ")";
       }
       case FullElementType::VectorOfBool: {
-        return "self._tab.get_slot_vector::<&" + lifetime + " bool>(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<bool>(" + offset_name + ")";
       }
       case FullElementType::VectorOfEnumKey: {
         //const auto typname = WrapInNameSpace(*type.VectorType().enum_def);
         const auto typname = WrapInNameSpace(*type.enum_def);
         //const auto typname = GenTypeBasic(type.VectorType(), false);
-        return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + ">(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<" + typname + ">(" + offset_name + ")";
       }
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + ">(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<" + typname + ">(" + offset_name + ")";
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + "<" + lifetime + ">>(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<flatbuffers::Offset<" + typname + "<" + lifetime + ">>>(" + offset_name + ")";
       }
       case FullElementType::VectorOfString: {
-        return "self._tab.get_slot_vector(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<flatbuffers::Offset<flatbuffers::FBString<" + lifetime + ">>>(" + offset_name + ")";
         //return "self._tab.get_slot_vector::<&" + lifetime + " flatbuffers::String<" + lifetime + ">>(" + offset_name + ")";
         //return "self._tab.get_slot_vector::<&" + lifetime + ", &" + lifetime + " flatbuffers::Offset<flatbuffers::String<" + lifetime + ">>>";
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
-        return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + "<" + lifetime + ">>(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<flatbuffers::Offset<" + typname + "<" + lifetime + ">>>(" + offset_name + ")";
+        //return "self._tab.get_slot_vector::<&" + lifetime + " " + typname + "<" + lifetime + ">>(" + offset_name + ")";
       }
     }
   }
@@ -2684,7 +2685,7 @@ class RustGenerator : public BaseGenerator {
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
     code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "  start_: flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset>,";
+    code_ += "  start_: flatbuffers::Offset<flatbuffers::TableOffset>,";
     code_ += "}";
 
     // Generate builder functions:
@@ -2785,10 +2786,10 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  //pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<flatbuffers::TableOffset> {";
-    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}> {";
+    code_ += "  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {";
+    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
-    code_ += "    //let o = flatbuffers::LabeledUOffsetT::<{{OFFSET_TYPELABEL}}>::new(end);";
+    code_ += "    //let o = flatbuffers::Offset::<{{OFFSET_TYPELABEL}}>::new(end);";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2799,7 +2800,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "    self.fbb_.required(&o, {{STRUCT_NAME}}::{{OFFSET_NAME}});";
       }
     }
-    code_ += "    flatbuffers::LabeledUOffsetT::new(o.value())";
+    code_ += "    flatbuffers::Offset::new(o.value())";
     code_ += "  }";
     code_ += "}";
     code_ += "";
@@ -2810,7 +2811,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b>(";
     code_ += "    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
     code_ += "    args: &'a {{STRUCT_NAME}}Args) -> \\";
-    code_ += "flatbuffers::LabeledUOffsetT<{{OFFSET_TYPELABEL}}> {";
+    code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
     //  const auto &field = **it;
@@ -3078,7 +3079,7 @@ class RustGenerator : public BaseGenerator {
               }
               code += "(" + value + ")";
             } else {
-              code += "_fbb.create_vector<flatbuffers::LabeledUOffsetT<";
+              code += "_fbb.create_vector<flatbuffers::Offset<";
               code += WrapInNameSpace(*vector_type.struct_def) + ">> ";
               code += "(" + value + ".size(), ";
               code += "[](size_t i, _VectorArgs *__va) { ";
@@ -3096,7 +3097,7 @@ class RustGenerator : public BaseGenerator {
           case BASE_TYPE_UNION: {
             code +=
                 "_fbb.create_vector<flatbuffers::"
-                "LabeledUOffsetT<flatbuffers::Void>>(" +
+                "Offset<flatbuffers::Void>>(" +
                 value +
                 ".size(), [](size_t i, _VectorArgs *__va) { "
                 "return __va->_" +
