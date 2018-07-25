@@ -160,22 +160,43 @@ pub trait VectorGettable {
     fn get(&self, i: usize) -> Self;
 }
 
-pub struct Vector<'a, T: Sized + 'a> {
-    data: &'a [u8],
-    _phantom: PhantomData<T>,
-}
+pub struct Vector<'a, T: Sized + 'a>(&'a [T]);
+//pub struct Vector<'a, T: Sized + 'a> {
+//    data: &'a [u8],
+//    _phantom: PhantomData<T>,
+//}
 
-impl<'a, T: 'a> Vector<'a, T> {
+impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn new(buf: &'a [u8]) -> Self {
-        Self {
-            data: buf,
-            _phantom: PhantomData,
-        }
+        let sz = std::mem::size_of::<T>();
+        let num_elems = buf.len() / sz;
+        let ptr = buf.as_ptr() as *const T;
+        let data = unsafe {
+            std::slice::from_raw_parts::<T>(ptr, num_elems)
+        };
+        Self { 0: data }
+    }
+    pub fn get(&self, idx: usize) -> &'a T {
+        unimplemented!()
     }
 }
 
-pub struct String<'a> {
-    data: &'a [u8],
+//pub struct String<'a> {
+//    data: &'a [u8],
+//}
+pub type FBString<'a> = Vector<'a, u8>;
+impl<'a> FBString<'a> {
+    pub fn as_str(&'a self) -> &'a str {
+        unsafe {
+            std::str::from_utf8_unchecked(self.0)
+        }
+    }
+}
+pub type ByteString<'a> = Vector<'a, u8>;
+impl<'a> ByteString<'a> {
+    pub fn as_slice(&'a self) -> &'a [u8] {
+        self.0
+    }
 }
 
 //impl<'a, T> Vector<'a, T> {
@@ -262,7 +283,7 @@ impl<'a> Table<'a> {
         Some(s)
     }
     //pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
-    pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<String<'a>> {
+    pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<FBString<'a>> {
         return None;
         //let x: Option<Vector<u8>> = self.get_slot_vector(slotnum);
         //x
@@ -430,7 +451,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             _phantom: PhantomData,
         }
     }
-    pub fn start_table(&mut self, num_fields: VOffsetT) -> LabeledUOffsetT<TableOffset> {
+    pub fn start_table(&mut self, num_fields: VOffsetT) -> Offset<TableOffset> {
         self.assert_not_nested();
         self.nested = true;
 
@@ -439,7 +460,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.vtable.resize(num_fields as usize, 0);
 
         self.min_align = 1;
-        LabeledUOffsetT::new(self.rev_cur_idx())
+        Offset::new(self.rev_cur_idx())
 
         //self.table_end = self.rev_cur_idx();
 
@@ -533,13 +554,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector(&mut self, num_elems: usize) -> LabeledUOffsetT<VectorOffset> {
+    pub fn end_vector<'a, T: Sized + 'a>(&'a mut self, num_elems: usize) -> Offset<Vector<'a, T>> {
       self.assert_nested();
 
       // we already made space for this, so write without PrependUint32
       self.push_element_scalar_no_prep(num_elems as UOffsetT);
       self.nested = false;
-      LabeledUOffsetT::new(self.rev_cur_idx())
+      Offset::new(self.rev_cur_idx())
   }
     pub fn emplace_scalar_in_active_buf<T>(&mut self, at: usize, x: T) {
         let buf = &mut self.get_mut_active_buf_slice();
@@ -595,7 +616,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn add_element<T>(&mut self, _: isize, _: T, _: T) -> T {
         unimplemented!()
     }
-    pub fn add_offset<T>(&mut self, _: isize, _: LabeledUOffsetT<T>) -> usize {
+    pub fn add_offset<T>(&mut self, _: isize, _: Offset<T>) -> usize {
 
         unimplemented!()
     }
@@ -604,10 +625,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // TODO: unimplemented!()
     }
     // utf-8 string creation
-    pub fn create_string(&mut self, s: &str) -> LabeledUOffsetT<StringOffset> {
-        LabeledUOffsetT::new(self.create_byte_string(s.as_bytes()).value())
+    pub fn create_string(&mut self, s: &str) -> Offset<FBString> {
+        Offset::new(self.create_byte_string(s.as_bytes()).value())
     }
-    pub fn create_byte_string<'a>(&mut self, data: &[u8]) -> LabeledUOffsetT<ByteStringOffset> {
+    pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<ByteString> {
         self.assert_not_nested();
         self.nested = true;
         self.prep(SIZE_UOFFSET, data.len() + 1);
@@ -619,14 +640,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.cur_idx -= data.len();
         //self.owned_buf[self.cur_idx..self.cur_idx+data.len()].copy_from_slice(data);
 
-        LabeledUOffsetT::new(self.end_vector(data.len()).value())
+        Offset::new(self.end_vector::<'_, u8>(data.len()).value())
 
         ////self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
         //self.push_bytes(data);
         //self.push_element_scalar(data.len() as UOffsetT);
         //LabeledUOffsetT::new(self.get_size() as u32)
     }
-    pub fn create_byte_vector(&mut self, data: &[u8]) -> LabeledUOffsetT<ByteStringOffset> {
+    pub fn create_byte_vector<'a>(&'a mut self, data: &[u8]) -> Offset<Vector<'a, u8>> {
         self.assert_not_nested();
         self.nested = true;
         let l = data.len();
@@ -635,47 +656,47 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.cur_idx -= l;
         self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(data);
 
-        LabeledUOffsetT::new(self.end_vector(data.len()).value())
+        Offset::new(self.end_vector::<'a, u8>(data.len()).value())
     }
-    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> LabeledUOffsetT<StringOffset> {
-        LabeledUOffsetT::new(0)
+    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<StringOffset> {
+        Offset::new(0)
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
-    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset> {
-        LabeledUOffsetT::new(0)
+    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> Offset<VectorOffset> {
+        Offset::new(0)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<LabeledVectorUOffsetT<T>> {
+    pub fn create_vector<'a, T: Sized + 'a>(&'a mut self, items: &'a [T]) -> Offset<Vector<'a, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len(), elemsize);
         self.start_vector(elemsize, items.len(), elemsize);
         for i in items.iter().rev() {
             self.push_bytes_no_prep(to_bytes(i));
         }
-        LabeledUOffsetT::new(self.end_vector(items.len()).value())
+        Offset::new(self.end_vector::<'_, T>(items.len()).value())
     }
 //  //pub fn create_vector_from_fn<'a: 'fbb, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'fbb mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
-    pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> LabeledUOffsetT<&'fbb [T]>
+    pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [T]>
         where F: FnMut(usize, &mut Self) -> T {
-        LabeledUOffsetT::new(0)
+        Offset::new(0)
     }
 //  pub fn create_vector_of_structs<'a, T: 'a>(&'fbb mut self, _: &'a [T]) -> Offset<&'a [T]> {
 //      LabeledUOffsetT::new(0)
 //  }
 //  // TODO probably should not be returning [&T]
-    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [T]> {
-        LabeledUOffsetT::new(0)
+    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
+        Offset::new(0)
     }
-    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> LabeledUOffsetT<&'fbb [T]>
+    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'fbb, T>>
         where F: FnMut(usize, &mut T) {
-        LabeledUOffsetT::new(0)
+        Offset::new(0)
     }
-    pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> LabeledUOffsetT<&'fbb [T]> {
-        LabeledUOffsetT::new(0)
+    pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
+        Offset::new(0)
     }
     pub fn dump_buf(&self, label: &str) {
         //println!("dump_buf {}: {}/{}: {:?}", label, self.get_size(), self.owned_buf.len(), self.get_active_buf_slice());
@@ -685,14 +706,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //    self.push_element_scalar::<SOffsetT>(0);
     //    let object_offset = b.get_size();
     //}
-    pub fn end_table(&mut self, off: LabeledUOffsetT<TableOffset>) -> LabeledUOffsetT<TableOffset> {
+    pub fn end_table(&mut self, off: Offset<TableOffset>) -> Offset<TableOffset> {
         //println!("1/3");
         self.assert_nested();
         //println!("2/3");
         let n = self.write_vtable(off.value());
         //println!("3/3");
         self.nested = false;
-        let o = LabeledUOffsetT::new(n);
+        let o = Offset::new(n);
         o
     }
     pub fn write_vtable(&mut self, table_end: UOffsetT) -> UOffsetT {
@@ -822,17 +843,17 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // vtableoffsetloc as UOffsetT
     }
 
-    pub fn required<T>(&self, _: &LabeledUOffsetT<T>, _: VOffsetT) {
+    pub fn required<T>(&self, _: &Offset<T>, _: VOffsetT) {
         //TODO: unimplemented!()
     }
-    pub fn finish<T>(&mut self, root: LabeledUOffsetT<T>) {
+    pub fn finish<T>(&mut self, root: Offset<T>) {
         self.assert_not_nested();
         let min_align = self.min_align;
         self.prep(min_align, SIZE_UOFFSET);
         self.push_element_scalar_indirect_uoffset(root.value());
         self.finished = true;
     }
-    pub fn finish_with_identifier<'a, T>(&'a mut self, root: LabeledUOffsetT<T>, name: &'static str) {
+    pub fn finish_with_identifier<'a, T>(&'a mut self, root: Offset<T>, name: &'static str) {
         self.finish(root)
     }
 
@@ -925,16 +946,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: &T) {
 	// using to_bytes as a trait makes it easier to mix references into T
         self.assert_nested();
-        //let ptr = &*x as *const T as *const u8;
-        //let bytes: &[u8] = unsafe {
-        //    std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<T>())
-        //};
 	let bytes = x.to_bytes();
         self.prep(bytes.len(), 0);
         self.push_bytes_no_prep(bytes);
-        //if x != self.rev_cur_idx() {
-        //    panic!("structs must be written inside a table");
-        //}
         self.store_slot(slotoff);
     }
     // Offsets initially are relative to the end of the buffer (downwards).
@@ -948,12 +962,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         assert!(off <= self.get_size() as UOffsetT);
         self.get_size() as UOffsetT - off + SIZE_UOFFSET as UOffsetT
     }
-    pub fn push_slot_labeled_uoffset_relative_from_option<T>(&mut self, slotoff: VOffsetT, x: Option<LabeledUOffsetT<T>>) {
+    pub fn push_slot_labeled_uoffset_relative_from_option<T>(&mut self, slotoff: VOffsetT, x: Option<Offset<T>>) {
+        unimplemented!();
         if let Some(o) = x {
             self.push_slot_labeled_uoffset_relative(slotoff, o)
         }
     }
-    pub fn push_slot_uoffset_relative<T>(&mut self, slotoff: VOffsetT, x: Offset<T>) {
+    pub fn push_slot_offset_relative<T>(&mut self, slotoff: VOffsetT, x: Offset<T>) {
         if x.value() == 0 {
             return;
         }
@@ -964,7 +979,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.store_slot(slotoff);
         //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
-    pub fn push_slot_labeled_uoffset_relative<T>(&mut self, slotoff: VOffsetT, x: LabeledUOffsetT<T>) {
+    pub fn push_slot_labeled_uoffset_relative<T>(&mut self, slotoff: VOffsetT, x: Offset<T>) {
         if x.value() == 0 {
             return;
         }

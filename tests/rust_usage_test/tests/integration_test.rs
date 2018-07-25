@@ -116,13 +116,13 @@ impl LCG {
 // example of how to build up a serialized buffer algorithmically:
 fn Foo<'fbb, 'a: 'fbb>(
     fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,
-    root: flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>) {
+    root: flatbuffers::Offset<MyGame::Example::MonsterOffset>) {
     //fbb.finish_with_identifier(root, MonsterIdentifier());
 }
 fn Bar<'a, 'b, 'c: 'a>(
     _fbb: &'a mut flatbuffers::FlatBufferBuilder<'c>,
-    args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset> {
-    flatbuffers::LabeledUOffsetT::new(0)
+    args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::MonsterOffset> {
+    flatbuffers::Offset::new(0)
 }
 fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::FlatBufferBuilder) {
     //impl From<flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>> for flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset> {
@@ -137,15 +137,15 @@ fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::
         let args = MyGame::Example::MonsterArgs{
             hp: 80,
             mana: 150,
-            name: builder.create_string("MyMonster"),
+            name: Some(builder.create_string("MyMonster")),
             pos: Some(&pos),
             test_type: MyGame::Example::Any::Monster,
             // TODO(rw): better offset ergonomics
-            test: Some(flatbuffers::LabeledUOffsetT::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
-                name: fred_name,
+            test: Some(flatbuffers::Offset::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
+                name: Some(fred_name),
                 ..Default::default()
             }).value())),
-            inventory: inventory,
+            inventory: Some(inventory),
             ..Default::default()
         };
         MyGame::Example::CreateMonster(builder, &args)
@@ -157,7 +157,7 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
     let nested_union_mon = {
         let name = builder.create_string("Fred");
         let table_start = builder.start_table(34);
-        builder.push_slot_labeled_uoffset_relative(MyGame::Example::Monster::VT_NAME, name);
+        builder.push_slot_offset_relative(MyGame::Example::Monster::VT_NAME, name);
         builder.end_table(table_start)
     };
     let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
@@ -169,11 +169,11 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
     let table_start = builder.start_table(34);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_MANA, 150, 150);
-    builder.push_slot_labeled_uoffset_relative(MyGame::Example::Monster::VT_NAME, name);
-    builder.push_slot_struct(MyGame::Example::Monster::VT_POS, Some(&pos));
+    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_NAME, name);
+    builder.push_slot_struct(MyGame::Example::Monster::VT_POS, &pos);
     builder.push_slot_scalar::<u8>(MyGame::Example::Monster::VT_TEST_TYPE, MyGame::Example::Any::Monster as u8, 0);
-    builder.push_slot_labeled_uoffset_relative_from_option(MyGame::Example::Monster::VT_TEST, Some(nested_union_mon));
-    builder.push_slot_labeled_uoffset_relative_from_option(MyGame::Example::Monster::VT_INVENTORY, Some(inv));
+    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST, nested_union_mon);
+    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_INVENTORY, inv);
     let root = builder.end_table(table_start);
     builder.finish(root);
 }
@@ -198,7 +198,7 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
 
   // create monster with very few fields set:
   // (same functionality as CreateMonster below, but sets fields manually)
-  let mut mlocs: [flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>; 3] = [flatbuffers::LabeledUOffsetT::<_>::new(0); 3];
+  let mut mlocs: [flatbuffers::Offset<MyGame::Example::MonsterOffset>; 3] = [flatbuffers::Offset::<_>::new(0); 3];
   let fred = builder.create_string("Fred");
   let barney = builder.create_string("Barney");
   let wilma = builder.create_string("Wilma");
@@ -227,7 +227,7 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
   //let vecofstrings = builder.create_vector_of_strings(&names);
   let vecofstrings = builder.create_vector_from_fn::<_, _>(
       4,
-      |i, b| -> flatbuffers::LabeledUOffsetT<flatbuffers::StringOffset> {
+      |i, b| -> flatbuffers::Offset<flatbuffers::StringOffset> {
           b.create_shared_string(names[i])
       });
 
@@ -256,7 +256,7 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
   let args = MyGame::Example::MonsterArgs{
       mana: 0,
       hp: 0,
-      name: nested_builder.create_string("NestedMonster"),
+      name: Some(nested_builder.create_string("NestedMonster")),
       ..Default::default()
   };
   let nmloc = MyGame::Example::CreateMonster(&mut nested_builder, &args);
@@ -286,17 +286,17 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
         pos: Some(&_vec),
         mana: 150,
         hp: 80,
-        name: _name,
-        inventory: inventory,
+        name: Some(_name),
+        inventory: Some(inventory),
         color: MyGame::Example::Color::Blue,
         test_type: MyGame::Example::Any::Monster,
         test: Some(mlocs[1].union()),  // Store a union.
-        test4: testv,
-        testarrayofstring: vecofstrings,
+        test4: Some(testv),
+        testarrayofstring: Some(vecofstrings),
         //testarrayoftables: vecoftables, // TODO
-        enemy: flatbuffers::LabeledUOffsetT::new(0),
-        testnestedflatbuffer: nested_flatbuffer_vector,
-        testempty: flatbuffers::LabeledUOffsetT::new(0),
+        enemy: Some(flatbuffers::Offset::new(0)),
+        testnestedflatbuffer: Some(nested_flatbuffer_vector),
+        testempty: Some(flatbuffers::Offset::new(0)),
         testbool: false,
         testhashs32_fnv1: 0,
         testhashu32_fnv1: 0,
@@ -306,17 +306,17 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
         testhashu32_fnv1a: 0,
         testhashs64_fnv1a: 0,
         testhashu64_fnv1a: 0,
-        testarrayofbools: flatbuffers::LabeledUOffsetT::new(0),
+        testarrayofbools: Some(flatbuffers::Offset::new(0)),
         testf: 3.14159f32,
         testf2: 3.0f32,
         testf3: 0.0f32,
         //testarrayofstring2: vecofstrings2, // TODO
-        testarrayofsortedstruct: vecofstructs,
-        flex: flatbuffers::LabeledUOffsetT::new(0),
-        test5: flatbuffers::LabeledUOffsetT::new(0),
-        vector_of_longs: flatbuffers::LabeledUOffsetT::new(0),
-        vector_of_doubles: flatbuffers::LabeledUOffsetT::new(0),
-        //parent_namespace_test: flatbuffers::LabeledUOffsetT::new(0),
+        testarrayofsortedstruct: Some(vecofstructs),
+        flex: Some(flatbuffers::Offset::new(0)),
+        test5: Some(flatbuffers::Offset::new(0)),
+        vector_of_longs: Some(flatbuffers::Offset::new(0)),
+        vector_of_doubles: Some(flatbuffers::Offset::new(0)),
+        //parent_namespace_test: flatbuffers::Offset::new(0),
 
         ..Default::default() // for phantom
     });
@@ -433,7 +433,7 @@ mod vector_read_scalar_tests {
         let idx = all.len() - vecend.value() as usize;
         let buf = &all[idx..];
 
-        let vec: flatbuffers::Vector<T> = flatbuffers::Vector::new_from_buf(buf);
+        let vec: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf);
         assert_eq!(vec.len(), xs.len());
         for i in 0..xs.len() {
             assert_eq!(vec.get(i), &xs[i]);
@@ -2417,7 +2417,7 @@ fn assert_example_data_is_accessible_and_correct(filename: &'static str) {
 #[should_panic]
 fn end_table_should_panic_when_not_in_table() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
-    b.end_table(flatbuffers::LabeledUOffsetT::new(0));
+    b.end_table(flatbuffers::Offset::new(0));
 }
 
 #[test]
@@ -2445,7 +2445,7 @@ fn push_struct_slot_should_panic_when_not_in_table() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     b.start_table(0);
     let x = foo{};
-    b.push_slot_struct(0, Some(&x));
+    b.push_slot_struct(0, &x);
 }
 
 #[test]
@@ -2731,7 +2731,7 @@ mod byte_layouts {
         b.start_vector(flatbuffers::SIZE_U8, 0, 1);
         let vecend = b.end_vector(0);
         let off = b.start_table(1);
-        b.push_slot_labeled_uoffset_relative(fi2fo(0), vecend);
+        b.push_slot_offset_relative(fi2fo(0), vecend);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
@@ -2812,7 +2812,7 @@ mod byte_layouts {
         //b.push_element_scalar(0x12345678i32);
         //let struct_start = b.rev_cur_idx();
         let x = foo{a: 0x12345678i32.to_le(), _pad0: [0,0], b: 0x1234i16.to_le(), _pad1: [0, 0, 0], c: 55i8.to_le()};
-        b.push_slot_struct(fi2fo(0), Some(&x));
+        b.push_slot_struct(fi2fo(0), &x);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
