@@ -271,7 +271,7 @@ impl<'a> Table<'a> {
         //    Some(v) => { return None; }
         //}
     }
-    pub fn get_slot_vector<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<T>> {
+    pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
