@@ -354,7 +354,7 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             None => { return Err("bad m.name"); }
             Some("MyMonster") => { }
             Some(x) => {
-                assert_eq!(x, "MyMonster"); return Err("bad m.name"); }
+                assert_eq!(x.as_str(), "MyMonster"); return Err("bad m.name"); }
         }
         let pos = match m.pos() {
             None => { return Err("bad m.pos"); }
