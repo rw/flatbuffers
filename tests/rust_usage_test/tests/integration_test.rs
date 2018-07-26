@@ -224,12 +224,12 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
 
   // Create an array of strings. Also test string pooling, and lambdas.
   let names: [&'static str; 4] = ["bob", "fred", "bob", "fred"];
-  //let vecofstrings = builder.create_vector_of_strings(&names);
-  let vecofstrings = builder.create_vector_from_fn::<_, _>(
-      4,
-      |i, b| -> flatbuffers::Offset<flatbuffers::StringOffset> {
-          b.create_shared_string(names[i])
-      });
+  let vecofstrings = builder.create_vector_of_strings(&names);
+  //let vecofstrings = builder.create_vector_from_fn::<_, _>(
+  //    4,
+  //    |i, b| -> flatbuffers::Offset<flatbuffers::StringOffset> {
+  //        b.create_shared_string(names[i])
+  //    });
 
   // Creating vectors of strings in one convenient call.
   let names2 = vec!["jane", "mary"];
@@ -290,7 +290,7 @@ fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut f
         inventory: Some(inventory),
         color: MyGame::Example::Color::Blue,
         test_type: MyGame::Example::Any::Monster,
-        test: Some(mlocs[1].union()),  // Store a union.
+        test: None,//Some(mlocs[1].union()),  // Store a union.
         test4: Some(testv),
         testarrayofstring: Some(vecofstrings),
         //testarrayoftables: vecoftables, // TODO
@@ -354,7 +354,7 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             None => { return Err("bad m.name"); }
             Some("MyMonster") => { }
             Some(x) => {
-                assert_eq!(x.as_str(), "MyMonster"); return Err("bad m.name"); }
+                assert_eq!(x, "MyMonster"); return Err("bad m.name"); }
         }
         let pos = match m.pos() {
             None => { return Err("bad m.pos"); }
@@ -434,9 +434,10 @@ mod vector_read_scalar_tests {
         let buf = &all[idx..];
 
         let vec: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf);
-        assert_eq!(vec.len(), xs.len());
+        let sl = vec.as_slice();
+        assert_eq!(sl.len(), xs.len());
         for i in 0..xs.len() {
-            assert_eq!(vec.get(i), &xs[i]);
+            assert_eq!(sl[i], xs[i]);
         }
     }
 

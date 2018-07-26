@@ -1904,7 +1904,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::String: {
          //return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", u8>>>";// + lifetime + ">>>";
-         return "Option<flatbuffers::FBString<" + lifetime + ">>";
+         //return "Option<flatbuffers::FBString<" + lifetime + ">>";
+         return "Option<&" + lifetime + " str>";
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
@@ -1975,6 +1976,7 @@ class RustGenerator : public BaseGenerator {
         return "unsafe { ::std::mem::transmute(self._tab.get_slot_scalar::<" + underlying_typname + ">(" + offset_name + ", " + default_value + " as " + underlying_typname + ")) }";
       }
       case FullElementType::String: {
+        //return "self._tab.get_slot_string(" + offset_name + ").map(|s| s.as_str())";
         return "self._tab.get_slot_string(" + offset_name + ")";
       }
 
