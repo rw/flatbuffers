@@ -179,6 +179,9 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn get(&self, idx: usize) -> &'a T {
         unimplemented!()
     }
+    pub fn as_slice(&self) -> &'a [T] {
+        self.0
+    }
 }
 
 //pub struct String<'a> {
@@ -192,12 +195,18 @@ impl<'a> FBString<'a> {
         }
     }
 }
-pub type ByteString<'a> = Vector<'a, u8>;
-impl<'a> ByteString<'a> {
-    pub fn as_slice(&'a self) -> &'a [u8] {
-        self.0
+impl<'a> std::convert::AsRef<str> for FBString<'a> {
+    fn as_ref(&self) -> &str {
+        self.as_str()
     }
 }
+//impl<'a> std::ops::Deref for FBString<'a> {
+//    type Target = str;
+//    fn deref(&self) -> &str {
+//        self.as_str()
+//    }
+//}
+pub type ByteString<'a> = Vector<'a, u8>;
 
 //impl<'a, T> Vector<'a, T> {
 //    pub fn new_from_buf(buf: &'a [u8]) -> Self {
@@ -265,7 +274,7 @@ impl<'a> Table<'a> {
         };
         Some(t2)
     }
-    pub fn get_slot_string_unsafe(&'a self, slotnum: VOffsetT) -> Option<&'a str> {
+    pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<&'a str> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
@@ -283,15 +292,15 @@ impl<'a> Table<'a> {
         Some(s)
     }
     //pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
-    pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<FBString<'a>> {
-        return None;
-        //let x: Option<Vector<u8>> = self.get_slot_vector(slotnum);
-        //x
-        //match x {
-        //    None => { return None; }
-        //    Some(v) => { return None; }
-        //}
-    }
+    //pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<FBString<'a>> {
+    //    return None;
+    //    //let x: Option<Vector<u8>> = self.get_slot_vector(slotnum);
+    //    //x
+    //    //match x {
+    //    //    None => { return None; }
+    //    //    Some(v) => { return None; }
+    //    //}
+    //}
     pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
@@ -625,7 +634,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // TODO: unimplemented!()
     }
     // utf-8 string creation
-    pub fn create_string(&mut self, s: &str) -> Offset<FBString> {
+    pub fn create_string<'b, 'a: 'b>(&'a mut self, s: &'b str) -> Offset<FBString> {
         Offset::new(self.create_byte_string(s.as_bytes()).value())
     }
     pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<ByteString> {
@@ -663,14 +672,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
-    pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> Offset<VectorOffset> {
-        Offset::new(0)
+    pub fn create_vector_of_strings<'b, 'a: 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'a, Offset<FBString>>> {
+        //let offsets: Vec<Offset<FBString>> = vec![];// xs.iter().map(|s| self.create_string(s)).collect();
+        let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
+        self.create_vector(&offsets)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, T: Sized + 'a>(&'a mut self, items: &'a [T]) -> Offset<Vector<'a, T>> {
+    pub fn create_vector<'a, 'b, T: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'a, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len(), elemsize);
         self.start_vector(elemsize, items.len(), elemsize);

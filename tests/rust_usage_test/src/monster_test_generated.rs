@@ -492,7 +492,7 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
     pub const VT_VAL: flatbuffers::VOffsetT = 6;
     pub const VT_COUNT: flatbuffers::VOffsetT = 8;
 
-  pub fn id(&'a self) -> Option<flatbuffers::FBString<'a>> {
+  pub fn id(&'a self) -> Option<&'a str> {
     self._tab.get_slot_string(Stat::VT_ID)
   }
   pub fn val(&'a self) -> i64 {
@@ -636,7 +636,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn hp(&'a self) -> i16 {
     self._tab.get_slot_scalar::<i16>(Monster::VT_HP, 100)
   }
-  pub fn name(&'a self) -> Option<flatbuffers::FBString<'a>> {
+  pub fn name(&'a self) -> Option<&'a str> {
     self._tab.get_slot_string(Monster::VT_NAME)
   }
   fn KeyCompareLessThan(&self, o: &Monster) -> bool {
