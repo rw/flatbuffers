@@ -124,7 +124,7 @@ fn Bar<'a, 'b, 'c: 'a>(
     args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::MonsterOffset> {
     flatbuffers::Offset::new(0)
 }
-fn create_serialized_example_with_generated_code(mut builder: &mut flatbuffers::FlatBufferBuilder) {
+fn create_serialized_example_with_generated_code<'a>(builder: &'a mut flatbuffers::FlatBufferBuilder<'a>) {
     //impl From<flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>> for flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset> {
     //    fn from(o: flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>) -> Self {
     //        flatbuffers::LabeledUOffsetT::new(o.value())
@@ -178,7 +178,7 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
     builder.finish(root);
 }
 
-fn create_serialized_example_with_generated_code_more_fields(mut builder: &mut flatbuffers::FlatBufferBuilder) {
+fn create_serialized_example_with_generated_code_more_fields<'a>(builder: &'a mut flatbuffers::FlatBufferBuilder<'a>) {
   let x = MyGame::Example::Test::new(10, 20);
   let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, x);
   let _name = builder.create_string("MyMonster");
