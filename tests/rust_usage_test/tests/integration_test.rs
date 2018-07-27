@@ -372,22 +372,21 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
 
         if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
 
-        let table2 = match m.test() {
+        let table2_bytes = match m.test() {
             None => { return Err("bad m.test"); }
             Some(x) => { x }
         };
 
-        let monster2 = MyGame::Example::Monster::init_from_table(table2);
+        let monster2 = MyGame::Example::Monster::init_from_table(flatbuffers::Table::new(table2_bytes.as_slice(), 0));
 
         match monster2.name() {
-            None => { return Err("bad monster2.name"); }
             Some("Fred") => { }
-            Some(_) => { return Err("bad monster2.name"); }
+            _ => { return Err("bad monster2.name"); }
         }
 
         let inv = match m.inventory() {
             None => { return Err("bad m.inventory"); }
-            Some(x) => { x }
+            Some(x) => { x.as_slice() }
         };
 
         if inv.len() != 5 { return Err("bad m.inventory len"); }
@@ -396,7 +395,7 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
 
         let test4 = match m.test4() {
             None => { return Err("bad m.test4"); }
-            Some(x) => { x }
+            Some(x) => { x.as_slice() }
         };
         if test4.len() != 2 { return Err("bad m.test4 len"); }
 
@@ -427,7 +426,7 @@ mod vector_read_scalar_tests {
         for i in xs.iter().rev() {
             b.push_element_scalar(*i);
         }
-        let vecend = b.end_vector(xs.len());
+        let vecend = b.end_vector::<T>(xs.len());
 
         let all = &b.owned_buf[..];
         let idx = all.len() - vecend.value() as usize;
@@ -474,7 +473,7 @@ mod vector_read_obj_tests {
         for &i in offsets.iter().rev() {
             b.push_element_scalar(*i);
         }
-        let vecend = b.end_vector(xs.len());
+        let vecend = b.end_vector::<flatbuffers::FBString>(xs.len());
 
         let all = &b.owned_buf[..];
         let idx = all.len() - vecend.value() as usize;
@@ -2468,7 +2467,7 @@ fn create_byte_vector_fuzz() {
         for i in (0..xs.len()).rev() {
             b1.push_element_scalar(xs[i]);
         }
-        b1.end_vector(xs.len());
+        b1.end_vector::<u8>(xs.len());
 
         let mut b2 = flatbuffers::FlatBufferBuilder::new();
         b2.create_byte_vector(xs);
@@ -2528,7 +2527,7 @@ mod byte_layouts {
         check(&b, &[0, 0, 0]); // align to 4bytes
         b.push_element_scalar(1u8);
         check(&b, &[1, 0, 0, 0]);
-        b.end_vector(1);
+        b.end_vector::<u8>(1);
         check(&b, &[1, 0, 0, 0, 1, 0, 0, 0]); // padding
     }
 
@@ -2541,7 +2540,7 @@ mod byte_layouts {
         check(&b, &[1, 0, 0]);
         b.push_element_scalar(2u8);
         check(&b, &[2, 1, 0, 0]);
-        b.end_vector(2);
+        b.end_vector::<u8>(2);
         check(&b, &[2, 0, 0, 0, 2, 1, 0, 0]); // padding
     }
 
@@ -2558,7 +2557,7 @@ mod byte_layouts {
             gold.insert(0, i);
             check(&b, &gold[..]);
         }
-        b.end_vector(8);
+        b.end_vector::<u8>(8);
         let want = vec![8u8, 0, 0, 0,  8, 7, 6, 5, 4, 3, 2, 1];
         check(&b, &want[..]);
     }
@@ -2569,7 +2568,7 @@ mod byte_layouts {
         check(&b, &[0, 0]); // align to 4bytes
         b.push_element_scalar(1u16);
         check(&b, &[1, 0, 0, 0]);
-        b.end_vector(1);
+        b.end_vector::<u16>(1);
         check(&b, &[1, 0, 0, 0, 1, 0, 0, 0]); // padding
     }
 
@@ -2582,7 +2581,7 @@ mod byte_layouts {
         check(&b, &[0xCD, 0xAB]);
         b.push_element_scalar(0xDCBAu16);
         check(&b, &[0xBA, 0xDC, 0xCD, 0xAB]);
-        b.end_vector(2);
+        b.end_vector::<u16>(2);
         check(&b, &[2, 0, 0, 0, 0xBA, 0xDC, 0xCD, 0xAB]);
     }
 
@@ -2730,7 +2729,7 @@ mod byte_layouts {
     fn test_12b_vtable_with_empty_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U8, 0, 1);
-        let vecend = b.end_vector(0);
+        let vecend = b.end_vector::<u8>(0);
         let off = b.start_table(1);
         b.push_slot_offset_relative(fi2fo(0), vecend);
         b.end_table(off);
@@ -2748,7 +2747,7 @@ mod byte_layouts {
     fn test_12c_vtable_with_empty_vector_of_byte_and_some_scalars() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U8, 0, 1);
-        let vecend = b.end_vector(0);
+        let vecend = b.end_vector::<u8>(0);
         let off = b.start_table(2);
         b.push_slot_scalar::<i16>(fi2fo(0), 55i16, 0);
         b.push_slot_scalar_indirect_uoffset(fi2fo(1), vecend.value(), 0);
@@ -2771,7 +2770,7 @@ mod byte_layouts {
         b.start_vector(flatbuffers::SIZE_I16, 2, 1);
         b.push_element_scalar(0x1234i16);
         b.push_element_scalar(0x5678i16);
-        let vecend = b.end_vector(2);
+        let vecend = b.end_vector::<i16>(2);
         let off = b.start_table(2);
         b.push_slot_scalar_indirect_uoffset(fi2fo(1), vecend.value(), 0);
         b.push_slot_scalar(fi2fo(0), 55i16, 0);
@@ -2830,13 +2829,17 @@ mod byte_layouts {
   	// test 15: vtable with 1 vector of 2 struct of 2 int8
     #[test]
     fn test_15_vtable_with_1_vector_of_2_struct_2_int8() {
+        struct FooStruct {
+            a: i8,
+            b: i8,
+        }
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_I8*2, 2, 1);
+        b.start_vector(::std::mem::size_of::<FooStruct>(), 2, 1);
         b.push_element_scalar(33i8);
         b.push_element_scalar(44i8);
         b.push_element_scalar(55i8);
         b.push_element_scalar(66i8);
-        let vecend = b.end_vector(2);
+        let vecend = b.end_vector::<FooStruct>(2);
         let off = b.start_table(1);
         b.push_slot_scalar_indirect_uoffset(fi2fo(0), vecend.value(), 0);
         b.end_table(off);
