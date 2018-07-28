@@ -563,7 +563,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector<'a: 'b, 'b, T: Sized + 'a>(&'a mut self, num_elems: usize) -> Offset<Vector<'b, T>> {
+    pub fn end_vector<'a, T: Sized + 'a>(&'a mut self, num_elems: usize) -> Offset<Vector<'_, T>> {
       self.assert_nested();
 
       // we already made space for this, so write without PrependUint32
