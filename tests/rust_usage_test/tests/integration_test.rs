@@ -137,15 +137,15 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         let args = MyGame::Example::MonsterArgs{
             hp: 80,
             mana: 150,
-            //name: Some(builder.create_string("MyMonster")),
-            //pos: Some(&pos),
-            //test_type: MyGame::Example::Any::Monster,
-            //// TODO(rw): better offset ergonomics
-            //test: Some(flatbuffers::Offset::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
-            //    name: Some(fred_name),
-            //    ..Default::default()
-            //}).value())),
-            //inventory: Some(inventory),
+            name: Some(builder.create_string("MyMonster")),
+            pos: Some(&pos),
+            test_type: MyGame::Example::Any::Monster,
+            // TODO(rw): better offset ergonomics
+            test: Some(flatbuffers::Offset::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
+                name: Some(fred_name),
+                ..Default::default()
+            }).value())),
+            inventory: Some(inventory),
             ..Default::default()
         };
         MyGame::Example::CreateMonster(builder, &args)
@@ -204,20 +204,20 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
   let wilma = builder.create_string("Wilma");
 
   {
-      let mut mb1 = MyGame::Example::MonsterBuilder::new(&mut builder);
+      let mut mb1 = MyGame::Example::MonsterBuilder::new(builder);
       mb1.add_name(fred);
       mlocs[0] = mb1.finish();
   }
 
   {
-      let mut mb2 = MyGame::Example::MonsterBuilder::new(&mut builder);
+      let mut mb2 = MyGame::Example::MonsterBuilder::new(builder);
       mb2.add_name(barney);
       mb2.add_hp(1000);
       mlocs[1] = mb2.finish();
   }
 
   {
-      let mut mb3 = MyGame::Example::MonsterBuilder::new(&mut builder);
+      let mut mb3 = MyGame::Example::MonsterBuilder::new(builder);
       mb3.add_name(wilma);
       mlocs[2] = mb3.finish();
   }
@@ -282,7 +282,7 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
 //  auto flex = builder.CreateVector(flexbuild.GetBuffer());
 //
     // shortcut for creating monster with all fields set:
-    let mloc = MyGame::Example::CreateMonster(&mut builder, &MyGame::Example::MonsterArgs{
+    let mloc = MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
         pos: Some(&_vec),
         mana: 150,
         hp: 80,
