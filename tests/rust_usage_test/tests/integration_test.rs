@@ -124,7 +124,7 @@ impl LCG {
 //      args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::Monster<'c>> {
 //      flatbuffers::Offset::new(0)
 //  }
-fn create_serialized_example_with_generated_code<'a>(builder: &'a mut flatbuffers::FlatBufferBuilder<'a>) {
+fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder) {
     //impl From<flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>> for flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset> {
     //    fn from(o: flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>) -> Self {
     //        flatbuffers::LabeledUOffsetT::new(o.value())
@@ -137,18 +137,18 @@ fn create_serialized_example_with_generated_code<'a>(builder: &'a mut flatbuffer
         let args = MyGame::Example::MonsterArgs{
             hp: 80,
             mana: 150,
-            name: Some(builder.create_string("MyMonster")),
-            pos: Some(&pos),
-            test_type: MyGame::Example::Any::Monster,
-            // TODO(rw): better offset ergonomics
-            test: Some(flatbuffers::Offset::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
-                name: Some(fred_name),
-                ..Default::default()
-            }).value())),
-            inventory: Some(inventory),
+            //name: Some(builder.create_string("MyMonster")),
+            //pos: Some(&pos),
+            //test_type: MyGame::Example::Any::Monster,
+            //// TODO(rw): better offset ergonomics
+            //test: Some(flatbuffers::Offset::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
+            //    name: Some(fred_name),
+            //    ..Default::default()
+            //}).value())),
+            //inventory: Some(inventory),
             ..Default::default()
         };
-        MyGame::Example::CreateMonster(builder, &args)
+        MyGame::Example::CreateMonster(&mut builder, &args)
     };
     MyGame::Example::FinishMonsterBuffer(builder, mon);
     println!("finished writing");
