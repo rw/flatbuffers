@@ -153,7 +153,7 @@ fn create_serialized_example_with_generated_code<'a>(builder: &'a mut flatbuffer
     MyGame::Example::FinishMonsterBuffer(builder, mon);
     println!("finished writing");
 }
-fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::FlatBufferBuilder) {
+fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBufferBuilder) {
     let nested_union_mon = {
         let name = builder.create_string("Fred");
         let table_start = builder.start_table(34);
@@ -322,9 +322,9 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
     });
 
 
-    let mloc = MyGame::Example::CreateMonster(&mut builder, &args);
+    let mloc = MyGame::Example::CreateMonster(builder, &args);
     //builder.finish(mloc.value());
-    MyGame::Example::FinishMonsterBuffer(&mut builder, mloc);
+    MyGame::Example::FinishMonsterBuffer(builder, mloc);
 //
 //  // clang-format off
 //  #ifdef FLATBUFFERS_TEST_VERBOSE
