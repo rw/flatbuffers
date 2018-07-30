@@ -1744,7 +1744,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<&" + lifetime + " " + typname + "<'a>>";
+        return "flatbuffers::Offset<&" + lifetime + " " + typname + "<" + lifetime + ">>";
       }
       case FullElementType::Integer:
       case FullElementType::Float: {
@@ -2685,14 +2685,14 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
 
     // Generate a builder struct:
-    code_ += "pub struct {{STRUCT_NAME}}Builder<'a, 'b> {";
+    code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
     code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
     code_ += "  start_: flatbuffers::Offset<flatbuffers::TableOffset>,";
     code_ += "}";
 
     // Generate builder functions:
     //code_ += "impl{{PARENT_LIFETIME}} {{STRUCT_NAME}}Builder{{PARENT_LIFETIME}} {";
-    code_ += "impl<'a, 'b> {{STRUCT_NAME}}Builder<'a, 'b> {";
+    code_ += "impl<'a: 'b, 'b> {{STRUCT_NAME}}Builder<'a, 'b> {";
     bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2714,7 +2714,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("FIELD_NAME", Name(field));
         code_.SetValue("FIELD_CAST", GenBuilderArgsAddFuncFieldCast(field));
         code_.SetValue("FIELD_OFFSET", Name(struct_def) + "::" + offset);
-        code_.SetValue("FIELD_TYPE", GenBuilderArgsAddFuncType(field, "'a "));
+        code_.SetValue("FIELD_TYPE", GenBuilderArgsAddFuncType(field, "'b "));
         code_.SetValue("FUNC_BODY", GenBuilderArgsAddFuncBody(field));
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         if (is_scalar) {
@@ -2810,9 +2810,9 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "pub fn Create{{STRUCT_NAME}}<'a, 'b, 'y, 'z >(";
-    code_ += "    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "    args: &'z {{STRUCT_NAME}}Args<'b>) -> \\";
+    code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b: 'c, 'c>(";
+    code_ += "    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,";
+    code_ += "    args: &'b {{STRUCT_NAME}}Args<'b>) -> \\";
     code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
