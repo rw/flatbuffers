@@ -148,7 +148,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
             //inventory: Some(inventory),
             ..Default::default()
         };
-        MyGame::Example::CreateMonster(&mut builder, &args)
+        MyGame::Example::CreateMonster(builder, &args)
     };
     MyGame::Example::FinishMonsterBuffer(builder, mon);
     println!("finished writing");
