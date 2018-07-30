@@ -2810,9 +2810,9 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b: 'c, 'c: 'd, 'd>(";
-    code_ += "    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "    args: &'d {{STRUCT_NAME}}Args<'b>) -> \\";
+    code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b>(";
+    code_ += "    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
+    code_ += "    args: &'b {{STRUCT_NAME}}Args<'b>) -> \\";
     code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {

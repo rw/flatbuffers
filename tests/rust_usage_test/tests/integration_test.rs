@@ -117,11 +117,11 @@ impl LCG {
 fn Foo<'fbb, 'a: 'fbb>(
     fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,
     root: flatbuffers::Offset<MyGame::Example::MonsterOffset>) {
-    //fbb.finish_with_identifier(root, MonsterIdentifier());
+    fbb.finish(root);//, MonsterIdentifier());
 }
 fn Bar<'a, 'b, 'c: 'a>(
     _fbb: &'a mut flatbuffers::FlatBufferBuilder<'c>,
-    args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::MonsterOffset> {
+    args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::Monster<'c>> {
     flatbuffers::Offset::new(0)
 }
 fn create_serialized_example_with_generated_code<'a>(builder: &'a mut flatbuffers::FlatBufferBuilder<'a>) {
@@ -178,7 +178,7 @@ fn create_serialized_example_with_library_code(mut builder: &mut flatbuffers::Fl
     builder.finish(root);
 }
 
-fn create_serialized_example_with_generated_code_more_fields<'a>(builder: &'a mut flatbuffers::FlatBufferBuilder<'a>) {
+fn create_serialized_example_with_generated_code_more_fields<'a: 'b, 'b>(mut builder: &'b mut flatbuffers::FlatBufferBuilder<'a>) {
   let x = MyGame::Example::Test::new(10, 20);
   let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, x);
   let _name = builder.create_string("MyMonster");
@@ -2482,7 +2482,7 @@ mod byte_layouts {
     extern crate flatbuffers;
     use flatbuffers::field_index_to_field_offset as fi2fo;
 
-    fn check(b: &flatbuffers::FlatBufferBuilder, want: &[u8]) {
+    fn check<'a>(b: &'a flatbuffers::FlatBufferBuilder, want: &'a [u8]) {
         let got = b.get_active_buf_slice();
         assert_eq!(want, got);
         //let message = format!("case %d: want\n%v\nbut got\n%v\n", i, want, got);
@@ -2575,7 +2575,7 @@ mod byte_layouts {
     #[test]
     fn test_5_2xuint16_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_U16, 2, 1);
+        let _off = b.start_vector(flatbuffers::SIZE_U16, 2, 1);
         check(&b, &[]); // align to 4bytes
         b.push_element_scalar(0xABCDu16);
         check(&b, &[0xCD, 0xAB]);

@@ -485,7 +485,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn get_buf_slice(&self) -> &[u8] {
         &self.owned_buf[..]
     }
-    pub fn get_active_buf_slice(&self) -> &[u8] {
+    pub fn get_active_buf_slice<'a>(&'a self) -> &'a [u8] {
         &self.owned_buf[self.cur_idx..]
     }
     pub fn get_mut_active_buf_slice(&mut self) -> &mut [u8] {
@@ -563,7 +563,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector<'a, T: Sized + 'a>(&'a mut self, num_elems: usize) -> Offset<Vector<'_, T>> {
+    pub fn end_vector<'a, 'b, T: Sized + 'a>(&'a mut self, num_elems: usize) -> Offset<Vector<'b, T>> {
       self.assert_nested();
 
       // we already made space for this, so write without PrependUint32
@@ -634,29 +634,30 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // TODO: unimplemented!()
     }
     // utf-8 string creation
-    pub fn create_string<'b, 'a: 'b>(&'a mut self, s: &'b str) -> Offset<FBString> {
-        Offset::new(self.create_byte_string(s.as_bytes()).value())
+    pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<FBString<'c>> {
+        Offset::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
-    pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<ByteString> {
-        self.assert_not_nested();
-        self.nested = true;
-        self.prep(SIZE_UOFFSET, data.len() + 1);
+    pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<ByteString<'c>> {
+        //self.assert_not_nested();
+        //self.nested = true;
+        //self.prep(SIZE_UOFFSET, data.len() + 1);
 
-        self.push_element_scalar_no_prep(0u8);
-        self.push_bytes_no_prep(data);
+        //self.push_element_scalar_no_prep(0u8);
+        //self.push_bytes_no_prep(data);
         //self.cur_idx -= SIZE_U8;
         //self.owned_buf[self.cur_idx] = 0;
         //self.cur_idx -= data.len();
         //self.owned_buf[self.cur_idx..self.cur_idx+data.len()].copy_from_slice(data);
 
-        Offset::new(self.end_vector::<'_, u8>(data.len()).value())
+        Offset::new(0)
+        //Offset::new(self.end_vector::<'a, 'b, u8>(data.len()).value())
 
         ////self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
         //self.push_bytes(data);
         //self.push_element_scalar(data.len() as UOffsetT);
         //LabeledUOffsetT::new(self.get_size() as u32)
     }
-    pub fn create_byte_vector<'a>(&'a mut self, data: &[u8]) -> Offset<Vector<'a, u8>> {
+    pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &[u8]) -> Offset<Vector<'b, u8>> {
         self.assert_not_nested();
         self.nested = true;
         let l = data.len();
@@ -665,30 +666,31 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.cur_idx -= l;
         self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(data);
 
-        Offset::new(self.end_vector::<'a, u8>(data.len()).value())
+        Offset::new(self.end_vector::<'_, '_, u8>(data.len()).value())
     }
     pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<StringOffset> {
         Offset::new(0)
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
-    pub fn create_vector_of_strings<'b, 'a: 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'a, Offset<FBString>>> {
+    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<FBString<'c>>>> {
+        Offset::new(0)
         //let offsets: Vec<Offset<FBString>> = vec![];// xs.iter().map(|s| self.create_string(s)).collect();
-        let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
-        self.create_vector(&offsets)
+        //let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
+        //self.create_vector::<'a, 'b, Offset<FBString>>(offsets)
     }
     //pub fn create_vector<T, V: FromIterator<T>>(&mut self, _: V) -> Offset<Vector<T>> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, 'b, T: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'a, T>> {
+    pub fn create_vector<'a, 'b, 'c, T: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'c, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len(), elemsize);
         self.start_vector(elemsize, items.len(), elemsize);
         for i in items.iter().rev() {
             self.push_bytes_no_prep(to_bytes(i));
         }
-        Offset::new(self.end_vector::<'_, T>(items.len()).value())
+        Offset::new(self.end_vector::<'_, '_, T>(items.len()).value())
     }
 //  //pub fn create_vector_from_fn<'a: 'fbb, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'fbb mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
     pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [T]>
