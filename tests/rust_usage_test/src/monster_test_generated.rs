@@ -52,11 +52,11 @@ impl<'a> Default for InParentNamespaceArgs<'a> {
         }
     }
 }
-pub struct InParentNamespaceBuilder<'a: 'b, 'b> {
+pub struct InParentNamespaceBuilder<'a, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
-impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
+impl<'a, 'b> InParentNamespaceBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> InParentNamespaceBuilder<'a, 'b> {
     let start = _fbb.start_table(0);
     InParentNamespaceBuilder {
@@ -74,9 +74,9 @@ impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
 }
 
 #[inline]
-pub fn CreateInParentNamespace<'a: 'b, 'b>(
-    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b InParentNamespaceArgs<'a>) -> flatbuffers::Offset<InParentNamespaceOffset> {
+pub fn CreateInParentNamespace<'a, 'b, 'y, 'z >(
+    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,
+    args: &'z InParentNamespaceArgs<'b>) -> flatbuffers::Offset<InParentNamespaceOffset> {
   let mut builder = InParentNamespaceBuilder::new(_fbb);
   builder.finish()
 }
@@ -131,11 +131,11 @@ impl<'a> Default for MonsterArgs<'a> {
         }
     }
 }
-pub struct MonsterBuilder<'a: 'b, 'b> {
+pub struct MonsterBuilder<'a, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
-impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
+impl<'a, 'b> MonsterBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
     let start = _fbb.start_table(0);
     MonsterBuilder {
@@ -153,9 +153,9 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
 }
 
 #[inline]
-pub fn CreateMonster<'a: 'b, 'b>(
-    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b MonsterArgs<'a>) -> flatbuffers::Offset<MonsterOffset> {
+pub fn CreateMonster<'a, 'b, 'y, 'z >(
+    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,
+    args: &'z MonsterArgs<'b>) -> flatbuffers::Offset<MonsterOffset> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder.finish()
 }
@@ -430,11 +430,11 @@ impl<'a> Default for TestSimpleTableWithEnumArgs<'a> {
         }
     }
 }
-pub struct TestSimpleTableWithEnumBuilder<'a: 'b, 'b> {
+pub struct TestSimpleTableWithEnumBuilder<'a, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
-impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
+impl<'a, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
   pub fn add_color(&mut self, color: Color) {
     self.fbb_.push_slot_scalar::<i8>(TestSimpleTableWithEnum::VT_COLOR, color as i8, Color::Green as i8);
   }
@@ -455,9 +455,9 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
 }
 
 #[inline]
-pub fn CreateTestSimpleTableWithEnum<'a: 'b, 'b>(
-    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b TestSimpleTableWithEnumArgs<'a>) -> flatbuffers::Offset<TestSimpleTableWithEnumOffset> {
+pub fn CreateTestSimpleTableWithEnum<'a, 'b, 'y, 'z >(
+    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,
+    args: &'z TestSimpleTableWithEnumArgs<'b>) -> flatbuffers::Offset<TestSimpleTableWithEnumOffset> {
   let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
   builder.add_color(args.color);
   builder.finish()
@@ -519,11 +519,11 @@ impl<'a> Default for StatArgs<'a> {
         }
     }
 }
-pub struct StatBuilder<'a: 'b, 'b> {
+pub struct StatBuilder<'a, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
-impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
+impl<'a, 'b> StatBuilder<'a, 'b> {
   pub fn add_id(&mut self, id: flatbuffers::Offset<flatbuffers::FBString<'a >>) {
     self.fbb_.push_slot_offset_relative(Stat::VT_ID, id);
   }
@@ -550,9 +550,9 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
 }
 
 #[inline]
-pub fn CreateStat<'a: 'b, 'b>(
-    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b StatArgs<'a>) -> flatbuffers::Offset<StatOffset> {
+pub fn CreateStat<'a, 'b, 'y, 'z >(
+    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,
+    args: &'z StatArgs<'b>) -> flatbuffers::Offset<StatOffset> {
   let mut builder = StatBuilder::new(_fbb);
   builder.add_val(args.val);
   if let Some(x) = args.id { builder.add_id(x); }
@@ -869,11 +869,11 @@ impl<'a> Default for MonsterArgs<'a> {
         }
     }
 }
-pub struct MonsterBuilder<'a: 'b, 'b> {
+pub struct MonsterBuilder<'a, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
-impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
+impl<'a, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_pos(&mut self, pos: &'a  Vec3) {
     self.fbb_.push_slot_struct::<Vec3/* foo */>(Monster::VT_POS, pos);
   }
@@ -1012,9 +1012,9 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
 }
 
 #[inline]
-pub fn CreateMonster<'a: 'b, 'b>(
-    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b MonsterArgs<'a>) -> flatbuffers::Offset<MonsterOffset> {
+pub fn CreateMonster<'a, 'b, 'y, 'z >(
+    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,
+    args: &'z MonsterArgs<'b>) -> flatbuffers::Offset<MonsterOffset> {
   let mut builder = MonsterBuilder::new(_fbb);
   builder.add_testhashu64_fnv1a(args.testhashu64_fnv1a);
   builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
@@ -1169,11 +1169,11 @@ impl<'a> Default for TypeAliasesArgs<'a> {
         }
     }
 }
-pub struct TypeAliasesBuilder<'a: 'b, 'b> {
+pub struct TypeAliasesBuilder<'a, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
-impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
+impl<'a, 'b> TypeAliasesBuilder<'a, 'b> {
   pub fn add_i8_(&mut self, i8_: i8) {
     self.fbb_.push_slot_scalar::<i8>(TypeAliases::VT_I8_, i8_, 0);
   }
@@ -1227,9 +1227,9 @@ impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
 }
 
 #[inline]
-pub fn CreateTypeAliases<'a: 'b, 'b>(
-    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b TypeAliasesArgs<'a>) -> flatbuffers::Offset<TypeAliasesOffset> {
+pub fn CreateTypeAliases<'a, 'b, 'y, 'z >(
+    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,
+    args: &'z TypeAliasesArgs<'b>) -> flatbuffers::Offset<TypeAliasesOffset> {
   let mut builder = TypeAliasesBuilder::new(_fbb);
   builder.add_f64_(args.f64_);
   builder.add_u64_(args.u64_);
@@ -1329,7 +1329,7 @@ pub fn MonsterExtension() -> &'static str {
 }
 
 #[inline]
-pub fn FinishMonsterBuffer<'a: 'b, 'b>(
+pub fn FinishMonsterBuffer<'a, 'b>(
     fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     root: flatbuffers::Offset<MonsterOffset>) {
   fbb.finish_with_identifier(root, MonsterIdentifier());

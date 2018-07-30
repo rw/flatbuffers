@@ -413,7 +413,7 @@ class RustGenerator : public BaseGenerator {
         // Finish a buffer with a given root object:
         code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
         code_ += "#[inline]";
-        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'a: 'b, 'b>(";
+        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'a, 'b>(";
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{OFFSET_TYPELABEL}}>) {";
         if (parser_.file_identifier_.length()) {
@@ -2685,14 +2685,14 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
 
     // Generate a builder struct:
-    code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
+    code_ += "pub struct {{STRUCT_NAME}}Builder<'a, 'b> {";
     code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
     code_ += "  start_: flatbuffers::Offset<flatbuffers::TableOffset>,";
     code_ += "}";
 
     // Generate builder functions:
     //code_ += "impl{{PARENT_LIFETIME}} {{STRUCT_NAME}}Builder{{PARENT_LIFETIME}} {";
-    code_ += "impl<'a: 'b, 'b> {{STRUCT_NAME}}Builder<'a, 'b> {";
+    code_ += "impl<'a, 'b> {{STRUCT_NAME}}Builder<'a, 'b> {";
     bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2810,9 +2810,9 @@ class RustGenerator : public BaseGenerator {
     // Generate a convenient CreateX function that uses the above builder
     // to create a table in one go.
     code_ += "#[inline]";
-    code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b>(";
-    code_ += "    _fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "    args: &'b {{STRUCT_NAME}}Args<'a>) -> \\";
+    code_ += "pub fn Create{{STRUCT_NAME}}<'a, 'b, 'y, 'z >(";
+    code_ += "    _fbb: &'y mut flatbuffers::FlatBufferBuilder<'a>,";
+    code_ += "    args: &'z {{STRUCT_NAME}}Args<'b>) -> \\";
     code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
