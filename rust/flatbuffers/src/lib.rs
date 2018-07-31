@@ -662,7 +662,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<ByteString<'c>> {
     self.assert_not_nested();
-    self.nested = true;
     self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
     self.fill(1);
     self.push_bytes(data);
