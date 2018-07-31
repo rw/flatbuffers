@@ -652,6 +652,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.owned_buf.len() - self.cur_idx as usize
         //self.owned_buf.len() - self.cur_idx
     }
+    pub fn fill_big(&mut self, zero_pad_bytes: usize) {
+        self.fill(zero_pad_bytes);
+    }
     pub fn fill(&mut self, zero_pad_bytes: usize) {
         println!("fill({})", zero_pad_bytes);
         self.make_space(zero_pad_bytes);
@@ -791,69 +794,66 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let o = Offset::new(n);
         o
     }
-    pub fn write_vtable_new(&mut self, table_end: UOffsetT) -> UOffsetT {
-    // If you get this assert, a corresponding StartTable wasn't called.
-    self.assert_nested();
-    // Write the vtable offset, which is the start of any Table.
-    // We fill it's value later.
-    let vtableoffsetloc = self.push_element_scalar::<SOffsetT>(0);
-    // Write a vtable, which consists entirely of voffset_t elements.
-    // It starts with the number of offsets, followed by a type id, followed
-    // by the offsets themselves. In reverse:
-    // Include space for the last offset and ensure empty tables have a
-    // minimum size.
-    //let max_voffset_ = std::cmp::max(self.max_voffset_ + SIZE_VOFFSET as VOffsetT,
-    //                                 field_index_to_field_offset(0))
-    //buf_.fill_big(max_voffset_);
-    //   self.fill_big(max_voffset_);
-    //   let table_object_size = vtableoffsetloc - start;
-    //   assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
-    //   WriteScalar<voffset_t>(buf_.data() + sizeof(voffset_t),
-    //                          static_cast<voffset_t>(table_object_size));
-    //   WriteScalar<voffset_t>(buf_.data(), max_voffset_);
-    //   // Write the offsets into the table
-    //   for (auto it = buf_.scratch_end() - num_field_loc * sizeof(FieldLoc);
-    //        it < buf_.scratch_end(); it += sizeof(FieldLoc)) {
-    //     auto field_location = reinterpret_cast<FieldLoc *>(it);
-    //     auto pos = static_cast<voffset_t>(vtableoffsetloc - field_location->off);
-    //     // If this asserts, it means you've set a field twice.
-    //     assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
-    //     WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
-    //   }
-    //   ClearOffsets();
-    //   auto vt1 = reinterpret_cast<voffset_t *>(buf_.data());
-    //   auto vt1_size = ReadScalar<voffset_t>(vt1);
-    //   let vt_use = self.get_size();
-    //   // See if we already have generated a vtable with this exact same
-    //   // layout before. If so, make it point to the old one, remove this one.
-    //   if (dedup_vtables_) {
-    //     for (auto it = buf_.scratch_data(); it < buf_.scratch_end();
-    //          it += sizeof(uoffset_t)) {
-    //       auto vt_offset_ptr = reinterpret_cast<uoffset_t *>(it);
-    //       auto vt2 = reinterpret_cast<voffset_t *>(buf_.data_at(*vt_offset_ptr));
-    //       auto vt2_size = *vt2;
-    //       if (vt1_size != vt2_size || memcmp(vt2, vt1, vt1_size)) continue;
-    //       vt_use = *vt_offset_ptr;
-    //       buf_.pop(GetSize() - vtableoffsetloc);
-    //       break;
-    //     }
-    //   }
-    //   // If this is a new vtable, remember it.
-    //   if (vt_use == GetSize()) { buf_.scratch_push_small(vt_use); }
-    //   // Fill the vtable offset we created above.
-    //   // The offset points from the beginning of the object to where the
-    //   // vtable is stored.
-    //   // Offsets default direction is downward in memory for future format
-    //   // flexibility (storing all vtables at the start of the file).
-    //   WriteScalar(buf_.data_at(vtableoffsetloc),
-    //               static_cast<soffset_t>(vt_use) -
-    //                   static_cast<soffset_t>(vtableoffsetloc));
-
-    //   self.nested = false;
-    //   vtableoffsetloc
-    0
-  }
     pub fn write_vtable(&mut self, table_end: UOffsetT) -> UOffsetT {
+        // If you get this assert, a corresponding StartTable wasn't called.
+        self.assert_nested();
+        // Write the vtable offset, which is the start of any Table.
+        // We fill it's value later.
+        let vtableoffsetloc = self.push_element_scalar::<SOffsetT>(0);
+        // Write a vtable, which consists entirely of voffset_t elements.
+        // It starts with the number of offsets, followed by a type id, followed
+        // by the offsets themselves. In reverse:
+        // Include space for the last offset and ensure empty tables have a
+        // minimum size.
+        self.max_voffset = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
+                                         field_index_to_field_offset(0));
+        { let s = self.max_voffset; self.fill_big(s as usize); }
+        //   let table_object_size = vtableoffsetloc - start;
+        //   assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
+        //   WriteScalar<voffset_t>(buf_.data() + sizeof(voffset_t),
+        //                          static_cast<voffset_t>(table_object_size));
+        //   WriteScalar<voffset_t>(buf_.data(), max_voffset_);
+        //   // Write the offsets into the table
+        //   for (auto it = buf_.scratch_end() - num_field_loc * sizeof(FieldLoc);
+        //        it < buf_.scratch_end(); it += sizeof(FieldLoc)) {
+        //     auto field_location = reinterpret_cast<FieldLoc *>(it);
+        //     auto pos = static_cast<voffset_t>(vtableoffsetloc - field_location->off);
+        //     // If this asserts, it means you've set a field twice.
+        //     assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
+        //     WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
+        //   }
+        //   ClearOffsets();
+        //   auto vt1 = reinterpret_cast<voffset_t *>(buf_.data());
+        //   auto vt1_size = ReadScalar<voffset_t>(vt1);
+        //   let vt_use = self.get_size();
+        //   // See if we already have generated a vtable with this exact same
+        //   // layout before. If so, make it point to the old one, remove this one.
+        //   if (dedup_vtables_) {
+        //     for (auto it = buf_.scratch_data(); it < buf_.scratch_end();
+        //          it += sizeof(uoffset_t)) {
+        //       auto vt_offset_ptr = reinterpret_cast<uoffset_t *>(it);
+        //       auto vt2 = reinterpret_cast<voffset_t *>(buf_.data_at(*vt_offset_ptr));
+        //       auto vt2_size = *vt2;
+        //       if (vt1_size != vt2_size || memcmp(vt2, vt1, vt1_size)) continue;
+        //       vt_use = *vt_offset_ptr;
+        //       buf_.pop(GetSize() - vtableoffsetloc);
+        //       break;
+        //     }
+        //   }
+        //   // If this is a new vtable, remember it.
+        //   if (vt_use == GetSize()) { buf_.scratch_push_small(vt_use); }
+        //   // Fill the vtable offset we created above.
+        //   // The offset points from the beginning of the object to where the
+        //   // vtable is stored.
+        //   // Offsets default direction is downward in memory for future format
+        //   // flexibility (storing all vtables at the start of the file).
+        //   WriteScalar(buf_.data_at(vtableoffsetloc),
+        //               static_cast<soffset_t>(vt_use) -
+        //                   static_cast<soffset_t>(vtableoffsetloc));
+
+        vtableoffsetloc
+    }
+    pub fn write_vtable_old(&mut self, table_end: UOffsetT) -> UOffsetT {
         self.push_soffset_relative(0);
 
         let table_offset = self.rev_cur_idx();
