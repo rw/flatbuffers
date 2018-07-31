@@ -552,11 +552,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn assert_finished(&self) {
         assert!(self.finished);
     }
-    pub fn start_vector(&mut self, elemsize: usize, num_elems: usize, alignment: usize) -> UOffsetT {
+    pub fn start_vector(&mut self, elem_size: usize, len: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
-        self.prep(SIZE_UOFFSET, elemsize*num_elems);
-        self.prep(alignment, elemsize*num_elems); // Just in case elemsize is wider than uoffset_t.
+        //self.prep(SIZE_UOFFSET, elemsize*num_elems);
+        //self.prep(alignment, elemsize*num_elems); // Just in case elemsize is wider than uoffset_t.
+        self.pre_align(len * elem_size, SIZE_UOFFSET);
+        self.pre_align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
         self.rev_cur_idx()
     }
     // Offset relative to the end of the buffer.
@@ -575,10 +577,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let buf = &mut self.get_mut_active_buf_slice();
         emplace_scalar(&mut buf[at..], x)
     }
-    pub fn pre_align(&mut self, n: usize, alignment: usize) {
+    pub fn pre_align(&mut self, len: usize, alignment: usize) {
         self.track_min_align(alignment);
         let s = self.get_size() as usize;
-        self.fill(padding_bytes(s + n, alignment));
+        self.fill(padding_bytes(s + len, alignment));
     }
     pub fn prep(&mut self, sz: usize, additional_bytes: usize) {
         // Track the biggest thing we've ever aligned to.
@@ -695,8 +697,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
     pub fn create_vector<'a, 'b, 'c, T: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'c, T>> {
         let elemsize = std::mem::size_of::<T>();
-        let start_off = self.start_vector(elemsize, items.len(), elemsize);
-        self.start_vector(elemsize, items.len(), elemsize);
+        let start_off = self.start_vector(elemsize, items.len());
         for i in items.iter().rev() {
             self.push_bytes_no_prep(to_bytes(i));
         }

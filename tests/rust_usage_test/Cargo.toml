@@ -9,4 +9,4 @@ quickcheck = "0.6"
 
 [profile.test]
 # run tests faster, while preserving debug asserts:
-#opt-level = 3
+opt-level = 3
