@@ -422,7 +422,7 @@ mod vector_read_scalar_tests {
 
     fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(xs: Vec<T>) {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(::std::mem::size_of::<T>(), xs.len(), 1);
+        b.start_vector(::std::mem::size_of::<T>(), xs.len());
         for i in xs.iter().rev() {
             b.push_element_scalar(*i);
         }
@@ -469,7 +469,7 @@ mod vector_read_obj_tests {
             offsets.push(b.create_string(s.as_str()));
         }
 
-        b.start_vector(flatbuffers::SIZE_UOFFSET, xs.len(), flatbuffers::SIZE_UOFFSET);
+        b.start_vector(flatbuffers::SIZE_UOFFSET, xs.len());
         for &i in offsets.iter().rev() {
             b.push_element_scalar(*i);
         }
@@ -2462,7 +2462,7 @@ fn create_byte_vector_fuzz() {
         let xs = &vec[..];
 
         let mut b1 = flatbuffers::FlatBufferBuilder::new();
-        b1.start_vector(flatbuffers::SIZE_U8, xs.len(), 1);
+        b1.start_vector(flatbuffers::SIZE_U8, xs.len());
 
         for i in (0..xs.len()).rev() {
             b1.push_element_scalar(xs[i]);
@@ -2522,7 +2522,7 @@ mod byte_layouts {
     fn test_2_1xbyte_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
-        b.start_vector(flatbuffers::SIZE_U8, 1, 1);
+        b.start_vector(flatbuffers::SIZE_U8, 1);
         println!("cap: {}", b.owned_buf.capacity());
         check(&b, &[0, 0, 0]); // align to 4bytes
         b.push_element_scalar(1u8);
@@ -2534,7 +2534,7 @@ mod byte_layouts {
     #[test]
     fn test_3_2xbyte_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_U8, 2, 1);
+        b.start_vector(flatbuffers::SIZE_U8, 2);
         check(&b, &[0, 0]); // align to 4bytes
         b.push_element_scalar(1u8);
         check(&b, &[1, 0, 0]);
@@ -2547,7 +2547,7 @@ mod byte_layouts {
     #[test]
     fn test_3b_11xbyte_vector_matches_builder_size() {
         let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
-        b.start_vector(flatbuffers::SIZE_U8, 8, 1);
+        b.start_vector(flatbuffers::SIZE_U8, 8);
 
         let mut gold = vec![0u8; 0];
         check(&b, &gold[..]);
@@ -2564,7 +2564,7 @@ mod byte_layouts {
     #[test]
     fn test_4_1xuint16_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_U16, 1, 1);
+        b.start_vector(flatbuffers::SIZE_U16, 1);
         check(&b, &[0, 0]); // align to 4bytes
         b.push_element_scalar(1u16);
         check(&b, &[1, 0, 0, 0]);
@@ -2575,7 +2575,7 @@ mod byte_layouts {
     #[test]
     fn test_5_2xuint16_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let _off = b.start_vector(flatbuffers::SIZE_U16, 2, 1);
+        let _off = b.start_vector(flatbuffers::SIZE_U16, 2);
         check(&b, &[]); // align to 4bytes
         b.push_element_scalar(0xABCDu16);
         check(&b, &[0xCD, 0xAB]);
@@ -2728,7 +2728,7 @@ mod byte_layouts {
     #[test]
     fn test_12b_vtable_with_empty_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_U8, 0, 1);
+        b.start_vector(flatbuffers::SIZE_U8, 0);
         let vecend = b.end_vector::<u8>(0);
         let off = b.start_table(1);
         b.push_slot_offset_relative(fi2fo(0), vecend);
@@ -2746,7 +2746,7 @@ mod byte_layouts {
     #[test]
     fn test_12c_vtable_with_empty_vector_of_byte_and_some_scalars() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_U8, 0, 1);
+        b.start_vector(flatbuffers::SIZE_U8, 0);
         let vecend = b.end_vector::<u8>(0);
         let off = b.start_table(2);
         b.push_slot_scalar::<i16>(fi2fo(0), 55i16, 0);
@@ -2767,7 +2767,7 @@ mod byte_layouts {
     #[test]
     fn test_13_vtable_with_1_int16_and_2_vector_of_i16() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(flatbuffers::SIZE_I16, 2, 1);
+        b.start_vector(flatbuffers::SIZE_I16, 2);
         b.push_element_scalar(0x1234i16);
         b.push_element_scalar(0x5678i16);
         let vecend = b.end_vector::<i16>(2);
@@ -2834,7 +2834,7 @@ mod byte_layouts {
             b: i8,
         }
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(::std::mem::size_of::<FooStruct>(), 2, 1);
+        b.start_vector(::std::mem::size_of::<FooStruct>(), 2);
         b.push_element_scalar(33i8);
         b.push_element_scalar(44i8);
         b.push_element_scalar(55i8);
