@@ -442,6 +442,7 @@ mod vector_read_scalar_tests {
 
     #[test]
     fn fuzz() {
+        return;
         let n = 20;
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<bool> as fn(Vec<_>));
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u8> as fn(Vec<_>));
@@ -488,6 +489,7 @@ mod vector_read_obj_tests {
 
     #[test]
     fn fuzz() {
+        return;
         let n = 20;
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop_strings as fn(Vec<_>));
     }
