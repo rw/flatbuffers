@@ -638,19 +638,29 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         Offset::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
     pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<ByteString<'c>> {
-        //self.assert_not_nested();
-        //self.nested = true;
-        //self.prep(SIZE_UOFFSET, data.len() + 1);
+        self.assert_not_nested();
+        self.nested = true;
+        let l = data.len();
+        let l_terminated = data.len() + SIZE_U8;
+        self.prep(SIZE_UOFFSET, l_terminated);
 
-        //self.push_element_scalar_no_prep(0u8);
-        //self.push_bytes_no_prep(data);
-        //self.cur_idx -= SIZE_U8;
-        //self.owned_buf[self.cur_idx] = 0;
-        //self.cur_idx -= data.len();
-        //self.owned_buf[self.cur_idx..self.cur_idx+data.len()].copy_from_slice(data);
+        self.cur_idx -= l_terminated;
+        self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(data);
 
-        Offset::new(0)
-        //Offset::new(self.end_vector::<'a, 'b, u8>(data.len()).value())
+        Offset::new(self.end_vector::<'a, 'b, u8>(l).value())
+
+        ////self.assert_not_nested();
+        ////self.nested = true;
+        ////self.prep(SIZE_UOFFSET, data.len() + 1);
+
+        ////self.push_element_scalar_no_prep(0u8);
+        ////self.push_bytes_no_prep(data);
+        ////self.cur_idx -= SIZE_U8;
+        ////self.owned_buf[self.cur_idx] = 0;
+        ////self.cur_idx -= data.len();
+        ////self.owned_buf[self.cur_idx..self.cur_idx+data.len()].copy_from_slice(data);
+
+        ////Offset::new(self.end_vector::<'a, 'b, u8>(data.len()).value())
 
         ////self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
         //self.push_bytes(data);
