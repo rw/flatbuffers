@@ -661,16 +661,24 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         Offset::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
     pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<ByteString<'c>> {
-        self.assert_not_nested();
-        self.nested = true;
-        let l = data.len();
-        let l_terminated = data.len() + SIZE_U8;
-        self.prep(SIZE_UOFFSET, l_terminated);
+    self.assert_not_nested();
+    self.nested = true;
+    self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
+    self.fill(1);
+    self.push_bytes(data);
+    self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
+    Offset::new(self.get_size() as UOffsetT)
+    //return Offset<String>(GetSize());
+        //self.assert_not_nested();
+        //self.nested = true;
+        //let l = data.len();
+        //let l_terminated = data.len() + SIZE_U8;
+        //self.prep(SIZE_UOFFSET, l_terminated);
 
-        self.cur_idx -= l_terminated;
-        self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(data);
+        //self.cur_idx -= l_terminated;
+        //self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(data);
 
-        Offset::new(self.end_vector::<'a, 'b, u8>(l).value())
+        //Offset::new(self.end_vector::<'a, 'b, u8>(l).value())
 
         ////self.assert_not_nested();
         ////self.nested = true;
@@ -976,7 +984,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.cur_idx as UOffsetT
     }
     pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
-        unreachable!();
         let n = self.make_space(x.len());
         &mut self.owned_buf[n..n+x.len()].copy_from_slice(x);
 
