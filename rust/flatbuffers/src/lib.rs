@@ -109,7 +109,8 @@ pub const SIZE_VOFFSET: usize = SIZE_I16;
 
 #[inline]
 pub fn padding_bytes(buf_size: usize, scalar_size: usize) -> usize {
-  ((!buf_size) + 1) & (scalar_size - 1)
+  // ((!buf_size) + 1) & (scalar_size - 1)
+  (!buf_size).wrapping_add(1) & (scalar_size - 1)
 }
 pub fn field_index_to_field_offset(field_id: VOffsetT) -> VOffsetT {
     // Should correspond to what end_table() below builds up.
@@ -503,40 +504,46 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     pub fn grow_owned_buf(&mut self) {
+        let starting_active_size = self.get_active_buf_slice().len();
+
         let old_len = self.owned_buf.len();
         let new_len = std::cmp::max(1, old_len * 2);
 
         assert!(new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
-		        "cannot grow buffer beyond 2 gigabytes");
-        //let diff = new_len - old_len;
+                "cannot grow buffer beyond 2 gigabytes");
+        assert!(new_len <= 1024,
+                "cannot grow buffer beyond 1 kilobytes");
+        assert!(new_len <= 1024*1024,
+                "cannot grow buffer beyond 1 megabytes");
 
+        let diff = new_len - old_len;
         self.owned_buf.resize(new_len, 0);
-        //self.cur_idx += diff;
-        //let ending_active_size = self.get_active_buf_slice().len();
-        //assert_eq!(starting_active_size, ending_active_size);
+        self.cur_idx += diff;
+
+        let ending_active_size = self.get_active_buf_slice().len();
+        assert_eq!(starting_active_size, ending_active_size);
+
         if new_len == 1 {
             return;
         }
 
-		// calculate the midpoint, and safely copy the old end data to the new
-		// end position:
-		let middle = new_len / 2;
-		{
-			let (left, right) = &mut self.owned_buf[..].split_at_mut(middle);
+        // calculate the midpoint, and safely copy the old end data to the new
+        // end position:
+        let middle = new_len / 2;
+        {
+            let (left, right) = &mut self.owned_buf[..].split_at_mut(middle);
             //println!("foo {}, {:?}, {:?}", middle, &left[..], &right[..]);
-			right.copy_from_slice(left);
-		}
+            right.copy_from_slice(left);
+        }
         // then, zero out the old end data (just to be safe):
         // should be vectorized by the compiler--rust has no stdlib memset.
         for x in &mut self.owned_buf[..middle] {
             *x = 0;
         }
 
-        //let ending_active_size = self.get_active_buf_slice().len();
-        //assert_eq!(starting_active_size, ending_active_size);
 
         //new_len
-	}
+    }
     //pub fn as_mut(&mut self) -> &mut Self {
     //    self
     //}
@@ -555,8 +562,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn start_vector(&mut self, elem_size: usize, len: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
-        //self.prep(SIZE_UOFFSET, elemsize*num_elems);
-        //self.prep(alignment, elemsize*num_elems); // Just in case elemsize is wider than uoffset_t.
+        //self.prep(SIZE_UOFFSET, elemsize*len);
+        //self.prep(alignment, elemsize*len); // Just in case elemsize is wider than uoffset_t.
         self.pre_align(len * elem_size, SIZE_UOFFSET);
         self.pre_align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
         self.rev_cur_idx()
@@ -567,11 +574,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn end_vector<'a, 'b, T: Sized + 'a>(&'a mut self, num_elems: usize) -> Offset<Vector<'b, T>> {
       self.assert_nested();
-
-      // we already made space for this, so write without PrependUint32
-      self.push_element_scalar_no_prep(num_elems as UOffsetT);
       self.nested = false;
-      Offset::new(self.rev_cur_idx())
+      let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
+      Offset::new(off)
+
+
+      //   //self.push_element_scalar(num_elems as UOffsetT)
+
+
+      //   // we already made space for this, so write without PrependUint32
+      //   self.push_element_scalar_no_prep(num_elems as UOffsetT);
+      //   //self.nested = false;
+      //Offset::new(self.rev_cur_idx())
   }
     pub fn emplace_scalar_in_active_buf<T>(&mut self, at: usize, x: T) {
         let buf = &mut self.get_mut_active_buf_slice();
@@ -582,6 +596,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let s = self.get_size() as usize;
         self.fill(padding_bytes(s + len, alignment));
     }
+  //fn push_small<T: ElementScalar>(&mut self, little_endian_t: T) {
+  //  self.make_space(std::mem::size_of::<T>());
+  //  emplace_scalar::<T>(kj
+  //  *reinterpret_cast<T *>(cur_) = little_endian_t;
+  //}
     pub fn prep(&mut self, sz: usize, additional_bytes: usize) {
         // Track the biggest thing we've ever aligned to.
         self.min_align = std::cmp::max(self.min_align, sz);
@@ -612,14 +631,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //println!("final prep: {}, {}, {}", self.owned_buf.len(), self.cur_idx, align_size);
     }
     pub fn get_size(&self) -> usize {
-        self.owned_buf.len() - self.cur_idx
+        self.rev_cur_idx() as usize
+        //self.owned_buf.len() - self.cur_idx
     }
     pub fn fill(&mut self, zero_pad_bytes: usize) {
+        println!("fill({})", zero_pad_bytes);
         self.make_space(zero_pad_bytes);
-        let start = self.cur_idx;
-        for i in 0..zero_pad_bytes {
-            self.owned_buf[start + i] = 0;
-        }
+        //let start = self.cur_idx;
+        //for i in 0..zero_pad_bytes {
+        //    self.owned_buf[start + i] = 0;
+        //}
     }
     pub fn track_min_align(&mut self, alignment: usize) {
         self.min_align = std::cmp::max(self.min_align, alignment);
@@ -892,9 +913,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar(b as u8)
     }
     fn align(&mut self, elem_size: usize) {
-        let delta = self.cur_idx % elem_size;
-        self.cur_idx -= delta;
+        self.track_min_align(elem_size);
+        let s = self.get_size();
+        self.fill(padding_bytes(s, elem_size));
     }
+    //fn align(&mut self, elem_size: usize) {
+    //    let delta = self.cur_idx % elem_size;
+    //    self.cur_idx -= delta;
+    //}
     pub fn push_element_scalar_no_prep<T: ElementScalar>(&mut self, t: T) -> UOffsetT {
         //let t = t.to_le(); // convert to little-endian
         self.cur_idx -= std::mem::size_of::<T>();
@@ -902,13 +928,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.cur_idx as UOffsetT
     }
     pub fn push_element_scalar<T: ElementScalar>(&mut self, t: T) -> UOffsetT {
-        self.prep(std::mem::size_of::<T>(), 0);
-        self.cur_idx -= std::mem::size_of::<T>();
-        emplace_scalar::<T>(&mut self.owned_buf[self.cur_idx..], t);
+        let sz = std::mem::size_of::<T>();
+        self.align(sz);
+        self.make_space(sz);
+        emplace_scalar(&mut self.owned_buf[self.cur_idx..], t);
         self.cur_idx as UOffsetT
+        //self.prep(std::mem::size_of::<T>(), 0);
+        //self.cur_idx -= std::mem::size_of::<T>();
+        //emplace_scalar::<T>(&mut self.owned_buf[self.cur_idx..], t);
+        //self.cur_idx as UOffsetT
     }
     pub fn place_element_scalar<T: ElementScalar>(&mut self, t: T) {
-        let t = t.to_le(); // convert to little-endian
+        //let t = t.to_le(); // convert to little-endian
         self.cur_idx -= std::mem::size_of::<T>();
         let cur_idx = self.cur_idx;
         emplace_scalar(&mut self.owned_buf[cur_idx..], t);
@@ -1057,12 +1088,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn ensure_space(&mut self, want: usize) -> usize {
         assert!(want <= FLATBUFFERS_MAX_BUFFER_SIZE,
 		        "cannot grow buffer beyond 2 gigabytes");
-        while self.cur_idx < want {
+        while self.unused_ready_space() < want {
             //println!("growing: {} < {}: {:?}", self.cur_idx, want, self.get_active_buf_slice());
+            println!("growing: {} < {}", self.cur_idx, want);
             self.grow_owned_buf();
+            println!("grew to: {} < {}", self.cur_idx, want);
             //println!("grew to: {}, {}, {:?}", self.cur_idx, self.owned_buf.len(), self.get_active_buf_slice());
         }
         want
+    }
+    fn unused_ready_space(&self) -> usize {
+        assert!(self.owned_buf.len() >= self.get_size());
+        self.owned_buf.len() - self.get_size()
     }
     pub fn finished_bytes(&self) -> &[u8] {
         self.assert_finished();
