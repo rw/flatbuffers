@@ -794,7 +794,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let o = Offset::new(n);
         o
     }
-    pub fn write_vtable(&mut self, table_end: UOffsetT) -> UOffsetT {
+    pub fn write_vtable(&mut self, start: UOffsetT) -> UOffsetT {
         // If you get this assert, a corresponding StartTable wasn't called.
         self.assert_nested();
         // Write the vtable offset, which is the start of any Table.
@@ -808,11 +808,17 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.max_voffset = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
                                          field_index_to_field_offset(0));
         { let s = self.max_voffset; self.fill_big(s as usize); }
-        //   let table_object_size = vtableoffsetloc - start;
-        //   assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
-        //   WriteScalar<voffset_t>(buf_.data() + sizeof(voffset_t),
-        //                          static_cast<voffset_t>(table_object_size));
+        let table_object_size = vtableoffsetloc - start;
+        // TODO: always true?
+        assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
+        //WriteScalar<voffset_t>(buf_.data() + sizeof(voffset_t),
+        //                       static_cast<voffset_t>(table_object_size));
+        emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + SIZE_VOFFSET..],
+                                   table_object_size as VOffsetT);
+
         //   WriteScalar<voffset_t>(buf_.data(), max_voffset_);
+        emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx..],
+                                   self.max_voffset);
         //   // Write the offsets into the table
         //   for (auto it = buf_.scratch_end() - num_field_loc * sizeof(FieldLoc);
         //        it < buf_.scratch_end(); it += sizeof(FieldLoc)) {
@@ -825,7 +831,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //   ClearOffsets();
         //   auto vt1 = reinterpret_cast<voffset_t *>(buf_.data());
         //   auto vt1_size = ReadScalar<voffset_t>(vt1);
-        //   let vt_use = self.get_size();
+        let vt_use = self.get_size();
         //   // See if we already have generated a vtable with this exact same
         //   // layout before. If so, make it point to the old one, remove this one.
         //   if (dedup_vtables_) {
@@ -842,14 +848,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //   }
         //   // If this is a new vtable, remember it.
         //   if (vt_use == GetSize()) { buf_.scratch_push_small(vt_use); }
-        //   // Fill the vtable offset we created above.
-        //   // The offset points from the beginning of the object to where the
-        //   // vtable is stored.
-        //   // Offsets default direction is downward in memory for future format
-        //   // flexibility (storing all vtables at the start of the file).
-        //   WriteScalar(buf_.data_at(vtableoffsetloc),
-        //               static_cast<soffset_t>(vt_use) -
-        //                   static_cast<soffset_t>(vtableoffsetloc));
+        // Fill the vtable offset we created above.
+        // The offset points from the beginning of the object to where the
+        // vtable is stored.
+        // Offsets default direction is downward in memory for future format
+        // flexibility (storing all vtables at the start of the file).
+        //WriteScalar(buf_.data_at(vtableoffsetloc),
+        //            static_cast<soffset_t>(vt_use) -
+        //                static_cast<soffset_t>(vtableoffsetloc));
+        //emplace_scalar::<SOffsetT>(&mut self.owned_buf[self.cur_idx + vtableoffsetloc as usize..],
+        //                           vt_use as SOffsetT - vtableoffsetloc as SOffsetT);
 
         vtableoffsetloc
     }

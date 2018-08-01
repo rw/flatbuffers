@@ -2627,10 +2627,11 @@ mod byte_layouts {
     #[test]
     fn test_7_empty_vtable() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let off = b.start_table(0);
-        check(&b, &[]);
-        let off0 = b.end_table(off);
+        let off0 = b.start_table(0);
         assert_eq!(4, off0.value());
+        check(&b, &[]);
+        let off1 = b.end_table(off0);
+        //assert_eq!(4, off1.value());
         check(&b, &[4, 0, // vtable length
                     4, 0, // length of table including vtable offset
                     4, 0, 0, 0]); // offset for start of vtable
