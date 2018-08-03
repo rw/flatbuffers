@@ -841,6 +841,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // Write the offsets into the table
         for (i, &fl) in self.field_locs.iter().enumerate() {
             let pos: VOffsetT = (vtableoffsetloc - fl.off) as VOffsetT;
+            emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + fl.id as usize..], pos);
         //|  // If this asserts, it means you've set a field twice.
         //|  assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
         //|  WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
