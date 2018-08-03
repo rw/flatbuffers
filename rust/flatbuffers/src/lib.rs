@@ -527,14 +527,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         assert!(new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
                 "cannot grow buffer beyond 2 gigabytes");
-        assert!(new_len <= 1024,
-                "cannot grow buffer beyond 1 kilobytes");
-        assert!(new_len <= 1024*1024,
-                "cannot grow buffer beyond 1 megabytes");
+        //assert!(new_len <= 1024,
+        //        "cannot grow buffer beyond 1 kilobytes");
+        //assert!(new_len <= 1024*1024,
+        //        "cannot grow buffer beyond 1 megabytes");
 
         let diff = new_len - old_len;
         self.owned_buf.resize(new_len, 0);
-        println!("cur_idx += diff: {}, {}", self.cur_idx, diff);
+        //println!("cur_idx += diff: {}, {}", self.cur_idx, diff);
         self.inc_cur_idx(diff);
 
         let ending_active_size = self.get_size();
@@ -673,7 +673,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.fill(zero_pad_bytes);
     }
     pub fn fill(&mut self, zero_pad_bytes: usize) {
-        println!("fill({})", zero_pad_bytes);
+        //println!("fill({})", zero_pad_bytes);
         self.make_space(zero_pad_bytes);
         //let start = self.cur_idx;
         //for i in 0..zero_pad_bytes {
@@ -818,8 +818,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // Write the vtable offset, which is the start of any Table.
         // We fill it's value later.
         let vtableoffsetloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0xFF);
-        println!("vtableoffsetloc: {}", vtableoffsetloc);
-        println!("field_locs: {:?}", self.field_locs);
+       // println!("vtableoffsetloc: {}", vtableoffsetloc);
+       // println!("field_locs: {:?}", self.field_locs);
         // Write a vtable, which consists entirely of voffset_t elements.
         // It starts with the number of offsets, followed by a type id, followed
         // by the offsets themselves. In reverse:
@@ -1132,7 +1132,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_nested();
         let bytes = x.to_bytes();
         self.align(bytes.len());
-        println!("x bytes: {:?}", x.to_bytes());
+       // println!("x bytes: {:?}", x.to_bytes());
         self.push_bytes(bytes);
         let sz = self.get_size() as UOffsetT;
         self.track_field(slotoff, sz);
@@ -1225,9 +1225,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 		        "cannot grow buffer beyond 2 gigabytes");
         while self.unused_ready_space() < want {
             //println!("growing: {} < {}: {:?}", self.cur_idx, want, self.get_active_buf_slice());
-            println!("growing: {} < {}", self.cur_idx, want);
+           // println!("growing: {} < {}", self.cur_idx, want);
             self.grow_owned_buf();
-            println!("grew to: {} < {}", self.cur_idx, want);
+           // println!("grew to: {} < {}", self.cur_idx, want);
             //println!("grew to: {}, {}, {:?}", self.cur_idx, self.owned_buf.len(), self.get_active_buf_slice());
         }
         want
@@ -1377,7 +1377,7 @@ pub fn verify_offset_required(_: &Verifier, _: VOffsetT) -> ! {
 //pub fn get_root<'a, 'b: 'a, T: BufferBacked<'a>>(bytes: &'b [u8]) -> T {
 pub fn get_root<'a, T: BufferBacked<'a> + 'a>(bytes: &'a [u8]) -> T {
 	let n = read_scalar::<UOffsetT>(bytes) as usize;
-    println!("get_root n: {}, len of bytes: {}", n, bytes.len());
+   // println!("get_root n: {}, len of bytes: {}", n, bytes.len());
     T::init_from_bytes(bytes, n)
 
     //let ptr = obj_bytes.as_ptr() as *const T;
