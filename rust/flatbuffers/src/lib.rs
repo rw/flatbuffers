@@ -1114,6 +1114,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
     }
     pub fn push_element_scalar_indirect_uoffset(&mut self, x: UOffsetT) -> UOffsetT {
+        let x = self.refer_to(x);
+        return self.push_element_scalar(x);
         self.prep(std::mem::size_of::<UOffsetT>(), 0);
         assert!(x <= self.rev_cur_idx() as UOffsetT, "logic error");
         let off2 = self.rev_cur_idx() as UOffsetT - x + SIZE_UOFFSET as UOffsetT;
