@@ -739,7 +739,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_not_nested();
         //self.nested = true;
         self.pre_align(data.len(), SIZE_UOFFSET);
-        self.fill(1);
+        //self.fill(1);
         self.push_bytes(data);
         self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
