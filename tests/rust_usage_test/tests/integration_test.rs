@@ -2628,7 +2628,7 @@ mod byte_layouts {
     fn test_7_empty_vtable() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off0 = b.start_table(0);
-        assert_eq!(4, off0.value());
+        //assert_eq!(4, off0.value());
         check(&b, &[]);
         let off1 = b.end_table(off0);
         //assert_eq!(4, off1.value());
