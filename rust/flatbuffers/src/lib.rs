@@ -571,7 +571,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn assert_not_nested(&self) {
         assert!(!self.nested);
-        assert_eq!(self.vtable.len(), 0);
+        assert_eq!(self.field_locs.len(), 0);
     }
     pub fn assert_finished(&self) {
         assert!(self.finished);
@@ -808,6 +808,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let n = self.write_vtable(off.value());
         //println!("3/3");
         self.nested = false;
+        self.field_locs.clear();
         let o = Offset::new(n);
         o
     }
@@ -883,6 +884,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         vtableoffsetloc
     }
     pub fn write_vtable_old(&mut self, table_end: UOffsetT) -> UOffsetT {
+        unreachable!();
         self.push_soffset_relative(0);
 
         let table_offset = self.rev_cur_idx();
@@ -1014,8 +1016,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn finish<T>(&mut self, root: Offset<T>) {
         self.assert_not_nested();
-        let min_align = self.min_align;
-        self.prep(min_align, SIZE_UOFFSET);
+        self.vtables.clear();
+        { let x = self.min_align; self.pre_align(SIZE_UOFFSET, x); }
         self.push_element_scalar_indirect_uoffset(root.value());
         self.finished = true;
     }
