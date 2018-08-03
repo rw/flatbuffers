@@ -1128,10 +1128,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn push_slot_struct<T: GeneratedStruct>(&mut self, slotoff: VOffsetT, x: &T) {
 	// using to_bytes as a trait makes it easier to mix references into T
         self.assert_nested();
-	let bytes = x.to_bytes();
-        self.prep(bytes.len(), 0);
-        self.push_bytes_no_prep(bytes);
-        self.store_slot(slotoff);
+        let bytes = x.to_bytes();
+        self.align(bytes.len());
+        println!("x bytes: {:?}", x.to_bytes());
+        self.push_bytes(bytes);
+        let sz = self.get_size() as UOffsetT;
+        self.track_field(slotoff, sz);
+	//let bytes = x.to_bytes();
+        //self.prep(bytes.len(), 0);
+        //self.push_bytes_no_prep(bytes);
+        //self.store_slot(slotoff);
     }
     // Offsets initially are relative to the end of the buffer (downwards).
     // This function converts them to be relative to the current location
