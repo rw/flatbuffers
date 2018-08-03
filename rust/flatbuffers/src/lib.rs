@@ -1109,15 +1109,15 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn push_slot_scalar_indirect_uoffset(&mut self, slotoff: VOffsetT, x: UOffsetT, default: UOffsetT) {
         if x != default {
-            self.push_element_scalar_indirect_uoffset(x);
-            self.store_slot(slotoff);
+            let off = self.push_element_scalar_indirect_uoffset(x);
+            self.track_field(slotoff, off);
         }
     }
-    pub fn push_element_scalar_indirect_uoffset(&mut self, x: UOffsetT) {
+    pub fn push_element_scalar_indirect_uoffset(&mut self, x: UOffsetT) -> UOffsetT {
         self.prep(std::mem::size_of::<UOffsetT>(), 0);
         assert!(x <= self.rev_cur_idx() as UOffsetT, "logic error");
         let off2 = self.rev_cur_idx() as UOffsetT - x + SIZE_UOFFSET as UOffsetT;
-        self.push_element_scalar_no_prep::<UOffsetT>(off2);
+        self.push_element_scalar_no_prep::<UOffsetT>(off2)
     }
     pub fn push_slot_bool(&mut self, slotnum: VOffsetT, x: bool, default: bool) {
         unimplemented!();
@@ -1156,7 +1156,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_slot_scalar::<UOffsetT>(slotoff, rel_off, 0);
         //AddElement(field, ReferTo(off.o), static_cast<uoffset_t>(0));
         //self.push_uoffset_relative(x.value());
-        self.store_slot(slotoff);
+        //self.track_field(slotoff, off);
         //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
     pub fn push_slot_labeled_uoffset_relative<T>(&mut self, slotoff: VOffsetT, x: Offset<T>) {
