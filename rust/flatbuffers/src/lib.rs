@@ -107,6 +107,7 @@ pub const SIZE_UOFFSET: usize = SIZE_U32;
 pub const SIZE_SOFFSET: usize = SIZE_I32;
 pub const SIZE_VOFFSET: usize = SIZE_I16;
 
+#[derive(Clone, Copy, Debug)]
 struct FieldLoc {
     off: UOffsetT,
     id: VOffsetT,
@@ -478,6 +479,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_not_nested();
         self.nested = true;
 
+        self.field_locs.clear();
+
         self.vtable.clear();
         //self.vtable.truncate(num_fields as usize);
         self.vtable.resize(num_fields as usize, 0);
@@ -489,6 +492,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.get_size() as UOffsetT
     }
     pub fn store_slot(&mut self, slotoff: VOffsetT) {
+        unreachable!();
         //let i = slotnum as usize;
         //let i = field_offset_to_field_index(slotnum) as usize;
         let slotnum = field_offset_to_field_index(slotoff) as usize;
@@ -812,8 +816,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_nested();
         // Write the vtable offset, which is the start of any Table.
         // We fill it's value later.
-        let vtableoffsetloc = self.push_element_scalar::<SOffsetT>(0xFF);
+        let vtableoffsetloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0xFF);
         println!("vtableoffsetloc: {}", vtableoffsetloc);
+        println!("field_locs: {:?}", self.field_locs);
         // Write a vtable, which consists entirely of voffset_t elements.
         // It starts with the number of offsets, followed by a type id, followed
         // by the offsets themselves. In reverse:
@@ -834,15 +839,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx..],
                                    self.max_voffset);
         // Write the offsets into the table
-        //|for &(i, vt_offset) in self.vtable.iter() {
-        //|for (auto it = buf_.scratch_end() - num_field_loc * sizeof(FieldLoc);
-        //|     it < buf_.scratch_end(); it += sizeof(FieldLoc)) {
-        //|  auto field_location = reinterpret_cast<FieldLoc *>(it);
-        //|  auto pos = static_cast<voffset_t>(vtableoffsetloc - field_location->off);
+        for (i, &fl) in self.field_locs.iter().enumerate() {
+            let pos: VOffsetT = (vtableoffsetloc - fl.off) as VOffsetT;
         //|  // If this asserts, it means you've set a field twice.
         //|  assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
         //|  WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
-        //|}
+        }
         //|ClearOffsets();
         //let vt1 = reinterpret_cast<voffset_t *>(buf_.data());
         //let vt1_size = read_scalar_at::<VOffsetT>(self.get_active_buf_slice());
@@ -1171,11 +1173,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //println!("push_slot_scalar: slotnum={}, x={}, default={}, get_active_buf_slice={:?}", slotnum, x, default, self.get_active_buf_slice());
         if x != default {
            //// println!("pushing slot scalar {} != {}", x, default);
-            self.push_element_scalar(x);
+            let off = self.push_element_scalar(x);
             //self.prep(std::mem::size_of::<T>(), 0);
             //emplace_scalar(&mut self.owned_buf[self.cur_idx..], x);
             //self.push_element_scalar(x);
-            self.store_slot(slotoff);
+            self.track_field(slotoff, off);
         }
     }
 
