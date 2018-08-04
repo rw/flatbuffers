@@ -175,6 +175,7 @@ pub struct Vector<'a, T: Sized + 'a>(&'a [T]);
 
 impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn new(buf: &'a [u8]) -> Self {
+        println!("vecbuf: {:?}", buf);
         assert!(buf.len() >= SIZE_UOFFSET);
         let elem_sz = std::mem::size_of::<T>();
         let actual_num_elems = read_scalar::<UOffsetT>(buf) as usize;
