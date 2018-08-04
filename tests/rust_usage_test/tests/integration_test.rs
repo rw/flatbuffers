@@ -492,8 +492,8 @@ mod vector_read_obj_tests {
         let idx = all.len() - vecend.value() as usize;
         let buf = &all[idx..];
 
-        //let vec: flatbuffers::VectorLabeledUOffsetT<flatbuffers::StringOffset> = flatbuffers::Vector::new_from_buf(buf);
-        //assert_eq!(vec.len(), xs.len());
+        let v: flatbuffers::Vector<flatbuffers::Offset<flatbuffers::FBString>> = flatbuffers::Vector::new(buf);
+        assert_eq!(v.as_slice().len(), xs.len());
         //for i in 0..xs.len() {
         //    assert_eq!(vec.get(i), &xs[i]);
         //}
@@ -1223,7 +1223,7 @@ fn fuzz_scalar_table_serialization() {
             let f = flatbuffers::field_index_to_field_offset(j);
 
             match choice {
-                0 => {builder.push_slot_scalar(f, bool_val, false);}
+                0 => {builder.push_slot_scalar::<bool>(f, bool_val, false);}
                 1 => {builder.push_slot_scalar::<i8>(f, char_val, 0);}
                 2 => {builder.push_slot_scalar::<u8>(f, uchar_val, 0);}
                 3 => {builder.push_slot_scalar::<i16>(f, short_val, 0);}
@@ -1267,7 +1267,7 @@ fn fuzz_scalar_table_serialization() {
             let f = flatbuffers::field_index_to_field_offset(j);
 
             match choice {
-                0 => { assert_eq!(bool_val, table.get_slot_scalar(f, false)); }
+                0 => { assert_eq!(bool_val, table.get_slot_scalar::<bool>(f, false)); }
                 1 => { assert_eq!(char_val, table.get_slot_scalar::<i8>(f, 0)); }
                 2 => { assert_eq!(uchar_val, table.get_slot_scalar::<u8>(f, 0)); }
                 3 => { assert_eq!(short_val, table.get_slot_scalar::<i16>(f, 0)); }
