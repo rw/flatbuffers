@@ -8,5 +8,5 @@ flatbuffers = { path = "../../rust/flatbuffers" }
 quickcheck = "0.6"
 
 [profile.test]
-# run tests faster, while preserving debug asserts:
 opt-level = 3
+# run tests faster, while preserving debug asserts:

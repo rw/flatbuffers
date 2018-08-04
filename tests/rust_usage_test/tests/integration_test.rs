@@ -422,29 +422,38 @@ mod vector_read_scalar_tests {
 
     fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(xs: Vec<T>) {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(::std::mem::size_of::<T>(), xs.len());
-        for i in xs.iter().rev() {
-            b.push_element_scalar(*i);
+        b.start_vector(xs.len(), ::std::mem::size_of::<T>());
+        for i in (0..xs.len()).rev() {
+            b.push_element_scalar::<T>(xs[i]);
         }
         let vecend = b.end_vector::<T>(xs.len());
 
-        let all = &b.owned_buf[..];
+        let all = b.get_active_buf_slice();
         let idx = all.len() - vecend.value() as usize;
         let buf = &all[idx..];
+        println!("buf len: {}", buf.len());
+        println!("buf: {:?}", buf);
 
-        let vec: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf);
-        let sl = vec.as_slice();
-        assert_eq!(sl.len(), xs.len());
+        let ret: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf);
+        let rl = ret.as_slice();
+        assert_eq!(rl.len(), xs.len());
         for i in 0..xs.len() {
-            assert_eq!(sl[i], xs[i]);
+            assert_eq!(rl[i], xs[i]);
         }
     }
 
     #[test]
+    fn easy() {
+        prop::<u8>(vec![]);
+        prop::<u8>(vec![1u8]);
+        prop::<u8>(vec![1u8, 2u8]);
+        prop::<u8>(vec![1u8, 2u8, 3u8]);
+        prop::<u8>(vec![1u8, 2u8, 3u8, 4u8]);
+    }
+
+    #[test]
     fn fuzz() {
-        return;
         let n = 20;
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<bool> as fn(Vec<_>));
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u8> as fn(Vec<_>));
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<i8> as fn(Vec<_>));
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u16> as fn(Vec<_>));
@@ -455,6 +464,7 @@ mod vector_read_scalar_tests {
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<i64> as fn(Vec<_>));
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<f32> as fn(Vec<_>));
         quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<f64> as fn(Vec<_>));
+        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<bool> as fn(Vec<_>));
     }
 }
 
