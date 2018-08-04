@@ -207,7 +207,7 @@ impl<'a> FBString<'a> {
             std::str::from_utf8_unchecked(self.0)
         }
     }
-    pub fn into_str(self) -> &'a str {
+    pub fn unsafe_into_str(self) -> &'a str {
         unsafe {
             std::str::from_utf8_unchecked(self.0)
         }
@@ -293,7 +293,7 @@ impl<'a: 'b, 'b> Table<'a> {
         Some(t2)
     }
     pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'b str> {
-        self.get_slot_vector::<u8>(slotoff).map(|v| v.into_str())
+        self.get_slot_vector::<u8>(slotoff).map(|v| v.unsafe_into_str())
         //let o = self.compute_vtable_offset(slotoff) as usize;
         //if o == 0 {
         //    return None;
