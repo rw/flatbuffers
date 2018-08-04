@@ -350,12 +350,12 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
     for m in vec![monster1] {
         if m.hp() != 80 { assert_eq!(80, m.hp()); return Err("bad m.hp"); }
         if m.mana() != 150 { return Err("bad m.mana"); }
-        //match m.name() {
-        //    None => { return Err("bad m.name"); }
-        //    Some("MyMonster") => { }
-        //    Some(x) => {
-        //        assert_eq!(x, "MyMonster"); return Err("bad m.name"); }
-        //}
+        match m.name() {
+            None => { return Err("bad m.name"); }
+            Some("MyMonster") => { }
+            Some(x) => {
+                assert_eq!(x, "MyMonster"); return Err("bad m.name"); }
+        }
         let pos = match m.pos() {
             None => { return Err("bad m.pos"); }
             Some(x) => { x }
@@ -379,10 +379,10 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
 
         let monster2 = MyGame::Example::Monster::init_from_table(flatbuffers::Table::new(table2_bytes.as_slice(), 0));
 
-        //match monster2.name() {
-        //    Some("Fred") => { }
-        //    _ => { return Err("bad monster2.name"); }
-        //}
+        match monster2.name() {
+            Some("Fred") => { }
+            _ => { return Err("bad monster2.name"); }
+        }
 
         let inv = match m.inventory() {
             None => { return Err("bad m.inventory"); }
