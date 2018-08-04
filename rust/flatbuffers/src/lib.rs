@@ -293,14 +293,15 @@ impl<'a: 'b, 'b> Table<'a> {
         Some(t2)
     }
     pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'b str> {
-        let o = self.compute_vtable_offset(slotoff) as usize;
-        if o == 0 {
-            return None;
-        }
-        let off = o + self.pos;
-        let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        //let fbs: FBString<'a> = FBString::new(&self.data[off2..]);
-        return Some(FBString::new(&self.data[off2..]).into_str());
+        self.get_slot_vector::<u8>(slotoff).map(|v| v.into_str())
+        //let o = self.compute_vtable_offset(slotoff) as usize;
+        //if o == 0 {
+        //    return None;
+        //}
+        //let off = o + self.pos;
+        //let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
+        ////let fbs: FBString<'a> = FBString::new(&self.data[off2..]);
+        //return Some(FBString::new(&self.data[off2..]).into_str());
         //return Some(fbs.as_str());
         //let start = off2 + SIZE_UOFFSET as usize;
         //let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
