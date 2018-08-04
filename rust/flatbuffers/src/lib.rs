@@ -116,7 +116,7 @@ struct FieldLoc {
 #[inline]
 pub fn padding_bytes(buf_size: usize, scalar_size: usize) -> usize {
   // ((!buf_size) + 1) & (scalar_size - 1)
-  (!buf_size).wrapping_add(1) & (scalar_size - 1)
+  (!buf_size).wrapping_add(1) & (scalar_size.wrapping_sub(1))
 }
 pub fn field_index_to_field_offset(field_id: VOffsetT) -> VOffsetT {
     // Should correspond to what end_table() below builds up.
@@ -175,11 +175,12 @@ pub struct Vector<'a, T: Sized + 'a>(&'a [T]);
 
 impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn new(buf: &'a [u8]) -> Self {
-        let sz = std::mem::size_of::<T>();
-        let num_elems = buf.len() / sz;
-        let ptr = buf.as_ptr() as *const T;
+        let elem_sz = std::mem::size_of::<T>();
+        let actual_num_elems = read_scalar::<UOffsetT>(buf) as usize;
+        let extra_bytes = buf.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
+        let ptr = buf[SIZE_UOFFSET..].as_ptr() as *const T;
         let data = unsafe {
-            std::slice::from_raw_parts::<T>(ptr, num_elems)
+            std::slice::from_raw_parts::<T>(ptr, actual_num_elems)
         };
         Self { 0: data }
     }
@@ -384,14 +385,18 @@ impl<'a> Table<'a> {
     //pub fn get_struct<T: Sized>(&'a self, slotnum: VOffsetT) -> &'a T {
     //    let field_offset = GetOptionalFieldOffset(field);
     //    auto p = const_cast<uint8_t *>(data_ + field_offset);
-    //    return field_offset ? reinterpret_cast<P>(p) : nullptr;
+
     //}
     pub fn compute_vtable_offset(&self, vtable_offset: VOffsetT) -> VOffsetT {
         let vtable_start = {
             let a = self.pos as SOffsetT;
             let b = read_scalar_at::<SOffsetT>(self.data, self.pos);
-            assert!(a - b >= 0, format!("vtable_offset: {}, a: {}, b: {}, self.pos: {}", vtable_offset, a, b, self.pos));
-            (a - b) as usize
+            let c = (a - b);
+            println!("a: {}, b: {}, c: {}", a, b,c);
+            assert!(c >= 0);
+            c as usize
+            //assert!(a - b >= 0, format!("vtable_offset: {}, a: {}, b: {}, self.pos: {}", vtable_offset, a, b, self.pos));
+            //(a - b) as usize
         };
         let vtsize = read_scalar_at::<VOffsetT>(self.data, vtable_start);
         if vtable_offset >= vtsize {
@@ -576,7 +581,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn assert_finished(&self) {
         assert!(self.finished);
     }
-    pub fn start_vector(&mut self, elem_size: usize, len: usize) -> UOffsetT {
+    pub fn start_vector(&mut self, len: usize, elem_size: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
         //self.prep(SIZE_UOFFSET, elemsize*len);
@@ -770,7 +775,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
         for i in items.iter().rev() {
-            self.push_bytes_no_prep(to_bytes(i));
+            self.push_bytes(to_bytes(i));
         }
         Offset::new(self.end_vector::<'_, '_, T>(items.len()).value())
     }
@@ -1090,13 +1095,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar_no_prep(off2);
         //emplace_scalar(&mut self.owned_buf[start..start+SIZE_SOFFSET], off2);
     }
-    fn push_small<T: Sized>(&mut self, x: T) {
+    fn push_small<T: ElementScalar>(&mut self, x: T) {
         self.make_space(std::mem::size_of::<T>());
         emplace_scalar(&mut self.owned_buf[self.cur_idx..], x);
     }
     // push_bytes_no_prep must not be used when endian-ness is not guaranteed
     // (e.g. with vectors of elements)
     fn push_bytes_no_prep(&mut self, x: &[u8]) -> UOffsetT {
+        unreachable!();
         let l = x.len();
         self.cur_idx -= l;
         &mut self.owned_buf[self.cur_idx..self.cur_idx+l].copy_from_slice(x);
