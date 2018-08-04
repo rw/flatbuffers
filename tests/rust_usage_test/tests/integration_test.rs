@@ -2455,7 +2455,6 @@ fn push_struct_slot_should_panic_when_not_in_table() {
     struct foo { }
     impl flatbuffers::GeneratedStruct for foo {}
     let mut b = flatbuffers::FlatBufferBuilder::new();
-    b.start_table(0);
     let x = foo{};
     b.push_slot_struct(0, &x);
 }
