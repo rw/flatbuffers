@@ -169,7 +169,7 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     let table_start = builder.start_table(34);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_MANA, 150, 150);
-    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_NAME, name);
+    builder.push_slot_offset_relative::<flatbuffers::FBString>(MyGame::Example::Monster::VT_NAME, name);
     builder.push_slot_struct(MyGame::Example::Monster::VT_POS, &pos);
     builder.push_slot_scalar::<u8>(MyGame::Example::Monster::VT_TEST_TYPE, MyGame::Example::Any::Monster as u8, 0);
     builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST, nested_union_mon);
@@ -1202,7 +1202,7 @@ fn fuzz_scalar_table_serialization() {
 
     let test_values_max: isize = 11;
     let max_fields_per_object: flatbuffers::VOffsetT = 20;
-    let num_fuzz_objects: isize = 10000;  // The higher, the more thorough :)
+    let num_fuzz_objects: isize = 1000;  // The higher, the more thorough :)
 
     let mut builder = flatbuffers::FlatBufferBuilder::new();
     let mut lcg = LCG::new();

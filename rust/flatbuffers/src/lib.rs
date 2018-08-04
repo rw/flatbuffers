@@ -175,8 +175,11 @@ pub struct Vector<'a, T: Sized + 'a>(&'a [T]);
 
 impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn new(buf: &'a [u8]) -> Self {
+        assert!(buf.len() >= SIZE_UOFFSET);
         let elem_sz = std::mem::size_of::<T>();
         let actual_num_elems = read_scalar::<UOffsetT>(buf) as usize;
+        assert!(buf.len() - SIZE_UOFFSET >= actual_num_elems*elem_sz,
+                format!("buf.len(): {}, actual_num_elems: {}, elem_sz: {}", buf.len(), actual_num_elems, elem_sz));
         let extra_bytes = buf.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
         let ptr = buf[SIZE_UOFFSET..].as_ptr() as *const T;
         let data = unsafe {
@@ -192,12 +195,18 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
     }
 }
 
+
 //pub struct String<'a> {
 //    data: &'a [u8],
 //}
 pub type FBString<'a> = Vector<'a, u8>;
 impl<'a> FBString<'a> {
     pub fn as_str(&'a self) -> &'a str {
+        unsafe {
+            std::str::from_utf8_unchecked(self.0)
+        }
+    }
+    pub fn into_str(self) -> &'a str {
         unsafe {
             std::str::from_utf8_unchecked(self.0)
         }
@@ -257,8 +266,8 @@ pub struct Table<'a> {
     pub data: &'a [u8],
     pub pos: usize,
 }
-impl<'a> Table<'a> {
-    pub fn new<'b: 'a>(data: &'b [u8], pos: UOffsetT) -> Self {
+impl<'a: 'b, 'b> Table<'a> {
+    pub fn new<'before: 'a>(data: &'before [u8], pos: UOffsetT) -> Self {
         Table {
             data: data,
             pos: pos as usize,
@@ -282,22 +291,25 @@ impl<'a> Table<'a> {
         };
         Some(t2)
     }
-    pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<&'a str> {
-        let o = self.compute_vtable_offset(slotnum) as usize;
+    pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'b str> {
+        let o = self.compute_vtable_offset(slotoff) as usize;
         if o == 0 {
             return None;
         }
         let off = o + self.pos;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        let start = off2 + SIZE_UOFFSET as usize;
-        let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
-        let buf = &self.data[start..start+length];
-        let s: &str = unsafe {
-            let v = std::slice::from_raw_parts(buf.as_ptr(), length);
-            // from str::from_utf8_unchecked which is nightly
-            &*(v as *const [u8] as *const str)
-        };
-        Some(s)
+        //let fbs: FBString<'a> = FBString::new(&self.data[off2..]);
+        return Some(FBString::new(&self.data[off2..]).into_str());
+        //return Some(fbs.as_str());
+        //let start = off2 + SIZE_UOFFSET as usize;
+        //let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
+        //let buf = &self.data[start..start+length];
+        //let s: &str = unsafe {
+        //    let v = std::slice::from_raw_parts(buf.as_ptr(), length);
+        //    // from str::from_utf8_unchecked which is nightly
+        //    &*(v as *const [u8] as *const str)
+        //};
+        //Some(s)
     }
     //pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
     //pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<FBString<'a>> {
@@ -316,19 +328,20 @@ impl<'a> Table<'a> {
         }
         let off = o + self.pos;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        let start = off2 + SIZE_UOFFSET as usize;
+        return Some(Vector::new(&self.data[off2..]));
+        //let start = off2 + SIZE_UOFFSET as usize;
 
-        let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
-        let length_u8 = length * std::mem::size_of::<T>();
+        //let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
+        //let length_u8 = length * std::mem::size_of::<T>();
 
-        let buf = &self.data[start..start+length_u8];
-        //let ptr = buf.as_ptr() as *const T;
+        //let buf = &self.data[start..start+length_u8];
+        ////let ptr = buf.as_ptr() as *const T;
 
-        //let s: &[T] = unsafe {
-        //    std::slice::from_raw_parts(ptr, length)
-        //};
-        let v = Vector::new(buf);
-        Some(v)
+        ////let s: &[T] = unsafe {
+        ////    std::slice::from_raw_parts(ptr, length)
+        ////};
+        //let v = Vector::new(buf);
+        //Some(v)
     }
     pub fn get_slot_struct<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
         self.get_slot_struct_unsafe(slotnum)
@@ -701,7 +714,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     // utf-8 string creation
     pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<FBString<'c>> {
-        Offset::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
+        Offset::<FBString>::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
     pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<ByteString<'c>> {
     self.assert_not_nested();
@@ -1176,6 +1189,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
     pub fn push_slot_labeled_uoffset_relative<T>(&mut self, slotoff: VOffsetT, x: Offset<T>) {
+        unreachable!();
         if x.value() == 0 {
             return;
         }
