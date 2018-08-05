@@ -2490,6 +2490,32 @@ fn create_byte_vector_fuzz() {
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
 }
 
+#[test]
+fn table_of_strings_fuzz() {
+    fn prop(vec: Vec<String>) {
+        let xs = &vec[..];
+
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+
+        let str_offsets = xs.iter().map(|s| b.create_string(&s[..]) );
+
+        //let off0 = b.start_table(xs.len());
+
+        //b1.start_vector(flatbuffers::SIZE_U8, xs.len());
+
+        //for i in (0..xs.len()).rev() {
+        //    b1.push_element_scalar(xs[i]);
+        //}
+        //b1.end_vector::<u8>(xs.len());
+
+        //let mut b2 = flatbuffers::FlatBufferBuilder::new();
+        //b2.create_byte_vector(xs);
+        //assert_eq!(&b1.owned_buf[..], &b2.owned_buf[..]);
+    }
+    let n = 20;
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
+}
+
 #[cfg(test)]
 mod byte_layouts {
     extern crate flatbuffers;
