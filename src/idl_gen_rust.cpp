@@ -1106,6 +1106,31 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "}";
 
+    //     code_ += "//#[repr({{BASE_TYPE}})]";
+    //     code_ += "#[derive(Clone, Copy, PartialEq, Debug)]";
+    //     code_ += GenEnumDecl(enum_def) + "Union\\";
+    //     code_ += " {";
+
+    //     int64_t anyv = 0;
+    //     const EnumVal *minv = nullptr, *maxv = nullptr;
+    //     for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+    //          ++it) {
+    //       const auto &ev = **it;
+
+    //       GenComment(ev.doc_comment, "  ");
+    //       code_.SetValue("KEY", GenEnumValDecl(enum_def, Name(ev)));
+    //       code_.SetValue("VALUE", NumToString(ev.value));
+    //       code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
+    //       code_.SetValue("SEP", ",\n");
+
+    //       minv = !minv || minv->value > ev.value ? &ev : minv;
+    //       maxv = !maxv || maxv->value < ev.value ? &ev : maxv;
+    //       anyv |= ev.value;
+    //     }
+
+    //      code_ += "";
+    //      code_ += "}";
+
     if (parser_.opts.scoped_enums && enum_def.attributes.Lookup("bit_flags")) {
       code_ += "DEFINE_BITMASK_OPERATORS({{ENUM_NAME}}, {{BASE_TYPE}})";
     }
@@ -1966,7 +1991,7 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::UnionValue: {
         //const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
         //return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
-        //return "self._tab.get_slot_vector::<u8>(" + offset_name + ")";
+        return "self._tab.get_slot_vector::<u8>(" + offset_name + ")";
       }
       case FullElementType::UnionKey:
       case FullElementType::EnumKey: {
