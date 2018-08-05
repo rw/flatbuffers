@@ -175,14 +175,16 @@ pub struct Vector<'a, T: Sized + 'a>(&'a [T]);
 
 impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn new(buf: &'a [u8]) -> Self {
-        println!("vecbuf: {:?}", buf);
+        //println!("vecbuf: {:?}", buf);
         assert!(buf.len() >= SIZE_UOFFSET);
         let elem_sz = std::mem::size_of::<T>();
         let actual_num_elems = read_scalar::<UOffsetT>(buf) as usize;
         assert!(buf.len() - SIZE_UOFFSET >= actual_num_elems*elem_sz,
                 format!("buf.len(): {}, actual_num_elems: {}, elem_sz: {}", buf.len(), actual_num_elems, elem_sz));
         let extra_bytes = buf.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
-        let ptr = buf[SIZE_UOFFSET..].as_ptr() as *const T;
+        let elems_buf = &buf[SIZE_UOFFSET..SIZE_UOFFSET+actual_num_elems*elem_sz];
+        println!("elems_buf: {:?}", elems_buf);
+        let ptr = elems_buf.as_ptr() as *const T;
         let data = unsafe {
             std::slice::from_raw_parts::<T>(ptr, actual_num_elems)
         };
@@ -267,7 +269,7 @@ pub struct Table<'a> {
     pub data: &'a [u8],
     pub pos: usize,
 }
-impl<'a: 'b, 'b> Table<'a> {
+impl<'a> Table<'a> {
     pub fn new<'before: 'a>(data: &'before [u8], pos: UOffsetT) -> Self {
         Table {
             data: data,
@@ -292,7 +294,7 @@ impl<'a: 'b, 'b> Table<'a> {
         };
         Some(t2)
     }
-    pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'b str> {
+    pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'a str> {
         self.get_slot_vector::<u8>(slotoff).map(|v| v.unsafe_into_str())
         //let o = self.compute_vtable_offset(slotoff) as usize;
         //if o == 0 {
