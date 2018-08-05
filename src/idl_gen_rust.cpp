@@ -1966,7 +1966,7 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::UnionValue: {
         //const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
         //return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
-        return "self._tab.get_slot_vector::<u8>(" + offset_name + ")";
+        //return "self._tab.get_slot_vector::<u8>(" + offset_name + ")";
       }
       case FullElementType::UnionKey:
       case FullElementType::EnumKey: {
