@@ -291,7 +291,7 @@ impl<'a> Table<'a> {
         unimplemented!();
         return true;
     }
-    pub fn get_slot_union(&self, slotoff: VOffsetT) -> Option<Table> {
+    pub fn get_slot_union_table(&self, slotoff: VOffsetT) -> Option<Table> {
         let o = self.compute_vtable_offset(slotoff) as usize;
         if o == 0 {
             return None;
