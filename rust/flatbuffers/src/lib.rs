@@ -30,7 +30,7 @@ pub trait GeneratedStruct : Sized {
 	bytes
     }
 }
-pub trait ElementScalar : Sized + PartialEq + Clone {
+pub trait ElementScalar : Sized + PartialEq + Copy + Clone {
     fn to_le(self) -> Self;
     fn from_le(self) -> Self;
     //fn eq(&self, rhs: &Self) -> bool;
@@ -163,41 +163,82 @@ pub trait BufferBacked<'a>{
     fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self;
 }
 
-pub trait VectorGettable {
-    fn get(&self, i: usize) -> Self;
+pub trait VectorGettable<'a> {
+    type Input;
+    type Output;
+    fn indirect_helper(&'a self, i: usize, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output;
 }
 
-pub struct Vector<'a, T: Sized + 'a>(&'a [T]);
+impl<'a, T: ElementScalar> VectorGettable<'a> for T {
+    type Input = T;
+    type Output = T;
+    fn indirect_helper(&'a self, i: usize, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
+        vecdata[i]
+    }
+}
+
+impl<'a> VectorGettable<'a> for Offset<FBString<'a>> {
+    type Input = Offset<FBString<'a>>;
+    type Output = &'a str;
+    fn indirect_helper(&'a self, i: usize, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
+        let off = vecdata[i].value() as usize;
+        let s_vec: FBString<'_> = Vector::new(&all_data[off..], all_data);
+        s_vec.unsafe_into_str()
+    }
+}
+
+//impl<T> VectorGettable for Offset<T> {
+//    type Output = T;
+//    fn indirect_helper(&self, i: usize, vecdata: &[T], all_data: &[u8]) -> Self::Output {
+//        vecdata[i]
+//    }
+//}
+
+pub struct Vector<'a, T: Sized + 'a>(&'a [T], &'a [u8]);
 //pub struct Vector<'a, T: Sized + 'a> {
 //    data: &'a [u8],
 //    _phantom: PhantomData<T>,
 //}
 
 impl<'a, T: Sized + 'a> Vector<'a, T> {
-    pub fn new(buf: &'a [u8]) -> Self {
+    pub fn new(vecbuf_with_len: &'a [u8], backing_data: &'a [u8]) -> Self {
         //println!("vecbuf: {:?}", buf);
-        assert!(buf.len() >= SIZE_UOFFSET);
+        assert!(vecbuf_with_len.len() >= SIZE_UOFFSET);
         let elem_sz = std::mem::size_of::<T>();
-        let actual_num_elems = read_scalar::<UOffsetT>(buf) as usize;
-        assert!(buf.len() - SIZE_UOFFSET >= actual_num_elems*elem_sz,
-                format!("buf.len(): {}, actual_num_elems: {}, elem_sz: {}", buf.len(), actual_num_elems, elem_sz));
-        let extra_bytes = buf.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
-        let elems_buf = &buf[SIZE_UOFFSET..SIZE_UOFFSET+actual_num_elems*elem_sz];
+        let actual_num_elems = read_scalar::<UOffsetT>(vecbuf_with_len) as usize;
+        assert!(vecbuf_with_len.len() - SIZE_UOFFSET >= actual_num_elems*elem_sz,
+                format!("buf.len(): {}, actual_num_elems: {}, elem_sz: {}", vecbuf_with_len.len(), actual_num_elems, elem_sz));
+        let extra_bytes = vecbuf_with_len.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
+        let elems_buf = &vecbuf_with_len[SIZE_UOFFSET..SIZE_UOFFSET+actual_num_elems*elem_sz];
         println!("elems_buf: {:?}", elems_buf);
         let ptr = elems_buf.as_ptr() as *const T;
-        let data = unsafe {
+        let vecbuf = unsafe {
             std::slice::from_raw_parts::<T>(ptr, actual_num_elems)
         };
-        Self { 0: data }
+        Self { 0: vecbuf, 1: backing_data }
     }
     pub fn len(&self) -> usize {
         self.0.len()
     }
-    pub fn get(&self, idx: usize) -> &'a T {
-        &self.0[idx]
-    }
+    //pub fn get(&self, idx: usize) -> &'a T {
+    //    &self.0[idx]
+    //    //T::indirect_helper(idx, self.0, self.all_buf)
+    //}
     pub fn as_slice(&self) -> &'a [T] {
         self.0
+    }
+}
+impl<'a, T: ElementScalar> Vector<'a, T> {
+    pub fn get(&'a self, idx: usize) -> &'a T {
+        &self.0[idx]
+        //T::indirect_helper(idx, self.0, self.all_buf)
+    }
+}
+impl<'a> Vector<'a, Offset<FBString<'a>>> {
+    pub fn get(&'a self, idx: usize) -> &'a str {
+        unimplemented!()
+        //let off = self.0[idx].value() as usize;
+        //T::indirect_helper(idx, self.0, self.all_buf)
     }
 }
 
@@ -218,11 +259,11 @@ impl<'a> FBString<'a> {
         }
     }
 }
-impl<'a> std::convert::AsRef<str> for FBString<'a> {
-    fn as_ref(&self) -> &str {
-        self.as_str()
-    }
-}
+//impl<'a> std::convert::AsRef<str> for FBString<'a> {
+//    fn as_ref(&self) -> &str {
+//        self.as_str()
+//    }
+//}
 //impl<'a> std::ops::Deref for FBString<'a> {
 //    type Target = str;
 //    fn deref(&self) -> &str {
@@ -345,7 +386,7 @@ impl<'a> Table<'a> {
         }
         let off = o + self.pos;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        return Some(Vector::new(&self.data[off2..]));
+        return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
         //let start = off2 + SIZE_UOFFSET as usize;
 
         //let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
