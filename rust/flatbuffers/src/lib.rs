@@ -789,6 +789,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
     pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<FBString<'c>>>> {
+        unreachable!();
         Offset::new(0)
         //let offsets: Vec<Offset<FBString>> = vec![];// xs.iter().map(|s| self.create_string(s)).collect();
         //let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
@@ -1102,6 +1103,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
     }
     pub fn push_soffset_relative(&mut self, off: SOffsetT) {
+        unreachable!();
         self.prep(SIZE_SOFFSET, 0);
         //self.pre_align(SIZE_SOFFSET, 0);
         //self.align(SIZE_SOFFSET);
@@ -1114,6 +1116,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //emplace_scalar(&mut self.owned_buf[start..start+SIZE_SOFFSET], off2);
     }
     fn push_uoffset_relative(&mut self, off: UOffsetT) {
+        unreachable!();
         self.prep(SIZE_UOFFSET, 0);
         assert!(off <= self.rev_cur_idx() as UOffsetT, "logic error in offsets");
         let off2 = (self.rev_cur_idx() as UOffsetT) - (off as UOffsetT) + (SIZE_UOFFSET as UOffsetT);
