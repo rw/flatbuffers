@@ -2493,13 +2493,29 @@ fn create_byte_vector_fuzz() {
 #[test]
 fn table_of_strings_fuzz() {
     fn prop(vec: Vec<String>) {
+        use flatbuffers::field_index_to_field_offset as fi2fo;
         let xs = &vec[..];
 
+        // build
         let mut b = flatbuffers::FlatBufferBuilder::new();
+        let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_string(&s[..])).collect();
+        let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
 
-        let str_offsets = xs.iter().map(|s| b.create_string(&s[..]) );
+        for i in 0..xs.len() {
+            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+        }
+        let root = b.end_table(table_start);
+        b.finish(root);
 
-        //let off0 = b.start_table(xs.len());
+        // use
+        let buf = b.get_active_buf_slice();
+        let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+
+        for i in 0..xs.len() {
+            let got = b.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
+            assert_eq!(got, Some(xs[i]));
+        }
+
 
         //b1.start_vector(flatbuffers::SIZE_U8, xs.len());
 
