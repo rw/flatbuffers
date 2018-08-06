@@ -377,11 +377,18 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             Some(x) => { x }
         };
 
-        let monster2 = MyGame::Example::Monster::init_from_table(flatbuffers::Table::new(table2_bytes.as_slice(), 0));
+        let monster2 = {
+            let slice = table2_bytes.as_slice();
+            let off = flatbuffers::get_root_uoffset(slice);
+            let tab = flatbuffers::Table::new(slice, off);
+            MyGame::Example::Monster::init_from_table(tab)
+        };
 
         match monster2.name() {
             Some("Fred") => { }
-            _ => { return Err("bad monster2.name"); }
+            _ => {
+                println!("name: {:?}", monster2.name());
+                return Err("bad monster2.name"); }
         }
 
         let inv = match m.inventory() {
