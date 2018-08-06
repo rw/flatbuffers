@@ -131,7 +131,12 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
     //    }
     //}
     let fred_name = builder.create_string("Fred");
-    let inventory = builder.create_vector(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    //let inventory = builder.create_vector(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    let inventory = builder.create_vector(&vec![0, 1, 2, 3, 4]);
+
+    let test4 = builder.create_vector(&vec![MyGame::Example::Test::new(10, 20),
+                                            MyGame::Example::Test::new(30, 40)]);
+
     let mon = {
         let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
         let args = MyGame::Example::MonsterArgs{
@@ -146,6 +151,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
                 ..Default::default()
             }).value())),
             inventory: Some(inventory),
+            test4: Some(test4),
             ..Default::default()
         };
         MyGame::Example::CreateMonster(builder, &args)
@@ -182,7 +188,7 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
   let x = MyGame::Example::Test::new(10, 20);
   let _vec = MyGame::Example::Vec3::new(1.0,2.0,3.0,0.0, MyGame::Example::Color::Red, x);
   let _name = builder.create_string("MyMonster");
-  let inv_data = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  let inv_data = vec![0, 1, 2, 3, 4];//, 5, 6, 7, 8, 9];
   let inventory = builder.create_vector(&inv_data);
 
   // Alternatively, create the vector first, and fill in data later:
