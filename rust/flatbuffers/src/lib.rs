@@ -792,8 +792,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
     pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<FBString<'c>>>> {
-        unreachable!();
-        Offset::new(0)
+        // TODO: any way to avoid heap allocs?
+        let offsets: Vec<Offset<FBString<'_>>> = xs.iter().map(|s| self.create_string(s)).collect();
+        self.create_vector(&offsets[..])
         //let offsets: Vec<Offset<FBString>> = vec![];// xs.iter().map(|s| self.create_string(s)).collect();
         //let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
         //self.create_vector::<'a, 'b, Offset<FBString>>(offsets)
