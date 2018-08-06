@@ -220,27 +220,26 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
-    //pub fn get(&self, idx: usize) -> &'a T {
-    //    &self.0[idx]
-    //    //T::indirect_helper(idx, self.0, self.all_buf)
-    //}
+    pub fn get(&self, idx: usize) -> &'a T {
+        T::indirect_helper(idx, self.0, self.1)
+    }
     pub fn as_slice(&self) -> &'a [T] {
         self.0
     }
 }
-impl<'a, T: ElementScalar> Vector<'a, T> {
-    pub fn get(&'a self, idx: usize) -> &'a T {
-        &self.0[idx]
-        //T::indirect_helper(idx, self.0, self.all_buf)
-    }
-}
-impl<'a> Vector<'a, Offset<FBString<'a>>> {
-    pub fn get(&'a self, idx: usize) -> &'a str {
-        unimplemented!()
-        //let off = self.0[idx].value() as usize;
-        //T::indirect_helper(idx, self.0, self.all_buf)
-    }
-}
+//impl<'a, T: ElementScalar> Vector<'a, T> {
+//    pub fn get(&'a self, idx: usize) -> &'a T {
+//        &self.0[idx]
+//        //T::indirect_helper(idx, self.0, self.all_buf)
+//    }
+//}
+//impl<'a> Vector<'a, Offset<FBString<'a>>> {
+//    pub fn get(&'a self, idx: usize) -> &'a str {
+//        unimplemented!()
+//        //let off = self.0[idx].value() as usize;
+//        //T::indirect_helper(idx, self.0, self.all_buf)
+//    }
+//}
 
 
 //pub struct String<'a> {
