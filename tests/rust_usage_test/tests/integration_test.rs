@@ -2512,21 +2512,39 @@ fn table_of_strings_fuzz() {
         let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
 
         for i in 0..xs.len() {
-            let got = b.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
-            assert_eq!(got, Some(xs[i]));
+            let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
+            assert_eq!(got.unwrap(), xs[i].as_str());
         }
+    }
+    let n = 20;
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
+}
 
+#[test]
+fn table_of_byte_strings_fuzz() {
+    fn prop(vec: Vec<Vec<u8>>) {
+        use flatbuffers::field_index_to_field_offset as fi2fo;
+        let xs = &vec[..];
 
-        //b1.start_vector(flatbuffers::SIZE_U8, xs.len());
+        // build
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
+        let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
 
-        //for i in (0..xs.len()).rev() {
-        //    b1.push_element_scalar(xs[i]);
-        //}
-        //b1.end_vector::<u8>(xs.len());
+        for i in 0..xs.len() {
+            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+        }
+        let root = b.end_table(table_start);
+        b.finish(root);
 
-        //let mut b2 = flatbuffers::FlatBufferBuilder::new();
-        //b2.create_byte_vector(xs);
-        //assert_eq!(&b1.owned_buf[..], &b2.owned_buf[..]);
+        // use
+        let buf = b.get_active_buf_slice();
+        let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+
+        for i in 0..xs.len() {
+            let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
+            assert_eq!(got.unwrap().as_bytes(), &xs[i][..]);
+        }
     }
     let n = 20;
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
