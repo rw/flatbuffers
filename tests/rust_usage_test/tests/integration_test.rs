@@ -152,7 +152,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
             }).value())),
             inventory: Some(inventory),
             test4: Some(test4),
-            testarrayofstring: builder.create_vector_of_strings(&["bob", "fred", "bob", "fred"]),
+            testarrayofstring: Some(builder.create_vector_of_strings(&["bob", "fred", "bob", "fred"])),
             ..Default::default()
         };
         MyGame::Example::CreateMonster(builder, &args)
