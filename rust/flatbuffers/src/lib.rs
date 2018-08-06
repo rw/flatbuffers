@@ -163,25 +163,31 @@ pub trait BufferBacked<'a>{
     fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self;
 }
 
+//pub struct IndirectHelper<T> { }
+
+
+
 pub trait VectorGettable<'a> {
     type Input;
     type Output;
-    fn indirect_helper(&'a self, i: usize, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output;
+    fn indirect_helper(&'a self, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output;
 }
 
 impl<'a, T: ElementScalar> VectorGettable<'a> for T {
     type Input = T;
     type Output = T;
-    fn indirect_helper(&'a self, i: usize, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
-        vecdata[i]
+
+    #[inline]
+    fn indirect_helper(&'a self, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
+        *self
     }
 }
 
 impl<'a> VectorGettable<'a> for Offset<FBString<'a>> {
     type Input = Offset<FBString<'a>>;
     type Output = &'a str;
-    fn indirect_helper(&'a self, i: usize, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
-        let off = vecdata[i].value() as usize;
+    fn indirect_helper(&'a self, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
+        let off = self.value() as usize;
         let s_vec: FBString<'_> = Vector::new(&all_data[off..], all_data);
         s_vec.unsafe_into_str()
     }
@@ -200,6 +206,7 @@ pub struct Vector<'a, T: Sized + 'a>(&'a [T], &'a [u8]);
 //    _phantom: PhantomData<T>,
 //}
 
+//impl<'a, T: VectorGettable<'a> + Sized + 'a> Vector<'a, T> {
 impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn new(vecbuf_with_len: &'a [u8], backing_data: &'a [u8]) -> Self {
         //println!("vecbuf: {:?}", buf);
@@ -220,8 +227,11 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
-    pub fn get(&self, idx: usize) -> &'a T {
-        T::indirect_helper(idx, self.0, self.1)
+    pub fn get(&'a self, idx: usize) -> &'a T {
+        //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
+        let x  = &self.0[idx];
+        unimplemented!()
+        //&x.indirect_helper(self.0, self.1)
     }
     pub fn as_slice(&self) -> &'a [T] {
         self.0
@@ -378,6 +388,7 @@ impl<'a> Table<'a> {
     //    //    Some(v) => { return None; }
     //    //}
     //}
+    //pub fn get_slot_vector<T: VectorGettable<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
     pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
