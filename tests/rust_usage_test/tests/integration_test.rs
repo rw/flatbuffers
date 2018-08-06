@@ -410,14 +410,14 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
 
         let test4 = match m.test4() {
             None => { return Err("bad m.test4"); }
-            Some(x) => { x.as_slice() }
+            Some(x) => { x }
         };
         if test4.len() != 2 { return Err("bad m.test4 len"); }
 
-        //let x = test4.get(0);
-        //let y = test4.get(1);
-        //let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
-        //if xy_sum != 100 { return Err("bad m.test4 item sum"); }
+        let x = test4.get(0);
+        let y = test4.get(1);
+        let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
+        if xy_sum != 100 { return Err("bad m.test4 item sum"); }
 
         let testarrayofstring = match m.testarrayofstring() {
             None => { return Err("bad m.testarrayofstring"); }
