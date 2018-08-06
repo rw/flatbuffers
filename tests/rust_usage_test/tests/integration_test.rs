@@ -424,9 +424,9 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             None => { return Err("bad m.testarrayofstring"); }
             Some(x) => { x }
         };
-        //if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
-        //if testarrayofstring[0] != "test1" { return Err("bad monster.testarrayofstring[0]"); }
-        //TODO if testarrayofstring[1] != "test2" { return Err("bad monster.testarrayofstring[1]"); }
+        if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
+        if testarrayofstring.get(0) != "test1" { return Err("bad monster.testarrayofstring[0]"); }
+        if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring[1]"); }
     }
     Ok(())
 }
