@@ -190,8 +190,11 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
         };
         Self { 0: data }
     }
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
     pub fn get(&self, idx: usize) -> &'a T {
-        unimplemented!()
+        &self.0[idx]
     }
     pub fn as_slice(&self) -> &'a [T] {
         self.0
