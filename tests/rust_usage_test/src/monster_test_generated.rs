@@ -657,8 +657,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn test_type(&'a self) -> Any {
     unsafe { ::std::mem::transmute(self._tab.get_slot_scalar::<u8>(Monster::VT_TEST_TYPE, Any::NONE as u8)) }
   }
-  pub fn test(&'a self) -> Option<flatbuffers::Vector<u8>> {
-    self._tab.get_slot_vector::<u8>(Monster::VT_TEST)
+  pub fn test(&'a self) -> Option<flatbuffers::Table<'a>> {
+    self._tab.get_slot_union_table(Monster::VT_TEST)
   }
   pub fn test4(&'a self) -> Option<flatbuffers::Vector<'a, Test>> {
     self._tab.get_slot_vector::<Test>(Monster::VT_TEST4)

@@ -372,16 +372,16 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
 
         if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
 
-        let table2_bytes = match m.test() {
+        let table2 = match m.test() {
             None => { return Err("bad m.test"); }
             Some(x) => { x }
         };
 
         let monster2 = {
-            let slice = table2_bytes.as_slice();
-            let off = flatbuffers::get_root_uoffset(slice);
-            let tab = flatbuffers::Table::new(slice, off);
-            MyGame::Example::Monster::init_from_table(tab)
+            ////let slice = table2_bytes.as_slice();
+            //let off = flatbuffers::get_root_uoffset(slice);
+            //let tab = flatbuffers::Table::new(slice, off);
+            MyGame::Example::Monster::init_from_table(table2)
         };
 
         match monster2.name() {
