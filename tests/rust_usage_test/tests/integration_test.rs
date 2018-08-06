@@ -450,7 +450,7 @@ mod vector_read_scalar_tests {
        // println!("buf len: {}", buf.len());
        // println!("buf: {:?}", buf);
 
-        let ret: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf);
+        let ret: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf, all);
         let rl = ret.as_slice();
         assert_eq!(rl.len(), xs.len());
         for i in 0..xs.len() {
@@ -506,7 +506,7 @@ mod vector_read_obj_tests {
         let idx = all.len() - vecend.value() as usize;
         let buf = &all[idx..];
 
-        let v: flatbuffers::Vector<flatbuffers::Offset<flatbuffers::FBString>> = flatbuffers::Vector::new(buf);
+        let v: flatbuffers::Vector<flatbuffers::Offset<flatbuffers::FBString>> = flatbuffers::Vector::new(buf, all);
         assert_eq!(v.as_slice().len(), xs.len());
         //for i in 0..xs.len() {
         //    assert_eq!(vec.get(i), &xs[i]);
