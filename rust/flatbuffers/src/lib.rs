@@ -269,6 +269,16 @@ pub struct Table<'a> {
     pub data: &'a [u8],
     pub pos: usize,
 }
+
+impl<'a> BufferBacked<'a> for Table<'a> {
+    fn init_from_bytes(data: &'a [u8], pos: usize) -> Self {
+	let pos = read_scalar::<UOffsetT>(data) as usize;
+        Table {
+            data: data,
+            pos: pos,
+        }
+    }
+}
 impl<'a> Table<'a> {
     pub fn new<'before: 'a>(data: &'before [u8], pos: UOffsetT) -> Self {
         Table {
@@ -1397,6 +1407,9 @@ pub fn verify_offset(_: &Verifier, _: VOffsetT) -> ! {
 }
 pub fn verify_offset_required(_: &Verifier, _: VOffsetT) -> ! {
     unimplemented!()
+}
+pub fn get_root_uoffset(data: &[u8]) -> UOffsetT {
+	read_scalar::<UOffsetT>(data)
 }
 //pub fn get_root<'a, 'b: 'a, T: BufferBacked<'a>>(bytes: &'b [u8]) -> T {
 pub fn get_root<'a, T: BufferBacked<'a> + 'a>(bytes: &'a [u8]) -> T {
