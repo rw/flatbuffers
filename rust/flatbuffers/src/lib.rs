@@ -163,8 +163,11 @@ pub trait BufferBacked<'a>{
     fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self;
 }
 
-//pub struct IndirectHelper<T> { }
-
+pub struct IndirectHelper<Input, Output> {
+    _phantom_0: PhantomData<Input>,
+    _phantom_1: PhantomData<Output>,
+}
+//pub fn follow_offset<T>(off: Offset<T>
 
 
 pub trait VectorGettable<'a> {
@@ -230,8 +233,9 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn get(&'a self, idx: usize) -> &'a T {
         //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
         let x  = &self.0[idx];
-        unimplemented!()
+        //unimplemented!()
         //&x.indirect_helper(self.0, self.1)
+        x
     }
     pub fn as_slice(&self) -> &'a [T] {
         self.0
@@ -318,6 +322,7 @@ pub type ByteString<'a> = Vector<'a, u8>;
 //    //}
 //}
 
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Table<'a> {
     pub data: &'a [u8],
     pub pos: usize,
