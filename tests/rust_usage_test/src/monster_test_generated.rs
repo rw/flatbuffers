@@ -16,6 +16,7 @@ pub mod MyGame {
   use std::cmp::Ordering;
 
 pub enum InParentNamespaceOffset {}
+#[derive(Copy, Clone, PartialEq)]
 pub struct InParentNamespace<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -95,6 +96,7 @@ pub mod Example2 {
   use std::cmp::Ordering;
 
 pub enum MonsterOffset {}
+#[derive(Copy, Clone, PartialEq)]
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -387,6 +389,7 @@ impl Ability {
 // STRUCT_END(Ability, 8);
 
 pub enum TestSimpleTableWithEnumOffset {}
+#[derive(Copy, Clone, PartialEq)]
 pub struct TestSimpleTableWithEnum<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -464,6 +467,7 @@ pub fn CreateTestSimpleTableWithEnum<'a: 'b, 'b: 'c, 'c>(
 }
 
 pub enum StatOffset {}
+#[derive(Copy, Clone, PartialEq)]
 pub struct Stat<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -562,6 +566,7 @@ pub fn CreateStat<'a: 'b, 'b: 'c, 'c>(
 
 /// an example documentation comment: monster object
 pub enum MonsterOffset {}
+#[derive(Copy, Clone, PartialEq)]
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -1060,6 +1065,7 @@ pub fn CreateMonster<'a: 'b, 'b: 'c, 'c>(
 }
 
 pub enum TypeAliasesOffset {}
+#[derive(Copy, Clone, PartialEq)]
 pub struct TypeAliases<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,

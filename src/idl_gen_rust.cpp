@@ -2299,6 +2299,7 @@ class RustGenerator : public BaseGenerator {
     ////code_ += "    flatbuffers::LabeledUOffsetT::new(o.value())";
     //code_ += "  }";
     //code_ += "}";
+    code_ += "#[derive(Copy, Clone, PartialEq)]";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
     code_ += "  pub _tab: flatbuffers::Table<'a>,";
     code_ += "  _phantom: PhantomData<&'a ()>,";
