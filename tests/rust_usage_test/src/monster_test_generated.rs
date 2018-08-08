@@ -22,8 +22,8 @@ pub struct InParentNamespace<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
-    type Inner = &'a InParentNamespace<'a>;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = InParentNamespace<'a>;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -108,8 +108,8 @@ pub struct Monster<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
-    type Inner = &'a Monster<'a>;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Monster<'a>;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -197,8 +197,8 @@ pub enum Color {
   Blue = 8
 }
 impl<'a> flatbuffers::Follow<'a> for Color {
-    type Inner = &'a Color;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Color;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -233,8 +233,8 @@ pub enum Farts {
   Green = 2
 }
 impl<'a> flatbuffers::Follow<'a> for Farts {
-    type Inner = &'a Farts;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Farts;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -265,8 +265,8 @@ pub enum Any {
   MyGame_Example2_Monster = 3
 }
 impl<'a> flatbuffers::Follow<'a> for Any {
-    type Inner = &'a Any;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Any;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -300,8 +300,8 @@ pub struct Test {
   padding0__: u8,
 } // pub struct Test
 impl<'a> flatbuffers::Follow<'a> for Test {
-    type Inner = &'a Test;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Test;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -344,8 +344,8 @@ pub struct Vec3 {
   padding2__: u16,
 } // pub struct Vec3
 impl<'a> flatbuffers::Follow<'a> for Vec3 {
-    type Inner = &'a Vec3;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Vec3;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -401,8 +401,8 @@ pub struct Ability {
   distance_: u32,
 } // pub struct Ability
 impl<'a> flatbuffers::Follow<'a> for Ability {
-    type Inner = &'a Ability;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Ability;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -443,8 +443,8 @@ pub struct TestSimpleTableWithEnum<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
-    type Inner = &'a TestSimpleTableWithEnum<'a>;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = TestSimpleTableWithEnum<'a>;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -527,8 +527,8 @@ pub struct Stat<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
-    type Inner = &'a Stat<'a>;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Stat<'a>;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -632,8 +632,8 @@ pub struct Monster<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
-    type Inner = &'a Monster<'a>;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = Monster<'a>;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
@@ -1137,8 +1137,8 @@ pub struct TypeAliases<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
-    type Inner = &'a TypeAliases<'a>;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = TypeAliases<'a>;
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
