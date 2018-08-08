@@ -2541,17 +2541,57 @@ fn table_of_strings_fuzz() {
 
 #[test]
 fn table_of_byte_strings_fuzz() {
-    fn prop(vec: Vec<Vec<u8>>) {
+    //fn prop(vec: Vec<Vec<u8>>) {
+    //    use flatbuffers::field_index_to_field_offset as fi2fo;
+    //    let xs = &vec[..];
+
+    //    // build
+    //    let mut b = flatbuffers::FlatBufferBuilder::new();
+    //    let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
+    //    let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
+
+    //    for i in 0..xs.len() {
+    //        b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+    //    }
+    //    let root = b.end_table(table_start);
+    //    b.finish(root);
+
+    //    // use
+    //    let buf = b.get_active_buf_slice();
+    //    let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+
+    //    for i in 0..xs.len() {
+    //        let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
+    //        assert_eq!(got.unwrap().as_bytes(), &xs[i][..]);
+    //    }
+    //}
+    //let n = 20;
+    //quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
+}
+
+fn table_with_vector_of_scalars_fuzz() {
+    fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(vecs: Vec<Vec<T>>) {
         use flatbuffers::field_index_to_field_offset as fi2fo;
-        let xs = &vec[..];
+        //let xs = &vec[..];
 
         // build
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
-        let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
+        let mut offs: Vec<flatbuffers::Offset<_>> = vec![];
+        for vec in &vecs {
+            b.start_vector(vec.len(), ::std::mem::size_of::<T>());
 
-        for i in 0..xs.len() {
-            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+            let xs = &vec[..];
+            for i in (0..xs.len()).rev() {
+                b.push_element_scalar::<T>(xs[i]);
+            }
+            let vecend = b.end_vector::<T>(xs.len());
+            offs.push(vecend);
+        }
+
+        let table_start = b.start_table(vecs.len() as flatbuffers::VOffsetT);
+
+        for i in 0..vecs.len() {
+            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
         }
         let root = b.end_table(table_start);
         b.finish(root);
@@ -2560,13 +2600,17 @@ fn table_of_byte_strings_fuzz() {
         let buf = b.get_active_buf_slice();
         let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
 
-        for i in 0..xs.len() {
-            let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
-            assert_eq!(got.unwrap().as_bytes(), &xs[i][..]);
+        for i in 0..vecs.len() {
+            let got = tab.get_slot_vector::<flatbuffers::Offset<flatbuffers::Vector<T>>>(fi2fo(i as flatbuffers::VOffsetT)).unwrap();
+            assert_eq!(vecs[i].len(), got.len());
+            //for j in 0..got.len() {
+
+            //}
+            //assert_eq!(got.unwrap(), &vecs[i][..]);
         }
     }
     let n = 20;
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
 }
 
 #[cfg(test)]

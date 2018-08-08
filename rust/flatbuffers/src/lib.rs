@@ -431,6 +431,18 @@ impl<'a> Table<'a> {
     //    //}
     //}
     //pub fn get_slot_vector<T: VectorGettable<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
+    pub fn get_slot_vector_follow<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<T::Inner> {
+        let o = self.compute_vtable_offset(slotnum) as usize;
+        if o == 0 {
+            return None;
+        }
+
+        let off = (o + self.pos) as UOffsetT;
+        let off2 = off + read_scalar_at::<UOffsetT>(self.data, off as usize);
+        let x: Offset<T> = Offset::new(off2);
+        Some(x.follow(&self.data[self.pos..]))
+        //return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
+    }
     pub fn get_slot_vector<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
@@ -1478,6 +1490,17 @@ impl<'a, T: Sized + 'a> Follow<'a> for Offset<&'a [T]> {
         let ptr = slice.as_ptr() as *const T;
         let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
         x
+    }
+}
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
+    type Inner = &'a Vector<'a, T>;
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+        unimplemented!();
+        //let off = self.0 as usize;
+        //let slice = &buf[4..4 + len];
+        //let ptr = slice.as_ptr() as *const T;
+        //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
+        //x
     }
 }
 
