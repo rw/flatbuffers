@@ -396,9 +396,7 @@ impl<'a> Table<'a> {
             o => {
                 let off: Offset<&'a str> = Offset::new(0);
                 let buf: &'a [u8] = &self.data[self.pos..];
-                unimplemented!();
-                //let x: &'a str = off.follow(buf);
-                //Some(x)
+                Some(off.follow(buf))
             }
 	}
 
@@ -837,16 +835,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // TODO: unimplemented!()
     }
     // utf-8 string creation
-    pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<&'c str> {
+    pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<&'fbb str> {
         Offset::<&str>::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
     pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<&'fbb [u8]> {
-    self.assert_not_nested();
-    self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
-    self.fill(1);
-    self.push_bytes(data);
-    self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
-    Offset::new(self.get_size() as UOffsetT)
+        self.assert_not_nested();
+        self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
+        self.fill(1);
+        self.push_bytes(data);
+        self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
+        Offset::new(self.get_size() as UOffsetT)
     //return Offset<String>(GetSize());
         //self.assert_not_nested();
         //self.nested = true;
