@@ -2541,32 +2541,34 @@ fn table_of_strings_fuzz() {
 
 #[test]
 fn table_of_byte_strings_fuzz() {
-    //fn prop(vec: Vec<Vec<u8>>) {
-    //    use flatbuffers::field_index_to_field_offset as fi2fo;
-    //    let xs = &vec[..];
+    fn prop(vec: Vec<Vec<u8>>) {
+        use flatbuffers::field_index_to_field_offset as fi2fo;
+        let xs = &vec[..];
 
-    //    // build
-    //    let mut b = flatbuffers::FlatBufferBuilder::new();
-    //    let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
-    //    let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
+        // build
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
+        let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
 
-    //    for i in 0..xs.len() {
-    //        b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
-    //    }
-    //    let root = b.end_table(table_start);
-    //    b.finish(root);
+        for i in 0..xs.len() {
+            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+        }
+        let root = b.end_table(table_start);
+        b.finish(root);
 
-    //    // use
-    //    let buf = b.get_active_buf_slice();
-    //    let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+        // use
+        let buf = b.get_active_buf_slice();
+        let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
 
-    //    for i in 0..xs.len() {
-    //        let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
-    //        assert_eq!(got.unwrap().as_bytes(), &xs[i][..]);
-    //    }
-    //}
-    //let n = 20;
-    //quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
+        for i in 0..xs.len() {
+            let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
+            assert_eq!(got.unwrap().as_bytes(), &xs[i][..]);
+        }
+    }
+    prop(vec![vec![1,2,3]]);
+
+    let n = 20;
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
 }
 
 fn table_with_vector_of_scalars_fuzz() {
