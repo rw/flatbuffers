@@ -731,7 +731,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector<'a, 'b, T: Follow<'a> + 'a,>(&'a mut self, num_elems: usize) -> Offset<Vector<'a, T>> {
+    pub fn end_vector<'a, 'b, T: Follow<'fbb> + 'fbb>(&'a mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
       self.assert_nested();
       self.nested = false;
       let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
@@ -840,7 +840,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<&'c str> {
         Offset::<&str>::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
-    pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<&'a [u8]> {
+    pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<&'fbb [u8]> {
     self.assert_not_nested();
     self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
     self.fill(1);
@@ -898,7 +898,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
-    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'a, Offset<&'a str>>> {
+    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, Offset<&'fbb str>>> {
         // TODO: any way to avoid heap allocs?
         let offsets: Vec<Offset<&str>> = xs.iter().map(|s| self.create_string(s)).collect();
         self.create_vector(&offsets[..])
@@ -910,7 +910,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, 'b, 'c, T: Follow<'a> + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'a, T>> {
+    pub fn create_vector<'a, 'b, 'c, T: Follow<'fbb> + 'fbb>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
         for i in items.iter().rev() {
@@ -923,20 +923,23 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //    where F: FnMut(usize, &mut Self) -> T {
     //    Offset::new(0)
     //}
-//  pub fn create_vector_of_structs<'a, T: 'a>(&'fbb mut self, _: &'a [T]) -> Offset<&'a [T]> {
-//      LabeledUOffsetT::new(0)
-//  }
+    pub fn create_vector_of_structs<'a, T: 'a>(&'fbb mut self, _: &'a [T]) -> Offset<&'a [T]> {
+        unimplemented!();
+        //LabeledUOffsetT::new(0)
+    }
 //  // TODO probably should not be returning [&T]
-    //pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
-    //    Offset::new(0)
-    //}
-    //pub fn create_vector_of_structs_from_fn<'a, T: Follow<'a> + 'a, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'fbb, T>>
-    //    where F: FnMut(usize, &mut T) {
-    //    Offset::new(0)
-    //}
-    //pub fn create_vector_of_sorted_tables<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
-    //    Offset::new(0)
-    //}
+    pub fn create_vector_of_sorted_structs<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'a, T>> {
+        Offset::new(0)
+    }
+    pub fn create_vector_of_structs_from_fn<'a, T: Follow<'a> + 'a, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'a, T>>
+        where F: FnMut(usize, &mut T) {
+      unimplemented!();
+        //Offset::new(0)
+    }
+    pub fn create_vector_of_sorted_tables<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'a, T>> {
+        unimplemented!();
+        //Offset::new(0)
+    }
     pub fn dump_buf(&self, label: &str) {
         //println!("dump_buf {}: {}/{}: {:?}", label, self.get_size(), self.owned_buf.len(), self.get_active_buf_slice());
     }

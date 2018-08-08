@@ -415,7 +415,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "#[inline]";
         code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'a, 'b>(";
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-        code_ += "    root: flatbuffers::Offset<{{OFFSET_TYPELABEL}}>) {";
+        code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
           code_ += "  fbb.finish_with_identifier(root, "
                    "{{STRUCT_NAME}}Identifier());";
@@ -2830,9 +2830,9 @@ class RustGenerator : public BaseGenerator {
 
     // Finish() function.
     code_ += "  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {";
-    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
+    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
-    code_ += "    //let o = flatbuffers::Offset::<{{OFFSET_TYPELABEL}}>::new(end);";
+    code_ += "    //let o = flatbuffers::Offset::<{{STRUCT_NAME}}<'a>>::new(end);";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
@@ -2854,7 +2854,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b: 'c, 'c>(";
     code_ += "    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,";
     code_ += "    args: &'b {{STRUCT_NAME}}Args<'b>) -> \\";
-    code_ += "flatbuffers::Offset<{{OFFSET_TYPELABEL}}> {";
+    code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     //for (auto it = struct_def.fields.vec.begin();
     //     it != struct_def.fields.vec.end(); ++it) {
     //  const auto &field = **it;
