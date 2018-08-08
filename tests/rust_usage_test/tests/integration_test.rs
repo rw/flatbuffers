@@ -2603,10 +2603,9 @@ fn table_with_vector_of_scalars_fuzz() {
         for i in 0..vecs.len() {
             let got = tab.get_slot_vector::<flatbuffers::Offset<flatbuffers::Vector<T>>>(fi2fo(i as flatbuffers::VOffsetT)).unwrap();
             assert_eq!(vecs[i].len(), got.len());
-            //for j in 0..got.len() {
-
-            //}
-            //assert_eq!(got.unwrap(), &vecs[i][..]);
+            for j in 0..got.len() {
+                assert_eq!(got.as_slice()[j], vecs[i][j]);
+            }
         }
     }
     let n = 20;

@@ -213,7 +213,8 @@ impl<'a, T: ElementScalar> VectorGettable<'a> for T {
 //    }
 //}
 
-pub struct Vector<'a, T: Sized + 'a>(&'a [T], &'a [u8]);
+#[derive(Debug, PartialEq)]
+pub struct Vector<'a, T: Follow<'a> + 'a>(&'a [T], &'a [u8]);
 //pub struct Vector<'a, T: Sized + 'a> {
 //    data: &'a [u8],
 //    _phantom: PhantomData<T>,
@@ -240,7 +241,7 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
-    pub fn get(&'a self, idx: usize) -> &'a T::Inner {
+    pub fn get(&'a self, idx: usize) -> T::Inner {
         unimplemented!()
         //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
         //let x  = & unsafe {
@@ -730,7 +731,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector<'a, 'b, T: Sized + 'a,>(&'a mut self, num_elems: usize) -> Offset<Vector<'b, T>> {
+    pub fn end_vector<'a, 'b, T: Follow<'a> + 'a,>(&'a mut self, num_elems: usize) -> Offset<Vector<'a, T>> {
       self.assert_nested();
       self.nested = false;
       let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
@@ -839,7 +840,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<&'c str> {
         Offset::<&str>::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
-    pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<ByteString<'c>> {
+    pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<&'a [u8]> {
     self.assert_not_nested();
     self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
     self.fill(1);
@@ -897,7 +898,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
-    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<&'c str>>> {
+    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'a, Offset<&'a str>>> {
         // TODO: any way to avoid heap allocs?
         let offsets: Vec<Offset<&str>> = xs.iter().map(|s| self.create_string(s)).collect();
         self.create_vector(&offsets[..])
@@ -909,7 +910,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, 'b, 'c, T: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'c, T>> {
+    pub fn create_vector<'a, 'b, 'c, T: Follow<'a> + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'a, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
         for i in items.iter().rev() {
@@ -918,24 +919,24 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         Offset::new(self.end_vector::<'_, '_, T>(items.len()).value())
     }
 //  //pub fn create_vector_from_fn<'a: 'fbb, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'fbb mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
-    pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [T]>
-        where F: FnMut(usize, &mut Self) -> T {
-        Offset::new(0)
-    }
+    //pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [T]>
+    //    where F: FnMut(usize, &mut Self) -> T {
+    //    Offset::new(0)
+    //}
 //  pub fn create_vector_of_structs<'a, T: 'a>(&'fbb mut self, _: &'a [T]) -> Offset<&'a [T]> {
 //      LabeledUOffsetT::new(0)
 //  }
 //  // TODO probably should not be returning [&T]
-    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
-        Offset::new(0)
-    }
-    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'fbb, T>>
-        where F: FnMut(usize, &mut T) {
-        Offset::new(0)
-    }
-    pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
-        Offset::new(0)
-    }
+    //pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
+    //    Offset::new(0)
+    //}
+    //pub fn create_vector_of_structs_from_fn<'a, T: Follow<'a> + 'a, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'fbb, T>>
+    //    where F: FnMut(usize, &mut T) {
+    //    Offset::new(0)
+    //}
+    //pub fn create_vector_of_sorted_tables<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
+    //    Offset::new(0)
+    //}
     pub fn dump_buf(&self, label: &str) {
         //println!("dump_buf {}: {}/{}: {:?}", label, self.get_size(), self.owned_buf.len(), self.get_active_buf_slice());
     }
@@ -1458,7 +1459,7 @@ pub trait Follow<'a> {
 }
 
 impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
-    type Inner = &'a T;
+    type Inner = T;
     fn follow(self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
@@ -1467,11 +1468,12 @@ impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
     type Inner = T::Inner;
     fn follow(self, buf: &'a [u8]) -> Self::Inner {
-        let idx = self.0 as usize;
-        let slice: &'a [u8] = &buf[idx..];
-        let ptr = slice.as_ptr() as *const T;
-        let x: &'a T = unsafe { &*ptr };
-        x.follow(slice)
+        unimplemented!();
+        //let idx = self.0 as usize;
+        //let slice: &'a [u8] = &buf[idx..];
+        //let ptr = slice.as_ptr() as *const T;
+        //let x: &'a T = unsafe { &*ptr };
+        //x.follow(slice)
     }
 }
 impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
@@ -1497,10 +1499,10 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
     type Inner = Vector<'a, T>;
     fn follow(self, buf: &'a [u8]) -> Self::Inner {
         let off = self.0 as usize;
-        let slice = &buf[4..4 + len];
-        let ptr = slice.as_ptr() as *const T;
-        let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
-        x
+        Vector::new(&buf[off..], &buf[off..])
+        //let ptr = slice.as_ptr() as *const T;
+        //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
+        //x
     }
 }
 
@@ -1517,6 +1519,7 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
 //}
 
 
+#[derive(Debug, PartialEq)]
 pub struct Offset<T> (UOffsetT, PhantomData<T>);
 impl<T> Copy for Offset<T> { } // TODO: why does deriving Copy cause ownership errors?
 impl<T> Clone for Offset<T> {
