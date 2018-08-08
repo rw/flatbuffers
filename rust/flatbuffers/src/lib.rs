@@ -440,7 +440,8 @@ impl<'a> Table<'a> {
         let off = (o + self.pos) as UOffsetT;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off as usize);
         let x: Offset<T> = Offset::new(off2);
-        Some(x.follow(&self.data[self.pos..]))
+        let buf2: &'a [u8] = &self.data[self.pos..];
+        Some(x.follow(buf2))
         //return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
     }
     pub fn get_slot_vector<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
@@ -1463,13 +1464,13 @@ impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
     }
 }
 
-impl<'a, T: Follow<'a>> Follow<'a> for Offset<T> {
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
     type Inner = T::Inner;
     fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
         let idx = self.0 as usize;
-        let slice = &buf[idx..];
+        let slice: &'a [u8] = &buf[idx..];
         let ptr = slice.as_ptr() as *const T;
-        let x: &T = unsafe { &*ptr };
+        let x: &'a T = unsafe { &*ptr };
         x.follow(slice)
     }
 }
