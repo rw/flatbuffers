@@ -214,14 +214,14 @@ impl<'a, T: ElementScalar> VectorGettable<'a> for T {
 //    }
 //}
 
-pub struct Vector<'a, T: Sized + 'a, U: Sized + 'a>(&'a [T], &'a [u8], PhantomData<U>);
+pub struct Vector<'a, T: Sized + 'a>(&'a [T], &'a [u8], PhantomData<U>);
 //pub struct Vector<'a, T: Sized + 'a> {
 //    data: &'a [u8],
 //    _phantom: PhantomData<T>,
 //}
 
 //impl<'a, T: VectorGettable<'a> + Sized + 'a> Vector<'a, T> {
-impl<'a, T: Sized + 'a, U: Sized + 'a> Vector<'a, T, U> {
+impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn new(vecbuf_with_len: &'a [u8], backing_data: &'a [u8]) -> Self {
         //println!("vecbuf: {:?}", buf);
         assert!(vecbuf_with_len.len() >= SIZE_UOFFSET);
@@ -236,7 +236,7 @@ impl<'a, T: Sized + 'a, U: Sized + 'a> Vector<'a, T, U> {
         let vecbuf = unsafe {
             std::slice::from_raw_parts::<T>(ptr, actual_num_elems)
         };
-        Self { 0: vecbuf, 1: backing_data, 2: PhantomData }
+        Self { 0: vecbuf, 1: backing_data }
     }
     pub fn len(&self) -> usize {
         self.0.len()
@@ -285,7 +285,7 @@ impl<'a, T: Sized + 'a, U: Sized + 'a> Vector<'a, T, U> {
 //pub struct String<'a> {
 //    data: &'a [u8],
 //}
-pub type FBString<'a> = Vector<'a, u8, u8>;
+pub type FBString<'a> = Vector<'a, u8>;
 impl<'a> FBString<'a> {
     pub fn as_str(&'a self) -> &'a str {
         unsafe {
@@ -309,7 +309,7 @@ impl<'a> FBString<'a> {
 //        self.as_str()
 //    }
 //}
-pub type ByteString<'a> = Vector<'a, u8, u8>;
+pub type ByteString<'a> = Vector<'a, u8>;
 
 //impl<'a, T> Vector<'a, T> {
 //    pub fn new_from_buf(buf: &'a [u8]) -> Self {
@@ -389,7 +389,7 @@ impl<'a> Table<'a> {
         Some(t2)
     }
     pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'a str> {
-        self.get_slot_vector::<u8, u8>(slotoff).map(|v| v.unsafe_into_str())
+        self.get_slot_vector::<u8>(slotoff).map(|v| v.unsafe_into_str())
         //let o = self.compute_vtable_offset(slotoff) as usize;
         //if o == 0 {
         //    return None;
@@ -420,7 +420,7 @@ impl<'a> Table<'a> {
     //    //}
     //}
     //pub fn get_slot_vector<T: VectorGettable<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
-    pub fn get_slot_vector<T, U>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T, U>> {
+    pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
@@ -706,7 +706,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector<'a, 'b, T: Sized + 'a, U: Sized + 'a>(&'a mut self, num_elems: usize) -> Offset<Vector<'b, T, U>> {
+    pub fn end_vector<'a, 'b, T: Sized + 'a,>(&'a mut self, num_elems: usize) -> Offset<Vector<'b, T>> {
       self.assert_nested();
       self.nested = false;
       let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
@@ -852,7 +852,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.push_element_scalar(data.len() as UOffsetT);
         //LabeledUOffsetT::new(self.get_size() as u32)
     }
-    pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &[u8]) -> Offset<Vector<'b, u8, u8>> {
+    pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &[u8]) -> Offset<Vector<'b, u8>> {
         self.assert_not_nested();
         //self.nested = true;
         self.pre_align(data.len(), SIZE_UOFFSET);
@@ -873,7 +873,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
-    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<FBString<'c>>, &'c str>> {
+    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<FBString<'c>>>> {
         // TODO: any way to avoid heap allocs?
         let offsets: Vec<Offset<FBString<'_>>> = xs.iter().map(|s| self.create_string(s)).collect();
         self.create_vector(&offsets[..])
@@ -885,13 +885,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, 'b, 'c, T: Sized + 'a, U: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'c, T, U>> {
+    pub fn create_vector<'a, 'b, 'c, T: Sized + 'a, U: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'c, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
         for i in items.iter().rev() {
             self.push_bytes(to_bytes(i));
         }
-        Offset::new(self.end_vector::<'_, '_, T, U>(items.len()).value())
+        Offset::new(self.end_vector::<'_, '_, T>(items.len()).value())
     }
 //  //pub fn create_vector_from_fn<'a: 'fbb, 'b, T: 'b, F: FnMut(usize, &mut Self) -> T>(&'fbb mut self, _len: usize, _f: F) -> Offset<&'b [T]> {
     pub fn create_vector_from_fn<F, T>(&mut self, _len: usize, _f: F) -> Offset<&'fbb [T]>
@@ -902,14 +902,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 //      LabeledUOffsetT::new(0)
 //  }
 //  // TODO probably should not be returning [&T]
-    pub fn create_vector_of_sorted_structs<'a, T, U>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T, U>> {
+    pub fn create_vector_of_sorted_structs<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
         Offset::new(0)
     }
-    pub fn create_vector_of_structs_from_fn<T, U, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'fbb, T, U>>
+    pub fn create_vector_of_structs_from_fn<T, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'fbb, T>>
         where F: FnMut(usize, &mut T) {
         Offset::new(0)
     }
-    pub fn create_vector_of_sorted_tables<'a, T, U>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T, U>> {
+    pub fn create_vector_of_sorted_tables<'a, T>(&mut self, _: &'a mut [T]) -> Offset<Vector<'fbb, T>> {
         Offset::new(0)
     }
     pub fn dump_buf(&self, label: &str) {
