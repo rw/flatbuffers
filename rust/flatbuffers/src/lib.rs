@@ -21,15 +21,14 @@ pub enum StringOffset {}
 pub enum ByteStringOffset {}
 pub enum UnionOffset {}
 pub enum TableOffset {}
-pub trait GeneratedStruct  {
-    fn to_bytes(&self) -> &[u8];
-    //{
-    //    let ptr = &*self as *const Self as *const u8;
-    //    let bytes: &[u8] = unsafe {
-    //        std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<Self>())
-    //    };
-    //    bytes
-    //}
+pub trait GeneratedStruct  : Sized{
+    fn to_bytes(&self) -> &[u8] {
+        let ptr = &*self as *const Self as *const u8;
+        let bytes: &[u8] = unsafe {
+            std::slice::from_raw_parts::<u8>(ptr, std::mem::size_of::<Self>())
+        };
+        bytes
+    }
 }
 pub trait ElementScalar : Sized + PartialEq + Copy + Clone {
     fn to_le(self) -> Self;
@@ -214,7 +213,7 @@ impl<'a, T: ElementScalar> VectorGettable<'a> for T {
 //    }
 //}
 
-pub struct Vector<'a, T: Sized + 'a>(&'a [T], &'a [u8], PhantomData<U>);
+pub struct Vector<'a, T: Sized + 'a>(&'a [T], &'a [u8]);
 //pub struct Vector<'a, T: Sized + 'a> {
 //    data: &'a [u8],
 //    _phantom: PhantomData<T>,
@@ -885,7 +884,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, 'b, 'c, T: Sized + 'a, U: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'c, T>> {
+    pub fn create_vector<'a, 'b, 'c, T: Sized + 'a>(&'a mut self, items: &'b [T]) -> Offset<Vector<'c, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
         for i in items.iter().rev() {
@@ -1427,6 +1426,61 @@ impl<T> LabeledUOffsetT<T> {
         self.0
     }
 }
+
+trait Follow<'a> {
+    type Inner;
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner;
+}
+
+impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
+    type Inner = &'a T;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
+
+impl<'a, T: Follow<'a>> Follow<'a> for Offset<T> {
+    type Inner = T::Inner;
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+        let idx = self.0 as usize;
+        let slice = &buf[idx..];
+        let ptr = slice.as_ptr() as *const T;
+        let x: &T = unsafe { &*ptr };
+        x.follow(slice)
+    }
+}
+impl<'a> Follow<'a> for Offset<&'a str> {
+    type Inner = &'a str;
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+        let len = self.0 as usize;
+        let slice = &buf[4..4 + len];
+        let s = unsafe { std::str::from_utf8_unchecked(slice) };
+        s
+    }
+}
+impl<'a, T: Sized + 'a> Follow<'a> for Offset<&'a [T]> {
+    type Inner = &'a [T];
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+        let len = self.0 as usize;
+        let slice = &buf[4..4 + len];
+        let ptr = slice.as_ptr() as *const T;
+        let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
+        x
+    }
+}
+
+//type FBString = UOffsetT;
+//
+//impl<'a> Follow<'a> for FBString {
+//    type Inner = &'a str;
+//    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+//        let len = *self as usize;
+//        let slice = &buf[4..4 + len];
+//        let s = unsafe { std::str::from_utf8_unchecked(slice) };
+//        s
+//    }
+//}
+
 
 pub struct Offset<T> (UOffsetT, PhantomData<T>);
 impl<T> Copy for Offset<T> { } // TODO: why does deriving Copy cause ownership errors?
