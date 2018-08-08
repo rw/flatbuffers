@@ -1454,38 +1454,40 @@ impl<T> LabeledUOffsetT<T> {
 
 pub trait Follow<'a> {
     type Inner;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner;
+    fn follow(self, buf: &'a [u8]) -> Self::Inner;
 }
 
 impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
     type Inner = &'a T;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
-        self
+    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
+        unimplemented!();
+        //self
     }
 }
 
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
     type Inner = T::Inner;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-        let idx = self.0 as usize;
-        let slice: &'a [u8] = &buf[idx..];
-        let ptr = slice.as_ptr() as *const T;
-        let x: &'a T = unsafe { &*ptr };
-        x.follow(slice)
+    fn follow(self, buf: &'a [u8]) -> Self::Inner {
+        unimplemented!();
+        //let idx = self.0 as usize;
+        //let slice: &'a [u8] = &buf[idx..];
+        //let ptr = slice.as_ptr() as *const T;
+        //let x: &'a T = unsafe { &*ptr };
+        //x.follow(slice)
     }
 }
 impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
     type Inner = &'b str;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+    fn follow(self, buf: &'a [u8]) -> Self::Inner {
         let len = self.0 as usize;
         let slice = &buf[4..4 + len];
         let s = unsafe { std::str::from_utf8_unchecked(slice) };
         s
     }
 }
-impl<'a, T: Sized + 'a> Follow<'a> for Offset<&'a [T]> {
-    type Inner = &'a [T];
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
+    type Inner = &'b [T];
+    fn follow(self, buf: &'a [u8]) -> Self::Inner {
         let len = self.0 as usize;
         let slice = &buf[4..4 + len];
         let ptr = slice.as_ptr() as *const T;
@@ -1494,8 +1496,8 @@ impl<'a, T: Sized + 'a> Follow<'a> for Offset<&'a [T]> {
     }
 }
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
-    type Inner = &'a Vector<'a, T>;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+    type Inner = Vector<'a, T>;
+    fn follow(self, buf: &'a [u8]) -> Self::Inner {
         unimplemented!();
         //let off = self.0 as usize;
         //let slice = &buf[4..4 + len];
