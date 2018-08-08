@@ -1460,20 +1460,18 @@ pub trait Follow<'a> {
 impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
     type Inner = &'a T;
     fn follow(self, _buf: &'a [u8]) -> Self::Inner {
-        unimplemented!();
-        //self
+        self
     }
 }
 
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
     type Inner = T::Inner;
     fn follow(self, buf: &'a [u8]) -> Self::Inner {
-        unimplemented!();
-        //let idx = self.0 as usize;
-        //let slice: &'a [u8] = &buf[idx..];
-        //let ptr = slice.as_ptr() as *const T;
-        //let x: &'a T = unsafe { &*ptr };
-        //x.follow(slice)
+        let idx = self.0 as usize;
+        let slice: &'a [u8] = &buf[idx..];
+        let ptr = slice.as_ptr() as *const T;
+        let x: &'a T = unsafe { &*ptr };
+        x.follow(slice)
     }
 }
 impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
@@ -1498,12 +1496,11 @@ impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
     type Inner = Vector<'a, T>;
     fn follow(self, buf: &'a [u8]) -> Self::Inner {
-        unimplemented!();
-        //let off = self.0 as usize;
-        //let slice = &buf[4..4 + len];
-        //let ptr = slice.as_ptr() as *const T;
-        //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
-        //x
+        let off = self.0 as usize;
+        let slice = &buf[4..4 + len];
+        let ptr = slice.as_ptr() as *const T;
+        let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
+        x
     }
 }
 
