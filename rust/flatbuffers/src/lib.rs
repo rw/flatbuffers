@@ -388,8 +388,18 @@ impl<'a> Table<'a> {
         Some(t2)
     }
     pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'a str> {
-	unimplemented!();
-        //self.get_slot_vector::<u8>(slotoff).map(|v| v.unsafe_into_str())
+        //self.get_slot_vector::<Offset<Offset<&str>>>(slotoff)
+        //self.get_slot_vector(slotoff)
+        match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
+            0 => { None }
+            o => {
+                let off: Offset<&'a str> = Offset::new(0);
+                let buf: &'a [u8] = &self.data[self.pos..];
+                unimplemented!();
+                //let x: &'a str = off.follow(buf);
+                //Some(x)
+            }
+	}
 
         //let o = self.compute_vtable_offset(slotoff) as usize;
         //if o == 0 {
@@ -421,7 +431,7 @@ impl<'a> Table<'a> {
     //    //}
     //}
     //pub fn get_slot_vector<T: VectorGettable<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
-    pub fn get_slot_vector<T: Follow<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
+    pub fn get_slot_vector<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
@@ -1451,8 +1461,8 @@ impl<'a, T: Follow<'a>> Follow<'a> for Offset<T> {
         x.follow(slice)
     }
 }
-impl<'a> Follow<'a> for Offset<&'a str> {
-    type Inner = &'a str;
+impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
+    type Inner = &'b str;
     fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
         let len = self.0 as usize;
         let slice = &buf[4..4 + len];
@@ -1498,9 +1508,9 @@ impl<T> std::ops::Deref for Offset<T> {
         &self.0
     }
 }
-impl<T> Offset<T> {
-    pub fn new(o: UOffsetT) -> Self {
-        Offset(o, PhantomData)
+impl<'a, T: 'a> Offset<T> {
+    pub fn new(o: UOffsetT) -> Offset<T> {
+        Offset { 0: o, 1: PhantomData}
     }
     pub fn union(&self) -> Offset<UnionOffset> {
         Offset::new(self.0)
