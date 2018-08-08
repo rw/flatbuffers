@@ -220,7 +220,7 @@ pub struct Vector<'a, T: Sized + 'a>(&'a [T], &'a [u8]);
 //}
 
 //impl<'a, T: VectorGettable<'a> + Sized + 'a> Vector<'a, T> {
-impl<'a, T: Sized + 'a> Vector<'a, T> {
+impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     pub fn new(vecbuf_with_len: &'a [u8], backing_data: &'a [u8]) -> Self {
         //println!("vecbuf: {:?}", buf);
         assert!(vecbuf_with_len.len() >= SIZE_UOFFSET);
@@ -240,7 +240,7 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
     pub fn len(&self) -> usize {
         self.0.len()
     }
-    pub fn get(&'a self, idx: usize) -> &'a T {
+    pub fn get(&'a self, idx: usize) -> &'a T::Inner {
         unimplemented!()
         //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
         //let x  = & unsafe {
@@ -284,19 +284,19 @@ impl<'a, T: Sized + 'a> Vector<'a, T> {
 //pub struct String<'a> {
 //    data: &'a [u8],
 //}
-pub type FBString<'a> = Vector<'a, u8>;
-impl<'a> FBString<'a> {
-    pub fn as_str(&'a self) -> &'a str {
-        unsafe {
-            std::str::from_utf8_unchecked(self.0)
-        }
-    }
-    pub fn unsafe_into_str(self) -> &'a str {
-        unsafe {
-            std::str::from_utf8_unchecked(self.0)
-        }
-    }
-}
+//pub type FBString<'a> = Vector<'a, u8>;
+//impl<'a> FBString<'a> {
+//    pub fn as_str(&'a self) -> &'a str {
+//        unsafe {
+//            std::str::from_utf8_unchecked(self.0)
+//        }
+//    }
+//    pub fn unsafe_into_str(self) -> &'a str {
+//        unsafe {
+//            std::str::from_utf8_unchecked(self.0)
+//        }
+//    }
+//}
 //impl<'a> std::convert::AsRef<str> for FBString<'a> {
 //    fn as_ref(&self) -> &str {
 //        self.as_str()
@@ -388,7 +388,9 @@ impl<'a> Table<'a> {
         Some(t2)
     }
     pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'a str> {
-        self.get_slot_vector::<u8>(slotoff).map(|v| v.unsafe_into_str())
+	unimplemented!();
+        //self.get_slot_vector::<u8>(slotoff).map(|v| v.unsafe_into_str())
+
         //let o = self.compute_vtable_offset(slotoff) as usize;
         //if o == 0 {
         //    return None;
@@ -419,7 +421,7 @@ impl<'a> Table<'a> {
     //    //}
     //}
     //pub fn get_slot_vector<T: VectorGettable<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
-    pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
+    pub fn get_slot_vector<T: Follow<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
@@ -811,8 +813,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // TODO: unimplemented!()
     }
     // utf-8 string creation
-    pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<FBString<'c>> {
-        Offset::<FBString>::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
+    pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<&'c str> {
+        Offset::<&str>::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
     pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<ByteString<'c>> {
     self.assert_not_nested();
@@ -872,9 +874,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
-    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<FBString<'c>>>> {
+    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'c, Offset<&'c str>>> {
         // TODO: any way to avoid heap allocs?
-        let offsets: Vec<Offset<FBString<'_>>> = xs.iter().map(|s| self.create_string(s)).collect();
+        let offsets: Vec<Offset<&str>> = xs.iter().map(|s| self.create_string(s)).collect();
         self.create_vector(&offsets[..])
         //let offsets: Vec<Offset<FBString>> = vec![];// xs.iter().map(|s| self.create_string(s)).collect();
         //let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
@@ -1427,7 +1429,7 @@ impl<T> LabeledUOffsetT<T> {
     }
 }
 
-trait Follow<'a> {
+pub trait Follow<'a> {
     type Inner;
     fn follow(&'a self, buf: &'a [u8]) -> Self::Inner;
 }

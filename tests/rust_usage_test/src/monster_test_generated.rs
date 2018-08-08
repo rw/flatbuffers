@@ -21,6 +21,12 @@ pub struct InParentNamespace<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
+    type Inner = &'a InParentNamespace<'a>;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
 // impl<'a> flatbuffers::Table for InParentNamespace<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
@@ -100,6 +106,12 @@ pub enum MonsterOffset {}
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
+}
+impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
+    type Inner = &'a Monster<'a>;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
@@ -184,6 +196,12 @@ pub enum Color {
   Green = 2,
   Blue = 8
 }
+impl<'a> flatbuffers::Follow<'a> for Color {
+    type Inner = &'a Color;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
 
 const EnumValuesColor:[Color; 3] = [
   Color::Red,
@@ -214,6 +232,12 @@ pub enum Farts {
   Blue = 1,
   Green = 2
 }
+impl<'a> flatbuffers::Follow<'a> for Farts {
+    type Inner = &'a Farts;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
 
 const EnumValuesFarts:[Farts; 3] = [
   Farts::Red,
@@ -239,6 +263,12 @@ pub enum Any {
   Monster = 1,
   TestSimpleTableWithEnum = 2,
   MyGame_Example2_Monster = 3
+}
+impl<'a> flatbuffers::Follow<'a> for Any {
+    type Inner = &'a Any;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
 }
 
 const EnumValuesAny:[Any; 4] = [
@@ -269,6 +299,12 @@ pub struct Test {
   b_: i8,
   padding0__: u8,
 } // pub struct Test
+impl<'a> flatbuffers::Follow<'a> for Test {
+    type Inner = &'a Test;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
 //impl flatbuffers::GeneratedStruct for Test {}
 
 impl Test {
@@ -307,6 +343,12 @@ pub struct Vec3 {
   test3_: Test/* foo */,
   padding2__: u16,
 } // pub struct Vec3
+impl<'a> flatbuffers::Follow<'a> for Vec3 {
+    type Inner = &'a Vec3;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
 //impl flatbuffers::GeneratedStruct for Vec3 {}
 
 impl Vec3 {
@@ -358,6 +400,12 @@ pub struct Ability {
   id_: u32,
   distance_: u32,
 } // pub struct Ability
+impl<'a> flatbuffers::Follow<'a> for Ability {
+    type Inner = &'a Ability;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
 //impl flatbuffers::GeneratedStruct for Ability {}
 
 impl Ability {
@@ -393,6 +441,12 @@ pub enum TestSimpleTableWithEnumOffset {}
 pub struct TestSimpleTableWithEnum<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
+}
+impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
+    type Inner = &'a TestSimpleTableWithEnum<'a>;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
 }
 // impl<'a> flatbuffers::Table for TestSimpleTableWithEnum<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for TestSimpleTableWithEnum<'a> {
@@ -472,6 +526,12 @@ pub struct Stat<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
+    type Inner = &'a Stat<'a>;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
+}
 // impl<'a> flatbuffers::Table for Stat<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
@@ -508,7 +568,7 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
 }
 
 pub struct StatArgs<'a> {
-    pub id: Option<flatbuffers::Offset<flatbuffers::FBString<'a >>>,
+    pub id: Option<flatbuffers::Offset<&'a  str>>,
     pub val: i64,
     pub count: u16,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
@@ -528,7 +588,7 @@ pub struct StatBuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
-  pub fn add_id(&mut self, id: flatbuffers::Offset<flatbuffers::FBString<'b >>) {
+  pub fn add_id(&mut self, id: flatbuffers::Offset<&'b  str>) {
     self.fbb_.push_slot_offset_relative(Stat::VT_ID, id);
   }
   pub fn add_val(&mut self, val: i64) {
@@ -570,6 +630,12 @@ pub enum MonsterOffset {}
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
+}
+impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
+    type Inner = &'a Monster<'a>;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
@@ -668,8 +734,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn test4(&'a self) -> Option<flatbuffers::Vector<'a, Test>> {
     self._tab.get_slot_vector::<Test>(Monster::VT_TEST4)
   }
-  pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<flatbuffers::FBString<'a>>>> {
-    self._tab.get_slot_vector::<flatbuffers::Offset<flatbuffers::FBString<'a>>>(Monster::VT_TESTARRAYOFSTRING)
+  pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<&'a str>>> {
+    self._tab.get_slot_vector::<flatbuffers::Offset<&'a str>>(Monster::VT_TESTARRAYOFSTRING)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
@@ -724,8 +790,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn testf3(&'a self) -> f32 {
     self._tab.get_slot_scalar::<f32>(Monster::VT_TESTF3, 0.0)
   }
-  pub fn testarrayofstring2(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<flatbuffers::FBString<'a>>>> {
-    self._tab.get_slot_vector::<flatbuffers::Offset<flatbuffers::FBString<'a>>>(Monster::VT_TESTARRAYOFSTRING2)
+  pub fn testarrayofstring2(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<&'a str>>> {
+    self._tab.get_slot_vector::<flatbuffers::Offset<&'a str>>(Monster::VT_TESTARRAYOFSTRING2)
   }
   pub fn testarrayofsortedstruct(&'a self) -> Option<flatbuffers::Vector<'a, Ability>> {
     self._tab.get_slot_vector::<Ability>(Monster::VT_TESTARRAYOFSORTEDSTRUCT)
@@ -787,13 +853,13 @@ pub struct MonsterArgs<'a> {
     pub pos: Option<&'a  Vec3>,
     pub mana: i16,
     pub hp: i16,
-    pub name: Option<flatbuffers::Offset<flatbuffers::FBString<'a >>>,
+    pub name: Option<flatbuffers::Offset<&'a  str>>,
     pub inventory: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u8>>>,
     pub color: Color,
     pub test_type: Any,
     pub test: Option<flatbuffers::Offset<AnyUnionTableOffset>>,
     pub test4: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Test>>>,
-    pub testarrayofstring: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<flatbuffers::FBString<'a >>>>>,
+    pub testarrayofstring: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<&'a  str>>>>,
     pub testarrayoftables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<Monster<'a >>>>>,
     pub enemy: Option<flatbuffers::Offset<&'a  Monster<'a >>>,
     pub testnestedflatbuffer: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u8>>>,
@@ -811,7 +877,7 @@ pub struct MonsterArgs<'a> {
     pub testf: f32,
     pub testf2: f32,
     pub testf3: f32,
-    pub testarrayofstring2: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<flatbuffers::FBString<'a >>>>>,
+    pub testarrayofstring2: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<&'a  str>>>>,
     pub testarrayofsortedstruct: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Ability>>>,
     pub flex: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u8>>>,
     pub test5: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Test>>>,
@@ -888,7 +954,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_hp(&mut self, hp: i16) {
     self.fbb_.push_slot_scalar::<i16>(Monster::VT_HP, hp, 100);
   }
-  pub fn add_name(&mut self, name: flatbuffers::Offset<flatbuffers::FBString<'b >>) {
+  pub fn add_name(&mut self, name: flatbuffers::Offset<&'b  str>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_NAME, name);
   }
   pub fn add_inventory(&mut self, inventory: flatbuffers::Offset<flatbuffers::Vector<'b , u8>>) {
@@ -906,7 +972,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<'b , Test>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TEST4, test4);
   }
-  pub fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<flatbuffers::FBString<'b >>>>) {
+  pub fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<&'b  str>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
   }
   pub fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<Monster<'b >>>>) {
@@ -960,7 +1026,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_testf3(&mut self, testf3: f32) {
     self.fbb_.push_slot_scalar::<f32>(Monster::VT_TESTF3, testf3, 0.0);
   }
-  pub fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<flatbuffers::FBString<'b >>>>) {
+  pub fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<&'b  str>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
   }
   pub fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<'b , Ability>>) {
@@ -1069,6 +1135,12 @@ pub enum TypeAliasesOffset {}
 pub struct TypeAliases<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
+}
+impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
+    type Inner = &'a TypeAliases<'a>;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+        self
+    }
 }
 // impl<'a> flatbuffers::Table for TypeAliases<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for TypeAliases<'a> {
