@@ -1504,8 +1504,9 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
 impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
     type Inner = &'b str;
     fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-        let len = self.0 as usize;
-        let slice = &buf[4..4 + len];
+        let buf = &buf[self.0 as usize..];
+        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
+        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
         let s = unsafe { std::str::from_utf8_unchecked(slice) };
         s
     }
@@ -1513,8 +1514,9 @@ impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
 impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
     type Inner = &'b [T];
     fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-        let len = self.0 as usize;
-        let slice = &buf[4..4 + len];
+        let buf = &buf[self.0 as usize..];
+        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
+        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
         let ptr = slice.as_ptr() as *const T;
         let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
         x
