@@ -2636,6 +2636,13 @@ mod test_follow_impls {
     }
 
     #[test]
+    fn test_offset_to_f32() {
+        let vec: Vec<u8> = vec![255, 255, 255, 255, /* start of value */ 208, 15, 73, 64];
+        let off: flatbuffers::Offset<f32> = flatbuffers::Offset::new(4);
+        assert_eq!(off.follow(&vec[..], 0), &3.14159);
+    }
+
+    #[test]
     fn test_offset_to_string() {
         let vec: Vec<u8> = vec![255,255,255,255,3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         let off: flatbuffers::Offset<&str> = flatbuffers::Offset::new(4);
