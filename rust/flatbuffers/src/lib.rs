@@ -408,17 +408,17 @@ impl<'a> Table<'a> {
     //    }
     //}
     pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'a str> {
-        unimplemented!();
         //self.get_slot_vector::<Offset<Offset<&str>>>(slotoff)
         //self.get_slot_vector(slotoff)
-        ////match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
-        ////    0 => { None }
-        ////    o => {
-        ////        let off: Offset<&'a str> = Offset::new(0);
-        ////        let buf: &'a [u8] = &self.data[self.pos..];
-        ////        Some(off.follow(buf))
-        ////    }
-	////}
+        match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
+            0 => { None }
+            o => {
+                return None;
+                //let off: Offset<&'a str> = Offset::new(0);
+                ////let buf: &'a [u8] = &self.data[self.pos..];
+                //Some(off.follow(self.data, self.pos))
+            }
+	}
 
         //let o = self.compute_vtable_offset(slotoff) as usize;
         //if o == 0 {
@@ -1495,7 +1495,7 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
         let slice: &'a [u8] = &buf[loc2..];
         let ptr = slice.as_ptr() as *const T;
         let x: &'a T = unsafe { &*ptr };
-        x.follow(&buf[..], loc2)
+        x.follow(buf, loc2)
     }
 }
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
