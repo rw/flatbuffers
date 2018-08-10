@@ -2681,9 +2681,30 @@ mod test_follow_impls {
     fn test_vector_of_offset_to_string_elements() {
         let buf: Vec<u8> = vec![/* vec len */ 1, 0, 0, 0, /* offset to string */ 4, 0, 0, 0, /* str length */ 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         let vec: flatbuffers::Vector<flatbuffers::Offset<&str>> = flatbuffers::Vector::new(&buf[..]);
-        //let off: flatbuffers::Vector<flatbuffers::Offset<&str>> = flatbuffers::Offset::new(4);
         assert_eq!(vec.len(), 1);
         assert_eq!(vec.get(0), "foo");
+    }
+
+    #[test]
+    fn test_vector_of_struct_elements() {
+        #[derive(Debug, PartialEq)]
+        #[repr(C, packed)]
+        struct FooStruct {
+            a: i8,
+            b: u8,
+            c: i16,
+        }
+        impl<'a> flatbuffers::Follow<'a> for FooStruct {
+            type Inner = &'a FooStruct;
+            fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+                self
+            }
+        }
+
+        let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
+        let vec: flatbuffers::Vector<FooStruct> = flatbuffers::Vector::new(&buf[..]);
+        assert_eq!(vec.len(), 1);
+        assert_eq!(vec.get(0), &FooStruct{a: 1, b: 2, c: 1027});
     }
 }
 
