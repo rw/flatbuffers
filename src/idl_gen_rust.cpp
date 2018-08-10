@@ -1108,7 +1108,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("ENUM_NAME", Name(enum_def));
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{ENUM_NAME}} {";
     code_ += "    type Inner = &'a {{ENUM_NAME}};";
-    code_ += "    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {";
+    code_ += "    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "        self";
     code_ += "    }";
     code_ += "}";
@@ -2313,7 +2313,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
     code_ += "    type Inner = &'a {{STRUCT_NAME}}<'a>;";
-    code_ += "    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {";
+    code_ += "    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "        self";
     code_ += "    }";
     code_ += "}";
@@ -3382,7 +3382,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "} // pub struct {{STRUCT_NAME}}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
     code_ += "    type Inner = &'a {{STRUCT_NAME}};";
-    code_ += "    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {";
+    code_ += "    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "        self";
     code_ += "    }";
     code_ += "}";

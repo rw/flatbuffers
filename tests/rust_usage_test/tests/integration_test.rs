@@ -2625,35 +2625,35 @@ mod test_follow_impls {
     fn test_offset_to_u8() {
         let vec: Vec<u8> = vec![255, 3];
         let off: flatbuffers::Offset<u8> = flatbuffers::Offset::new(1);
-        assert_eq!(*off.follow(&vec[..]), 3);
+        assert_eq!(*off.follow(&vec[..], 0), 3);
     }
 
     #[test]
     fn test_offset_to_u16() {
         let vec: Vec<u8> = vec![255, 255, 3, 4];
         let off: flatbuffers::Offset<u16> = flatbuffers::Offset::new(2);
-        assert_eq!(*off.follow(&vec[..]), 1027);
+        assert_eq!(*off.follow(&vec[..], 0), 1027);
     }
 
     #[test]
     fn test_offset_to_string() {
         let vec: Vec<u8> = vec![255,255,255,255,3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         let off: flatbuffers::Offset<&str> = flatbuffers::Offset::new(4);
-        assert_eq!(off.follow(&vec[..]), "foo");
+        assert_eq!(off.follow(&vec[..], 0), "foo");
     }
 
     #[test]
     fn test_offset_to_byte_string() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 3, 0, 0, 0, 1, 2, 3, 0];
         let off: flatbuffers::Offset<&[u8]> = flatbuffers::Offset::new(4);
-        assert_eq!(off.follow(&vec[..]), &vec![1, 2, 3][..]);
+        assert_eq!(off.follow(&vec[..], 0), &vec![1, 2, 3][..]);
     }
 
     #[test]
     fn test_offset_to_vector_of_u16() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];
         let off: flatbuffers::Offset<flatbuffers::Vector<u16>> = flatbuffers::Offset::new(4);
-        assert_eq!(off.follow(&vec[..]).as_slice(), &vec![513, 1027][..]);
+        assert_eq!(off.follow(&vec[..], 0).as_slice(), &vec![513, 1027][..]);
     }
 
     #[test]
@@ -2667,14 +2667,14 @@ mod test_follow_impls {
         }
         impl<'a> flatbuffers::Follow<'a> for FooStruct {
             type Inner = &'a FooStruct;
-            fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+            fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
                 self
             }
         }
 
         let vec: Vec<u8> = vec![255, 255, 255, 255, 1, 2, 3, 4];
         let off: flatbuffers::Offset<FooStruct> = flatbuffers::Offset::new(4);
-        assert_eq!(*off.follow(&vec[..]), FooStruct{a: 1, b: 2, c: 1027});
+        assert_eq!(*off.follow(&vec[..], 0), FooStruct{a: 1, b: 2, c: 1027});
     }
 
     #[test]
@@ -2696,7 +2696,7 @@ mod test_follow_impls {
         }
         impl<'a> flatbuffers::Follow<'a> for FooStruct {
             type Inner = &'a FooStruct;
-            fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+            fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
                 self
             }
         }
@@ -3067,7 +3067,7 @@ mod byte_layouts {
         }
         impl<'a> flatbuffers::Follow<'a> for FooStruct {
             type Inner = &'a FooStruct;
-            fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+            fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
                 self
             }
         }

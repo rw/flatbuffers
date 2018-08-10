@@ -229,13 +229,6 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
         let num_elems = read_scalar::<UOffsetT>(buf_with_veclen) as usize;
         assert!(buf_with_veclen.len() - SIZE_UOFFSET >= num_elems*elem_sz,
                 format!("buf_with_veclen.len(): {}, num_elems: {}, elem_sz: {}", buf_with_veclen.len(), num_elems, elem_sz));
-        //let extra_bytes = vecbuf_with_len.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
-        //let elems_buf = &vecbuf_with_len[SIZE_UOFFSET..SIZE_UOFFSET+actual_num_elems*elem_sz];
-        //println!("elems_buf: {:?}", elems_buf);
-        //let ptr = elems_buf.as_ptr() as *const T;
-        //let typed_vec = unsafe {
-        //    std::slice::from_raw_parts::<T>(ptr, actual_num_elems)
-        //};
         Self { 0: buf_with_veclen, 1: PhantomData }
     }
     pub fn len(&self) -> usize {
@@ -247,10 +240,9 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     pub fn get(&'a self, idx: usize) -> T::Inner {
         assert!(idx < self.len());
         let off = SIZE_UOFFSET + std::mem::size_of::<T>() * idx;
-        let buf = &self.0[off..];
-        let ptr = buf.as_ptr() as *const T;
+        let ptr = (&self.0[off..]).as_ptr() as *const T;
         let x = unsafe { &*ptr };
-        x.follow(buf)
+        x.follow(self.0, off)
             //std::mem::transmute::<_, T>(self.0[idx])
 
         //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
@@ -1486,29 +1478,29 @@ impl<T> LabeledUOffsetT<T> {
 
 pub trait Follow<'a> {
     type Inner;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner;
+    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner;
 }
 
 impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
     type Inner = &'a T;
-    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
         self
     }
 }
 
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
     type Inner = T::Inner;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-        let idx = self.0 as usize;
-        let slice: &'a [u8] = &buf[idx..];
+    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+        let loc2 = self.0 as usize + loc;
+        let slice: &'a [u8] = &buf[loc2..];
         let ptr = slice.as_ptr() as *const T;
         let x: &'a T = unsafe { &*ptr };
-        x.follow(&buf[..])
+        x.follow(&buf[..], loc2)
     }
 }
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
     type Inner = T::Inner;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
         unimplemented!();
         //let idx = self.0 as usize;
         //let slice: &'a [u8] = &buf[idx..];
@@ -1519,8 +1511,8 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
 }
 impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
     type Inner = &'b str;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-        let buf = &buf[self.0 as usize..];
+    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+        let buf = &buf[loc + self.0 as usize..];
         let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
         let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
         let s = unsafe { std::str::from_utf8_unchecked(slice) };
@@ -1529,8 +1521,8 @@ impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
 }
 impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
     type Inner = &'b [T];
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-        let buf = &buf[self.0 as usize..];
+    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+        let buf = &buf[loc + self.0 as usize..];
         let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
         let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
         let ptr = slice.as_ptr() as *const T;
@@ -1540,8 +1532,8 @@ impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
 }
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
     type Inner = Vector<'a, T>;
-    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-        let buf = &buf[self.0 as usize..];
+    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+        let buf = &buf[loc + self.0 as usize..];
         Vector::new(buf)
         //let ptr = slice.as_ptr() as *const T;
         //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
