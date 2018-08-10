@@ -1477,6 +1477,17 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
         //x.follow(slice)
     }
 }
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
+    type Inner = T::Inner;
+    fn follow(self, buf: &'a [u8]) -> Self::Inner {
+        unimplemented!();
+        //let idx = self.0 as usize;
+        //let slice: &'a [u8] = &buf[idx..];
+        //let ptr = slice.as_ptr() as *const T;
+        //let x: &'a T = unsafe { &*ptr };
+        //x.follow(slice)
+    }
+}
 impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
     type Inner = &'b str;
     fn follow(self, buf: &'a [u8]) -> Self::Inner {
@@ -1519,6 +1530,33 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
 //    }
 //}
 
+
+#[derive(Debug, PartialEq)]
+pub struct BackwardsXOffset<T> (UOffsetT, PhantomData<T>);
+impl<T> Copy for BackwardsXOffset<T> { } // TODO: why does deriving Copy cause ownership errors?
+impl<T> Clone for BackwardsXOffset<T> {
+    fn clone(&self) -> BackwardsXOffset<T> {
+        BackwardsXOffset::new(self.0.clone())
+    }
+}
+impl<T> std::ops::Deref for BackwardsXOffset<T> {
+    type Target = UOffsetT;
+    fn deref(&self) -> &UOffsetT {
+        &self.0
+    }
+}
+impl<'a, T: 'a> BackwardsXOffset<T> {
+    pub fn new(o: UOffsetT) -> BackwardsXOffset<T> {
+        BackwardsXOffset { 0: o, 1: PhantomData}
+    }
+    pub fn union(&self) -> BackwardsXOffset<UnionOffset> {
+        unimplemented!();
+        BackwardsXOffset::new(self.0)
+    }
+    pub fn value(&self) -> UOffsetT {
+        self.0
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Offset<T> (UOffsetT, PhantomData<T>);
