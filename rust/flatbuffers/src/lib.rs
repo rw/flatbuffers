@@ -227,8 +227,8 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
         assert!(buf_with_veclen.len() >= SIZE_UOFFSET);
         let elem_sz = std::mem::size_of::<T>();
         let num_elems = read_scalar::<UOffsetT>(buf_with_veclen) as usize;
-        //assert!(vecbuf_with_len.len() - SIZE_UOFFSET >= actual_num_elems*elem_sz,
-        //        format!("buf.len(): {}, actual_num_elems: {}, elem_sz: {}", vecbuf_with_len.len(), actual_num_elems, elem_sz));
+        assert!(buf_with_veclen.len() - SIZE_UOFFSET >= num_elems*elem_sz,
+                format!("buf_with_veclen.len(): {}, num_elems: {}, elem_sz: {}", buf_with_veclen.len(), num_elems, elem_sz));
         //let extra_bytes = vecbuf_with_len.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
         //let elems_buf = &vecbuf_with_len[SIZE_UOFFSET..SIZE_UOFFSET+actual_num_elems*elem_sz];
         //println!("elems_buf: {:?}", elems_buf);
@@ -1540,8 +1540,7 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
     type Inner = Vector<'a, T>;
     fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
         let buf = &buf[self.0 as usize..];
-        let off = self.0 as usize;
-        Vector::new(&buf[off..])
+        Vector::new(buf)
         //let ptr = slice.as_ptr() as *const T;
         //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
         //x
