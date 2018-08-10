@@ -2622,35 +2622,59 @@ mod test_follow_impls {
     use flatbuffers::Follow;
 
     #[test]
-    fn test_scalars() {
+    fn test_offset_to_u8() {
         let vec: Vec<u8> = vec![255, 3];
         let off: flatbuffers::Offset<u8> = flatbuffers::Offset::new(1);
         assert_eq!(*off.follow(&vec[..]), 3);
+    }
 
+    #[test]
+    fn test_offset_to_u16() {
         let vec: Vec<u8> = vec![255, 255, 3, 4];
         let off: flatbuffers::Offset<u16> = flatbuffers::Offset::new(2);
         assert_eq!(*off.follow(&vec[..]), 1027);
     }
 
     #[test]
-    fn test_string() {
+    fn test_offset_to_string() {
         let vec: Vec<u8> = vec![255,255,255,255,3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         let off: flatbuffers::Offset<&str> = flatbuffers::Offset::new(4);
         assert_eq!(off.follow(&vec[..]), "foo");
     }
 
     #[test]
-    fn test_byte_string() {
+    fn test_offset_to_byte_string() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 3, 0, 0, 0, 1, 2, 3, 0];
         let off: flatbuffers::Offset<&[u8]> = flatbuffers::Offset::new(4);
         assert_eq!(off.follow(&vec[..]), &vec![1, 2, 3][..]);
     }
 
     #[test]
-    fn test_vector_of_scalar() {
+    fn test_offset_to_vector_of_u16() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];
         let off: flatbuffers::Offset<flatbuffers::Vector<u16>> = flatbuffers::Offset::new(4);
         assert_eq!(off.follow(&vec[..]).as_slice(), &vec![513, 1027][..]);
+    }
+
+    #[test]
+    fn test_offset_to_struct() {
+        #[derive(Debug, PartialEq)]
+        #[repr(C, packed)]
+        struct FooStruct {
+            a: i8,
+            b: u8,
+            c: i16,
+        }
+        impl<'a> flatbuffers::Follow<'a> for FooStruct {
+            type Inner = &'a FooStruct;
+            fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
+                self
+            }
+        }
+
+        let vec: Vec<u8> = vec![255, 255, 255, 255, 1, 2, 3, 4];
+        let off: flatbuffers::Offset<FooStruct> = flatbuffers::Offset::new(4);
+        assert_eq!(*off.follow(&vec[..]), FooStruct{a: 1, b: 2, c: 1027});
     }
 }
 
