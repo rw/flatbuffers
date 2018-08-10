@@ -354,10 +354,14 @@ class RustGenerator : public BaseGenerator {
         // The root datatype accessor:
         code_ += "#[inline]";
         code_ +=
-            "pub fn GetRootAs{{STRUCT_NAME}}(buf: &[u8])"
-            " -> {{CPP_NAME}} {{NULLABLE_EXT}} {";
+            "pub fn GetRootAs{{STRUCT_NAME}}<'a>(buf: &'a [u8])"
+            " -> {{CPP_NAME}}<'a> {{NULLABLE_EXT}} {";
         code_ += "  //return flatbuffers::get_root::<&{{CPP_NAME}}>(buf);";
-        code_ += "  return flatbuffers::get_root::<{{CPP_NAME}}>(buf);";
+        code_ += "  //return flatbuffers::get_root::<{{CPP_NAME}}>(buf);";
+        code_ += "  let off: flatbuffers::Offset<flatbuffers::Offset<{{CPP_NAME}}<'a>>> = flatbuffers::Offset::new(0);";
+        code_ += "  use self::flatbuffers::Follow;";
+        code_ += "  unimplemented!()";
+        code_ += "  //off.follow(buf, 0).clone()";
         code_ += "}";
         code_ += "";
 
@@ -2312,9 +2316,9 @@ class RustGenerator : public BaseGenerator {
     code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
-    code_ += "    type Inner = &'a {{STRUCT_NAME}}<'a>;";
+    code_ += "    type Inner = {{STRUCT_NAME}}<'a>;";
     code_ += "    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "        self";
+    code_ += "        *self";
     code_ += "    }";
     code_ += "}";
     code_ += "// impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {";

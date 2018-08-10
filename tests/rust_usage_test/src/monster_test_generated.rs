@@ -22,9 +22,9 @@ pub struct InParentNamespace<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
-    type Inner = &'a InParentNamespace<'a>;
+    type Inner = InParentNamespace<'a>;
     fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        self
+        *self
     }
 }
 // impl<'a> flatbuffers::Table for InParentNamespace<'a> {
@@ -108,9 +108,9 @@ pub struct Monster<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
-    type Inner = &'a Monster<'a>;
+    type Inner = Monster<'a>;
     fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        self
+        *self
     }
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
@@ -443,9 +443,9 @@ pub struct TestSimpleTableWithEnum<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
-    type Inner = &'a TestSimpleTableWithEnum<'a>;
+    type Inner = TestSimpleTableWithEnum<'a>;
     fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        self
+        *self
     }
 }
 // impl<'a> flatbuffers::Table for TestSimpleTableWithEnum<'a> {
@@ -527,9 +527,9 @@ pub struct Stat<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
-    type Inner = &'a Stat<'a>;
+    type Inner = Stat<'a>;
     fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        self
+        *self
     }
 }
 // impl<'a> flatbuffers::Table for Stat<'a> {
@@ -632,9 +632,9 @@ pub struct Monster<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
-    type Inner = &'a Monster<'a>;
+    type Inner = Monster<'a>;
     fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        self
+        *self
     }
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
@@ -1137,9 +1137,9 @@ pub struct TypeAliases<'a> {
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
-    type Inner = &'a TypeAliases<'a>;
+    type Inner = TypeAliases<'a>;
     fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        self
+        *self
     }
 }
 // impl<'a> flatbuffers::Table for TypeAliases<'a> {
@@ -1379,9 +1379,13 @@ pub fn VerifyAnyVector(_verifier: &mut flatbuffers::Verifier, values: &[flatbuff
 }
 
 #[inline]
-pub fn GetRootAsMonster(buf: &[u8]) -> Monster  {
+pub fn GetRootAsMonster<'a>(buf: &'a [u8]) -> Monster<'a>  {
   //return flatbuffers::get_root::<&Monster>(buf);
-  return flatbuffers::get_root::<Monster>(buf);
+  //return flatbuffers::get_root::<Monster>(buf);
+  let off: flatbuffers::Offset<flatbuffers::Offset<Monster<'a>>> = flatbuffers::Offset::new(0);
+  use self::flatbuffers::Follow;
+  unimplemented!()
+  //off.follow(buf, 0).clone()
 }
 
 #[inline]
