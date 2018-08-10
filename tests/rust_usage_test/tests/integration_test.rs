@@ -2561,8 +2561,9 @@ fn table_of_byte_strings_fuzz() {
         let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
 
         for i in 0..xs.len() {
-            let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
-            assert_eq!(got.unwrap().as_bytes(), &xs[i][..]);
+            unimplemented!();
+            //let got = tab.get_slot_vector_follow::<flatbuffers::Offset<flatbuffers::Vector<u8>>>(fi2fo(i as flatbuffers::VOffsetT));
+            //assert_eq!(got.unwrap().as_slice(), &xs[i][..]);
         }
     }
     prop(vec![vec![1,2,3]]);
@@ -2571,6 +2572,7 @@ fn table_of_byte_strings_fuzz() {
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
 }
 
+#[test]
 fn table_with_vector_of_scalars_fuzz() {
     fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(vecs: Vec<Vec<T>>) {
         use flatbuffers::field_index_to_field_offset as fi2fo;
@@ -2612,6 +2614,30 @@ fn table_with_vector_of_scalars_fuzz() {
     }
     let n = 20;
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
+}
+
+#[cfg(test)]
+mod test_follow_impls {
+    extern crate flatbuffers;
+    use flatbuffers::Follow;
+
+    #[test]
+    fn test_scalars() {
+        let vec: Vec<u8> = vec![3];
+        let off: flatbuffers::Offset<u8> = flatbuffers::Offset::new(0);
+        assert_eq!(*off.follow(&vec[..]), 3);
+
+        let vec: Vec<u8> = vec![3, 4];
+        let off: flatbuffers::Offset<u16> = flatbuffers::Offset::new(0);
+        assert_eq!(*off.follow(&vec[..]), 1027);
+    }
+
+    #[test]
+    fn test_string() {
+        let vec: Vec<u8> = vec![4, 0, 0, 0, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
+        let off: flatbuffers::Offset<flatbuffers::Offset<&str>> = flatbuffers::Offset::new(0);
+        assert_eq!(off.follow(&vec[..]), "foo");
+    }
 }
 
 #[cfg(test)]
@@ -2972,8 +2998,8 @@ mod byte_layouts {
             b: i8,
         }
         impl<'a> flatbuffers::Follow<'a> for FooStruct {
-            type Inner = FooStruct;
-            fn follow(self, _buf: &'a [u8]) -> Self::Inner {
+            type Inner = &'a FooStruct;
+            fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
                 self
             }
         }
