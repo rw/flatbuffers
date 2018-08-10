@@ -2536,7 +2536,7 @@ fn table_of_strings_fuzz() {
         }
     }
     let n = 20;
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<String>));
 }
 
 #[test]
@@ -2561,9 +2561,8 @@ fn table_of_byte_strings_fuzz() {
         let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
 
         for i in 0..xs.len() {
-            unimplemented!();
-            //let got = tab.get_slot_vector_follow::<flatbuffers::Offset<flatbuffers::Vector<u8>>>(fi2fo(i as flatbuffers::VOffsetT));
-            //assert_eq!(got.unwrap().as_slice(), &xs[i][..]);
+            let got = tab.get_slot_vector_follow::<flatbuffers::Offset<flatbuffers::Vector<u8>>>(fi2fo(i as flatbuffers::VOffsetT));
+            assert_eq!(got.unwrap().as_slice(), &xs[i][..]);
         }
     }
     prop(vec![vec![1,2,3]]);
