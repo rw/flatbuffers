@@ -388,17 +388,30 @@ impl<'a> Table<'a> {
         };
         Some(t2)
     }
+    //pub fn get_slot_byte_string(&'a self, slotoff: VOffsetT) -> Option<Vector<&'a u8]>> {
+    //    //self.get_slot_vector::<Offset<Offset<&str>>>(slotoff)
+    //    //self.get_slot_vector(slotoff)
+    //    match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
+    //        0 => { None }
+    //        o => {
+    //            let off: Offset<&'a u8> = Offset::new(0);
+    //            let buf: &'a [u8] = &self.data[self.pos..];
+    //            Some(off.follow(buf))
+    //        }
+    //    }
+    //}
     pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'a str> {
+        unimplemented!();
         //self.get_slot_vector::<Offset<Offset<&str>>>(slotoff)
         //self.get_slot_vector(slotoff)
-        match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
-            0 => { None }
-            o => {
-                let off: Offset<&'a str> = Offset::new(0);
-                let buf: &'a [u8] = &self.data[self.pos..];
-                Some(off.follow(buf))
-            }
-	}
+        ////match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
+        ////    0 => { None }
+        ////    o => {
+        ////        let off: Offset<&'a str> = Offset::new(0);
+        ////        let buf: &'a [u8] = &self.data[self.pos..];
+        ////        Some(off.follow(buf))
+        ////    }
+	////}
 
         //let o = self.compute_vtable_offset(slotoff) as usize;
         //if o == 0 {
@@ -438,10 +451,11 @@ impl<'a> Table<'a> {
 
         let off = (o + self.pos) as UOffsetT;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off as usize);
-        let x: Offset<T> = Offset::new(off2);
-        let buf2: &'a [u8] = &self.data[self.pos..];
-        Some(x.follow(buf2))
-        //return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
+        unimplemented!();
+        ////let x: Offset<T> = Offset::new(off2);
+        ////let buf2 = &self.data[self.pos..];
+        ////Some(x.follow(buf2))
+        //////return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
     }
     pub fn get_slot_vector<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
@@ -1456,30 +1470,29 @@ impl<T> LabeledUOffsetT<T> {
 
 pub trait Follow<'a> {
     type Inner;
-    fn follow(self, buf: &'a [u8]) -> Self::Inner;
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner;
 }
 
 impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
-    type Inner = T;
-    fn follow(self, _buf: &'a [u8]) -> Self::Inner {
+    type Inner = &'a T;
+    fn follow(&'a self, _buf: &'a [u8]) -> Self::Inner {
         self
     }
 }
 
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
     type Inner = T::Inner;
-    fn follow(self, buf: &'a [u8]) -> Self::Inner {
-        unimplemented!();
-        //let idx = self.0 as usize;
-        //let slice: &'a [u8] = &buf[idx..];
-        //let ptr = slice.as_ptr() as *const T;
-        //let x: &'a T = unsafe { &*ptr };
-        //x.follow(slice)
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+        let idx = self.0 as usize;
+        let slice: &'a [u8] = &buf[idx..];
+        let ptr = slice.as_ptr() as *const T;
+        let x: &'a T = unsafe { &*ptr };
+        x.follow(&buf[..])
     }
 }
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
     type Inner = T::Inner;
-    fn follow(self, buf: &'a [u8]) -> Self::Inner {
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
         unimplemented!();
         //let idx = self.0 as usize;
         //let slice: &'a [u8] = &buf[idx..];
@@ -1490,7 +1503,7 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
 }
 impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
     type Inner = &'b str;
-    fn follow(self, buf: &'a [u8]) -> Self::Inner {
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
         let len = self.0 as usize;
         let slice = &buf[4..4 + len];
         let s = unsafe { std::str::from_utf8_unchecked(slice) };
@@ -1499,7 +1512,7 @@ impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
 }
 impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
     type Inner = &'b [T];
-    fn follow(self, buf: &'a [u8]) -> Self::Inner {
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
         let len = self.0 as usize;
         let slice = &buf[4..4 + len];
         let ptr = slice.as_ptr() as *const T;
@@ -1509,7 +1522,7 @@ impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
 }
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
     type Inner = Vector<'a, T>;
-    fn follow(self, buf: &'a [u8]) -> Self::Inner {
+    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
         let off = self.0 as usize;
         Vector::new(&buf[off..], &buf[off..])
         //let ptr = slice.as_ptr() as *const T;
