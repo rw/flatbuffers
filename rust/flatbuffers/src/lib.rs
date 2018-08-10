@@ -214,7 +214,7 @@ impl<'a, T: ElementScalar> VectorGettable<'a> for T {
 //}
 
 #[derive(Debug, PartialEq)]
-pub struct Vector<'a, T: Follow<'a> + 'a>(&'a [T], &'a [u8]);
+pub struct Vector<'a, T: Follow<'a> + 'a>(&'a [u8], PhantomData<T>);
 //pub struct Vector<'a, T: Sized + 'a> {
 //    data: &'a [u8],
 //    _phantom: PhantomData<T>,
@@ -222,37 +222,50 @@ pub struct Vector<'a, T: Follow<'a> + 'a>(&'a [T], &'a [u8]);
 
 //impl<'a, T: VectorGettable<'a> + Sized + 'a> Vector<'a, T> {
 impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
-    pub fn new(vecbuf_with_len: &'a [u8], backing_data: &'a [u8]) -> Self {
+    pub fn new(buf_with_veclen: &'a [u8]) -> Self {
         //println!("vecbuf: {:?}", buf);
-        assert!(vecbuf_with_len.len() >= SIZE_UOFFSET);
+        assert!(buf_with_veclen.len() >= SIZE_UOFFSET);
         let elem_sz = std::mem::size_of::<T>();
-        let actual_num_elems = read_scalar::<UOffsetT>(vecbuf_with_len) as usize;
-        assert!(vecbuf_with_len.len() - SIZE_UOFFSET >= actual_num_elems*elem_sz,
-                format!("buf.len(): {}, actual_num_elems: {}, elem_sz: {}", vecbuf_with_len.len(), actual_num_elems, elem_sz));
-        let extra_bytes = vecbuf_with_len.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
-        let elems_buf = &vecbuf_with_len[SIZE_UOFFSET..SIZE_UOFFSET+actual_num_elems*elem_sz];
-        println!("elems_buf: {:?}", elems_buf);
-        let ptr = elems_buf.as_ptr() as *const T;
-        let vecbuf = unsafe {
-            std::slice::from_raw_parts::<T>(ptr, actual_num_elems)
-        };
-        Self { 0: vecbuf, 1: backing_data }
+        let num_elems = read_scalar::<UOffsetT>(buf_with_veclen) as usize;
+        //assert!(vecbuf_with_len.len() - SIZE_UOFFSET >= actual_num_elems*elem_sz,
+        //        format!("buf.len(): {}, actual_num_elems: {}, elem_sz: {}", vecbuf_with_len.len(), actual_num_elems, elem_sz));
+        //let extra_bytes = vecbuf_with_len.len() - SIZE_UOFFSET - actual_num_elems*elem_sz;
+        //let elems_buf = &vecbuf_with_len[SIZE_UOFFSET..SIZE_UOFFSET+actual_num_elems*elem_sz];
+        //println!("elems_buf: {:?}", elems_buf);
+        //let ptr = elems_buf.as_ptr() as *const T;
+        //let typed_vec = unsafe {
+        //    std::slice::from_raw_parts::<T>(ptr, actual_num_elems)
+        //};
+        Self { 0: buf_with_veclen, 1: PhantomData }
     }
     pub fn len(&self) -> usize {
-        self.0.len()
+        read_scalar::<UOffsetT>(self.0) as usize
+    }
+    pub fn len_bytes(&self) -> usize {
+        read_scalar::<UOffsetT>(self.0) as usize * std::mem::size_of::<T>()
     }
     pub fn get(&'a self, idx: usize) -> T::Inner {
+        assert!(idx < self.len());
         unimplemented!()
-        //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
-        //let x  = & unsafe {
+        //let x  =  unsafe {
         //    std::mem::transmute::<_, T>(self.0[idx])
         //};
+
+        //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
         //unimplemented!()
         //&x.indirect_helper(self.0, self.1)
         //x
     }
     pub fn as_slice(&self) -> &'a [T] {
-        self.0
+        let ptr = self.0[SIZE_UOFFSET..].as_ptr() as *const T;
+        let len = self.len();
+        let s: &[T] = unsafe {
+            std::slice::from_raw_parts(ptr, len)
+        };
+        s
+    }
+    pub fn as_slice_bytes(&self) -> &'a [u8] {
+        &self.0[SIZE_UOFFSET..SIZE_UOFFSET + self.len_bytes()]
     }
 }
 //impl<'a, T: ElementScalar> Vector<'a, T> {
@@ -464,7 +477,8 @@ impl<'a> Table<'a> {
         }
         let off = o + self.pos;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
+        return Some(Vector::new(&self.data[off2..]));
+        //return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
         //let start = off2 + SIZE_UOFFSET as usize;
 
         //let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
@@ -1525,8 +1539,9 @@ impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
     type Inner = Vector<'a, T>;
     fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
+        let buf = &buf[self.0 as usize..];
         let off = self.0 as usize;
-        Vector::new(&buf[off..], &buf[off..])
+        Vector::new(&buf[off..])
         //let ptr = slice.as_ptr() as *const T;
         //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
         //x
