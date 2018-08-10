@@ -246,10 +246,12 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     }
     pub fn get(&'a self, idx: usize) -> T::Inner {
         assert!(idx < self.len());
-        unimplemented!()
-        //let x  =  unsafe {
-        //    std::mem::transmute::<_, T>(self.0[idx])
-        //};
+        let off = SIZE_UOFFSET + std::mem::size_of::<T>() * idx;
+        let buf = &self.0[off..];
+        let ptr = buf.as_ptr() as *const T;
+        let x = unsafe { &*ptr };
+        x.follow(buf)
+            //std::mem::transmute::<_, T>(self.0[idx])
 
         //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
         //unimplemented!()
