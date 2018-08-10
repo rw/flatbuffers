@@ -456,7 +456,7 @@ mod vector_read_scalar_tests {
        // println!("buf len: {}", buf.len());
        // println!("buf: {:?}", buf);
 
-        let ret: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf, all);
+        let ret: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf);
         let rl = ret.as_slice();
         assert_eq!(rl.len(), xs.len());
         for i in 0..xs.len() {
@@ -512,7 +512,7 @@ mod vector_read_obj_tests {
         let idx = all.len() - vecend.value() as usize;
         let buf = &all[idx..];
 
-        let v: flatbuffers::Vector<flatbuffers::Offset<&str>> = flatbuffers::Vector::new(buf, all);
+        let v: flatbuffers::Vector<flatbuffers::Offset<&str>> = flatbuffers::Vector::new(buf);
         assert_eq!(v.as_slice().len(), xs.len());
         //for i in 0..xs.len() {
         //    assert_eq!(vec.get(i), &xs[i]);
@@ -2644,6 +2644,13 @@ mod test_follow_impls {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         let off: flatbuffers::Offset<&[u8]> = flatbuffers::Offset::new(4);
         assert_eq!(off.follow(&vec[..]), &vec!['f' as u8, 'o' as u8, 'o' as u8][..]);
+    }
+
+    #[test]
+    fn test_vector_of_scalar() {
+        let vec: Vec<u8> = vec![255, 255, 255, 255, 4, 0, 0, 0, 1, 2, 3, 4];
+        let off: flatbuffers::Offset<flatbuffers::Vector<u16>> = flatbuffers::Offset::new(4);
+        assert_eq!(off.follow(&vec[..]).as_slice(), &vec![258, 772][..]);
     }
 }
 
