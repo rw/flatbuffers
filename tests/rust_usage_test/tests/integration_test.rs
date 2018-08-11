@@ -2666,6 +2666,15 @@ mod test_follow_impls {
     }
 
     #[test]
+    fn test_offset_to_vector_of_u16() {
+        let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];
+        let off: flatbuffers::ForwardsU32Offset<flatbuffers::Vector<u16>> = flatbuffers::ForwardsU32Offset::new();
+        assert_eq!(off.self_follow(&vec[..], 4).len(), 2);
+        assert_eq!(off.self_follow(&vec[..], 4).get(0), 513);
+        assert_eq!(off.self_follow(&vec[..], 4).get(1), 1027);
+    }
+
+    #[test]
     fn test_offset_to_struct() {
         #[derive(Debug, PartialEq)]
         #[repr(C, packed)]
@@ -2674,12 +2683,6 @@ mod test_follow_impls {
             b: u8,
             c: i16,
         }
-        //impl<'a> flatbuffers::Follow<'a> for FooStruct {
-        //    type Inner = &'a FooStruct;
-        //    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        //        self
-        //    }
-        //}
 
         let vec: Vec<u8> = vec![255, 255, 255, 255, 1, 2, 3, 4];
         let off: flatbuffers::ForwardsU32Offset<&FooStruct> = flatbuffers::ForwardsU32Offset::new();
