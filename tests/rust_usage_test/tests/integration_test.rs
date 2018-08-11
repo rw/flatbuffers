@@ -2624,17 +2624,31 @@ mod test_follow_impls {
     use flatbuffers::Follow;
 
     #[test]
+    fn test_offset_to_ref_u8() {
+        let vec: Vec<u8> = vec![255, 3];
+        let fs: flatbuffers::FollowStart<&u8> = flatbuffers::FollowStart::new();
+        assert_eq!(*fs.self_follow(&vec[..], 1), 3);
+    }
+
+    #[test]
     fn test_offset_to_u8() {
         let vec: Vec<u8> = vec![255, 3];
-        let off: flatbuffers::FollowStart<&u8> = flatbuffers::FollowStart::new();
-        assert_eq!(*off.self_follow(&vec[..], 1), 3);
+        let fs: flatbuffers::FollowStart<u8> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&vec[..], 1), 3);
+    }
+
+    #[test]
+    fn test_offset_to_ref_u16() {
+        let vec: Vec<u8> = vec![255, 255, 3, 4];
+        let fs: flatbuffers::FollowStart<&u16> = flatbuffers::FollowStart::new();
+        assert_eq!(*fs.self_follow(&vec[..], 2), 1027);
     }
 
     #[test]
     fn test_offset_to_u16() {
         let vec: Vec<u8> = vec![255, 255, 3, 4];
-        let off: flatbuffers::FollowStart<&u16> = flatbuffers::FollowStart::new();
-        assert_eq!(*off.self_follow(&vec[..], 2), 1027);
+        let fs: flatbuffers::FollowStart<u16> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&vec[..], 2), 1027);
     }
 
     #[test]
@@ -2707,14 +2721,6 @@ mod test_follow_impls {
             b: u8,
             c: i16,
         }
-        //impl<'a> flatbuffers::Follow<'a> for FooStruct {
-        //    type Inner = &'a FooStruct;
-        //    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        //        let buf = &buf[loc..];
-        //        let ptr = buf.as_ptr() as *const u8 as *const FooStruct;
-        //        unsafe { &*ptr }
-        //    }
-        //}
 
         let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
         let fs: flatbuffers::FollowStart<&[FooStruct]> = flatbuffers::FollowStart::new();
