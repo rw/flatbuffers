@@ -1764,12 +1764,11 @@ impl<'a, T: Sized> Follow<'a> for &'a [T] {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         println!("entering follow for &'a [T] with {:?}", &buf[loc..]);
-        let len_bytes = read_scalar::<u32>(&buf[loc..loc + 4]) as usize;
         let sz = std::mem::size_of::<T>();
         assert!(sz > 0);
-        let len = len_bytes / sz;
-        let slice = &buf[loc + 4..loc + 4 + len];
-        let ptr = slice.as_ptr() as *const T;
+        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let data_buf = &buf[loc + SIZE_UOFFSET .. loc + SIZE_UOFFSET + len * sz];
+        let ptr = data_buf.as_ptr() as *const T;
         let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
         s
     }
