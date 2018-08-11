@@ -1110,12 +1110,12 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "}";
     code_.SetValue("ENUM_NAME", Name(enum_def));
-    code_ += "impl<'a> flatbuffers::Follow<'a> for {{ENUM_NAME}} {";
-    code_ += "    type Inner = &'a {{ENUM_NAME}};";
-    code_ += "    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "        self";
-    code_ += "    }";
-    code_ += "}";
+    code_ += "//impl<'a> flatbuffers::Follow<'a> for {{ENUM_NAME}} {";
+    code_ += "//    type Inner = &'a {{ENUM_NAME}};";
+    code_ += "//    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "//        self";
+    code_ += "//    }";
+    code_ += "//}";
 
     //     code_ += "//#[repr({{BASE_TYPE}})]";
     //     code_ += "#[derive(Clone, Copy, PartialEq, Debug)]";
@@ -2315,12 +2315,12 @@ class RustGenerator : public BaseGenerator {
     code_ += "  pub _tab: flatbuffers::Table<'a>,";
     code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
-    code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
-    code_ += "    type Inner = {{STRUCT_NAME}}<'a>;";
-    code_ += "    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "        *self";
-    code_ += "    }";
-    code_ += "}";
+    code_ += "//impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
+    code_ += "//    type Inner = {{STRUCT_NAME}}<'a>;";
+    code_ += "//    fn follow(_buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "//        *self";
+    code_ += "//    }";
+    code_ += "//}";
     code_ += "// impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {";
     code_ += "//impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
     code_ += "impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
@@ -3384,12 +3384,12 @@ class RustGenerator : public BaseGenerator {
     }
 
     code_ += "} // pub struct {{STRUCT_NAME}}";
-    code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
-    code_ += "    type Inner = &'a {{STRUCT_NAME}};";
-    code_ += "    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "        self";
-    code_ += "    }";
-    code_ += "}";
+    code_ += "//impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
+    code_ += "//    type Inner = &'a {{STRUCT_NAME}};";
+    code_ += "//    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "//        self";
+    code_ += "//    }";
+    code_ += "//}";
 
     // Impl the dummy GeneratedStruct trait to help users write structs
     // correctly:

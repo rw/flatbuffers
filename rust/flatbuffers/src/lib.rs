@@ -213,55 +213,55 @@ impl<'a, T: ElementScalar> VectorGettable<'a> for T {
 //    }
 //}
 
-#[derive(Debug, PartialEq)]
-pub struct Vector<'a, T: Follow<'a> + 'a>(&'a [u8], PhantomData<T>);
+//#[derive(Debug, PartialEq)]
+//pub struct Vector<'a, T: Follow<'a> + 'a>(&'a [u8], PhantomData<T>);
 //pub struct Vector<'a, T: Sized + 'a> {
 //    data: &'a [u8],
 //    _phantom: PhantomData<T>,
 //}
 
 //impl<'a, T: VectorGettable<'a> + Sized + 'a> Vector<'a, T> {
-impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
-    pub fn new(buf_with_veclen: &'a [u8]) -> Self {
-        //println!("vecbuf: {:?}", buf);
-        assert!(buf_with_veclen.len() >= SIZE_UOFFSET);
-        let elem_sz = std::mem::size_of::<T>();
-        let num_elems = read_scalar::<UOffsetT>(buf_with_veclen) as usize;
-        assert!(buf_with_veclen.len() - SIZE_UOFFSET >= num_elems*elem_sz,
-                format!("buf_with_veclen.len(): {}, num_elems: {}, elem_sz: {}", buf_with_veclen.len(), num_elems, elem_sz));
-        Self { 0: buf_with_veclen, 1: PhantomData }
-    }
-    pub fn len(&self) -> usize {
-        read_scalar::<UOffsetT>(self.0) as usize
-    }
-    pub fn len_bytes(&self) -> usize {
-        read_scalar::<UOffsetT>(self.0) as usize * std::mem::size_of::<T>()
-    }
-    pub fn get(&'a self, idx: usize) -> T::Inner {
-        assert!(idx < self.len());
-        let off = SIZE_UOFFSET + std::mem::size_of::<T>() * idx;
-        let ptr = (&self.0[off..]).as_ptr() as *const T;
-        let x = unsafe { &*ptr };
-        x.follow(self.0, off)
-            //std::mem::transmute::<_, T>(self.0[idx])
-
-        //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
-        //unimplemented!()
-        //&x.indirect_helper(self.0, self.1)
-        //x
-    }
-    pub fn as_slice(&self) -> &'a [T] {
-        let ptr = self.0[SIZE_UOFFSET..].as_ptr() as *const T;
-        let len = self.len();
-        let s: &[T] = unsafe {
-            std::slice::from_raw_parts(ptr, len)
-        };
-        s
-    }
-    pub fn as_slice_bytes(&self) -> &'a [u8] {
-        &self.0[SIZE_UOFFSET..SIZE_UOFFSET + self.len_bytes()]
-    }
-}
+//////impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
+//////    pub fn new(buf_with_veclen: &'a [u8]) -> Self {
+//////        //println!("vecbuf: {:?}", buf);
+//////        assert!(buf_with_veclen.len() >= SIZE_UOFFSET);
+//////        let elem_sz = std::mem::size_of::<T>();
+//////        let num_elems = read_scalar::<UOffsetT>(buf_with_veclen) as usize;
+//////        assert!(buf_with_veclen.len() - SIZE_UOFFSET >= num_elems*elem_sz,
+//////                format!("buf_with_veclen.len(): {}, num_elems: {}, elem_sz: {}", buf_with_veclen.len(), num_elems, elem_sz));
+//////        Self { 0: buf_with_veclen, 1: PhantomData }
+//////    }
+//////    pub fn len(&self) -> usize {
+//////        read_scalar::<UOffsetT>(self.0) as usize
+//////    }
+//////    pub fn len_bytes(&self) -> usize {
+//////        read_scalar::<UOffsetT>(self.0) as usize * std::mem::size_of::<T>()
+//////    }
+//////    pub fn get(&'a self, idx: usize) -> T::Inner {
+//////        assert!(idx < self.len());
+//////        let off = SIZE_UOFFSET + std::mem::size_of::<T>() * idx;
+//////        let ptr = (&self.0[off..]).as_ptr() as *const T;
+//////        let x = unsafe { &*ptr };
+//////        x.follow(self.0, off)
+//////            //std::mem::transmute::<_, T>(self.0[idx])
+//////
+//////        //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
+//////        //unimplemented!()
+//////        //&x.indirect_helper(self.0, self.1)
+//////        //x
+//////    }
+//////    pub fn as_slice(&self) -> &'a [T] {
+//////        let ptr = self.0[SIZE_UOFFSET..].as_ptr() as *const T;
+//////        let len = self.len();
+//////        let s: &[T] = unsafe {
+//////            std::slice::from_raw_parts(ptr, len)
+//////        };
+//////        s
+//////    }
+//////    pub fn as_slice_bytes(&self) -> &'a [u8] {
+//////        &self.0[SIZE_UOFFSET..SIZE_UOFFSET + self.len_bytes()]
+//////    }
+//////}
 //impl<'a, T: ElementScalar> Vector<'a, T> {
 //    pub fn get(&'a self, idx: usize) -> &'a T {
 //        &self.0[idx]
@@ -464,14 +464,15 @@ impl<'a> Table<'a> {
         ////Some(x.follow(buf2))
         //////return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
     }
-    pub fn get_slot_vector<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
+    pub fn get_slot_vector<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
             return None;
         }
+	unimplemented!();
         let off = o + self.pos;
         let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        return Some(Vector::new(&self.data[off2..]));
+        //return Some(Vector::new(&self.data[off2..]));
         //return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
         //let start = off2 + SIZE_UOFFSET as usize;
 
@@ -919,9 +920,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
     pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, Offset<&'fbb str>>> {
+	unimplemented!()
         // TODO: any way to avoid heap allocs?
-        let offsets: Vec<Offset<&str>> = xs.iter().map(|s| self.create_string(s)).collect();
-        self.create_vector(&offsets[..])
+        ////let offsets: Vec<Offset<&str>> = xs.iter().map(|s| self.create_string(s)).collect();
+        ////self.create_vector(&offsets[..])
         //let offsets: Vec<Offset<FBString>> = vec![];// xs.iter().map(|s| self.create_string(s)).collect();
         //let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
         //self.create_vector::<'a, 'b, Offset<FBString>>(offsets)
@@ -1476,70 +1478,70 @@ impl<T> LabeledUOffsetT<T> {
     }
 }
 
-pub trait Follow<'a> {
-    type Inner;
-    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner;
-}
+//pub trait Follow<'a> {
+//    type Inner;
+//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner;
+//}
 
-impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
-    type Inner = &'a T;
-    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        self
-    }
-}
+//impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
+//    type Inner = &'a T;
+//    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
+//        self
+//    }
+//}
 
-impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
-    type Inner = T::Inner;
-    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-        let loc2 = self.0 as usize + loc;
-        let slice: &'a [u8] = &buf[loc2..];
-        let ptr = slice.as_ptr() as *const T;
-        let x: &'a T = unsafe { &*ptr };
-        x.follow(buf, loc2)
-    }
-}
-impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
-    type Inner = T::Inner;
-    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-        unimplemented!();
-        //let idx = self.0 as usize;
-        //let slice: &'a [u8] = &buf[idx..];
-        //let ptr = slice.as_ptr() as *const T;
-        //let x: &'a T = unsafe { &*ptr };
-        //x.follow(slice)
-    }
-}
-impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
-    type Inner = &'b str;
-    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-        let buf = &buf[loc + self.0 as usize..];
-        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
-        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
-        let s = unsafe { std::str::from_utf8_unchecked(slice) };
-        s
-    }
-}
-impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
-    type Inner = &'b [T];
-    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-        let buf = &buf[loc + self.0 as usize..];
-        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
-        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
-        let ptr = slice.as_ptr() as *const T;
-        let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
-        x
-    }
-}
-impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
-    type Inner = Vector<'a, T>;
-    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-        let buf = &buf[loc + self.0 as usize..];
-        Vector::new(buf)
-        //let ptr = slice.as_ptr() as *const T;
-        //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
-        //x
-    }
-}
+//impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
+//    type Inner = T::Inner;
+//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let loc2 = self.0 as usize + loc;
+//        let slice: &'a [u8] = &buf[loc2..];
+//        let ptr = slice.as_ptr() as *const T;
+//        let x: &'a T = unsafe { &*ptr };
+//        x.follow(buf, loc2)
+//    }
+//}
+////impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
+//    type Inner = T::Inner;
+//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+//        unimplemented!();
+//        //let idx = self.0 as usize;
+//        //let slice: &'a [u8] = &buf[idx..];
+//        //let ptr = slice.as_ptr() as *const T;
+//        //let x: &'a T = unsafe { &*ptr };
+//        //x.follow(slice)
+//    }
+//}
+//impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
+//    type Inner = &'b str;
+//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let buf = &buf[loc + self.0 as usize..];
+//        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
+//        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
+//        let s = unsafe { std::str::from_utf8_unchecked(slice) };
+//        s
+//    }
+//}
+//impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
+//    type Inner = &'b [T];
+//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let buf = &buf[loc + self.0 as usize..];
+//        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
+//        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
+//        let ptr = slice.as_ptr() as *const T;
+//        let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
+//        x
+//    }
+//}
+//impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
+//    type Inner = Vector<'a, T>;
+//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let buf = &buf[loc + self.0 as usize..];
+//        Vector::new(buf)
+//        //let ptr = slice.as_ptr() as *const T;
+//        //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
+//        //x
+//    }
+//}
 
 //type FBString = UOffsetT;
 //
@@ -1554,32 +1556,32 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
 //}
 
 
-#[derive(Debug, PartialEq)]
-pub struct BackwardsXOffset<T> (UOffsetT, PhantomData<T>);
-impl<T> Copy for BackwardsXOffset<T> { } // TODO: why does deriving Copy cause ownership errors?
-impl<T> Clone for BackwardsXOffset<T> {
-    fn clone(&self) -> BackwardsXOffset<T> {
-        BackwardsXOffset::new(self.0.clone())
-    }
-}
-impl<T> std::ops::Deref for BackwardsXOffset<T> {
-    type Target = UOffsetT;
-    fn deref(&self) -> &UOffsetT {
-        &self.0
-    }
-}
-impl<'a, T: 'a> BackwardsXOffset<T> {
-    pub fn new(o: UOffsetT) -> BackwardsXOffset<T> {
-        BackwardsXOffset { 0: o, 1: PhantomData}
-    }
-    pub fn union(&self) -> BackwardsXOffset<UnionOffset> {
-        unimplemented!();
-        BackwardsXOffset::new(self.0)
-    }
-    pub fn value(&self) -> UOffsetT {
-        self.0
-    }
-}
+//#[derive(Debug, PartialEq)]
+//pub struct BackwardsXOffset<T> (UOffsetT, PhantomData<T>);
+//impl<T> Copy for BackwardsXOffset<T> { } // TODO: why does deriving Copy cause ownership errors?
+//impl<T> Clone for BackwardsXOffset<T> {
+//    fn clone(&self) -> BackwardsXOffset<T> {
+//        BackwardsXOffset::new(self.0.clone())
+//    }
+//}
+//impl<T> std::ops::Deref for BackwardsXOffset<T> {
+//    type Target = UOffsetT;
+//    fn deref(&self) -> &UOffsetT {
+//        &self.0
+//    }
+//}
+//impl<'a, T: 'a> BackwardsXOffset<T> {
+//    pub fn new(o: UOffsetT) -> BackwardsXOffset<T> {
+//        BackwardsXOffset { 0: o, 1: PhantomData}
+//    }
+//    pub fn union(&self) -> BackwardsXOffset<UnionOffset> {
+//        unimplemented!();
+//        BackwardsXOffset::new(self.0)
+//    }
+//    pub fn value(&self) -> UOffsetT {
+//        self.0
+//    }
+//}
 
 #[derive(Debug, PartialEq)]
 pub struct Offset<T> (UOffsetT, PhantomData<T>);
@@ -1681,6 +1683,121 @@ pub fn get_field<T: ElementScalar>(slotnum: VOffsetT, default: T) -> T {
     //}
     //read_scalar_at::<T>(&self.data, off as usize)
 }
+
+//use std::marker::PhantomData;
+
+//pub fn read_scalar<T: Sized + Clone>(x: &[u8]) -> T {
+//    let p = x.as_ptr();
+//    let x = unsafe {
+//        let p2 = std::mem::transmute::<*const u8, *const T>(p);
+//        (*p2).clone()
+//    };
+//    x
+//    //x.from_le()
+//}
+
+#[derive(Debug)]
+struct ForwardsU32Offset<T>(u32, PhantomData<T>);
+
+#[derive(Debug)]
+struct ForwardsU16Offset<T>(u16, PhantomData<T>);
+
+#[derive(Debug)]
+struct BackwardsI32Offset<T>(i32, PhantomData<T>);
+
+pub trait Follow<'a> {
+    type Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner;
+}
+
+impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU32Offset<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        println!("entering follow for ForwardsU32Offset<T> with {:?}", &buf[loc..]);
+        let slice = &buf[loc..loc + 4];
+        let off = read_scalar::<u32>(slice) as usize;
+        T::follow(buf, loc + off)
+    }
+}
+impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU16Offset<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        println!("entering follow for ForwardsU16Offset<T> with {:?}", &buf[loc..]);
+        let slice = &buf[loc..loc + 2];
+        let off = read_scalar::<u16>(slice) as usize;
+        T::follow(buf, loc + off)
+    }
+}
+impl<'a, T: Follow<'a>> Follow<'a> for BackwardsI32Offset<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        println!("entering follow for ForwardsI32Offset<T> with {:?}", &buf[loc..]);
+        let slice = &buf[loc..loc + 4];
+        let off = read_scalar::<i32>(slice);
+        T::follow(buf, (loc as i32 - off) as usize)
+    }
+}
+impl<'a> Follow<'a> for &'a str {
+    type Inner = &'a str;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        println!("entering follow for &'a str with {:?}", &buf[loc..]);
+        let len = read_scalar::<u32>(&buf[loc..loc + 4]) as usize;
+        let slice = &buf[loc + 4..loc + 4 + len];
+        let s = unsafe { std::str::from_utf8_unchecked(slice) };
+        s
+    }
+}
+
+impl<'a, T: Sized> Follow<'a> for &'a [T] {
+    type Inner = &'a [T];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        println!("entering follow for &'a [T] with {:?}", &buf[loc..]);
+        let len_bytes = read_scalar::<u32>(&buf[loc..loc + 4]) as usize;
+        let sz = std::mem::size_of::<T>();
+        assert!(sz > 0);
+        let len = len_bytes / sz;
+        let slice = &buf[loc + 4..loc + 4 + len];
+        let ptr = slice.as_ptr() as *const T;
+        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
+        s
+    }
+}
+
+impl<'a, T: Sized> Follow<'a> for Vector<'a, T> {
+    type Inner = Vector<'a, T>;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        println!("entering follow for Vector<T> with {:?}", &buf[loc..]);
+        Vector{0: buf, 1: loc as u32, 2: PhantomData}
+    }
+}
+
+impl<'a, T: Follow<'a>> Vector<'a, T> {
+    fn get(&self, idx: usize) -> T::Inner {
+        assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
+        println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
+        let sz = std::mem::size_of::<T>();
+        assert!(sz > 0);
+        T::follow(self.0, self.1 as usize + 4 + sz * idx)
+    }
+}
+
+impl<'a, T: Sized> Follow<'a> for &'a T {
+    type Inner = &'a T;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let sz = std::mem::size_of::<T>();
+        let buf = &buf[loc..loc + sz];
+        println!("entering follow for Sized ref with {:?}", buf);
+        let ptr = buf.as_ptr() as *const T;
+        unsafe { &*ptr }
+    }
+}
+
+#[derive(Debug)]
+pub struct Vector<'a, T: Sized + 'a>(&'a [u8], u32, PhantomData<T>);
+
+pub fn lifted_follow<'a, T: Follow<'a>>(buf: &'a [u8], loc: usize) -> T::Inner {
+    T::follow(buf, loc)
+}
 //pub fn get_field<T: num_traits::Num>(_: isize, _: T) -> T {
 //    unimplemented!()
 //}
@@ -1703,4 +1820,7 @@ pub fn get_root<T>(_: &[u8], _: isize) -> T {
     unimplemented!()
 }
 
+
 }
+
+
