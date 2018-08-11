@@ -1697,13 +1697,19 @@ pub fn get_field<T: ElementScalar>(slotnum: VOffsetT, default: T) -> T {
 //}
 
 #[derive(Debug)]
-struct ForwardsU32Offset<T>(u32, PhantomData<T>);
+pub struct ForwardsU32Offset<T>(u32, PhantomData<T>); // data unused
+
+impl<T> ForwardsU32Offset<T> {
+    pub fn new() -> Self {
+        Self { 0: 0, 1: PhantomData }
+    }
+}
 
 #[derive(Debug)]
-struct ForwardsU16Offset<T>(u16, PhantomData<T>);
+pub struct ForwardsU16Offset<T>(u16, PhantomData<T>); // data unused
 
 #[derive(Debug)]
-struct BackwardsI32Offset<T>(i32, PhantomData<T>);
+pub struct BackwardsI32Offset<T>(i32, PhantomData<T>); // data unused
 
 pub trait Follow<'a> {
     type Inner;
@@ -1719,6 +1725,12 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU32Offset<T> {
         T::follow(buf, loc + off)
     }
 }
+impl<'a, T: Follow<'a>> ForwardsU32Offset<T> {
+    pub fn self_follow(&'a self, buf: &'a [u8], loc: usize) -> T::Inner {
+        T::follow(buf, loc)
+    }
+}
+
 impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU16Offset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
@@ -1772,7 +1784,10 @@ impl<'a, T: Sized> Follow<'a> for Vector<'a, T> {
 }
 
 impl<'a, T: Follow<'a>> Vector<'a, T> {
-    fn get(&self, idx: usize) -> T::Inner {
+    pub fn len(&self) -> usize {
+        read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
+}
+    pub fn get(&self, idx: usize) -> T::Inner {
         assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
         println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
         let sz = std::mem::size_of::<T>();
