@@ -2719,7 +2719,7 @@ mod test_follow_impls {
         let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
         let fs: flatbuffers::FollowStart<&[FooStruct]> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
-        //assert_eq!(fs.self_follow(&buf[..], 0)[0], FooStruct{a: 1, b: 2, c: 1027});
+        assert_eq!(fs.self_follow(&buf[..], 0).get(0), Some(&FooStruct{a: 1, b: 2, c: 1027}));
         assert_eq!(fs.self_follow(&buf[..], 0), &vec![FooStruct{a: 1, b: 2, c: 1027}][..]);
     }
 
