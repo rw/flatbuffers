@@ -2699,25 +2699,44 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_vector_of_struct_elements() {
-        //#[derive(Debug, PartialEq)]
-        //#[repr(C, packed)]
-        //struct FooStruct {
-        //    a: i8,
-        //    b: u8,
-        //    c: i16,
+    fn test_slice_of_struct_elements() {
+        #[derive(Debug, PartialEq)]
+        #[repr(C, packed)]
+        struct FooStruct {
+            a: i8,
+            b: u8,
+            c: i16,
+        }
+        //impl<'a> flatbuffers::Follow<'a> for FooStruct {
+        //    type Inner = &'a FooStruct;
+        //    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        //        let buf = &buf[loc..];
+        //        let ptr = buf.as_ptr() as *const u8 as *const FooStruct;
+        //        unsafe { &*ptr }
+        //    }
         //}
-        ////impl<'a> flatbuffers::Follow<'a> for FooStruct {
-        ////    type Inner = &'a FooStruct;
-        ////    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        ////        self
-        ////    }
-        ////}
 
-        //let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
-        //let vec: flatbuffers::Vector<FooStruct> = flatbuffers::Vector::new(&buf[..]);
-        //assert_eq!(vec.len(), 1);
-        //assert_eq!(vec.get(0), &FooStruct{a: 1, b: 2, c: 1027});
+        let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
+        let fs: flatbuffers::FollowStart<&[FooStruct]> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
+        //assert_eq!(fs.self_follow(&buf[..], 0)[0], FooStruct{a: 1, b: 2, c: 1027});
+        assert_eq!(fs.self_follow(&buf[..], 0), &vec![FooStruct{a: 1, b: 2, c: 1027}][..]);
+    }
+
+    #[test]
+    fn test_vector_of_struct_elements() {
+        #[derive(Debug, PartialEq)]
+        #[repr(C, packed)]
+        struct FooStruct {
+            a: i8,
+            b: u8,
+            c: i16,
+        }
+
+        let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
+        let fs: flatbuffers::FollowStart<flatbuffers::Vector<&FooStruct>> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
+        assert_eq!(fs.self_follow(&buf[..], 0).get(0), &FooStruct{a: 1, b: 2, c: 1027});
     }
 
     //{
