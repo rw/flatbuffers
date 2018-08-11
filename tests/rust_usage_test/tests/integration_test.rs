@@ -2671,12 +2671,12 @@ mod test_follow_impls {
             b: u8,
             c: i16,
         }
-        impl<'a> flatbuffers::Follow<'a> for FooStruct {
-            type Inner = &'a FooStruct;
-            fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-                self
-            }
-        }
+        //impl<'a> flatbuffers::Follow<'a> for FooStruct {
+        //    type Inner = &'a FooStruct;
+        //    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
+        //        self
+        //    }
+        //}
 
         let vec: Vec<u8> = vec![255, 255, 255, 255, 1, 2, 3, 4];
         let off: flatbuffers::Offset<FooStruct> = flatbuffers::Offset::new(4);
@@ -2700,18 +2700,126 @@ mod test_follow_impls {
             b: u8,
             c: i16,
         }
-        impl<'a> flatbuffers::Follow<'a> for FooStruct {
-            type Inner = &'a FooStruct;
-            fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-                self
-            }
-        }
+        //impl<'a> flatbuffers::Follow<'a> for FooStruct {
+        //    type Inner = &'a FooStruct;
+        //    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
+        //        self
+        //    }
+        //}
 
         let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
         let vec: flatbuffers::Vector<FooStruct> = flatbuffers::Vector::new(&buf[..]);
         assert_eq!(vec.len(), 1);
         assert_eq!(vec.get(0), &FooStruct{a: 1, b: 2, c: 1027});
     }
+
+    //{
+    //    let buf = vec![
+    //        255, 255, 255, 255, 3, 0, 0, 0, 'm' as u8, 'o' as u8, 'o' as u8, 0,
+    //    ];
+    //    let y: &str = <&str>::follow(&buf[..], 4);
+    //    assert_eq!("moo", y);
+    //    println!("{:?}", y);
+    //}
+    //{
+    //    let buf = vec![
+    //        255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 'm' as u8, 'o' as u8, 'o' as u8, 0,
+    //    ];
+    //    let y: &str = <ForwardsU32Offset<&str>>::follow(&buf[..], 4);
+    //    assert_eq!("moo", y);
+    //    println!("{:?}", y);
+    //}
+    //{
+    //    let buf = vec![
+    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 'm' as u8, 'o' as u8,
+    //        'o' as u8, 0,
+    //    ];
+    //    let y: &str = <ForwardsU32Offset<ForwardsU32Offset<&str>>>::follow(&buf[..], 0);
+    //    assert_eq!("moo", y);
+    //    println!("{:?}", y);
+    //}
+    //{
+    //    let buf = vec![
+    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 1, 2, 3, 4,
+    //    ];
+    //    let y: &[u8] = <ForwardsU32Offset<ForwardsU32Offset<&[u8]>>>::follow(&buf[..], 0);
+    //    assert_eq!(&vec![1, 2, 3][..], y);
+    //    println!("{:?}", y);
+    //}
+    //{
+    //    let buf = vec![
+    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4,
+    //    ];
+    //    let y: Vector<ForwardsU32Offset<&u8>> = <ForwardsU32Offset<ForwardsU32Offset<Vector<ForwardsU32Offset<&u8>>>>>::follow(&buf[..], 0);
+    //    assert_eq!(<ForwardsU32Offset<&u8>>::follow(&buf[..], 16), &2);
+    //    
+    //    assert_eq!(&2, y.get(0));
+    //    assert_eq!(&2, <Vector<ForwardsU32Offset<&u8>>>::follow(y.0, y.1 as usize).get(0));
+    //    assert_eq!(&2, y.get(0));
+    //    assert_eq!(&2, <Vector<ForwardsU32Offset<&u8>>>::follow(y.0, y.1 as usize).get(0));
+    //}
+    //{
+    //    let buf = vec![
+    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0,
+    //        4, 0, 0, 0, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0
+    //    ];
+    //    let y: Vector<ForwardsU32Offset<&str>> = <ForwardsU32Offset<ForwardsU32Offset<Vector<ForwardsU32Offset<&str>>>>>::follow(&buf[..], 0);
+    //    
+    //    assert_eq!("foo", y.get(1));
+    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
+    //    assert_eq!("foo", y.get(1));
+    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
+    //}
+    //{
+    //    let buf = vec![
+    //        8, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0,
+    //        4, 0, 0, 0, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0
+    //    ];
+    //    let y: Vector<ForwardsU32Offset<&str>> = <BackwardsI32Offset<ForwardsU32Offset<ForwardsU32Offset<Vector<ForwardsU32Offset<&str>>>>>>::follow(&buf[..], 4);
+    //    
+    //    assert_eq!("foo", y.get(1));
+    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
+    //    assert_eq!("foo", y.get(1));
+    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
+    //}
+    //{
+    //    let buf = vec![7, 0, 0, 0];
+    //    let y: &u32 = <&u32>::follow(&buf[..], 0);
+    //    assert_eq!(&7, y);
+    //    println!("{:?}", y);
+    //}
+    //{
+    //    #[repr(C, packed)]
+    //    #[derive(Clone, Copy, Debug, PartialEq)]
+    //    struct Foo {
+    //        a: u8,
+    //        b: u16,
+    //    }
+    //    let buf = vec![255, 255, 255, 255, 4, 0, 0, 0, 99, 3, 4];
+    //    let z: &Foo = <&Foo>::follow(&buf[..], 8);
+    //    assert_eq!(z, &Foo { a: 99, b: 1027 });
+    //    println!("{:?}", z);
+    //}
+    //{
+    //    #[repr(C, packed)]
+    //    #[derive(Clone, Copy, Debug, PartialEq)]
+    //    struct Foo {
+    //        a: u8,
+    //        b: u16,
+    //    }
+    //    let buf = vec![255, 255, 255, 255, 4, 0, 0, 0, 99, 3, 4];
+    //    let z: &Foo = <ForwardsU32Offset<&Foo>>::follow(&buf[..], 4);
+    //    assert_eq!(z, &Foo { a: 99, b: 1027 });
+    //    println!("{:?}", z);
+    //}
+    //{
+    //    let buf = vec![
+    //        255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 'm' as u8, 'o' as u8, 'o' as u8, 0,
+    //    ];
+    //    let y: &str = lifted_follow::<'_, ForwardsU32Offset<&str>>(&buf[..], 4);
+    //    assert_eq!("moo", y);
+    //    println!("{:?}", y);
+    //}
 }
 
 #[cfg(test)]
@@ -3071,12 +3179,12 @@ mod byte_layouts {
             a: i8,
             b: i8,
         }
-        impl<'a> flatbuffers::Follow<'a> for FooStruct {
-            type Inner = &'a FooStruct;
-            fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-                self
-            }
-        }
+        //impl<'a> flatbuffers::Follow<'a> for FooStruct {
+        //    type Inner = &'a FooStruct;
+        //    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
+        //        self
+        //    }
+        //}
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(::std::mem::size_of::<FooStruct>(), 2);
         b.push_element_scalar(33i8);
