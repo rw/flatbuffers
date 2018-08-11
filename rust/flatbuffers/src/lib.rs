@@ -1696,14 +1696,26 @@ pub fn get_field<T: ElementScalar>(slotnum: VOffsetT, default: T) -> T {
 //    //x.from_le()
 //}
 
-#[derive(Debug)]
-pub struct ForwardsU32Offset<T>(u32, PhantomData<T>); // data unused
 
-impl<T> ForwardsU32Offset<T> {
+#[derive(Debug)]
+pub struct FollowStart<T>(PhantomData<T>);
+impl<'a, T: Follow<'a> + 'a> FollowStart<T> {
     pub fn new() -> Self {
-        Self { 0: 0, 1: PhantomData }
+        Self { 0: PhantomData }
+    }
+    pub fn self_follow(&'a self, buf: &'a [u8], loc: usize) -> T::Inner {
+        T::follow(buf, loc)
     }
 }
+impl<'a, T: Follow<'a>> Follow<'a> for FollowStart<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        T::follow(buf, loc)
+    }
+}
+
+#[derive(Debug)]
+pub struct ForwardsU32Offset<T>(u32, PhantomData<T>); // data unused
 
 #[derive(Debug)]
 pub struct ForwardsU16Offset<T>(u16, PhantomData<T>); // data unused
@@ -1720,14 +1732,9 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU32Offset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         println!("entering follow for ForwardsU32Offset<T> with {:?}", &buf[loc..]);
-        let slice = &buf[loc..loc + 4];
+        let slice = &buf[loc..loc + SIZE_UOFFSET];
         let off = read_scalar::<u32>(slice) as usize;
         T::follow(buf, loc + off)
-    }
-}
-impl<'a, T: Follow<'a>> ForwardsU32Offset<T> {
-    pub fn self_follow(&'a self, buf: &'a [u8], loc: usize) -> T::Inner {
-        T::follow(buf, loc)
     }
 }
 

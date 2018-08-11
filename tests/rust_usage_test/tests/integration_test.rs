@@ -2626,49 +2626,49 @@ mod test_follow_impls {
     #[test]
     fn test_offset_to_u8() {
         let vec: Vec<u8> = vec![255, 3];
-        let off: flatbuffers::ForwardsU32Offset<&u8> = flatbuffers::ForwardsU32Offset::new();
+        let off: flatbuffers::FollowStart<&u8> = flatbuffers::FollowStart::new();
         assert_eq!(*off.self_follow(&vec[..], 1), 3);
     }
 
     #[test]
     fn test_offset_to_u16() {
         let vec: Vec<u8> = vec![255, 255, 3, 4];
-        let off: flatbuffers::ForwardsU32Offset<&u16> = flatbuffers::ForwardsU32Offset::new();
+        let off: flatbuffers::FollowStart<&u16> = flatbuffers::FollowStart::new();
         assert_eq!(*off.self_follow(&vec[..], 2), 1027);
     }
 
     #[test]
     fn test_offset_to_f32() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, /* start of value */ 208, 15, 73, 64];
-        let off: flatbuffers::ForwardsU32Offset<&f32> = flatbuffers::ForwardsU32Offset::new();
-        assert_eq!(off.self_follow(&vec[..], 4), &3.14159);
+        let fs: flatbuffers::FollowStart<&f32> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&vec[..], 4), &3.14159);
     }
 
     #[test]
     fn test_offset_to_string() {
-        let vec: Vec<u8> = vec![255,255,255,255,3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
-        let off: flatbuffers::ForwardsU32Offset<&str> = flatbuffers::ForwardsU32Offset::new();
+        let vec: Vec<u8> = vec![255,255,255,255, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
+        let off: flatbuffers::FollowStart<&str> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4), "foo");
     }
 
     #[test]
     fn test_offset_to_byte_string() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 3, 0, 0, 0, 1, 2, 3, 0];
-        let off: flatbuffers::ForwardsU32Offset<&[u8]> = flatbuffers::ForwardsU32Offset::new();
+        let off: flatbuffers::FollowStart<&[u8]> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4), &vec![1, 2, 3][..]);
     }
 
     #[test]
     fn test_offset_to_slice_of_u16() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];
-        let off: flatbuffers::ForwardsU32Offset<&[u16]> = flatbuffers::ForwardsU32Offset::new();
+        let off: flatbuffers::FollowStart<&[u16]> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4), &vec![513, 1027][..]);
     }
 
     #[test]
     fn test_offset_to_vector_of_u16() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];
-        let off: flatbuffers::ForwardsU32Offset<flatbuffers::Vector<u16>> = flatbuffers::ForwardsU32Offset::new();
+        let off: flatbuffers::FollowStart<flatbuffers::Vector<u16>> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4).len(), 2);
         assert_eq!(off.self_follow(&vec[..], 4).get(0), 513);
         assert_eq!(off.self_follow(&vec[..], 4).get(1), 1027);
@@ -2685,16 +2685,17 @@ mod test_follow_impls {
         }
 
         let vec: Vec<u8> = vec![255, 255, 255, 255, 1, 2, 3, 4];
-        let off: flatbuffers::ForwardsU32Offset<&FooStruct> = flatbuffers::ForwardsU32Offset::new();
+        let off: flatbuffers::FollowStart<&FooStruct> = flatbuffers::FollowStart::new();
         assert_eq!(*off.self_follow(&vec[..], 4), FooStruct{a: 1, b: 2, c: 1027});
     }
 
     #[test]
     fn test_vector_of_offset_to_string_elements() {
-        //let buf: Vec<u8> = vec![/* vec len */ 1, 0, 0, 0, /* offset to string */ 4, 0, 0, 0, /* str length */ 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
+        let buf: Vec<u8> = vec![/* vec len */ 1, 0, 0, 0, /* offset to string */ 4, 0, 0, 0, /* str length */ 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         //let vec: flatbuffers::Vector<flatbuffers::Offset<&str>> = flatbuffers::Vector::new(&buf[..]);
-        //assert_eq!(vec.len(), 1);
-        //assert_eq!(vec.get(0), "foo");
+        let s: flatbuffers::FollowStart<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&str>>> = flatbuffers::FollowStart::new();
+        assert_eq!(s.self_follow(&buf[..], 0).len(), 1);
+        assert_eq!(s.self_follow(&buf[..], 0).get(0), "foo");
     }
 
     #[test]
