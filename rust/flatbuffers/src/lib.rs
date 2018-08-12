@@ -1892,6 +1892,15 @@ impl<'a, T: Follow<'a>> Vector<'a, T> {
         T::follow(self.0, self.1 as usize + 4 + sz * idx)
     }
 
+    pub fn as_slice_unfollowed(&'a self) -> &'a [T] {
+        let sz = std::mem::size_of::<T>();
+        assert!(sz > 0);
+        let len = self.len();
+        let data_buf = &self.0[self.1 + SIZE_UOFFSET .. self.1 + SIZE_UOFFSET + len * sz];
+        let ptr = data_buf.as_ptr() as *const T;
+        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
+        s
+    }
     pub fn into_slice_unfollowed(self) -> &'a [T] {
         let sz = std::mem::size_of::<T>();
         assert!(sz > 0);
