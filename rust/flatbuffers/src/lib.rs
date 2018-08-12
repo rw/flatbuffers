@@ -1784,11 +1784,11 @@ impl<'a> Follow<'a> for VTable<'a> {
 
 impl<'a> VTable<'a> {
     pub fn num_fields(&self) -> usize {
-        let n = read_scalar_at::<VOffsetT>(self.buf, self.loc);
-        n as usize
+        self.num_fields() as usize - (2*SIZE_VOFFSET) / SIZE_VOFFSET
     }
     pub fn num_bytes(&self) -> usize {
-        SIZE_VOFFSET + SIZE_VOFFSET + self.num_fields() as usize * SIZE_VOFFSET
+        let n = read_scalar_at::<VOffsetT>(self.buf, self.loc);
+        n as usize
     }
     pub fn table_inline_num_bytes(&self) -> usize {
         let n = read_scalar_at::<VOffsetT>(self.buf, self.loc + SIZE_VOFFSET);
@@ -1802,9 +1802,9 @@ impl<'a> VTable<'a> {
         read_scalar_at::<VOffsetT>(self.buf, self.loc + SIZE_VOFFSET + SIZE_VOFFSET + SIZE_VOFFSET * idx)
     }
     pub fn get(&self, byte_loc: VOffsetT) -> VOffsetT {
-        println!("vtable get byte_loc = {}", byte_loc);
+        println!("vtable get byte_loc = {}. num_bytes == {}", byte_loc, self.num_bytes());
         // TODO(rw): distinguish between None and 0?
-        if byte_loc as usize > self.num_bytes() {
+        if byte_loc as usize >= self.num_bytes() {
             return 0;
         }
         read_scalar_at::<VOffsetT>(self.buf, self.loc + byte_loc as usize)

@@ -2622,6 +2622,7 @@ fn table_with_vector_of_scalars_fuzz() {
 mod test_follow_impls {
     extern crate flatbuffers;
     use flatbuffers::Follow;
+    use flatbuffers::field_index_to_field_offset as fi2fo;
 
     #[test]
     fn test_offset_to_ref_u8() {
@@ -2780,7 +2781,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_scalar() {
+    fn test_table_get_slot_scalar_u8() {
 	let buf: Vec<u8> = vec![
 	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -2794,7 +2795,40 @@ mod test_follow_impls {
 	];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
-        assert_eq!(tab.get_slot_follow::<u8>(4, Some(123)), Some(99));
+        assert_eq!(tab.get_slot_follow::<u8>(fi2fo(0), Some(123)), Some(99));
+    }
+
+    #[test]
+    fn test_table_get_slot_scalar_u8_default_via_vtable_len() {
+	let buf: Vec<u8> = vec![
+	    12, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    4, 0, // vtable len
+	    2, 0, // inline size
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    8, 0, 0, 0, // vtable location
+	];
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
+        let tab = fs.self_follow(&buf[..], 0);
+        assert_eq!(tab.get_slot_follow::<u8>(fi2fo(0), Some(123)), Some(123));
+    }
+
+    #[test]
+    fn test_table_get_slot_scalar_u8_default_via_vtable_zero() {
+	let buf: Vec<u8> = vec![
+	    14, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    6, 0, // vtable len
+	    2, 0, // inline size
+	    0, 0, // zero means use the default value
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    10, 0, 0, 0, // vtable location
+	];
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
+        let tab = fs.self_follow(&buf[..], 0);
+        assert_eq!(tab.get_slot_follow::<u8>(fi2fo(0), Some(123)), Some(123));
     }
 
     //{
