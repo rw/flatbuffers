@@ -2782,19 +2782,19 @@ mod test_follow_impls {
     #[test]
     fn test_table_get_slot_scalar() {
 	let buf: Vec<u8> = vec![
-	    12, 0, 0, 0, // offset to root table
+	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
 	    6, 0, // vtable len
 	    2, 0, // inline size
 	    5, 0, // value loc
 	    255, 255, 255, 255, // canary
 	    // enter table
-	    8, 0, 0, 0, // vtable location
+	    10, 0, 0, 0, // vtable location
 	    0, 99 // value (with padding)
 	];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
-        assert_eq!(tab.get_slot_follow::<u8>(0, None), Some(99));
+        assert_eq!(tab.get_slot_follow::<u8>(4, Some(123)), Some(99));
     }
 
     //{
