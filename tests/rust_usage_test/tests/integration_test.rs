@@ -2895,7 +2895,8 @@ mod test_follow_impls {
         let default_vec_buf: Vec<u8> = vec![3, 0, 0, 0, 70, 71, 72, 0];
         let default_vec = flatbuffers::Vector::new(&default_vec_buf[..], 0);
         let v = tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec));
-        assert_eq!(v.map(|x| x.into_slice_unfollowed()), Some(&vec![70, 71, 72][..]));
+        assert!(v.is_some());
+        assert_eq!(v.unwrap().as_slice_unfollowed(), &vec![70, 71, 72][..]);
     }
 
 }
