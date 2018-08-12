@@ -356,6 +356,20 @@ pub type ByteString<'a> = Vector<'a, u8>;
 //}
 
 #[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Table2<'a> {
+    pub buf: &'a [u8],
+    pub loc: u32,
+}
+
+impl<'a> Follow<'a> for Table2<'a> {
+    type Inner = Table2<'a>;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        println!("entering follow for Table2 with {:?}", &buf[loc..]);
+        Table2{buf: buf, loc: loc as u32}
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Table<'a> {
     pub data: &'a [u8],
     pub pos: usize,
@@ -450,6 +464,19 @@ impl<'a> Table<'a> {
     //    //}
     //}
     //pub fn get_slot_vector<T: VectorGettable<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
+    pub fn get_slot_follow<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
+        let o = self.compute_vtable_offset(slotnum) as usize;
+        if o == 0 {
+            if default.is_some() {
+                return default;
+            }
+        }
+
+        unimplemented!();
+        //let off = (o + self.pos) as UOffsetT;
+        //let off2 = off + read_scalar_at::<UOffsetT>(self.data, off as usize);
+        //Some(val)
+    }
     pub fn get_slot_vector_follow<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<T::Inner> {
         let o = self.compute_vtable_offset(slotnum) as usize;
         if o == 0 {
