@@ -1869,24 +1869,37 @@ impl<'a, T: Sized> Follow<'a> for &'a [T] {
     }
 }
 
-impl<'a, T: Sized> Follow<'a> for Vector<'a, T> {
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for Vector<'a, T> {
     type Inner = Vector<'a, T>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         println!("entering follow for Vector<T> with {:?}", &buf[loc..]);
-        Vector{0: buf, 1: loc as u32, 2: PhantomData}
+        Vector::new(buf, loc)
     }
 }
 
 impl<'a, T: Follow<'a>> Vector<'a, T> {
+    pub fn new(buf: &'a [u8], loc: usize) -> Self {
+        Vector{0: buf, 1: loc, 2: PhantomData}
+    }
     pub fn len(&self) -> usize {
         read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
-}
+    }
     pub fn get(&self, idx: usize) -> T::Inner {
         assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
         println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
         let sz = std::mem::size_of::<T>();
         assert!(sz > 0);
         T::follow(self.0, self.1 as usize + 4 + sz * idx)
+    }
+
+    pub fn into_slice_unfollowed(self) -> &'a [T] {
+        let sz = std::mem::size_of::<T>();
+        assert!(sz > 0);
+        let len = self.len();
+        let data_buf = &self.0[self.1 + SIZE_UOFFSET .. self.1 + SIZE_UOFFSET + len * sz];
+        let ptr = data_buf.as_ptr() as *const T;
+        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
+        s
     }
 }
 
@@ -1914,7 +1927,7 @@ impl<'a> Follow<'a> for f32 { type Inner = Self; fn follow(buf: &'a [u8], loc: u
 impl<'a> Follow<'a> for f64 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
 
 #[derive(Debug)]
-pub struct Vector<'a, T: Sized + 'a>(&'a [u8], u32, PhantomData<T>);
+pub struct Vector<'a, T: Sized + 'a>(&'a [u8], usize, PhantomData<T>);
 
 pub fn lifted_follow<'a, T: Follow<'a>>(buf: &'a [u8], loc: usize) -> T::Inner {
     T::follow(buf, loc)
