@@ -2575,44 +2575,44 @@ fn table_of_byte_strings_fuzz() {
 
 #[test]
 fn table_with_vector_of_scalars_fuzz() {
-    fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(vecs: Vec<Vec<T>>) {
-	unreachable!()
-        //// use flatbuffers::field_index_to_field_offset as fi2fo;
-        //// //let xs = &vec[..];
+    fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::ElementScalar + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
+        use flatbuffers::field_index_to_field_offset as fi2fo;
+        //let xs = &vec[..];
 
-        //// // build
-        //// let mut b = flatbuffers::FlatBufferBuilder::new();
-        //// let mut offs: Vec<flatbuffers::Offset<_>> = vec![];
-        //// for vec in &vecs {
-        ////     b.start_vector(vec.len(), ::std::mem::size_of::<T>());
+        // build
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let mut offs: Vec<flatbuffers::Offset<_>> = vec![];
+        for vec in &vecs {
+            b.start_vector(vec.len(), ::std::mem::size_of::<T>());
 
-        ////     let xs = &vec[..];
-        ////     for i in (0..xs.len()).rev() {
-        ////         b.push_element_scalar::<T>(xs[i]);
-        ////     }
-        ////     let vecend = b.end_vector::<T>(xs.len());
-        ////     offs.push(vecend);
-        //// }
+            let xs = &vec[..];
+            for i in (0..xs.len()).rev() {
+                b.push_element_scalar::<T>(xs[i]);
+            }
+            let vecend = b.end_vector::<T>(xs.len());
+            offs.push(vecend);
+        }
 
-        //// let table_start = b.start_table(vecs.len() as flatbuffers::VOffsetT);
+        let table_start = b.start_table(vecs.len() as flatbuffers::VOffsetT);
 
-        //// for i in 0..vecs.len() {
-        ////     b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
-        //// }
-        //// let root = b.end_table(table_start);
-        //// b.finish(root);
+        for i in 0..vecs.len() {
+            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
+        }
+        let root = b.end_table(table_start);
+        b.finish(root);
 
-        //// // use
-        //// let buf = b.get_active_buf_slice();
-        //// let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+        unimplemented!()
+        //// use
+        //let buf = b.get_active_buf_slice();
+        //let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
 
-        //// for i in 0..vecs.len() {
-        ////     let got = tab.get_slot_vector::<flatbuffers::Offset<flatbuffers::Vector<T>>>(fi2fo(i as flatbuffers::VOffsetT)).unwrap();
-        ////     assert_eq!(vecs[i].len(), got.len());
-        ////     for j in 0..got.len() {
-        ////         //assert_eq!(got.as_slice()[j], vecs[i][j]);
-        ////     }
-        //// }
+        //for i in 0..vecs.len() {
+        //    let got = tab.get_slot_vector::<flatbuffers::Offset<flatbuffers::Vector<T>>>(fi2fo(i as flatbuffers::VOffsetT)).unwrap();
+        //    assert_eq!(vecs[i].len(), got.len());
+        //    for j in 0..got.len() {
+        //        //assert_eq!(got.as_slice()[j], vecs[i][j]);
+        //    }
+        //}
     }
     let n = 20;
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
@@ -2706,7 +2706,6 @@ mod test_follow_impls {
     #[test]
     fn test_vector_of_offset_to_string_elements() {
         let buf: Vec<u8> = vec![/* vec len */ 1, 0, 0, 0, /* offset to string */ 4, 0, 0, 0, /* str length */ 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
-        //let vec: flatbuffers::Vector<flatbuffers::Offset<&str>> = flatbuffers::Vector::new(&buf[..]);
         let s: flatbuffers::FollowStart<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&str>>> = flatbuffers::FollowStart::new();
         assert_eq!(s.self_follow(&buf[..], 0).len(), 1);
         assert_eq!(s.self_follow(&buf[..], 0).get(0), "foo");
@@ -2743,6 +2742,42 @@ mod test_follow_impls {
         let fs: flatbuffers::FollowStart<flatbuffers::Vector<&FooStruct>> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
         assert_eq!(fs.self_follow(&buf[..], 0).get(0), &FooStruct{a: 1, b: 2, c: 1027});
+    }
+
+    #[test]
+    fn test_root_to_empty_table() {
+            //// Start of the buffer:
+            //20, 0, 0, 0,  // Offset to the root table.
+
+            //// Start of the vtable. Not shared in this example, but could be:
+            //16, 0, // Size of table, starting from here.
+            //22, 0, // Size of object inline data.
+            //4, 0,   0, 0,   20, 0,   16, 0,   0,0,  0, 0,  // Offsets to fields from start of (root) table, 0 for not present.
+
+            //// Start of the root table:
+            //16, 0, 0, 0,     // Offset to vtable used (default negative direction)
+            //float 1, 2, 3  // the Vec3 struct, inline.
+            //uint32_t 8     // Offset to the name string.
+            //int16_t 50     // hp field.
+            //int16_t 0      // Padding for alignment.
+
+            //// Start of name string:
+            //uint32_t 4  // Length of string.
+            //int8_t 'f', 'r', 'e', 'd', 0, 0, 0, 0  // Text + 0 termination + padding.
+
+        //let buf: Vec<u8> = vec![/* root offset */ 8, 0, 0, 0, /* canary */ 255, 255, 255, 255,  /* dummy table */ 255, 255, 255, 255];
+	let buf: Vec<u8> = vec![
+	    12, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    4, 0, // vtable len
+	    0, 0, // inline size
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    8, 0, 0, 0, // vtable start
+	];
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
+        //assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
+        //assert_eq!(fs.self_follow(&buf[..], 0).get(0), &FooStruct{a: 1, b: 2, c: 1027});
     }
 
     //{
