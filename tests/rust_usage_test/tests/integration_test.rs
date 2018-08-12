@@ -2882,6 +2882,58 @@ mod test_follow_impls {
         let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table2>>::follow(&buf[..], 0);
         assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&str>>(fi2fo(0), Some("abc")), Some("abc"));
     }
+
+    #[test]
+    fn test_table_get_slot_byte_string() {
+	let buf: Vec<u8> = vec![
+	    14, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    6, 0, // vtable len
+	    2, 0, // inline size
+	    4, 0, // value loc
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    10, 0, 0, 0, // vtable location
+	    8, 0, 0, 0, // offset to string
+	    // leave table
+	    255, 255, 255, 255, // canary
+	    // enter string
+	    3, 0, 0, 0, 109, 111, 111, 0 // string length and contents
+	];
+        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table2>>::follow(&buf[..], 0);
+        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(0), None), Some(&vec![109, 111, 111][..]));
+    }
+
+    #[test]
+    fn test_table_get_slot_byte_string_default_via_vtable_len() {
+	let buf: Vec<u8> = vec![
+	    12, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    4, 0, // vtable len
+	    4, 0, // table inline len
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    8, 0, 0, 0, // vtable location
+	];
+        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table2>>::follow(&buf[..], 0);
+        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(0), Some(&vec![109, 111, 111][..])), Some(&vec![109, 111, 111][..]));
+    }
+
+    #[test]
+    fn test_table_get_slot_byte_string_default_via_vtable_zero() {
+	let buf: Vec<u8> = vec![
+	    14, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    6, 0, // vtable len
+	    2, 0, // inline size
+	    0, 0, // value loc
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    10, 0, 0, 0, // vtable location
+	];
+        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table2>>::follow(&buf[..], 0);
+        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(0), Some(&vec![109, 111, 111][..])), Some(&vec![109, 111, 111][..]));
+    }
 }
 
 #[cfg(test)]
