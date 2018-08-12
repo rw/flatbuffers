@@ -369,6 +369,32 @@ impl<'a> Follow<'a> for Table2<'a> {
     }
 }
 
+impl<'a> Table2<'a> {
+    pub fn new(buf: &'a [u8], loc: usize) -> Table2 {
+        Table2 { buf: buf, loc: loc as u32}
+    }
+    pub fn get_slot_follow<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
+        default
+        //let o = {
+        //    let vtable = <FollowStart<BackwardsI32Offset>>::follow(self.buf, self.loc as usize);
+        //    let vtable_len = 
+
+        //    let o = self.compute_vtable_offset(slotnum) as usize;
+        //};
+        //if o == 0 {
+        //    return default;
+        //}
+
+        //let fs: FollowStart<T> = FollowStart::new();
+        //let x = fs.self_follow(self.buf, self.loc as usize + o);
+        //Some(x)
+
+        //let off = (o + self.pos) as UOffsetT;
+        //let off2 = off + read_scalar_at::<UOffsetT>(self.data, off as usize);
+        //Some(val)
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Table<'a> {
     pub data: &'a [u8],

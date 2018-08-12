@@ -2773,11 +2773,28 @@ mod test_follow_impls {
 	    0, 0, // inline size
 	    255, 255, 255, 255, // canary
 	    // enter table
-	    8, 0, 0, 0, // vtable start
+	    8, 0, 0, 0, // vtable location
 	];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
-        //assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
-        //assert_eq!(fs.self_follow(&buf[..], 0).get(0), &FooStruct{a: 1, b: 2, c: 1027});
+        assert_eq!(fs.self_follow(&buf[..], 0), flatbuffers::Table2::new(&buf[..], 12));
+    }
+
+    #[test]
+    fn test_table_get_slot_scalar() {
+	let buf: Vec<u8> = vec![
+	    12, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    6, 0, // vtable len
+	    2, 0, // inline size
+	    5, 0, // value loc
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    8, 0, 0, 0, // vtable location
+	    0, 99 // value (with padding)
+	];
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
+        let tab = fs.self_follow(&buf[..], 0);
+        assert_eq!(tab.get_slot_follow::<u8>(0, None), Some(99));
     }
 
     //{
