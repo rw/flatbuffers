@@ -2795,7 +2795,7 @@ mod test_follow_impls {
 	];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
-        assert_eq!(tab.get_slot_follow::<u8>(fi2fo(0), Some(123)), Some(99));
+        assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(99));
     }
 
     #[test]
@@ -2811,7 +2811,7 @@ mod test_follow_impls {
 	];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
-        assert_eq!(tab.get_slot_follow::<u8>(fi2fo(0), Some(123)), Some(123));
+        assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(123));
     }
 
     #[test]
@@ -2828,116 +2828,30 @@ mod test_follow_impls {
 	];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
-        assert_eq!(tab.get_slot_follow::<u8>(fi2fo(0), Some(123)), Some(123));
+        assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(123));
     }
 
-    //{
-    //    let buf = vec![
-    //        255, 255, 255, 255, 3, 0, 0, 0, 'm' as u8, 'o' as u8, 'o' as u8, 0,
-    //    ];
-    //    let y: &str = <&str>::follow(&buf[..], 4);
-    //    assert_eq!("moo", y);
-    //    println!("{:?}", y);
-    //}
-    //{
-    //    let buf = vec![
-    //        255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 'm' as u8, 'o' as u8, 'o' as u8, 0,
-    //    ];
-    //    let y: &str = <ForwardsU32Offset<&str>>::follow(&buf[..], 4);
-    //    assert_eq!("moo", y);
-    //    println!("{:?}", y);
-    //}
-    //{
-    //    let buf = vec![
-    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 'm' as u8, 'o' as u8,
-    //        'o' as u8, 0,
-    //    ];
-    //    let y: &str = <ForwardsU32Offset<ForwardsU32Offset<&str>>>::follow(&buf[..], 0);
-    //    assert_eq!("moo", y);
-    //    println!("{:?}", y);
-    //}
-    //{
-    //    let buf = vec![
-    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 1, 2, 3, 4,
-    //    ];
-    //    let y: &[u8] = <ForwardsU32Offset<ForwardsU32Offset<&[u8]>>>::follow(&buf[..], 0);
-    //    assert_eq!(&vec![1, 2, 3][..], y);
-    //    println!("{:?}", y);
-    //}
-    //{
-    //    let buf = vec![
-    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 1, 0, 0, 0, 5, 0, 0, 0, 1, 2, 3, 4,
-    //    ];
-    //    let y: Vector<ForwardsU32Offset<&u8>> = <ForwardsU32Offset<ForwardsU32Offset<Vector<ForwardsU32Offset<&u8>>>>>::follow(&buf[..], 0);
-    //    assert_eq!(<ForwardsU32Offset<&u8>>::follow(&buf[..], 16), &2);
-    //    
-    //    assert_eq!(&2, y.get(0));
-    //    assert_eq!(&2, <Vector<ForwardsU32Offset<&u8>>>::follow(y.0, y.1 as usize).get(0));
-    //    assert_eq!(&2, y.get(0));
-    //    assert_eq!(&2, <Vector<ForwardsU32Offset<&u8>>>::follow(y.0, y.1 as usize).get(0));
-    //}
-    //{
-    //    let buf = vec![
-    //        8, 0, 0, 0, 255, 255, 255, 255, 4, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0,
-    //        4, 0, 0, 0, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0
-    //    ];
-    //    let y: Vector<ForwardsU32Offset<&str>> = <ForwardsU32Offset<ForwardsU32Offset<Vector<ForwardsU32Offset<&str>>>>>::follow(&buf[..], 0);
-    //    
-    //    assert_eq!("foo", y.get(1));
-    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
-    //    assert_eq!("foo", y.get(1));
-    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
-    //}
-    //{
-    //    let buf = vec![
-    //        8, 0, 0, 0, 4, 0, 0, 0, 4, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0,
-    //        4, 0, 0, 0, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0
-    //    ];
-    //    let y: Vector<ForwardsU32Offset<&str>> = <BackwardsI32Offset<ForwardsU32Offset<ForwardsU32Offset<Vector<ForwardsU32Offset<&str>>>>>>::follow(&buf[..], 4);
-    //    
-    //    assert_eq!("foo", y.get(1));
-    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
-    //    assert_eq!("foo", y.get(1));
-    //    assert_eq!("foo", <Vector<ForwardsU32Offset<&str>>>::follow(y.0, y.1 as usize).get(1));
-    //}
-    //{
-    //    let buf = vec![7, 0, 0, 0];
-    //    let y: &u32 = <&u32>::follow(&buf[..], 0);
-    //    assert_eq!(&7, y);
-    //    println!("{:?}", y);
-    //}
-    //{
-    //    #[repr(C, packed)]
-    //    #[derive(Clone, Copy, Debug, PartialEq)]
-    //    struct Foo {
-    //        a: u8,
-    //        b: u16,
-    //    }
-    //    let buf = vec![255, 255, 255, 255, 4, 0, 0, 0, 99, 3, 4];
-    //    let z: &Foo = <&Foo>::follow(&buf[..], 8);
-    //    assert_eq!(z, &Foo { a: 99, b: 1027 });
-    //    println!("{:?}", z);
-    //}
-    //{
-    //    #[repr(C, packed)]
-    //    #[derive(Clone, Copy, Debug, PartialEq)]
-    //    struct Foo {
-    //        a: u8,
-    //        b: u16,
-    //    }
-    //    let buf = vec![255, 255, 255, 255, 4, 0, 0, 0, 99, 3, 4];
-    //    let z: &Foo = <ForwardsU32Offset<&Foo>>::follow(&buf[..], 4);
-    //    assert_eq!(z, &Foo { a: 99, b: 1027 });
-    //    println!("{:?}", z);
-    //}
-    //{
-    //    let buf = vec![
-    //        255, 255, 255, 255, 4, 0, 0, 0, 3, 0, 0, 0, 'm' as u8, 'o' as u8, 'o' as u8, 0,
-    //    ];
-    //    let y: &str = lifted_follow::<'_, ForwardsU32Offset<&str>>(&buf[..], 4);
-    //    assert_eq!("moo", y);
-    //    println!("{:?}", y);
-    //}
+    #[test]
+    fn test_table_get_slot_string() {
+	let buf: Vec<u8> = vec![
+	    14, 0, 0, 0, // offset to root table
+	    // enter vtable
+	    6, 0, // vtable len
+	    2, 0, // inline size
+	    4, 0, // value loc
+	    255, 255, 255, 255, // canary
+	    // enter table
+	    10, 0, 0, 0, // vtable location
+	    8, 0, 0, 0, // offset to string
+	    // leave table
+	    255, 255, 255, 255, // canary
+	    // enter string
+	    3, 0, 0, 0, 109, 111, 111, 0 // string length and contents
+	];
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table2>> = flatbuffers::FollowStart::new();
+        let tab = fs.self_follow(&buf[..], 0);
+        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&str>>(fi2fo(0), None), Some("moo"));
+    }
 }
 
 #[cfg(test)]

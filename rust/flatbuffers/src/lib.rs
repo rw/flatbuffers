@@ -376,7 +376,7 @@ impl<'a> Table2<'a> {
     pub fn vtable(&'a self) -> VTable<'a> {
         <BackwardsI32Offset<VTable<'a>>>::follow(self.buf, self.loc)
     }
-    pub fn get_slot_follow<T: Follow<'a> + 'a>(&'a self, slot_byte_loc: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
+    pub fn get<T: Follow<'a> + 'a>(&'a self, slot_byte_loc: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
         assert!(slot_byte_loc as usize >= SIZE_VOFFSET + SIZE_VOFFSET);
         let o = self.vtable().get(slot_byte_loc) as usize;
         println!("get_slot_follow: vtable lookup gave {}", o);
