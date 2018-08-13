@@ -113,6 +113,10 @@ pub const SIZE_UOFFSET: usize = SIZE_U32;
 pub const SIZE_SOFFSET: usize = SIZE_I32;
 pub const SIZE_VOFFSET: usize = SIZE_I16;
 
+pub type SOffsetT = i32;
+pub type UOffsetT = u32;
+pub type VOffsetT = i16;
+
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {
     off: UOffsetT,
@@ -997,174 +1001,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         &self.owned_buf[self.cur_idx..]
     }
 }
-pub trait UOffsetTTrait {}
-pub trait OffsetTTrait {}
-pub trait VOffsetTTrait {}
-pub type UOffsetT = u32;
-pub type SOffsetT = i32;
-pub type VOffsetT = i16;
-
-//pub type String<'a> = &'a str;
-pub type Void<'a> = &'a [u8];
-//pub struct Vector<T>  {
-//    phantom: PhantomData<T>,
-//}
-
-pub struct LabeledVectorUOffsetT<T> (UOffsetT, PhantomData<T>);
-impl<T> Copy for LabeledVectorUOffsetT<T> { } // TODO: why does deriving Copy cause ownership errors?
-impl<T> Clone for LabeledVectorUOffsetT<T> {
-    fn clone(&self) -> LabeledVectorUOffsetT<T> {
-        LabeledVectorUOffsetT::new(self.0.clone())
-    }
-}
-
-impl<T> std::ops::Deref for LabeledVectorUOffsetT<T> {
-    type Target = UOffsetT;
-    fn deref(&self) -> &UOffsetT {
-        &self.0
-    }
-}
-impl<T> LabeledVectorUOffsetT<T> {
-    pub fn new(o: UOffsetT) -> Self {
-        LabeledVectorUOffsetT(o, PhantomData)
-    }
-    //pub fn union(&self) -> LabeledVectorUOffsetT<UnionOffset> {
-    //    LabeledVectorUOffsetT::new(self.0)
-    //}
-    pub fn value(&self) -> UOffsetT {
-        self.0
-    }
-}
-pub struct LabeledUOffsetT<T> (UOffsetT, PhantomData<T>);
-impl<T> Copy for LabeledUOffsetT<T> { } // TODO: why does deriving Copy cause ownership errors?
-impl<T> Clone for LabeledUOffsetT<T> {
-    fn clone(&self) -> LabeledUOffsetT<T> {
-        LabeledUOffsetT::new(self.0.clone())
-    }
-}
-
-impl<T> std::ops::Deref for LabeledUOffsetT<T> {
-    type Target = UOffsetT;
-    fn deref(&self) -> &UOffsetT {
-        &self.0
-    }
-}
-impl<T> LabeledUOffsetT<T> {
-    pub fn new(o: UOffsetT) -> Self {
-        LabeledUOffsetT(o, PhantomData)
-    }
-    pub fn union(&self) -> LabeledUOffsetT<UnionOffset> {
-        LabeledUOffsetT::new(self.0)
-    }
-    pub fn value(&self) -> UOffsetT {
-        self.0
-    }
-}
-
-//pub trait Follow<'a> {
-//    type Inner;
-//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner;
-//}
-
-//impl<'a, T: ElementScalar + 'a> Follow<'a> for T {
-//    type Inner = &'a T;
-//    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-//        self
-//    }
-//}
-
-//impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<T> {
-//    type Inner = T::Inner;
-//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-//        let loc2 = self.0 as usize + loc;
-//        let slice: &'a [u8] = &buf[loc2..];
-//        let ptr = slice.as_ptr() as *const T;
-//        let x: &'a T = unsafe { &*ptr };
-//        x.follow(buf, loc2)
-//    }
-//}
-////impl<'a, T: Follow<'a> + 'a> Follow<'a> for BackwardsXOffset<T> {
-//    type Inner = T::Inner;
-//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-//        unimplemented!();
-//        //let idx = self.0 as usize;
-//        //let slice: &'a [u8] = &buf[idx..];
-//        //let ptr = slice.as_ptr() as *const T;
-//        //let x: &'a T = unsafe { &*ptr };
-//        //x.follow(slice)
-//    }
-//}
-//impl<'a: 'b, 'b> Follow<'a> for Offset<&'b str> {
-//    type Inner = &'b str;
-//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-//        let buf = &buf[loc + self.0 as usize..];
-//        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
-//        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
-//        let s = unsafe { std::str::from_utf8_unchecked(slice) };
-//        s
-//    }
-//}
-//impl<'a: 'b, 'b, T: Sized + 'a> Follow<'a> for Offset<&'b [T]> {
-//    type Inner = &'b [T];
-//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-//        let buf = &buf[loc + self.0 as usize..];
-//        let len: usize = read_scalar::<UOffsetT>(&buf[..SIZE_UOFFSET]) as usize;
-//        let slice = &buf[SIZE_UOFFSET..SIZE_UOFFSET + len];
-//        let ptr = slice.as_ptr() as *const T;
-//        let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
-//        x
-//    }
-//}
-//impl<'a, T: Follow<'a> + 'a> Follow<'a> for Offset<Vector<'a, T>> {
-//    type Inner = Vector<'a, T>;
-//    fn follow(&'a self, buf: &'a [u8], loc: usize) -> Self::Inner {
-//        let buf = &buf[loc + self.0 as usize..];
-//        Vector::new(buf)
-//        //let ptr = slice.as_ptr() as *const T;
-//        //let x = unsafe { std::slice::from_raw_parts(ptr, slice.len() / std::mem::size_of::<T>()) };
-//        //x
-//    }
-//}
-
-//type FBString = UOffsetT;
-//
-//impl<'a> Follow<'a> for FBString {
-//    type Inner = &'a str;
-//    fn follow(&'a self, buf: &'a [u8]) -> Self::Inner {
-//        let len = *self as usize;
-//        let slice = &buf[4..4 + len];
-//        let s = unsafe { std::str::from_utf8_unchecked(slice) };
-//        s
-//    }
-//}
-
-
-//#[derive(Debug, PartialEq)]
-//pub struct BackwardsXOffset<T> (UOffsetT, PhantomData<T>);
-//impl<T> Copy for BackwardsXOffset<T> { } // TODO: why does deriving Copy cause ownership errors?
-//impl<T> Clone for BackwardsXOffset<T> {
-//    fn clone(&self) -> BackwardsXOffset<T> {
-//        BackwardsXOffset::new(self.0.clone())
-//    }
-//}
-//impl<T> std::ops::Deref for BackwardsXOffset<T> {
-//    type Target = UOffsetT;
-//    fn deref(&self) -> &UOffsetT {
-//        &self.0
-//    }
-//}
-//impl<'a, T: 'a> BackwardsXOffset<T> {
-//    pub fn new(o: UOffsetT) -> BackwardsXOffset<T> {
-//        BackwardsXOffset { 0: o, 1: PhantomData}
-//    }
-//    pub fn union(&self) -> BackwardsXOffset<UnionOffset> {
-//        unimplemented!();
-//        BackwardsXOffset::new(self.0)
-//    }
-//    pub fn value(&self) -> UOffsetT {
-//        self.0
-//    }
-//}
 
 #[derive(Debug, PartialEq)]
 pub struct Offset<T> (UOffsetT, PhantomData<T>);
@@ -1193,23 +1029,6 @@ impl<'a, T: 'a> Offset<T> {
     }
 }
 
-//impl<T> From<usize> for ULabeledUOffsetT<T> { fn from(n: usize) -> Self { ULabeledUOffsetT::new(n) } }
-//impl<T> From<isize> for LabeledUOffsetT<T> { fn from(n: isize) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<u8> for LabeledUOffsetT<T>  { fn from(n: u8)  -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<u16> for LabeledUOffsetT<T> { fn from(n: u16) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<u32> for LabeledUOffsetT<T> { fn from(n: u32) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<u64> for LabeledUOffsetT<T> { fn from(n: u64) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<i8> for LabeledUOffsetT<T>  { fn from(n: i8)  -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<i16> for LabeledUOffsetT<T> { fn from(n: i16) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<i32> for LabeledUOffsetT<T> { fn from(n: i32) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<i64> for LabeledUOffsetT<T> { fn from(n: i64) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<usize> for LabeledUOffsetT<T> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
-//impl<T> From<isize> for LabeledUOffsetT<T> { fn from(n: isize) -> Self { LabeledUOffsetT::new(n) } }
-//impl From<usize> for Offset<u16> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
-//impl From<usize> for Offset<u32> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
-//impl From<usize> for Offset<u64> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
-//impl From<usize> for Offset<f32> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
-//impl From<usize> for Offset<f64> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
 pub fn endian_scalar<T>(x: T) -> T {
     x
     //x.to_le()
