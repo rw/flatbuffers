@@ -2610,7 +2610,20 @@ fn build_and_use_table_with_vector_of_scalars_fuzz() {
         }
     }
     let n = 20;
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<bool>>));
+
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u16>>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u32>>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u64>>));
+
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u16>>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u32>>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u64>>));
+
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<f32>>));
+    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<f64>>));
 }
 
 #[cfg(test)]
