@@ -125,11 +125,6 @@ impl LCG {
 //      flatbuffers::Offset::new(0)
 //  }
 fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder) {
-//    //impl From<flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>> for flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset> {
-//    //    fn from(o: flatbuffers::LabeledUOffsetT<MyGame::Example::MonsterOffset>) -> Self {
-//    //        flatbuffers::LabeledUOffsetT::new(o.value())
-//    //    }
-//    //}
     let mon = {
         let fred_name = builder.create_string("Fred");
         let inventory = builder.create_vector::<u8>(&vec![0, 1, 2, 3, 4][..]);
