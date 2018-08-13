@@ -1,6 +1,5 @@
 package flatbuffers
 
-
 // Builder is a state machine for creating FlatBuffer objects.
 // Use a Builder to construct object(s) starting from leaf nodes.
 //
@@ -170,10 +169,6 @@ func (b *Builder) WriteVtable() (n UOffsetT) {
 		// Next, write the offset to the new vtable in the
 		// already-allocated SOffsetT at the beginning of this object:
 		objectStart := SOffsetT(len(b.Bytes)) - SOffsetT(objectOffset)
-		//foo := GetSOffsetT(b.Bytes[objectStart:])
-		//if foo != 0 {
-		//	panic(fmt.Sprintf("foo: %d", foo))
-		//}
 		WriteSOffsetT(b.Bytes[objectStart:],
 			SOffsetT(b.Offset())-SOffsetT(objectOffset))
 
