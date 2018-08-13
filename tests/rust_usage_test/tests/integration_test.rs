@@ -1255,8 +1255,8 @@ fn fuzz_scalar_table_serialization() {
     for i in 0..(num_fuzz_objects as usize) {
         let table = {
             let buf = builder.get_buf_slice();
-            let pos = buf.len() as flatbuffers::UOffsetT - objects[i];
-            flatbuffers::Table::new(buf, pos)
+            let loc = buf.len() as flatbuffers::UOffsetT - objects[i];
+            flatbuffers::Table2::new(buf, loc as usize)
         };
 
         let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
@@ -1269,17 +1269,17 @@ fn fuzz_scalar_table_serialization() {
             let f = flatbuffers::field_index_to_field_offset(j);
 
             match choice {
-                0 => { assert_eq!(bool_val, table.get_slot_scalar::<bool>(f, false)); }
-                1 => { assert_eq!(char_val, table.get_slot_scalar::<i8>(f, 0)); }
-                2 => { assert_eq!(uchar_val, table.get_slot_scalar::<u8>(f, 0)); }
-                3 => { assert_eq!(short_val, table.get_slot_scalar::<i16>(f, 0)); }
-                4 => { assert_eq!(ushort_val, table.get_slot_scalar::<u16>(f, 0)); }
-                5 => { assert_eq!(int_val, table.get_slot_scalar::<i32>(f, 0)); }
-                6 => { assert_eq!(uint_val, table.get_slot_scalar::<u32>(f, 0)); }
-                7 => { assert_eq!(long_val, table.get_slot_scalar::<i64>(f, 0)); }
-                8 => { assert_eq!(ulong_val, table.get_slot_scalar::<u64>(f, 0)); }
-                9 => { assert_eq!(float_val, table.get_slot_scalar::<f32>(f, 0.0)); }
-                10 => { assert_eq!(double_val, table.get_slot_scalar::<f64>(f, 0.0)); }
+                0 => { assert_eq!(bool_val, table.get::<bool>(f, Some(false)).unwrap()); }
+                1 => { assert_eq!(char_val, table.get::<i8>(f, Some(0)).unwrap()); }
+                2 => { assert_eq!(uchar_val, table.get::<u8>(f, Some(0)).unwrap()); }
+                3 => { assert_eq!(short_val, table.get::<i16>(f, Some(0)).unwrap()); }
+                4 => { assert_eq!(ushort_val, table.get::<u16>(f, Some(0)).unwrap()); }
+                5 => { assert_eq!(int_val, table.get::<i32>(f, Some(0)).unwrap()); }
+                6 => { assert_eq!(uint_val, table.get::<u32>(f, Some(0)).unwrap()); }
+                7 => { assert_eq!(long_val, table.get::<i64>(f, Some(0)).unwrap()); }
+                8 => { assert_eq!(ulong_val, table.get::<u64>(f, Some(0)).unwrap()); }
+                9 => { assert_eq!(float_val, table.get::<f32>(f, Some(0.0)).unwrap()); }
+                10 => { assert_eq!(double_val, table.get::<f64>(f, Some(0.0)).unwrap()); }
                 _ => { panic!("unknown choice: {}", choice); }
             }
         }
@@ -2509,14 +2509,15 @@ fn table_of_strings_fuzz() {
         let root = b.end_table(table_start);
         b.finish(root);
 
-        // use
-        let buf = b.get_active_buf_slice();
-        let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+        unimplemented!();
+        //// use
+        //let buf = b.get_active_buf_slice();
+        //let tab = flatbuffers::Table2::new(buf, flatbuffers::get_root_uoffset(buf));
 
-        for i in 0..xs.len() {
-            let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
-            assert_eq!(got.unwrap(), xs[i].as_str());
-        }
+        //for i in 0..xs.len() {
+        //    let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
+        //    assert_eq!(got.unwrap(), xs[i].as_str());
+        //}
     }
     let n = 20;
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<String>));
