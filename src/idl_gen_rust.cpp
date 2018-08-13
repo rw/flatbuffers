@@ -2008,7 +2008,7 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
         //return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
-        return "self._tab.get::<" + typname + "<" + lifetime + ">>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsU32Offset<" + typname + "<" + lifetime + ">>>(" + offset_name + ", None)";
       }
       case FullElementType::UnionValue: {
         return "self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Table<" + lifetime + ">>>(" + offset_name + ", None)";
