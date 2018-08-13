@@ -729,7 +729,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     unsafe { ::std::mem::transmute(self._tab.get::<u8>(Monster::VT_TEST_TYPE, Some(Any::NONE as u8)).unwrap()) }
   }
   pub fn test(&'a self) -> Option<flatbuffers::Table2<'a>> {
-    self._tab.get_slot_union_table(Monster::VT_TEST)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Table2<'a>>>(Monster::VT_TEST, None)
   }
   pub fn test4(&'a self) -> Option<&'a [Test]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Test]>>(Monster::VT_TEST4, None)
