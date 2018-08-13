@@ -759,7 +759,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   }
   #[inline]
   pub fn enemy(&'a self) -> Option<Monster<'a>> {
-    self._tab.get::<Monster<'a>>(Monster::VT_ENEMY, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<Monster<'a>>>(Monster::VT_ENEMY, None)
   }
   #[inline]
   pub fn testnestedflatbuffer(&'a self) -> Option<&'a [u8]> {
@@ -767,7 +767,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   }
   #[inline]
   pub fn testempty(&'a self) -> Option<Stat<'a>> {
-    self._tab.get::<Stat<'a>>(Monster::VT_TESTEMPTY, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<Stat<'a>>>(Monster::VT_TESTEMPTY, None)
   }
   #[inline]
   pub fn testbool(&'a self) -> bool {
@@ -847,7 +847,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   }
   #[inline]
   pub fn parent_namespace_test(&'a self) -> Option<super::InParentNamespace<'a>> {
-    self._tab.get::<super::InParentNamespace<'a>>(Monster::VT_PARENT_NAMESPACE_TEST, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<super::InParentNamespace<'a>>>(Monster::VT_PARENT_NAMESPACE_TEST, None)
   }
   #[inline]
   pub fn foo0(&'a self) -> Option<&'a [Color]> {
@@ -871,7 +871,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   }
   #[inline]
   pub fn foo5(&'a self) -> Option<Monster<'a>> {
-    self._tab.get::<Monster<'a>>(Monster::VT_FOO5, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<Monster<'a>>>(Monster::VT_FOO5, None)
   }
 }
 

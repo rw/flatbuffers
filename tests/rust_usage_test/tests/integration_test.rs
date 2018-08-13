@@ -375,6 +375,18 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
           if pos_test3.a() != 5i16 { return Err("bad pos_test3.a"); }
           if pos_test3.b() != 6i8 { return Err("bad pos_test3.b"); }
 
+          match m.enemy() {
+              None => {
+                  println!("missing m.enemy, most language ports do not generate this yet");
+              }
+              Some(e) => {
+                  match e.name() {
+                      Some("Fred") => { /* woot */ }
+                      _ => { println!("missing m.enemy.name, most language ports do not generate this yet") }
+                  }
+              }
+          }
+
           if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
 
           let table2 = match m.test() {
