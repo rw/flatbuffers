@@ -170,27 +170,6 @@ pub trait BufferBacked<'a>{
 }
 
 
-pub struct Verifier {}
-impl Verifier {
-    pub fn new() -> Self {
-        Verifier{}
-    }
-    pub fn verify<T>(&mut self, _: T) -> bool {
-        false
-    }
-    pub fn verify_buffer<T>(&mut self, _: &'static str) -> bool {
-        false
-    }
-    pub fn verify_vector_of_strings<T>(&mut self, _: T) -> bool {
-        false
-    }
-    pub fn verify_vector_of_tables<T>(&mut self, _: T) -> bool {
-        false
-    }
-    pub fn verify_table<T>(&mut self, _: T) -> bool {
-        false
-    }
-}
 pub struct TypeTable {}
 pub struct FlatBufferBuilder<'fbb> {
     pub owned_buf: Vec<u8>,
@@ -1231,75 +1210,10 @@ impl<'a, T: 'a> Offset<T> {
 //impl From<usize> for Offset<u64> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
 //impl From<usize> for Offset<f32> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
 //impl From<usize> for Offset<f64> { fn from(n: usize) -> Self { LabeledUOffsetT::new(n) } }
-
-pub fn verify_table_start(_: &Verifier) -> bool {
-    false
-}
-//pub fn endian_scalar<T: num_traits::int::PrimInt>(x: T) -> T {
-//    x.to_le()
-//}
 pub fn endian_scalar<T>(x: T) -> T {
     x
     //x.to_le()
 }
-pub fn write_scalar<S, T>(_: S, _: T) -> ! {
-    unimplemented!()
-}
-pub fn set_field<T>(_: isize, _: T, _: T) -> bool {
-    unimplemented!()
-}
-pub fn verify_field<T>(_: &Verifier, _: VOffsetT) -> bool {
-    false
-}
-pub fn verify_offset(_: &Verifier, _: VOffsetT) -> ! {
-    unimplemented!()
-}
-pub fn verify_offset_required(_: &Verifier, _: VOffsetT) -> ! {
-    unimplemented!()
-}
-pub fn get_root_uoffset(data: &[u8]) -> UOffsetT {
-	read_scalar::<UOffsetT>(data)
-}
-//pub fn get_root<'a, 'b: 'a, T: BufferBacked<'a>>(bytes: &'b [u8]) -> T {
-pub fn get_root<'a, T: BufferBacked<'a> + 'a>(bytes: &'a [u8]) -> T {
-	let n = read_scalar::<UOffsetT>(bytes) as usize;
-   // println!("get_root n: {}, len of bytes: {}", n, bytes.len());
-    T::init_from_bytes(bytes, n)
-
-    //let ptr = obj_bytes.as_ptr() as *const T;
-    //println!("bytes: {}, n: {}, xx: {:?}, ptr: {}", bytes.len(), n, &bytes[..8], ptr as usize);
-    ////unimplemented!();
-    //unsafe {
-    //    &*ptr
-    //}
-}
-pub fn get_mutable_root<T>(_: &[u8]) -> T {
-    unimplemented!()
-}
-pub fn get_struct_mut<T>(_: VOffsetT) -> T {
-    unimplemented!()
-}
-pub fn get_field<T: ElementScalar>(slotnum: VOffsetT, default: T) -> T {
-    unreachable!();
-    //let off = self.compute_vtable_offset(slotnum);
-    //if off == 0 {
-    //    return default;
-    //}
-    //read_scalar_at::<T>(&self.data, off as usize)
-}
-
-//use std::marker::PhantomData;
-
-//pub fn read_scalar<T: Sized + Clone>(x: &[u8]) -> T {
-//    let p = x.as_ptr();
-//    let x = unsafe {
-//        let p2 = std::mem::transmute::<*const u8, *const T>(p);
-//        (*p2).clone()
-//    };
-//    x
-//    //x.from_le()
-//}
-
 
 #[derive(Debug)]
 pub struct FollowStart<T>(PhantomData<T>);

@@ -399,11 +399,11 @@ class RustGenerator : public BaseGenerator {
           code_.SetValue("ID", "nullptr");
         }
 
-        code_ += "#[inline]";
-        code_ += "pub fn Verify{{STRUCT_NAME}}Buffer(";
-        code_ += "    verifier: &mut flatbuffers::Verifier) -> bool {";
-        code_ += "  return verifier.verify_buffer::<{{CPP_NAME}}>({{ID}});";
-        code_ += "}";
+        code_ += "//#[inline]";
+        code_ += "//pub fn Verify{{STRUCT_NAME}}Buffer(";
+        code_ += "//    verifier: &mut flatbuffers::Verifier) -> bool {";
+        code_ += "//  return verifier.verify_buffer::<{{CPP_NAME}}>({{ID}});";
+        code_ += "//}";
         code_ += "";
 
         if (parser_.file_extension_.length()) {
@@ -1311,6 +1311,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   void GenUnionPost(const EnumDef &enum_def) {
+    return;
     // Generate a verifier function for this union that can be called by the
     // table verifier functions. It uses a switch case to select a specific
     // verifier function to call, this should be safe even if the union type
@@ -2341,17 +2342,17 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
     code_ += "// impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {";
     code_ += "//impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
-    code_ += "impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
-    code_ += "    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {";
-    code_ += "        {{STRUCT_NAME}} {";
-    code_ += "            _tab: flatbuffers::Table {";
-    code_ += "                buf: buf,";
-    code_ += "                loc: loc,";
-    code_ += "            },";
-    code_ += "            _phantom: PhantomData,";
-    code_ += "        }";
-    code_ += "    }";
-    code_ += "}";
+    code_ += "//impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
+    code_ += "//    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {";
+    code_ += "//        {{STRUCT_NAME}} {";
+    code_ += "//            _tab: flatbuffers::Table {";
+    code_ += "//                buf: buf,";
+    code_ += "//                loc: loc,";
+    code_ += "//            },";
+    code_ += "//            _phantom: PhantomData,";
+    code_ += "//        }";
+    code_ += "//    }";
+    code_ += "//}";
     code_ += "impl<'a> {{STRUCT_NAME}}<'a> /* private flatbuffers::Table */ {";
     code_ += "    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {";
     code_ += "        {{STRUCT_NAME}} {";
