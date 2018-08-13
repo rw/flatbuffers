@@ -364,7 +364,7 @@ pub struct Table2<'a> {
 impl<'a> Follow<'a> for Table2<'a> {
     type Inner = Table2<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for Table2 with {:?}", &buf[loc..]);
+        //println!("entering follow for Table2 with {:?}", &buf[loc..]);
         Table2{buf: buf, loc: loc}
     }
 }
@@ -379,7 +379,7 @@ impl<'a> Table2<'a> {
     pub fn get<T: Follow<'a> + 'a>(&'a self, slot_byte_loc: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
         assert!(slot_byte_loc as usize >= SIZE_VOFFSET + SIZE_VOFFSET);
         let o = self.vtable().get(slot_byte_loc) as usize;
-        println!("get_slot_follow: vtable lookup gave {}", o);
+        //println!("get_slot_follow: vtable lookup gave {}", o);
         if o == 0 {
             return default;
         }
@@ -387,230 +387,6 @@ impl<'a> Table2<'a> {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Table<'a> {
-    pub data: &'a [u8],
-    pub pos: usize,
-}
-
-impl<'a> BufferBacked<'a> for Table<'a> {
-    fn init_from_bytes(data: &'a [u8], pos: usize) -> Self {
-	let pos = read_scalar::<UOffsetT>(data) as usize;
-        Table {
-            data: data,
-            pos: pos,
-        }
-    }
-}
-impl<'a> Table<'a> {
-    pub fn new<'before: 'a>(data: &'before [u8], pos: UOffsetT) -> Self {
-        Table {
-            data: data,
-            pos: pos as usize,
-        }
-    }
-
-    pub fn get_slot_bool(&self, slotnum: VOffsetT, default: bool) -> bool {
-        unimplemented!();
-        return true;
-    }
-    pub fn get_slot_union_table(&self, slotoff: VOffsetT) -> Option<Table> {
-        let o = self.compute_vtable_offset(slotoff) as usize;
-        if o == 0 {
-            return None;
-        }
-        let off = o + self.pos;
-        let off2 = read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        let t2 = Table {
-            data: self.data,
-            pos: off + off2,
-        };
-        Some(t2)
-    }
-    //pub fn get_slot_byte_string(&'a self, slotoff: VOffsetT) -> Option<Vector<&'a u8]>> {
-    //    //self.get_slot_vector::<Offset<Offset<&str>>>(slotoff)
-    //    //self.get_slot_vector(slotoff)
-    //    match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
-    //        0 => { None }
-    //        o => {
-    //            let off: Offset<&'a u8> = Offset::new(0);
-    //            let buf: &'a [u8] = &self.data[self.pos..];
-    //            Some(off.follow(buf))
-    //        }
-    //    }
-    //}
-    pub fn get_slot_string(&'a self, slotoff: VOffsetT) -> Option<&'a str> {
-        //self.get_slot_vector::<Offset<Offset<&str>>>(slotoff)
-        //self.get_slot_vector(slotoff)
-        match self.get_slot_scalar::<UOffsetT>(slotoff, 0) {
-            0 => { None }
-            o => {
-                return None;
-                //let off: Offset<&'a str> = Offset::new(0);
-                ////let buf: &'a [u8] = &self.data[self.pos..];
-                //Some(off.follow(self.data, self.pos))
-            }
-	}
-
-        //let o = self.compute_vtable_offset(slotoff) as usize;
-        //if o == 0 {
-        //    return None;
-        //}
-        //let off = o + self.pos;
-        //let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        ////let fbs: FBString<'a> = FBString::new(&self.data[off2..]);
-        //return Some(FBString::new(&self.data[off2..]).into_str());
-        //return Some(fbs.as_str());
-        //let start = off2 + SIZE_UOFFSET as usize;
-        //let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
-        //let buf = &self.data[start..start+length];
-        //let s: &str = unsafe {
-        //    let v = std::slice::from_raw_parts(buf.as_ptr(), length);
-        //    // from str::from_utf8_unchecked which is nightly
-        //    &*(v as *const [u8] as *const str)
-        //};
-        //Some(s)
-    }
-    //pub fn get_slot_vector<T>(&'a self, slotnum: VOffsetT) -> Option<&'a [T]> {
-    //pub fn get_slot_string(&'a self, slotnum: VOffsetT) -> Option<FBString<'a>> {
-    //    return None;
-    //    //let x: Option<Vector<u8>> = self.get_slot_vector(slotnum);
-    //    //x
-    //    //match x {
-    //    //    None => { return None; }
-    //    //    Some(v) => { return None; }
-    //    //}
-    //}
-    //pub fn get_slot_vector<T: VectorGettable<'a>>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
-    pub fn get_slot_follow<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
-        let o = self.compute_vtable_offset(slotnum) as usize;
-        if o == 0 {
-            if default.is_some() {
-                return default;
-            }
-        }
-
-        unimplemented!();
-        //let off = (o + self.pos) as UOffsetT;
-        //let off2 = off + read_scalar_at::<UOffsetT>(self.data, off as usize);
-        //Some(val)
-    }
-    pub fn get_slot_vector_follow<T: Follow<'a> + 'a>(&'a self, slotnum: VOffsetT) -> Option<T::Inner> {
-        let o = self.compute_vtable_offset(slotnum) as usize;
-        if o == 0 {
-            return None;
-        }
-
-        let off = (o + self.pos) as UOffsetT;
-        let off2 = off + read_scalar_at::<UOffsetT>(self.data, off as usize);
-        unimplemented!();
-        ////let x: Offset<T> = Offset::new(off2);
-        ////let buf2 = &self.data[self.pos..];
-        ////Some(x.follow(buf2))
-        //////return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
-    }
-    pub fn get_slot_vector<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<Vector<'a, T>> {
-        let o = self.compute_vtable_offset(slotnum) as usize;
-        if o == 0 {
-            return None;
-        }
-	unimplemented!();
-        let off = o + self.pos;
-        let off2 = off + read_scalar_at::<UOffsetT>(self.data, off) as usize;
-        //return Some(Vector::new(&self.data[off2..]));
-        //return Some(Vector::new(&self.data[off2..], &self.data[self.pos..]));
-        //let start = off2 + SIZE_UOFFSET as usize;
-
-        //let length = read_scalar_at::<UOffsetT>(self.data, off2) as usize;
-        //let length_u8 = length * std::mem::size_of::<T>();
-
-        //let buf = &self.data[start..start+length_u8];
-        ////let ptr = buf.as_ptr() as *const T;
-
-        ////let s: &[T] = unsafe {
-        ////    std::slice::from_raw_parts(ptr, length)
-        ////};
-        //let v = Vector::new(buf);
-        //Some(v)
-    }
-    pub fn get_slot_struct<T: 'a>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
-        self.get_slot_struct_unsafe(slotnum)
-    }
-    pub fn get_slot_struct_unsafe<T>(&'a self, slotnum: VOffsetT) -> Option<&'a T> {
-        let off = self.compute_vtable_offset(slotnum) as usize;
-        if off == 0 {
-            return None;
-        }
-
-        let loc = self.pos + off;
-        let buf = &self.data[loc..];//loc+std::mem::size_of::<T>()];
-        let ptr = buf.as_ptr() as *const T;
-        let x: &T = unsafe {
-            &*ptr
-        };
-        Some(x)
-
-
-        //read_scalar_at::<T>(self.data, self.pos + off)
-    }
-    fn get_vtable(&self) -> &[u8] {
-        let rev_off = read_scalar_at::<SOffsetT>(self.data, self.pos) as usize;
-        &self.data[self.pos - rev_off..]
-    }
-    fn get_optional_field_offset(&self, slotoff: VOffsetT) -> VOffsetT {
-        // The vtable offset is always at the start.
-        let vtable = self.get_vtable();
-        // The first element is the size of the vtable (fields + type id + itself).
-        let vtsize = read_scalar::<VOffsetT>(vtable);
-        // If the field we're accessing is outside the vtable, we're reading older
-        // data, so it's the same as if the offset was 0 (not present).
-        if slotoff < vtsize {
-            read_scalar_at::<VOffsetT>(vtable, slotoff as usize)
-        } else {
-            0
-        }
-    }
-    pub fn get_slot_scalar<T: ElementScalar>(&self, slotoff: VOffsetT, default: T) -> T {
-        let field_offset = self.get_optional_field_offset(slotoff);
-        if field_offset == 0 {
-            default
-        } else {
-            read_scalar_at::<T>(self.data, self.pos + field_offset as usize)
-        }
-        //return field_offset ? ReadScalar<T>(data_ + field_offset) : defaultval;
-        //let off = self.compute_vtable_offset(slotnum) as usize;
-        //if off == 0 {
-        //    println!("get_slot_scalar: slotnum={}, off={}, self.data={:?}", slotnum, off, self.data);
-        //    return default;
-        //}
-        //read_scalar_at::<T>(self.data, self.pos + off)
-    }
-    //pub fn get_struct<T: Sized>(&'a self, slotnum: VOffsetT) -> &'a T {
-    //    let field_offset = GetOptionalFieldOffset(field);
-    //    auto p = const_cast<uint8_t *>(data_ + field_offset);
-
-    //}
-    pub fn compute_vtable_offset(&self, vtable_offset: VOffsetT) -> VOffsetT {
-        let vtable_start = {
-            let a = self.pos as SOffsetT;
-            let b = read_scalar_at::<SOffsetT>(self.data, self.pos);
-            let c = (a - b);
-            println!("a: {}, b: {}, c: {}", a, b,c);
-            assert!(c >= 0);
-            c as usize
-            //assert!(a - b >= 0, format!("vtable_offset: {}, a: {}, b: {}, self.pos: {}", vtable_offset, a, b, self.pos));
-            //(a - b) as usize
-        };
-        let vtsize = read_scalar_at::<VOffsetT>(self.data, vtable_start);
-        if vtable_offset >= vtsize {
-            return 0;
-        }
-        read_scalar_at::<VOffsetT>(self.data, vtable_start + vtable_offset as usize)
-    }
-}
-pub struct Struct<'a> {
-    _data: &'a [u8],
-}
 pub struct Verifier {}
 impl Verifier {
     pub fn new() -> Self {
@@ -1777,7 +1553,7 @@ pub struct VTable<'a> {
 impl<'a> Follow<'a> for VTable<'a> {
     type Inner = VTable<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for VTable with {:?}", &buf[loc..]);
+        //println!("entering follow for VTable with {:?}", &buf[loc..]);
         VTable{buf: buf, loc: loc}
     }
 }
@@ -1802,7 +1578,7 @@ impl<'a> VTable<'a> {
         read_scalar_at::<VOffsetT>(self.buf, self.loc + SIZE_VOFFSET + SIZE_VOFFSET + SIZE_VOFFSET * idx)
     }
     pub fn get(&self, byte_loc: VOffsetT) -> VOffsetT {
-        println!("vtable get byte_loc = {}. num_bytes == {}", byte_loc, self.num_bytes());
+        //println!("vtable get byte_loc = {}. num_bytes == {}", byte_loc, self.num_bytes());
         // TODO(rw): distinguish between None and 0?
         if byte_loc as usize >= self.num_bytes() {
             return 0;
@@ -1819,7 +1595,7 @@ pub trait Follow<'a> {
 impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU32Offset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for ForwardsU32Offset<T> with {:?}", &buf[loc..]);
+       //println!("entering follow for ForwardsU32Offset<T> with {:?}", &buf[loc..]);
         let slice = &buf[loc..loc + SIZE_UOFFSET];
         let off = read_scalar::<u32>(slice) as usize;
         T::follow(buf, loc + off)
@@ -1829,7 +1605,7 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU32Offset<T> {
 impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU16Offset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for ForwardsU16Offset<T> with {:?}", &buf[loc..]);
+       //println!("entering follow for ForwardsU16Offset<T> with {:?}", &buf[loc..]);
         let slice = &buf[loc..loc + 2];
         let off = read_scalar::<u16>(slice) as usize;
         T::follow(buf, loc + off)
@@ -1838,7 +1614,7 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU16Offset<T> {
 impl<'a, T: Follow<'a>> Follow<'a> for BackwardsI32Offset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for ForwardsI32Offset<T> with {:?}", &buf[loc..]);
+        //println!("entering follow for ForwardsI32Offset<T> with {:?}", &buf[loc..]);
         let slice = &buf[loc..loc + 4];
         let off = read_scalar::<i32>(slice);
         T::follow(buf, (loc as i32 - off) as usize)
@@ -1847,7 +1623,7 @@ impl<'a, T: Follow<'a>> Follow<'a> for BackwardsI32Offset<T> {
 impl<'a> Follow<'a> for &'a str {
     type Inner = &'a str;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for &'a str with {:?}", &buf[loc..]);
+        //println!("entering follow for &'a str with {:?}", &buf[loc..]);
         let len = read_scalar::<u32>(&buf[loc..loc + 4]) as usize;
         let slice = &buf[loc + 4..loc + 4 + len];
         let s = unsafe { std::str::from_utf8_unchecked(slice) };
@@ -1858,7 +1634,7 @@ impl<'a> Follow<'a> for &'a str {
 impl<'a, T: Sized> Follow<'a> for &'a [T] {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for &'a [T] with {:?}", &buf[loc..]);
+        //println!("entering follow for &'a [T] with {:?}", &buf[loc..]);
         let sz = std::mem::size_of::<T>();
         assert!(sz > 0);
         let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
@@ -1872,7 +1648,7 @@ impl<'a, T: Sized> Follow<'a> for &'a [T] {
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Vector<'a, T> {
     type Inner = Vector<'a, T>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        println!("entering follow for Vector<T> with {:?}", &buf[loc..]);
+        //println!("entering follow for Vector<T> with {:?}", &buf[loc..]);
         Vector::new(buf, loc)
     }
 }
@@ -1886,7 +1662,7 @@ impl<'a, T: Follow<'a>> Vector<'a, T> {
     }
     pub fn get(&self, idx: usize) -> T::Inner {
         assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
-        println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
+        //println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
         let sz = std::mem::size_of::<T>();
         assert!(sz > 0);
         T::follow(self.0, self.1 as usize + 4 + sz * idx)
@@ -1917,7 +1693,7 @@ impl<'a, T: Sized> Follow<'a> for &'a T {
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let sz = std::mem::size_of::<T>();
         let buf = &buf[loc..loc + sz];
-        println!("entering follow for Sized ref with {:?}", buf);
+        //println!("entering follow for Sized ref with {:?}", buf);
         let ptr = buf.as_ptr() as *const T;
         unsafe { &*ptr }
     }
