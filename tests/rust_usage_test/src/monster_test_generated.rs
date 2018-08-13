@@ -734,8 +734,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn test4(&'a self) -> Option<&'a [Test]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Test]>>(Monster::VT_TEST4, None)
   }
-  pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<&'a str>>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<&'a [&'a str]>>(Monster::VT_TESTARRAYOFSTRING, None)
+  pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<&'a str>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<&'a str>>>(Monster::VT_TESTARRAYOFSTRING, None)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
@@ -790,8 +790,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn testf3(&'a self) -> f32 {
     self._tab.get::<f32>(Monster::VT_TESTF3, Some(0.0)).unwrap()
   }
-  pub fn testarrayofstring2(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<&'a str>>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<&'a [&'a str]>>(Monster::VT_TESTARRAYOFSTRING2, None)
+  pub fn testarrayofstring2(&'a self) -> Option<flatbuffers::Vector<&'a str>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<&'a str>>>(Monster::VT_TESTARRAYOFSTRING2, None)
   }
   pub fn testarrayofsortedstruct(&'a self) -> Option<&'a [Ability]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Ability]>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
