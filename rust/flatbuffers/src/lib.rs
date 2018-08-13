@@ -355,37 +355,6 @@ pub type ByteString<'a> = Vector<'a, u8>;
 //    //}
 //}
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Table2<'a> {
-    pub buf: &'a [u8],
-    pub loc: usize,
-}
-
-impl<'a> Follow<'a> for Table2<'a> {
-    type Inner = Table2<'a>;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        //println!("entering follow for Table2 with {:?}", &buf[loc..]);
-        Table2{buf: buf, loc: loc}
-    }
-}
-
-impl<'a> Table2<'a> {
-    pub fn new(buf: &'a [u8], loc: usize) -> Table2 {
-        Table2 { buf: buf, loc: loc}
-    }
-    pub fn vtable(&'a self) -> VTable<'a> {
-        <BackwardsI32Offset<VTable<'a>>>::follow(self.buf, self.loc)
-    }
-    pub fn get<T: Follow<'a> + 'a>(&'a self, slot_byte_loc: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
-        assert!(slot_byte_loc as usize >= SIZE_VOFFSET + SIZE_VOFFSET);
-        let o = self.vtable().get(slot_byte_loc) as usize;
-        //println!("get_slot_follow: vtable lookup gave {}", o);
-        if o == 0 {
-            return default;
-        }
-        Some(<T>::follow(self.buf, self.loc + o))
-    }
-}
 
 pub struct Verifier {}
 impl Verifier {
@@ -1544,6 +1513,36 @@ pub struct ForwardsU16Offset<T>(u16, PhantomData<T>); // data unused
 #[derive(Debug)]
 pub struct BackwardsI32Offset<T>(i32, PhantomData<T>); // data unused
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Table<'a> {
+    pub buf: &'a [u8],
+    pub loc: usize,
+}
+
+impl<'a> Follow<'a> for Table<'a> {
+    type Inner = Table<'a>;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        Table{buf: buf, loc: loc}
+    }
+}
+
+impl<'a> Table<'a> {
+    pub fn new(buf: &'a [u8], loc: usize) -> Table {
+        Table { buf: buf, loc: loc}
+    }
+    pub fn vtable(&'a self) -> VTable<'a> {
+        <BackwardsI32Offset<VTable<'a>>>::follow(self.buf, self.loc)
+    }
+    pub fn get<T: Follow<'a> + 'a>(&'a self, slot_byte_loc: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
+        assert!(slot_byte_loc as usize >= SIZE_VOFFSET + SIZE_VOFFSET);
+        let o = self.vtable().get(slot_byte_loc) as usize;
+        if o == 0 {
+            return default;
+        }
+        Some(<T>::follow(self.buf, self.loc + o))
+    }
+}
+
 #[derive(Debug)]
 pub struct VTable<'a> {
     buf: &'a [u8],
@@ -1560,11 +1559,10 @@ impl<'a> Follow<'a> for VTable<'a> {
 
 impl<'a> VTable<'a> {
     pub fn num_fields(&self) -> usize {
-        self.num_fields() as usize - (2*SIZE_VOFFSET) / SIZE_VOFFSET
+        (self.num_bytes() / SIZE_VOFFSET) - 2
     }
     pub fn num_bytes(&self) -> usize {
-        let n = read_scalar_at::<VOffsetT>(self.buf, self.loc);
-        n as usize
+        read_scalar_at::<VOffsetT>(self.buf, self.loc) as usize
     }
     pub fn table_inline_num_bytes(&self) -> usize {
         let n = read_scalar_at::<VOffsetT>(self.buf, self.loc + SIZE_VOFFSET);

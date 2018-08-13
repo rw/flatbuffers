@@ -18,13 +18,13 @@ pub mod MyGame {
 pub enum InParentNamespaceOffset {}
 #[derive(Copy, Clone, PartialEq)]
 pub struct InParentNamespace<'a> {
-  pub _tab: flatbuffers::Table2<'a>,
+  pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
     type Inner = InParentNamespace<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table2 { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 // impl<'a> flatbuffers::Table for InParentNamespace<'a> {
@@ -32,7 +32,7 @@ impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
     fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
         InParentNamespace {
-            _tab: flatbuffers::Table2 {
+            _tab: flatbuffers::Table {
                 buf: buf,
                 loc: loc,
             },
@@ -41,7 +41,7 @@ impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
     }
 }
 impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
-    pub fn init_from_table(table: flatbuffers::Table2<'a>) -> Self {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         InParentNamespace {
             _tab: table,
             _phantom: PhantomData,
@@ -104,13 +104,13 @@ pub mod Example2 {
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, PartialEq)]
 pub struct Monster<'a> {
-  pub _tab: flatbuffers::Table2<'a>,
+  pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table2 { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
@@ -118,7 +118,7 @@ impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
     fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
         Monster {
-            _tab: flatbuffers::Table2 {
+            _tab: flatbuffers::Table {
                 buf: buf,
                 loc: loc,
             },
@@ -127,7 +127,7 @@ impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
     }
 }
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
-    pub fn init_from_table(table: flatbuffers::Table2<'a>) -> Self {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
             _tab: table,
             _phantom: PhantomData,
@@ -439,13 +439,13 @@ impl Ability {
 pub enum TestSimpleTableWithEnumOffset {}
 #[derive(Copy, Clone, PartialEq)]
 pub struct TestSimpleTableWithEnum<'a> {
-  pub _tab: flatbuffers::Table2<'a>,
+  pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
     type Inner = TestSimpleTableWithEnum<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table2 { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 // impl<'a> flatbuffers::Table for TestSimpleTableWithEnum<'a> {
@@ -453,7 +453,7 @@ impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for TestSimpleTableWithEnum<'a> {
     fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
         TestSimpleTableWithEnum {
-            _tab: flatbuffers::Table2 {
+            _tab: flatbuffers::Table {
                 buf: buf,
                 loc: loc,
             },
@@ -462,7 +462,7 @@ impl<'a> flatbuffers::BufferBacked<'a> for TestSimpleTableWithEnum<'a> {
     }
 }
 impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
-    pub fn init_from_table(table: flatbuffers::Table2<'a>) -> Self {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TestSimpleTableWithEnum {
             _tab: table,
             _phantom: PhantomData,
@@ -523,13 +523,13 @@ pub fn CreateTestSimpleTableWithEnum<'a: 'b, 'b: 'c, 'c>(
 pub enum StatOffset {}
 #[derive(Copy, Clone, PartialEq)]
 pub struct Stat<'a> {
-  pub _tab: flatbuffers::Table2<'a>,
+  pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
     type Inner = Stat<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table2 { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 // impl<'a> flatbuffers::Table for Stat<'a> {
@@ -537,7 +537,7 @@ impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
     fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
         Stat {
-            _tab: flatbuffers::Table2 {
+            _tab: flatbuffers::Table {
                 buf: buf,
                 loc: loc,
             },
@@ -546,7 +546,7 @@ impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
     }
 }
 impl<'a> Stat<'a> /* private flatbuffers::Table */ {
-    pub fn init_from_table(table: flatbuffers::Table2<'a>) -> Self {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Stat {
             _tab: table,
             _phantom: PhantomData,
@@ -628,13 +628,13 @@ pub fn CreateStat<'a: 'b, 'b: 'c, 'c>(
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, PartialEq)]
 pub struct Monster<'a> {
-  pub _tab: flatbuffers::Table2<'a>,
+  pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table2 { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
@@ -642,7 +642,7 @@ impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
     fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
         Monster {
-            _tab: flatbuffers::Table2 {
+            _tab: flatbuffers::Table {
                 buf: buf,
                 loc: loc,
             },
@@ -651,7 +651,7 @@ impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
     }
 }
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
-    pub fn init_from_table(table: flatbuffers::Table2<'a>) -> Self {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
             _tab: table,
             _phantom: PhantomData,
@@ -728,8 +728,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn test_type(&'a self) -> Any {
     unsafe { ::std::mem::transmute(self._tab.get::<u8>(Monster::VT_TEST_TYPE, Some(Any::NONE as u8)).unwrap()) }
   }
-  pub fn test(&'a self) -> Option<flatbuffers::Table2<'a>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Table2<'a>>>(Monster::VT_TEST, None)
+  pub fn test(&'a self) -> Option<flatbuffers::Table<'a>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Table<'a>>>(Monster::VT_TEST, None)
   }
   pub fn test4(&'a self) -> Option<&'a [Test]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Test]>>(Monster::VT_TEST4, None)
@@ -1133,13 +1133,13 @@ pub fn CreateMonster<'a: 'b, 'b: 'c, 'c>(
 pub enum TypeAliasesOffset {}
 #[derive(Copy, Clone, PartialEq)]
 pub struct TypeAliases<'a> {
-  pub _tab: flatbuffers::Table2<'a>,
+  pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
 impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
     type Inner = TypeAliases<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table2 { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 // impl<'a> flatbuffers::Table for TypeAliases<'a> {
@@ -1147,7 +1147,7 @@ impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
 impl<'a> flatbuffers::BufferBacked<'a> for TypeAliases<'a> {
     fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
         TypeAliases {
-            _tab: flatbuffers::Table2 {
+            _tab: flatbuffers::Table {
                 buf: buf,
                 loc: loc,
             },
@@ -1156,7 +1156,7 @@ impl<'a> flatbuffers::BufferBacked<'a> for TypeAliases<'a> {
     }
 }
 impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
-    pub fn init_from_table(table: flatbuffers::Table2<'a>) -> Self {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TypeAliases {
             _tab: table,
             _phantom: PhantomData,
