@@ -732,15 +732,15 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get_slot_union_table(Monster::VT_TEST)
   }
   pub fn test4(&'a self) -> Option<&'a [Test]> {
-    self._tab.get::<&[Test]>(Monster::VT_TEST4, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&[Test]>>(Monster::VT_TEST4, None)
   }
   pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<&'a str>>> {
-    self._tab.get_slot_vector::<flatbuffers::Offset<&'a str>>(Monster::VT_TESTARRAYOFSTRING)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&'a [&'a str]>>(Monster::VT_TESTARRAYOFSTRING, None)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
-  pub fn testarrayoftables(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<Monster<'a>>>> {
-    self._tab.get_slot_vector::<flatbuffers::Offset<Monster<'a>>>(Monster::VT_TESTARRAYOFTABLES)
+  pub fn testarrayoftables(&'a self) -> Option<flatbuffers::Vector<Monster<'a>>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Monster<'a>>>>(Monster::VT_TESTARRAYOFTABLES, None)
   }
   pub fn enemy(&'a self) -> Option<&'a Monster<'a>> {
     self._tab.get_slot_struct::<Monster>(Monster::VT_ENEMY)
@@ -791,16 +791,16 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get::<f32>(Monster::VT_TESTF3, Some(0.0)).unwrap()
   }
   pub fn testarrayofstring2(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<&'a str>>> {
-    self._tab.get_slot_vector::<flatbuffers::Offset<&'a str>>(Monster::VT_TESTARRAYOFSTRING2)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&'a [&'a str]>>(Monster::VT_TESTARRAYOFSTRING2, None)
   }
   pub fn testarrayofsortedstruct(&'a self) -> Option<&'a [Ability]> {
-    self._tab.get::<&[Ability]>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&[Ability]>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
   }
   pub fn flex(&'a self) -> Option<&'a [u8]> {
     self._tab.get::<&[u8]>(Monster::VT_FLEX, None)
   }
   pub fn test5(&'a self) -> Option<&'a [Test]> {
-    self._tab.get::<&[Test]>(Monster::VT_TEST5, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&[Test]>>(Monster::VT_TEST5, None)
   }
   pub fn vector_of_longs(&'a self) -> Option<&'a [i64]> {
     self._tab.get::<&[i64]>(Monster::VT_VECTOR_OF_LONGS, None)
@@ -817,11 +817,11 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn foo1(&'a self) -> Option<&'a Test> {
     self._tab.get_slot_struct::<Test>(Monster::VT_FOO1)
   }
-  pub fn foo2(&'a self) -> Option<flatbuffers::Vector<'a, flatbuffers::Offset<super::InParentNamespace<'a>>>> {
-    self._tab.get_slot_vector::<flatbuffers::Offset<super::InParentNamespace<'a>>>(Monster::VT_FOO2)
+  pub fn foo2(&'a self) -> Option<flatbuffers::Vector<super::InParentNamespace<'a>>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<super::InParentNamespace<'a>>>>(Monster::VT_FOO2, None)
   }
   pub fn foo3(&'a self) -> Option<&'a [Vec3]> {
-    self._tab.get::<&[Vec3]>(Monster::VT_FOO3, None)
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&[Vec3]>>(Monster::VT_FOO3, None)
   }
   pub fn foo4(&'a self) -> Color {
     unsafe { ::std::mem::transmute(self._tab.get::<i8>(Monster::VT_FOO4, Some(Color::Green as i8)).unwrap()) }
