@@ -356,13 +356,8 @@ class RustGenerator : public BaseGenerator {
         code_ +=
             "pub fn GetRootAs{{STRUCT_NAME}}<'a>(buf: &'a [u8])"
             " -> {{CPP_NAME}}<'a> {{NULLABLE_EXT}} {";
-        code_ += "  //return flatbuffers::get_root::<&{{CPP_NAME}}>(buf);";
-        code_ += "  //return flatbuffers::get_root::<{{CPP_NAME}}>(buf);";
-        code_ += "  //let off: flatbuffers::Offset<flatbuffers::Offset<{{CPP_NAME}}<'a>>> = flatbuffers::Offset::new(0);";
         code_ += "  use self::flatbuffers::Follow;";
         code_ += "  <flatbuffers::ForwardsU32Offset<{{CPP_NAME}}<'a>>>::follow(buf, 0)";
-        code_ += "  //unimplemented!()";
-        code_ += "  //off.follow(buf, 0).clone()";
         code_ += "}";
         code_ += "";
 
@@ -1111,12 +1106,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "}";
     code_.SetValue("ENUM_NAME", Name(enum_def));
-    code_ += "//impl<'a> flatbuffers::Follow<'a> for {{ENUM_NAME}} {";
-    code_ += "//    type Inner = &'a {{ENUM_NAME}};";
-    code_ += "//    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "//        self";
-    code_ += "//    }";
-    code_ += "//}";
 
     //     code_ += "//#[repr({{BASE_TYPE}})]";
     //     code_ += "#[derive(Clone, Copy, PartialEq, Debug)]";
@@ -3391,12 +3380,6 @@ class RustGenerator : public BaseGenerator {
     }
 
     code_ += "} // pub struct {{STRUCT_NAME}}";
-    code_ += "//impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
-    code_ += "//    type Inner = &'a {{STRUCT_NAME}};";
-    code_ += "//    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "//        self";
-    code_ += "//    }";
-    code_ += "//}";
 
     // Impl the dummy GeneratedStruct trait to help users write structs
     // correctly:
