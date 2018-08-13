@@ -161,28 +161,28 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
 //    println!("finished writing");
 }
 fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBufferBuilder) {
-//    let nested_union_mon = {
-//        let name = builder.create_string("Fred");
-//        let table_start = builder.start_table(34);
-//        builder.push_slot_offset_relative(MyGame::Example::Monster::VT_NAME, name);
-//        builder.end_table(table_start)
-//    };
-//    let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
-//    let inv = builder.create_vector(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-//
-//    // begin building
-//    let name = builder.create_string("MyMonster");
-//
-//    let table_start = builder.start_table(34);
-//    builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
+    let nested_union_mon = {
+        let name = builder.create_string("Fred");
+        let table_start = builder.start_table(34);
+        builder.push_slot_offset_relative(MyGame::Example::Monster::VT_NAME, name);
+        builder.end_table(table_start)
+    };
+    let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
+    let inv = builder.create_vector(&vec![0, 1, 2, 3, 4]);
+
+    // begin building
+    let name = builder.create_string("MyMonster");
+
+    let table_start = builder.start_table(34);
+    builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
 //    builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_MANA, 150, 150);
-//    builder.push_slot_offset_relative::<&str>(MyGame::Example::Monster::VT_NAME, name);
-//    builder.push_slot_struct(MyGame::Example::Monster::VT_POS, &pos);
-//    builder.push_slot_scalar::<u8>(MyGame::Example::Monster::VT_TEST_TYPE, MyGame::Example::Any::Monster as u8, 0);
-//    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST, nested_union_mon);
-//    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_INVENTORY, inv);
-//    let root = builder.end_table(table_start);
-//    builder.finish(root);
+    builder.push_slot_offset_relative::<&str>(MyGame::Example::Monster::VT_NAME, name);
+    builder.push_slot_struct(MyGame::Example::Monster::VT_POS, &pos);
+    builder.push_slot_scalar::<u8>(MyGame::Example::Monster::VT_TEST_TYPE, MyGame::Example::Any::Monster as u8, 0);
+    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST, nested_union_mon);
+    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_INVENTORY, inv);
+    let root = builder.end_table(table_start);
+    builder.finish(root);
 }
 
 fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatbuffers::FlatBufferBuilder) {
@@ -405,8 +405,8 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             None => { return Err("bad m.inventory"); }
             Some(x) => { x }
         };
-
-        if inv.len() != 5 { return Err("bad m.inventory len"); }
+println!("inv: {:?}", inv);
+        if inv.len() != 5 {  return Err("bad m.inventory len"); }
         let invsum: u8 = inv.iter().sum();
         if invsum != 10 { return Err("bad m.inventory sum"); }
 
@@ -2508,6 +2508,8 @@ fn create_byte_vector_fuzz() {
 fn table_of_strings_fuzz() {
     fn prop(vec: Vec<String>) {
         use flatbuffers::field_index_to_field_offset as fi2fo;
+        use flatbuffers::Follow;
+
         let xs = &vec[..];
 
         // build
@@ -2521,15 +2523,14 @@ fn table_of_strings_fuzz() {
         let root = b.end_table(table_start);
         b.finish(root);
 
-        unimplemented!();
-        //// use
-        //let buf = b.get_active_buf_slice();
-        //let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+        // use
+        let buf = b.get_active_buf_slice();
+        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(buf, 0);
 
-        //for i in 0..xs.len() {
-        //    let got = tab.get_slot_string(fi2fo(i as flatbuffers::VOffsetT));
-        //    assert_eq!(got.unwrap(), xs[i].as_str());
-        //}
+        for i in 0..xs.len() {
+            let v = tab.get::<flatbuffers::ForwardsU32Offset<&str>>(fi2fo(i as flatbuffers::VOffsetT), None);
+            assert_eq!(v, Some(&xs[i][..]));
+        }
     }
     let n = 20;
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<String>));
@@ -2538,29 +2539,30 @@ fn table_of_strings_fuzz() {
 #[test]
 fn table_of_byte_strings_fuzz() {
     fn prop(vec: Vec<Vec<u8>>) {
-	unreachable!()
-        //// use flatbuffers::field_index_to_field_offset as fi2fo;
-        //// let xs = &vec[..];
+        use flatbuffers::field_index_to_field_offset as fi2fo;
+        use flatbuffers::Follow;
 
-        //// // build
-        //// let mut b = flatbuffers::FlatBufferBuilder::new();
-        //// let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
-        //// let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
+        let xs = &vec[..];
 
-        //// for i in 0..xs.len() {
-        ////     b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
-        //// }
-        //// let root = b.end_table(table_start);
-        //// b.finish(root);
+        // build
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
+        let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
 
-        //// // use
-        //// let buf = b.get_active_buf_slice();
-        //// let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
+        for i in 0..xs.len() {
+            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+        }
+        let root = b.end_table(table_start);
+        b.finish(root);
 
-        //// for i in 0..xs.len() {
-        ////     let got = tab.get_slot_vector_follow::<flatbuffers::Offset<flatbuffers::Vector<u8>>>(fi2fo(i as flatbuffers::VOffsetT));
-        ////     assert_eq!(got.unwrap().as_slice(), &xs[i][..]);
-        //// }
+        // use
+        let buf = b.get_active_buf_slice();
+        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(buf, 0);
+
+        for i in 0..xs.len() {
+            let v = tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(i as flatbuffers::VOffsetT), None);
+            assert_eq!(v, Some(&xs[i][..]));
+        }
     }
     prop(vec![vec![1,2,3]]);
 

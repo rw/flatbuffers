@@ -333,7 +333,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
-    pub fn end_vector<'a, 'b, T: Follow<'fbb> + 'fbb>(&'a mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
+    //pub fn end_vector<'a, 'b, T: Follow<'fbb> + 'fbb>(&'a mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
+    pub fn end_vector<'a, 'b, T: 'fbb>(&'a mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
       self.assert_nested();
       self.nested = false;
       let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
@@ -513,7 +514,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     // by construction, all items used with this function will already be in little endian format.
     // TODO(rw): trait bounds. maybe require an impl for 'to_le' on everything.
     //pub fn create_vector<'a, T: 'a>(&'a mut self, items: &'a [T]) -> LabeledUOffsetT<&'fbb [T]> {
-    pub fn create_vector<'a, 'b, 'c, T: Follow<'fbb> + 'fbb>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
+    //
+    //pub fn create_vector<'a, 'b, 'c, T: Follow<'fbb> + 'fbb>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
+    pub fn create_vector<'a, 'b, 'c, T: 'fbb>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
         for i in items.iter().rev() {
@@ -768,7 +771,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_not_nested();
         self.vtables.clear();
         { let x = self.min_align; self.pre_align(SIZE_UOFFSET, x); }
-        self.push_element_scalar_indirect_uoffset(root.value());
+        //self.push_element_scalar_indirect_uoffset(root.value());
+        let fwd = self.refer_to(root.value());
+        self.push_element_scalar(fwd);
         self.finished = true;
     }
     pub fn finish_with_identifier<'a, T>(&'a mut self, root: Offset<T>, name: &'static str) {
@@ -946,6 +951,15 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
     }
 
+    pub fn absolutize_wip_offset<T>(&self, o: Offset<T>) -> UOffsetT {
+        unreachable!();
+        assert!(self.cur_idx <= self.owned_buf.len());
+        let self_front = self.owned_buf.len() as u32 - o.0;
+        let diff = self_front - self.cur_idx as u32;
+        // and take into account the size of this number...
+        (diff + SIZE_UOFFSET as u32) as UOffsetT
+    }
+
     pub fn push<T: Sized>(&mut self, x: T) {
         unreachable!();
         //println!("start of push: {}", self.cur_idx);
@@ -1063,13 +1077,13 @@ pub struct Table<'a> {
 impl<'a> Follow<'a> for Table<'a> {
     type Inner = Table<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Table{buf: buf, loc: loc}
+        Table { buf: buf, loc: loc }
     }
 }
 
 impl<'a> Table<'a> {
-    pub fn new(buf: &'a [u8], loc: usize) -> Table {
-        Table { buf: buf, loc: loc}
+    pub fn new(buf: &'a [u8], loc: usize) -> Self {
+        Table { buf: buf, loc: loc }
     }
     pub fn vtable(&'a self) -> VTable<'a> {
         <BackwardsI32Offset<VTable<'a>>>::follow(self.buf, self.loc)
@@ -1125,6 +1139,11 @@ impl<'a> VTable<'a> {
         read_scalar_at::<VOffsetT>(self.buf, self.loc + byte_loc as usize)
     }
 }
+
+//pub trait Push<'a> {
+//    type Outer;
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner;
+//}
 
 pub trait Follow<'a> {
     type Inner;
