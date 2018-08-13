@@ -406,7 +406,7 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             Some(x) => { x }
         };
 
-        if inv.len() != 5 { println!("inv.len: {}", inv.len()); return Err("bad m.inventory len"); }
+        if inv.len() != 5 { return Err("bad m.inventory len"); }
         let invsum: u8 = inv.iter().sum();
         if invsum != 10 { return Err("bad m.inventory sum"); }
 

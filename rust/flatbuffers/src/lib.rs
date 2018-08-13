@@ -93,16 +93,22 @@ impl ElementScalar for f64 {
 }
 
 pub const VTABLE_METADATA_FIELDS: usize = 2;
+
 pub const SIZE_U8: usize = 1;
 pub const SIZE_I8: usize = 1;
+
 pub const SIZE_U16: usize = 2;
 pub const SIZE_I16: usize = 2;
+
 pub const SIZE_U32: usize = 4;
 pub const SIZE_I32: usize = 4;
+
 pub const SIZE_U64: usize = 8;
 pub const SIZE_I64: usize = 8;
+
 pub const SIZE_F32: usize = 4;
 pub const SIZE_F64: usize = 8;
+
 pub const SIZE_UOFFSET: usize = SIZE_U32;
 pub const SIZE_SOFFSET: usize = SIZE_I32;
 pub const SIZE_VOFFSET: usize = SIZE_I16;
@@ -162,198 +168,6 @@ pub trait BufferBacked<'a>{
     // TODO: why isn't a default impl working here?
     fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self;
 }
-
-pub struct IndirectHelper<Input, Output> {
-    _phantom_0: PhantomData<Input>,
-    _phantom_1: PhantomData<Output>,
-}
-//pub fn follow_offset<T>(off: Offset<T>
-
-
-pub trait VectorGettable<'a> {
-    type Input: Sized;
-    type Output: Sized;
-    fn indirect_helper(&'a self, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output;
-}
-
-//impl<'a, T: ElementScalar> VectorGettable<'a> for T {
-//    type Input = T;
-//    type Output = T;
-//
-//    #[inline]
-//    fn indirect_helper(&'a self, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
-//        *self
-//    }
-//}
-
-impl<'a, T: ElementScalar> VectorGettable<'a> for T {
-    type Input = T;
-    type Output = T;
-
-    #[inline]
-    fn indirect_helper(&'a self, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
-        *self
-    }
-}
-
-//impl<'a> VectorGettable<'a> for Offset<FBString<'a>> {
-//    type Input = Offset<FBString<'a>>;
-//    type Output = &'a str;
-//    fn indirect_helper(&'a self, vecdata: &'a [Self::Input], all_data: &'a [u8]) -> Self::Output {
-//        let off = self.value() as usize;
-//        let s_vec: FBString<'_> = Vector::new(&all_data[off..], all_data);
-//        s_vec.unsafe_into_str()
-//    }
-//}
-
-//impl<T> VectorGettable for Offset<T> {
-//    type Output = T;
-//    fn indirect_helper(&self, i: usize, vecdata: &[T], all_data: &[u8]) -> Self::Output {
-//        vecdata[i]
-//    }
-//}
-
-//#[derive(Debug, PartialEq)]
-//pub struct Vector<'a, T: Follow<'a> + 'a>(&'a [u8], PhantomData<T>);
-//pub struct Vector<'a, T: Sized + 'a> {
-//    data: &'a [u8],
-//    _phantom: PhantomData<T>,
-//}
-
-//impl<'a, T: VectorGettable<'a> + Sized + 'a> Vector<'a, T> {
-//////impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
-//////    pub fn new(buf_with_veclen: &'a [u8]) -> Self {
-//////        //println!("vecbuf: {:?}", buf);
-//////        assert!(buf_with_veclen.len() >= SIZE_UOFFSET);
-//////        let elem_sz = std::mem::size_of::<T>();
-//////        let num_elems = read_scalar::<UOffsetT>(buf_with_veclen) as usize;
-//////        assert!(buf_with_veclen.len() - SIZE_UOFFSET >= num_elems*elem_sz,
-//////                format!("buf_with_veclen.len(): {}, num_elems: {}, elem_sz: {}", buf_with_veclen.len(), num_elems, elem_sz));
-//////        Self { 0: buf_with_veclen, 1: PhantomData }
-//////    }
-//////    pub fn len(&self) -> usize {
-//////        read_scalar::<UOffsetT>(self.0) as usize
-//////    }
-//////    pub fn len_bytes(&self) -> usize {
-//////        read_scalar::<UOffsetT>(self.0) as usize * std::mem::size_of::<T>()
-//////    }
-//////    pub fn get(&'a self, idx: usize) -> T::Inner {
-//////        assert!(idx < self.len());
-//////        let off = SIZE_UOFFSET + std::mem::size_of::<T>() * idx;
-//////        let ptr = (&self.0[off..]).as_ptr() as *const T;
-//////        let x = unsafe { &*ptr };
-//////        x.follow(self.0, off)
-//////            //std::mem::transmute::<_, T>(self.0[idx])
-//////
-//////        //let x: VectorGettable<Input=_,Output=_> = self.0[idx];
-//////        //unimplemented!()
-//////        //&x.indirect_helper(self.0, self.1)
-//////        //x
-//////    }
-//////    pub fn as_slice(&self) -> &'a [T] {
-//////        let ptr = self.0[SIZE_UOFFSET..].as_ptr() as *const T;
-//////        let len = self.len();
-//////        let s: &[T] = unsafe {
-//////            std::slice::from_raw_parts(ptr, len)
-//////        };
-//////        s
-//////    }
-//////    pub fn as_slice_bytes(&self) -> &'a [u8] {
-//////        &self.0[SIZE_UOFFSET..SIZE_UOFFSET + self.len_bytes()]
-//////    }
-//////}
-//impl<'a, T: ElementScalar> Vector<'a, T> {
-//    pub fn get(&'a self, idx: usize) -> &'a T {
-//        &self.0[idx]
-//        //T::indirect_helper(idx, self.0, self.all_buf)
-//    }
-//}
-//impl<'a, T: UOF> Vector<'a, Offset<Vector<'a, T>>> {
-//    pub fn get(&'a self, idx: usize) -> &'a T {
-//        &self.0[idx].value()
-//        //T::indirect_helper(idx, self.0, self.all_buf)
-//    }
-//}
-//impl<'a, T> Vector<'a, Offset<T>> {
-//    pub fn get(&'a self, idx: usize) -> &'a T {
-//        &self.0[idx].value()
-//        //T::indirect_helper(idx, self.0, self.all_buf)
-//    }
-//}
-//impl<'a> Vector<'a, Offset<FBString<'a>>> {
-//    pub fn get(&'a self, idx: usize) -> &'a str {
-//        unimplemented!()
-//        //let off = self.0[idx].value() as usize;
-//        //T::indirect_helper(idx, self.0, self.all_buf)
-//    }
-//}
-
-
-//pub struct String<'a> {
-//    data: &'a [u8],
-//}
-//pub type FBString<'a> = Vector<'a, u8>;
-//impl<'a> FBString<'a> {
-//    pub fn as_str(&'a self) -> &'a str {
-//        unsafe {
-//            std::str::from_utf8_unchecked(self.0)
-//        }
-//    }
-//    pub fn unsafe_into_str(self) -> &'a str {
-//        unsafe {
-//            std::str::from_utf8_unchecked(self.0)
-//        }
-//    }
-//}
-//impl<'a> std::convert::AsRef<str> for FBString<'a> {
-//    fn as_ref(&self) -> &str {
-//        self.as_str()
-//    }
-//}
-//impl<'a> std::ops::Deref for FBString<'a> {
-//    type Target = str;
-//    fn deref(&self) -> &str {
-//        self.as_str()
-//    }
-//}
-pub type ByteString<'a> = Vector<'a, u8>;
-
-//impl<'a, T> Vector<'a, T> {
-//    pub fn new_from_buf(buf: &'a [u8]) -> Self {
-//        let len = {
-//            let p = buf.as_ptr() as *const u32;
-//            let x = unsafe { *p };
-//            x.from_le() as usize
-//        };
-//        let slice = {
-//            let p = buf[SIZE_UOFFSET..].as_ptr() as *const T;
-//            unsafe {
-//                std::slice::from_raw_parts(p, len)
-//            }
-//        };
-//        Self {
-//            data: slice,
-//        }
-//    }
-//    pub fn get(&self, idx: usize) -> &T {
-//        &self.data[idx]
-//    }
-//    pub fn len(&self) -> usize {
-//        self.data.len()
-//    }
-//    //pub fn get(&self, idx: usize) -> &T {
-//    //    let stride = std::mem::size_of::<T>();
-//    //    let start = SIZE_UOFFSET;
-//    //    let loc = start + idx * stride;
-//    //    let p = self.data[loc..loc + stride].as_ptr() as *const T;
-//    //    unsafe { &*p }
-//
-//    //}
-//    //pub fn len(&self) -> u32 {
-//    //    let p = self.data.as_ptr() as *const u32;
-//    //    unsafe { *p }
-//    //}
-//}
 
 
 pub struct Verifier {}
