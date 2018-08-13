@@ -1929,7 +1929,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<&" + lifetime + " " + typname + "<" + lifetime + ">>";
+        return "Option<" + typname + "<" + lifetime + ">>";
       }
       case FullElementType::EnumKey:
       case FullElementType::UnionKey: { const auto typname = WrapInNameSpace(*type.enum_def); return typname; }
@@ -2005,7 +2005,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
+        //return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
+        return "self._tab.get::<" + typname + "<" + lifetime + ">>(" + offset_name + ", None)";
       }
       case FullElementType::UnionValue: {
         //const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";

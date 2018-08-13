@@ -742,14 +742,14 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn testarrayoftables(&'a self) -> Option<flatbuffers::Vector<Monster<'a>>> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Monster<'a>>>>(Monster::VT_TESTARRAYOFTABLES, None)
   }
-  pub fn enemy(&'a self) -> Option<&'a Monster<'a>> {
-    self._tab.get_slot_struct::<Monster>(Monster::VT_ENEMY)
+  pub fn enemy(&'a self) -> Option<Monster<'a>> {
+    self._tab.get::<Monster<'a>>(Monster::VT_ENEMY, None)
   }
   pub fn testnestedflatbuffer(&'a self) -> Option<&'a [u8]> {
     self._tab.get::<&[u8]>(Monster::VT_TESTNESTEDFLATBUFFER, None)
   }
-  pub fn testempty(&'a self) -> Option<&'a Stat<'a>> {
-    self._tab.get_slot_struct::<Stat>(Monster::VT_TESTEMPTY)
+  pub fn testempty(&'a self) -> Option<Stat<'a>> {
+    self._tab.get::<Stat<'a>>(Monster::VT_TESTEMPTY, None)
   }
   pub fn testbool(&'a self) -> bool {
     self._tab.get::<bool>(Monster::VT_TESTBOOL, Some(false)).unwrap()
@@ -808,8 +808,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn vector_of_doubles(&'a self) -> Option<&'a [f64]> {
     self._tab.get::<&[f64]>(Monster::VT_VECTOR_OF_DOUBLES, None)
   }
-  pub fn parent_namespace_test(&'a self) -> Option<&'a super::InParentNamespace<'a>> {
-    self._tab.get_slot_struct::<super::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST)
+  pub fn parent_namespace_test(&'a self) -> Option<super::InParentNamespace<'a>> {
+    self._tab.get::<super::InParentNamespace<'a>>(Monster::VT_PARENT_NAMESPACE_TEST, None)
   }
   pub fn foo0(&'a self) -> Option<&'a [Color]> {
     self._tab.get::<&[Color]>(Monster::VT_FOO0, None)
@@ -826,8 +826,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   pub fn foo4(&'a self) -> Color {
     unsafe { ::std::mem::transmute(self._tab.get::<i8>(Monster::VT_FOO4, Some(Color::Green as i8)).unwrap()) }
   }
-  pub fn foo5(&'a self) -> Option<&'a Monster<'a>> {
-    self._tab.get_slot_struct::<Monster>(Monster::VT_FOO5)
+  pub fn foo5(&'a self) -> Option<Monster<'a>> {
+    self._tab.get::<Monster<'a>>(Monster::VT_FOO5, None)
   }
 }
 
