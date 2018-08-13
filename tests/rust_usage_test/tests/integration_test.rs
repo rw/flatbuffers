@@ -389,16 +389,14 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             _ => { return Err("bad monster2.name"); }
         }
 
-//        let inv: &[u8] = match m.inventory() {
-//            None => { return Err("bad m.inventory"); }
-//            Some(x) => { unreachable!() /*x.as_slice()*/ }
-//        };
-//
-//        if inv.len() != 5 {
-//            println!("inv: {:?}", inv);
-//            return Err("bad m.inventory len"); }
-//        let invsum: u8 = inv.iter().sum();
-//        if invsum != 10 { return Err("bad m.inventory sum"); }
+        let inv: &[u8] = match m.inventory() {
+            None => { return Err("bad m.inventory"); }
+            Some(x) => { x }
+        };
+
+        if inv.len() != 5 { return Err("bad m.inventory len"); }
+        let invsum: u8 = inv.iter().sum();
+        if invsum != 10 { return Err("bad m.inventory sum"); }
 //
 //        let test4 = match m.test4() {
 //            None => { return Err("bad m.test4"); }
