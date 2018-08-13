@@ -168,12 +168,6 @@ pub fn read_scalar<T: ElementScalar>(x: &[u8]) -> T {
     x.from_le()
 }
 
-pub trait BufferBacked<'a>{
-    // TODO: why isn't a default impl working here?
-    fn init_from_bytes(bytes: &'a [u8], pos: usize) -> Self;
-}
-
-
 pub struct TypeTable {}
 pub struct FlatBufferBuilder<'fbb> {
     pub owned_buf: Vec<u8>,
