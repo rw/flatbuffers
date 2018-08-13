@@ -29,17 +29,17 @@ impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
 }
 // impl<'a> flatbuffers::Table for InParentNamespace<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
-impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
-    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
-        InParentNamespace {
-            _tab: flatbuffers::Table {
-                buf: buf,
-                loc: loc,
-            },
-            _phantom: PhantomData,
-        }
-    }
-}
+//impl<'a> flatbuffers::BufferBacked<'a> for InParentNamespace<'a> {
+//    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
+//        InParentNamespace {
+//            _tab: flatbuffers::Table {
+//                buf: buf,
+//                loc: loc,
+//            },
+//            _phantom: PhantomData,
+//        }
+//    }
+//}
 impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         InParentNamespace {
@@ -115,17 +115,17 @@ impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
-impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
-    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
-        Monster {
-            _tab: flatbuffers::Table {
-                buf: buf,
-                loc: loc,
-            },
-            _phantom: PhantomData,
-        }
-    }
-}
+//impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
+//    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
+//        Monster {
+//            _tab: flatbuffers::Table {
+//                buf: buf,
+//                loc: loc,
+//            },
+//            _phantom: PhantomData,
+//        }
+//    }
+//}
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
@@ -450,17 +450,17 @@ impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
 }
 // impl<'a> flatbuffers::Table for TestSimpleTableWithEnum<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for TestSimpleTableWithEnum<'a> {
-impl<'a> flatbuffers::BufferBacked<'a> for TestSimpleTableWithEnum<'a> {
-    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
-        TestSimpleTableWithEnum {
-            _tab: flatbuffers::Table {
-                buf: buf,
-                loc: loc,
-            },
-            _phantom: PhantomData,
-        }
-    }
-}
+//impl<'a> flatbuffers::BufferBacked<'a> for TestSimpleTableWithEnum<'a> {
+//    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
+//        TestSimpleTableWithEnum {
+//            _tab: flatbuffers::Table {
+//                buf: buf,
+//                loc: loc,
+//            },
+//            _phantom: PhantomData,
+//        }
+//    }
+//}
 impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TestSimpleTableWithEnum {
@@ -535,17 +535,17 @@ impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
 }
 // impl<'a> flatbuffers::Table for Stat<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
-impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
-    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
-        Stat {
-            _tab: flatbuffers::Table {
-                buf: buf,
-                loc: loc,
-            },
-            _phantom: PhantomData,
-        }
-    }
-}
+//impl<'a> flatbuffers::BufferBacked<'a> for Stat<'a> {
+//    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
+//        Stat {
+//            _tab: flatbuffers::Table {
+//                buf: buf,
+//                loc: loc,
+//            },
+//            _phantom: PhantomData,
+//        }
+//    }
+//}
 impl<'a> Stat<'a> /* private flatbuffers::Table */ {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Stat {
@@ -643,17 +643,17 @@ impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
 }
 // impl<'a> flatbuffers::Table for Monster<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
-impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
-    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
-        Monster {
-            _tab: flatbuffers::Table {
-                buf: buf,
-                loc: loc,
-            },
-            _phantom: PhantomData,
-        }
-    }
-}
+//impl<'a> flatbuffers::BufferBacked<'a> for Monster<'a> {
+//    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
+//        Monster {
+//            _tab: flatbuffers::Table {
+//                buf: buf,
+//                loc: loc,
+//            },
+//            _phantom: PhantomData,
+//        }
+//    }
+//}
 impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
@@ -1188,17 +1188,17 @@ impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
 }
 // impl<'a> flatbuffers::Table for TypeAliases<'a> {
 //impl<'a> flatbuffers::BufferBacked<'a> for TypeAliases<'a> {
-impl<'a> flatbuffers::BufferBacked<'a> for TypeAliases<'a> {
-    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
-        TypeAliases {
-            _tab: flatbuffers::Table {
-                buf: buf,
-                loc: loc,
-            },
-            _phantom: PhantomData,
-        }
-    }
-}
+//impl<'a> flatbuffers::BufferBacked<'a> for TypeAliases<'a> {
+//    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {
+//        TypeAliases {
+//            _tab: flatbuffers::Table {
+//                buf: buf,
+//                loc: loc,
+//            },
+//            _phantom: PhantomData,
+//        }
+//    }
+//}
 impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TypeAliases {
@@ -1381,60 +1381,6 @@ pub fn CreateTypeAliases<'a: 'b, 'b: 'c, 'c>(
 }
 
 #[inline]
-pub fn VerifyAny(verifier: &mut flatbuffers::Verifier, obj: &[u8], type_: Any) -> bool {
-  match type_ {
-    Any::NONE => {
-      return true;
-    }
-    Any::Monster => {
-
-      if obj.len() != mem::size_of::<Monster>() {
-          return false;
-      }
-      let x: &Monster = unsafe {
-        &*(obj.as_ptr() as *const Monster)
-      };
-      return verifier.verify_table::<&Monster>(x);
-    }
-    Any::TestSimpleTableWithEnum => {
-
-      if obj.len() != mem::size_of::<TestSimpleTableWithEnum>() {
-          return false;
-      }
-      let x: &TestSimpleTableWithEnum = unsafe {
-        &*(obj.as_ptr() as *const TestSimpleTableWithEnum)
-      };
-      return verifier.verify_table::<&TestSimpleTableWithEnum>(x);
-    }
-    Any::MyGame_Example2_Monster => {
-
-      if obj.len() != mem::size_of::<super::Example2::Monster>() {
-          return false;
-      }
-      let x: &super::Example2::Monster = unsafe {
-        &*(obj.as_ptr() as *const super::Example2::Monster)
-      };
-      return verifier.verify_table::<&super::Example2::Monster>(x);
-    }
-  }
-}
-
-#[inline]
-pub fn VerifyAnyVector(_verifier: &mut flatbuffers::Verifier, values: &[flatbuffers::Offset<flatbuffers::Void>], types: &[u8]) -> bool {
-  //if values.len() == 0 || types.len() == 0 {
-  //  return values.len() == types.len();
-  //}
-  if values.len() != types.len() { return false; }
-  //for _i in (0 as flatbuffers::UOffsetT)..values.len() {
-    //if !VerifyAny(
-    //    verifier,  values.Get(i), types.GetEnum::<Any>(i)) {
-    //  return false;
-    //}
-  //}
-  return true;
-}
-
-#[inline]
 pub fn GetRootAsMonster<'a>(buf: &'a [u8]) -> Monster<'a>  {
   //return flatbuffers::get_root::<&Monster>(buf);
   //return flatbuffers::get_root::<Monster>(buf);
@@ -1456,11 +1402,11 @@ pub fn MonsterBufferHasIdentifier(buf: &[u8]) -> bool {
       buf, MonsterIdentifier());
 }
 
-#[inline]
-pub fn VerifyMonsterBuffer(
-    verifier: &mut flatbuffers::Verifier) -> bool {
-  return verifier.verify_buffer::<Monster>(MonsterIdentifier());
-}
+//#[inline]
+//pub fn VerifyMonsterBuffer(
+//    verifier: &mut flatbuffers::Verifier) -> bool {
+//  return verifier.verify_buffer::<Monster>(MonsterIdentifier());
+//}
 
 #[inline]
 pub fn MonsterExtension() -> &'static str {
