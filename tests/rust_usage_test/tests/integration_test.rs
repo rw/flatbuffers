@@ -136,7 +136,6 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         let test4 = builder.create_vector(&vec![MyGame::Example::Test::new(10, 20),
                                                 MyGame::Example::Test::new(30, 40)][..]);
         let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
-        let testarrayofstring = builder.create_vector_of_strings(&["test1", "test2"]);
         let args = MyGame::Example::MonsterArgs{
             hp: 80,
             mana: 150,
@@ -151,7 +150,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
             inventory: Some(inventory),
             test4: Some(test4),
             //testarrayofstring: Some(builder.create_vector_of_strings(&["bob", "fred", "bob", "fred"])),
-            testarrayofstring: Some(testarrayofstring),
+            testarrayofstring: Some(builder.create_vector_of_strings(&["test1", "test2"])),
             ..Default::default()
         };
         MyGame::Example::CreateMonster(builder, &args)
@@ -410,7 +409,6 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
             None => { return Err("bad m.inventory"); }
             Some(x) => { x }
         };
-println!("inv: {:?}", inv);
         if inv.len() != 5 {  return Err("bad m.inventory len"); }
         let invsum: u8 = inv.iter().sum();
         if invsum != 10 { return Err("bad m.inventory sum"); }
@@ -431,7 +429,7 @@ println!("inv: {:?}", inv);
             Some(x) => { x }
         };
         if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
-        if testarrayofstring.get(0) != "test1" { println!("get(0): {}, get(1): {}", testarrayofstring.get(0), testarrayofstring.get(1)); return Err("bad monster.testarrayofstring.get(0)"); }
+        if testarrayofstring.get(0) != "test1" { return Err("bad monster.testarrayofstring.get(0)"); }
         if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring.get(1)"); }
       }
       Ok(())
@@ -443,25 +441,20 @@ mod vector_read_scalar_tests {
     extern crate flatbuffers;
 
     fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(xs: Vec<T>) {
-        //   let mut b = flatbuffers::FlatBufferBuilder::new();
-        //   b.start_vector(xs.len(), ::std::mem::size_of::<T>());
-        //   for i in (0..xs.len()).rev() {
-        //       b.push_element_scalar::<T>(xs[i]);
-        //   }
-        //   let vecend = b.end_vector::<&T>(xs.len());
+        use flatbuffers::Follow;
 
-        //   let all = b.get_active_buf_slice();
-        //   let idx = all.len() - vecend.value() as usize;
-        //   let buf = &all[idx..];
-        ////   / println!("buf len: {}", buf.len());
-        ////   / println!("buf: {:?}", buf);
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.start_vector(xs.len(), ::std::mem::size_of::<T>());
+        for i in (0..xs.len()).rev() {
+            b.push_element_scalar::<T>(xs[i]);
+        }
+        let vecend = b.end_vector::<T>(xs.len());
+        let root = b.finish(vecend);
 
-        //   let ret: flatbuffers::Vector<T> = flatbuffers::Vector::new(buf);
-        //   let rl = ret.as_slice();
-        //   assert_eq!(rl.len(), xs.len());
-        //   for i in 0..xs.len() {
-        //       assert_eq!(rl[i], xs[i]);
-        //   }
+        let buf = b.get_active_buf_slice();
+
+        let got = <flatbuffers::ForwardsU32Offset<&[T]>>::follow(buf, 0);
+        assert_eq!(got, &xs[..]);
     }
 
     #[test]
@@ -496,27 +489,29 @@ mod vector_read_obj_tests {
     extern crate flatbuffers;
 
     fn prop_strings(xs: Vec<String>) {
-        //// let mut b = flatbuffers::FlatBufferBuilder::new();
-        //// let mut offsets = Vec::new();
-        //// for s in xs.iter().rev() {
-        ////     offsets.push(b.create_string(s.as_str()));
-        //// }
+        use flatbuffers::Follow;
 
-        //// b.start_vector(flatbuffers::SIZE_UOFFSET, xs.len());
-        //// for &i in offsets.iter().rev() {
-        ////     b.push_element_scalar(*i);
-        //// }
-        //// let vecend = b.end_vector::<flatbuffers::Offset<&str>>(xs.len());
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let mut offsets = Vec::new();
+        for s in xs.iter().rev() {
+            offsets.push(b.create_string(s.as_str()));
+        }
 
-        //// let all = &b.owned_buf[..];
-        //// let idx = all.len() - vecend.value() as usize;
-        //// let buf = &all[idx..];
+        b.start_vector(flatbuffers::SIZE_UOFFSET, xs.len());
+        for &i in offsets.iter() {
+            b.push_element_scalar_indirect_uoffset(i.value());
+        }
+        let vecend = b.end_vector::<flatbuffers::Offset<&str>>(xs.len());
 
-        //// let v: flatbuffers::Vector<flatbuffers::Offset<&str>> = flatbuffers::Vector::new(buf);
-        //// assert_eq!(v.as_slice().len(), xs.len());
-        //// //for i in 0..xs.len() {
-        //// //    assert_eq!(vec.get(i), &xs[i]);
-        //// //}
+        b.finish(vecend);
+
+        let buf = b.get_active_buf_slice();
+        let got = <flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&str>>>>::follow(buf, 0);
+
+        assert_eq!(got.len(), xs.len());
+        for i in 0..xs.len() {
+            assert_eq!(got.get(i), &xs[i][..]);
+        }
     }
 
     #[test]
@@ -2393,7 +2388,6 @@ fn generated_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_generated_code(&mut b);
     let buf = b.get_active_buf_slice();
-    println!("{:?}", buf);
     match serialized_example_is_accessible_and_correct(&buf[..]) {
         Ok(()) => {}
         Err(msg) => {
@@ -2407,9 +2401,6 @@ fn library_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_library_code(&mut b);
     let buf = b.get_active_buf_slice();
-    //println!("");
-    //println!("got:  {:?}", buf);
-    //println!("want: {:?}", &[16, 0, 0, 0, 0, 0, 10, 0, 8, 0, 0, 0, 0, 0, 6, 0, 10, 0, 0, 0, 0, 0, 80, 0]);
     match serialized_example_is_accessible_and_correct(&buf[..]) {
         Ok(()) => {}
         Err(msg) => {
@@ -2941,7 +2932,6 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
         b.start_vector(flatbuffers::SIZE_U8, 1);
-        println!("cap: {}", b.owned_buf.capacity());
         check(&b, &[0, 0, 0]); // align to 4bytes
         b.push_element_scalar(1u8);
         check(&b, &[1, 0, 0, 0]);
