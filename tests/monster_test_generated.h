@@ -107,38 +107,6 @@ inline const char *EnumNameColor(Color e) {
   return EnumNamesColor()[index];
 }
 
-enum Farts {
-  Farts_Red = 0,
-  Farts_Blue = 1,
-  Farts_Green = 2,
-  Farts_MIN = Farts_Red,
-  Farts_MAX = Farts_Green
-};
-
-inline Farts (&EnumValuesFarts())[3] {
-  static Farts values[] = {
-    Farts_Red,
-    Farts_Blue,
-    Farts_Green
-  };
-  return values;
-}
-
-inline const char **EnumNamesFarts() {
-  static const char *names[] = {
-    "Red",
-    "Blue",
-    "Green",
-    nullptr
-  };
-  return names;
-}
-
-inline const char *EnumNameFarts(Farts e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesFarts()[index];
-}
-
 enum Any {
   Any_NONE = 0,
   Any_Monster = 1,
@@ -1413,7 +1381,6 @@ inline flatbuffers::Offset<Monster> CreateMonster(
   builder_.add_pos(pos);
   builder_.add_hp(hp);
   builder_.add_mana(mana);
-  builder_.add_foo4(foo4);
   builder_.add_testbool(testbool);
   builder_.add_test_type(test_type);
   builder_.add_color(color);

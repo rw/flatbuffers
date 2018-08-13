@@ -1,6 +1,6 @@
 // test schema file
 
-//include "include_test1.fbs";
+include "include_test1.fbs";
 
 namespace MyGame;
 
@@ -15,7 +15,6 @@ namespace MyGame.Example;
 attribute "priority";
 
 enum Color:byte (bit_flags) { Red = 0, Green, Blue = 3, }
-enum Farts:bool { Red , Blue , Green}
 
 union Any { Monster, TestSimpleTableWithEnum, MyGame.Example2.Monster }
 
