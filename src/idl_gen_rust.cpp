@@ -1938,9 +1938,9 @@ class RustGenerator : public BaseGenerator {
         //const auto typname = WrapInNameSpace(*type.enum_def) + "_UnionEnum";
         //return "Option<" + typname + "UnionTableOffset>";
         //return "Option<flatbuffers::Vector<u8>>";
-        //return "Option<flatbuffers::Table2<" + lifetime + ">>";
-        //return "Option<" + typename flatbuffers::Table2<" + lifetime + ">>";
-        return "Option<flatbuffers::Table2<" + lifetime + ">>";
+        //return "Option<flatbuffers::Table<" + lifetime + ">>";
+        //return "Option<" + typename flatbuffers::Table<" + lifetime + ">>";
+        return "Option<flatbuffers::Table<" + lifetime + ">>";
       }
       case FullElementType::String: {
          //return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", u8>>>";// + lifetime + ">>>";
@@ -2011,7 +2011,7 @@ class RustGenerator : public BaseGenerator {
         return "self._tab.get::<" + typname + "<" + lifetime + ">>(" + offset_name + ", None)";
       }
       case FullElementType::UnionValue: {
-        return "self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Table2<" + lifetime + ">>>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Table<" + lifetime + ">>>(" + offset_name + ", None)";
         ////const auto typname = WrapInNameSpace(*type.enum_def) + "_UnionEnum";
         //////return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
         //////return "self._tab.get_slot_vector::<u8>(" + offset_name + ")";
@@ -2330,13 +2330,13 @@ class RustGenerator : public BaseGenerator {
     //code_ += "}";
     code_ += "#[derive(Copy, Clone, PartialEq)]";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
-    code_ += "  pub _tab: flatbuffers::Table2<'a>,";
+    code_ += "  pub _tab: flatbuffers::Table<'a>,";
     code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
     code_ += "    type Inner = {{STRUCT_NAME}}<'a>;";
     code_ += "    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "        Self { _tab: flatbuffers::Table2 { buf: buf, loc: loc }, _phantom: PhantomData }";
+    code_ += "        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }";
     code_ += "    }";
     code_ += "}";
     code_ += "// impl<'a> flatbuffers::Table for {{STRUCT_NAME}}<'a> {";
@@ -2344,7 +2344,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "impl<'a> flatbuffers::BufferBacked<'a> for {{STRUCT_NAME}}<'a> {";
     code_ += "    fn init_from_bytes(buf: &'a [u8], loc: usize) -> Self {";
     code_ += "        {{STRUCT_NAME}} {";
-    code_ += "            _tab: flatbuffers::Table2 {";
+    code_ += "            _tab: flatbuffers::Table {";
     code_ += "                buf: buf,";
     code_ += "                loc: loc,";
     code_ += "            },";
@@ -2353,7 +2353,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "    }";
     code_ += "}";
     code_ += "impl<'a> {{STRUCT_NAME}}<'a> /* private flatbuffers::Table */ {";
-    code_ += "    pub fn init_from_table(table: flatbuffers::Table2<'a>) -> Self {";
+    code_ += "    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {";
     code_ += "        {{STRUCT_NAME}} {";
     code_ += "            _tab: table,";
     code_ += "            _phantom: PhantomData,";
