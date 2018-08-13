@@ -2574,34 +2574,34 @@ fn table_of_byte_strings_fuzz() {
 }
 
 #[test]
-fn table_with_vector_of_scalars_fuzz() {
+fn build_and_use_table_with_vector_of_scalars_fuzz() {
     fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::ElementScalar + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
         use flatbuffers::field_index_to_field_offset as fi2fo;
         //let xs = &vec[..];
+        unimplemented!();
 
-        // build
-        let mut b = flatbuffers::FlatBufferBuilder::new();
-        let mut offs: Vec<flatbuffers::Offset<_>> = vec![];
-        for vec in &vecs {
-            b.start_vector(vec.len(), ::std::mem::size_of::<T>());
+        //// build
+        //let mut b = flatbuffers::FlatBufferBuilder::new();
+        //let mut offs: Vec<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<T>>> = vec![];
+        //for vec in &vecs {
+        //    b.start_vector(vec.len(), ::std::mem::size_of::<T>());
 
-            let xs = &vec[..];
-            for i in (0..xs.len()).rev() {
-                b.push_element_scalar::<T>(xs[i]);
-            }
-            let vecend = b.end_vector::<T>(xs.len());
-            offs.push(vecend);
-        }
+        //    let xs = &vec[..];
+        //    for i in (0..xs.len()).rev() {
+        //        b.push_element_scalar::<T>(xs[i]);
+        //    }
+        //    let vecend = b.end_vector::<T>(xs.len());
+        //    offs.push(vecend);
+        //}
 
-        let table_start = b.start_table(vecs.len() as flatbuffers::VOffsetT);
+        //let table_start = b.start_table(vecs.len() as flatbuffers::VOffsetT);
 
-        for i in 0..vecs.len() {
-            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
-        }
-        let root = b.end_table(table_start);
-        b.finish(root);
+        //for i in 0..vecs.len() {
+        //    b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
+        //}
+        //let root = b.end_table(table_start);
+        //b.finish(root);
 
-        unimplemented!()
         //// use
         //let buf = b.get_active_buf_slice();
         //let tab = flatbuffers::Table::new(buf, flatbuffers::get_root_uoffset(buf));
@@ -2747,26 +2747,6 @@ mod test_follow_impls {
 
     #[test]
     fn test_root_to_empty_table() {
-            //// Start of the buffer:
-            //20, 0, 0, 0,  // Offset to the root table.
-
-            //// Start of the vtable. Not shared in this example, but could be:
-            //16, 0, // Size of table, starting from here.
-            //22, 0, // Size of object inline data.
-            //4, 0,   0, 0,   20, 0,   16, 0,   0,0,  0, 0,  // Offsets to fields from start of (root) table, 0 for not present.
-
-            //// Start of the root table:
-            //16, 0, 0, 0,     // Offset to vtable used (default negative direction)
-            //float 1, 2, 3  // the Vec3 struct, inline.
-            //uint32_t 8     // Offset to the name string.
-            //int16_t 50     // hp field.
-            //int16_t 0      // Padding for alignment.
-
-            //// Start of name string:
-            //uint32_t 4  // Length of string.
-            //int8_t 'f', 'r', 'e', 'd', 0, 0, 0, 0  // Text + 0 termination + padding.
-
-        //let buf: Vec<u8> = vec![/* root offset */ 8, 0, 0, 0, /* canary */ 255, 255, 255, 255,  /* dummy table */ 255, 255, 255, 255];
 	let buf: Vec<u8> = vec![
 	    12, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -2832,7 +2812,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_string() {
+    fn test_table_get_slot_string_multiple_types() {
 	let buf: Vec<u8> = vec![
 	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -2856,7 +2836,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_string_default_via_vtable_len() {
+    fn test_table_get_slot_string_multiple_types_default_via_vtable_len() {
 	let buf: Vec<u8> = vec![
 	    12, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -2877,7 +2857,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_string_default_via_vtable_zero() {
+    fn test_table_get_slot_string_multiple_types_default_via_vtable_zero() {
 	let buf: Vec<u8> = vec![
 	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
