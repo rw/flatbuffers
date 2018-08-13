@@ -2034,18 +2034,18 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::VectorOfFloat: {
         const auto typname = GenTypeBasic(type.VectorType(), false);
         //return "self._tab.get_slot_vector::<" + typname + ">(" + offset_name + ")";
-        return "self._tab.get::<&[" + typname + "]>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsU32Offset<&[" + typname + "]>>(" + offset_name + ", None)";
       }
       case FullElementType::VectorOfBool: {
         //return "self._tab.get_slot_vector::<bool>(" + offset_name + ")";
-        return "self._tab.get::<&[bool]>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsU32Offset<&[bool]>>(" + offset_name + ", None)";
       }
       case FullElementType::VectorOfEnumKey: {
         //const auto typname = WrapInNameSpace(*type.VectorType().enum_def);
         const auto typname = WrapInNameSpace(*type.enum_def);
         //const auto typname = GenTypeBasic(type.VectorType(), false);
         //return "self._tab.get_slot_vector::<" + typname + ">(" + offset_name + ")";
-        return "self._tab.get::<&[" + typname + "]>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsU32Offset<&[" + typname + "]>>(" + offset_name + ", None)";
       }
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
