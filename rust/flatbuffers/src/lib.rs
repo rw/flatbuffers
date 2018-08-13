@@ -1924,16 +1924,17 @@ impl<'a, T: Sized> Follow<'a> for &'a T {
 }
 
 // implementing these using bounds causes them to conflict with the Sized impl
-impl<'a> Follow<'a> for u8  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for u16 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for u32 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for u64 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i8  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i16 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i32 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i64 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for f32 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for f64 { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for bool { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for u8   { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for u16  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for u32  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for u64  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for i8   { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for i16  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for i32  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for i64  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for f32  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for f64  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
 
 #[derive(Debug)]
 pub struct Vector<'a, T: Sized + 'a>(&'a [u8], usize, PhantomData<T>);
