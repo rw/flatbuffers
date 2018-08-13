@@ -353,37 +353,35 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
 ////  //return flatbuffers::DetachedBuffer{};
 }
 fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'static str> {
-//    let monster1 = MyGame::Example::GetRootAsMonster(bytes);
-//    for m in vec![monster1] {
-//        if m.hp() != 80 { assert_eq!(80, m.hp()); return Err("bad m.hp"); }
-//        if m.mana() != 150 { return Err("bad m.mana"); }
-//        match m.name() {
-//            None => { return Err("bad m.name"); }
-//            Some("MyMonster") => { }
-//            Some(x) => {
-//                assert_eq!(x, "MyMonster"); return Err("bad m.name"); }
-//        }
-//        let pos = match m.pos() {
-//            None => { return Err("bad m.pos"); }
-//            Some(x) => { x }
-//        };
-//        if pos.x() != 1.0f32 { return Err("bad pos.x"); }
-//        if pos.y() != 2.0f32 { return Err("bad pos.y"); }
-//        if pos.z() != 3.0f32 { return Err("bad pos.z"); }
-//        if pos.test1() != 3.0f64 { return Err("bad pos.test1"); }
-//        if pos.test2() != MyGame::Example::Color::Green { return Err("bad pos.test2"); }
-//
-//        let pos_test3 = pos.test3();
-//        if pos_test3.a() != 5i16 { return Err("bad pos_test3.a"); }
-//        if pos_test3.b() != 6i8 { return Err("bad pos_test3.b"); }
-//
-//        if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
-//
-//        let table2 = match m.test() {
-//            None => { return Err("bad m.test"); }
-//            Some(x) => { x }
-//        };
-//
+      let monster1 = MyGame::Example::GetRootAsMonster(bytes);
+      for m in vec![monster1] {
+          if m.hp() != 80 { assert_eq!(80, m.hp()); return Err("bad m.hp"); }
+          if m.mana() != 150 { return Err("bad m.mana"); }
+          match m.name() {
+              Some("MyMonster") => { }
+              _ => { return Err("bad m.name"); }
+          }
+          let pos = match m.pos() {
+              None => { return Err("bad m.pos"); }
+              Some(x) => { x }
+          };
+          if pos.x() != 1.0f32 { return Err("bad pos.x"); }
+          if pos.y() != 2.0f32 { return Err("bad pos.y"); }
+          if pos.z() != 3.0f32 { return Err("bad pos.z"); }
+          if pos.test1() != 3.0f64 { return Err("bad pos.test1"); }
+          if pos.test2() != MyGame::Example::Color::Green { return Err("bad pos.test2"); }
+
+          let pos_test3 = pos.test3();
+          if pos_test3.a() != 5i16 { return Err("bad pos_test3.a"); }
+          if pos_test3.b() != 6i8 { return Err("bad pos_test3.b"); }
+
+          if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
+
+          let table2 = match m.test() {
+              None => { return Err("bad m.test"); }
+              Some(x) => { x }
+          };
+
 //        let monster2 = {
 //            ////let slice = table2_bytes.as_slice();
 //            //let off = flatbuffers::get_root_uoffset(slice);
@@ -433,9 +431,8 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
 //        //assert!(false);
 //        //if testarrayofstring.get(0) != "test1" { return Err("bad monster.testarrayofstring[0]"); }
 //        //if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring[1]"); }
-//    }
-//    Ok(())
-	unreachable!();
+      }
+      Ok(())
 }
 
 #[cfg(test)]
