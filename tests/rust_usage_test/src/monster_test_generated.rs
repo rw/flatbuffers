@@ -470,6 +470,7 @@ impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
     }
     pub const VT_COLOR: flatbuffers::VOffsetT = 4;
 
+  #[inline]
   pub fn color(&'a self) -> Color {
     unsafe { ::std::mem::transmute(self._tab.get::<i8>(TestSimpleTableWithEnum::VT_COLOR, Some(Color::Green as i8)).unwrap()) }
   }
@@ -556,12 +557,15 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
     pub const VT_VAL: flatbuffers::VOffsetT = 6;
     pub const VT_COUNT: flatbuffers::VOffsetT = 8;
 
+  #[inline]
   pub fn id(&'a self) -> Option<&'a str> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&str>>(Stat::VT_ID, None)
   }
+  #[inline]
   pub fn val(&'a self) -> i64 {
     self._tab.get::<i64>(Stat::VT_VAL, Some(0)).unwrap()
   }
+  #[inline]
   pub fn count(&'a self) -> u16 {
     self._tab.get::<u16>(Stat::VT_COUNT, Some(0)).unwrap()
   }
@@ -698,15 +702,19 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub const VT_FOO4: flatbuffers::VOffsetT = 82;
     pub const VT_FOO5: flatbuffers::VOffsetT = 84;
 
+  #[inline]
   pub fn pos(&'a self) -> Option<&'a Vec3> {
     self._tab.get::<&'a Vec3>(Monster::VT_POS, None)
   }
+  #[inline]
   pub fn mana(&'a self) -> i16 {
     self._tab.get::<i16>(Monster::VT_MANA, Some(150)).unwrap()
   }
+  #[inline]
   pub fn hp(&'a self) -> i16 {
     self._tab.get::<i16>(Monster::VT_HP, Some(100)).unwrap()
   }
+  #[inline]
   pub fn name(&'a self) -> Option<&'a str> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&str>>(Monster::VT_NAME, None)
   }
@@ -719,113 +727,149 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     Ordering::Equal
     // TODO(rw): self.name().cmp(val)
   }
+  #[inline]
   pub fn inventory(&'a self) -> Option<&'a [u8]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(Monster::VT_INVENTORY, None)
   }
+  #[inline]
   pub fn color(&'a self) -> Color {
     unsafe { ::std::mem::transmute(self._tab.get::<i8>(Monster::VT_COLOR, Some(Color::Blue as i8)).unwrap()) }
   }
+  #[inline]
   pub fn test_type(&'a self) -> Any {
     unsafe { ::std::mem::transmute(self._tab.get::<u8>(Monster::VT_TEST_TYPE, Some(Any::NONE as u8)).unwrap()) }
   }
+  #[inline]
   pub fn test(&'a self) -> Option<flatbuffers::Table<'a>> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Table<'a>>>(Monster::VT_TEST, None)
   }
+  #[inline]
   pub fn test4(&'a self) -> Option<&'a [Test]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Test]>>(Monster::VT_TEST4, None)
   }
+  #[inline]
   pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&'a str>>> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&'a str>>>>(Monster::VT_TESTARRAYOFSTRING, None)
   }
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
+  #[inline]
   pub fn testarrayoftables(&'a self) -> Option<flatbuffers::Vector<Monster<'a>>> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Monster<'a>>>>(Monster::VT_TESTARRAYOFTABLES, None)
   }
+  #[inline]
   pub fn enemy(&'a self) -> Option<Monster<'a>> {
     self._tab.get::<Monster<'a>>(Monster::VT_ENEMY, None)
   }
+  #[inline]
   pub fn testnestedflatbuffer(&'a self) -> Option<&'a [u8]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(Monster::VT_TESTNESTEDFLATBUFFER, None)
   }
+  #[inline]
   pub fn testempty(&'a self) -> Option<Stat<'a>> {
     self._tab.get::<Stat<'a>>(Monster::VT_TESTEMPTY, None)
   }
+  #[inline]
   pub fn testbool(&'a self) -> bool {
     self._tab.get::<bool>(Monster::VT_TESTBOOL, Some(false)).unwrap()
   }
+  #[inline]
   pub fn testhashs32_fnv1(&'a self) -> i32 {
     self._tab.get::<i32>(Monster::VT_TESTHASHS32_FNV1, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testhashu32_fnv1(&'a self) -> u32 {
     self._tab.get::<u32>(Monster::VT_TESTHASHU32_FNV1, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testhashs64_fnv1(&'a self) -> i64 {
     self._tab.get::<i64>(Monster::VT_TESTHASHS64_FNV1, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testhashu64_fnv1(&'a self) -> u64 {
     self._tab.get::<u64>(Monster::VT_TESTHASHU64_FNV1, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testhashs32_fnv1a(&'a self) -> i32 {
     self._tab.get::<i32>(Monster::VT_TESTHASHS32_FNV1A, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testhashu32_fnv1a(&'a self) -> u32 {
     self._tab.get::<u32>(Monster::VT_TESTHASHU32_FNV1A, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testhashs64_fnv1a(&'a self) -> i64 {
     self._tab.get::<i64>(Monster::VT_TESTHASHS64_FNV1A, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testhashu64_fnv1a(&'a self) -> u64 {
     self._tab.get::<u64>(Monster::VT_TESTHASHU64_FNV1A, Some(0)).unwrap()
   }
+  #[inline]
   pub fn testarrayofbools(&'a self) -> Option<&'a [bool]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[bool]>>(Monster::VT_TESTARRAYOFBOOLS, None)
   }
+  #[inline]
   pub fn testf(&'a self) -> f32 {
     self._tab.get::<f32>(Monster::VT_TESTF, Some(3.14159)).unwrap()
   }
+  #[inline]
   pub fn testf2(&'a self) -> f32 {
     self._tab.get::<f32>(Monster::VT_TESTF2, Some(3.0)).unwrap()
   }
+  #[inline]
   pub fn testf3(&'a self) -> f32 {
     self._tab.get::<f32>(Monster::VT_TESTF3, Some(0.0)).unwrap()
   }
+  #[inline]
   pub fn testarrayofstring2(&'a self) -> Option<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&'a str>>> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&'a str>>>>(Monster::VT_TESTARRAYOFSTRING2, None)
   }
+  #[inline]
   pub fn testarrayofsortedstruct(&'a self) -> Option<&'a [Ability]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Ability]>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
   }
+  #[inline]
   pub fn flex(&'a self) -> Option<&'a [u8]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(Monster::VT_FLEX, None)
   }
+  #[inline]
   pub fn test5(&'a self) -> Option<&'a [Test]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Test]>>(Monster::VT_TEST5, None)
   }
+  #[inline]
   pub fn vector_of_longs(&'a self) -> Option<&'a [i64]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[i64]>>(Monster::VT_VECTOR_OF_LONGS, None)
   }
+  #[inline]
   pub fn vector_of_doubles(&'a self) -> Option<&'a [f64]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[f64]>>(Monster::VT_VECTOR_OF_DOUBLES, None)
   }
+  #[inline]
   pub fn parent_namespace_test(&'a self) -> Option<super::InParentNamespace<'a>> {
     self._tab.get::<super::InParentNamespace<'a>>(Monster::VT_PARENT_NAMESPACE_TEST, None)
   }
+  #[inline]
   pub fn foo0(&'a self) -> Option<&'a [Color]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Color]>>(Monster::VT_FOO0, None)
   }
+  #[inline]
   pub fn foo1(&'a self) -> Option<&'a Test> {
     self._tab.get::<&'a Test>(Monster::VT_FOO1, None)
   }
+  #[inline]
   pub fn foo2(&'a self) -> Option<flatbuffers::Vector<super::InParentNamespace<'a>>> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<super::InParentNamespace<'a>>>>(Monster::VT_FOO2, None)
   }
+  #[inline]
   pub fn foo3(&'a self) -> Option<&'a [Vec3]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[Vec3]>>(Monster::VT_FOO3, None)
   }
+  #[inline]
   pub fn foo4(&'a self) -> Color {
     unsafe { ::std::mem::transmute(self._tab.get::<i8>(Monster::VT_FOO4, Some(Color::Green as i8)).unwrap()) }
   }
+  #[inline]
   pub fn foo5(&'a self) -> Option<Monster<'a>> {
     self._tab.get::<Monster<'a>>(Monster::VT_FOO5, None)
   }
@@ -1175,39 +1219,51 @@ impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
     pub const VT_V8: flatbuffers::VOffsetT = 24;
     pub const VT_VF64: flatbuffers::VOffsetT = 26;
 
+  #[inline]
   pub fn i8_(&'a self) -> i8 {
     self._tab.get::<i8>(TypeAliases::VT_I8_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn u8_(&'a self) -> u8 {
     self._tab.get::<u8>(TypeAliases::VT_U8_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn i16_(&'a self) -> i16 {
     self._tab.get::<i16>(TypeAliases::VT_I16_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn u16_(&'a self) -> u16 {
     self._tab.get::<u16>(TypeAliases::VT_U16_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn i32_(&'a self) -> i32 {
     self._tab.get::<i32>(TypeAliases::VT_I32_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn u32_(&'a self) -> u32 {
     self._tab.get::<u32>(TypeAliases::VT_U32_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn i64_(&'a self) -> i64 {
     self._tab.get::<i64>(TypeAliases::VT_I64_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn u64_(&'a self) -> u64 {
     self._tab.get::<u64>(TypeAliases::VT_U64_, Some(0)).unwrap()
   }
+  #[inline]
   pub fn f32_(&'a self) -> f32 {
     self._tab.get::<f32>(TypeAliases::VT_F32_, Some(0.0)).unwrap()
   }
+  #[inline]
   pub fn f64_(&'a self) -> f64 {
     self._tab.get::<f64>(TypeAliases::VT_F64_, Some(0.0)).unwrap()
   }
+  #[inline]
   pub fn v8(&'a self) -> Option<&'a [i8]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[i8]>>(TypeAliases::VT_V8, None)
   }
+  #[inline]
   pub fn vf64(&'a self) -> Option<&'a [f64]> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[f64]>>(TypeAliases::VT_VF64, None)
   }

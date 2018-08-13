@@ -2412,6 +2412,7 @@ class RustGenerator : public BaseGenerator {
       //code_.SetValue("REF", IsStruct(field.value.type) ? "&" : "");
 
       GenComment(field.doc_comment, "  ");
+      code_ += "  #[inline]";
       code_ += "  pub fn {{FIELD_NAME}}(&'a self) -> {{RETURN_TYPE}} {";
       code_ += "    {{FUNC_BODY}}";
       //code_ += "    {{REF}}{{FIELD_VALUE}}";
