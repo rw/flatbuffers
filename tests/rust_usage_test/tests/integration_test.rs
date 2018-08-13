@@ -397,31 +397,25 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
         if inv.len() != 5 { println!("inv.len: {}", inv.len()); return Err("bad m.inventory len"); }
         let invsum: u8 = inv.iter().sum();
         if invsum != 10 { return Err("bad m.inventory sum"); }
-//
-//        let test4 = match m.test4() {
-//            None => { return Err("bad m.test4"); }
-//            Some(x) => { x }
-//        };
-//        if test4.len() != 2 { return Err("bad m.test4 len"); }
-//
-//        let x = test4.get(0);
-//        let y = test4.get(1);
-//        let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
-//        if xy_sum != 100 { return Err("bad m.test4 item sum"); }
-//
-//        let testarrayofstring = match m.testarrayofstring() {
-//            None => { return Err("bad m.testarrayofstring"); }
-//            Some(x) => { x }
-//        };
-//        if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
-//        //println!("testarrayofstring.get(0): {:?}", testarrayofstring.get(0));
-//        //println!("testarrayofstring.get(1): {:?}", testarrayofstring.get(1));
-//        //let tas0_val = testarrayofstring.get(0).value() as usize;
-//        //let tas0 = flatbuffers::FBString::new(&monster1._tab.data[monster1._tab.pos + tas0_val..], &monster1._tab.data[monster1._tab.pos..]);
-//        //println!("testarrayofstring.get(1) followed: {:?}", tas0.unsafe_into_str());
-//        //assert!(false);
-//        //if testarrayofstring.get(0) != "test1" { return Err("bad monster.testarrayofstring[0]"); }
-//        //if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring[1]"); }
+
+        let test4 = match m.test4() {
+            None => { return Err("bad m.test4"); }
+            Some(x) => { x }
+        };
+        if test4.len() != 2 { return Err("bad m.test4 len"); }
+
+        let x = test4[0];
+        let y = test4[1];
+        let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
+        if xy_sum != 100 { return Err("bad m.test4 item sum"); }
+
+        let testarrayofstring = match m.testarrayofstring() {
+            None => { return Err("bad m.testarrayofstring"); }
+            Some(x) => { x }
+        };
+        if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
+        if testarrayofstring.get(0) != "test1" { return Err("bad monster.testarrayofstring.get(0)"); }
+        if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring.get(1)"); }
       }
       Ok(())
 }
