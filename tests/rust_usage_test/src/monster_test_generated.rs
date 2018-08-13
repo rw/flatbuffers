@@ -699,7 +699,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub const VT_FOO5: flatbuffers::VOffsetT = 84;
 
   pub fn pos(&'a self) -> Option<&'a Vec3> {
-    self._tab.get_slot_struct::<Vec3>(Monster::VT_POS)
+    self._tab.get::<&'a Vec3>(Monster::VT_POS, None)
   }
   pub fn mana(&'a self) -> i16 {
     self._tab.get::<i16>(Monster::VT_MANA, Some(150)).unwrap()
@@ -815,7 +815,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get::<&[Color]>(Monster::VT_FOO0, None)
   }
   pub fn foo1(&'a self) -> Option<&'a Test> {
-    self._tab.get_slot_struct::<Test>(Monster::VT_FOO1)
+    self._tab.get::<&'a Test>(Monster::VT_FOO1, None)
   }
   pub fn foo2(&'a self) -> Option<flatbuffers::Vector<super::InParentNamespace<'a>>> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<super::InParentNamespace<'a>>>>(Monster::VT_FOO2, None)

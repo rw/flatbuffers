@@ -2000,7 +2000,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Struct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
+        //return "self._tab.get_slot_struct::<" + typname + ">(" + offset_name + ")";
+        return "self._tab.get::<&" + lifetime + " " + typname + ">(" + offset_name + ", None)";
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
