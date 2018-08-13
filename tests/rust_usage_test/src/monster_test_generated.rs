@@ -2,6 +2,9 @@
 
 
 
+// #include "include_test1_generated.rs"
+// #include "include_test2_generated.rs"
+
 pub mod MyGame {
   #[allow(unused_imports)]
   use std::mem;
@@ -191,31 +194,6 @@ const EnumNamesColor:[&'static str; 8] = [
 pub fn EnumNameColor(e: Color) -> &'static str {
   let index: usize = e as usize - Color::Red as usize;
   EnumNamesColor[index]
-}
-
-#[repr(u8)]
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum Farts {
-  Red = 0,
-  Blue = 1,
-  Green = 2
-}
-
-const EnumValuesFarts:[Farts; 3] = [
-  Farts::Red,
-  Farts::Blue,
-  Farts::Green
-];
-
-const EnumNamesFarts:[&'static str; 3] = [
-    "Red",
-    "Blue",
-    "Green"
-];
-
-pub fn EnumNameFarts(e: Farts) -> &'static str {
-  let index: usize = e as usize;
-  EnumNamesFarts[index]
 }
 
 #[repr(u8)]
@@ -540,6 +518,93 @@ pub fn CreateStat<'a: 'b, 'b: 'c, 'c>(
   builder.finish()
 }
 
+pub enum ReferrableOffset {}
+#[derive(Copy, Clone, PartialEq)]
+pub struct Referrable<'a> {
+  pub _tab: flatbuffers::Table<'a>,
+  _phantom: PhantomData<&'a ()>,
+}
+impl<'a> flatbuffers::Follow<'a> for Referrable<'a> {
+    type Inner = Referrable<'a>;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+    }
+}
+impl<'a> Referrable<'a> /* private flatbuffers::Table */ {
+    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
+        Referrable {
+            _tab: table,
+            _phantom: PhantomData,
+        }
+    }
+    pub const VT_ID: flatbuffers::VOffsetT = 4;
+
+  #[inline]
+  pub fn id(&'a self) -> u64 {
+    self._tab.get::<u64>(Referrable::VT_ID, Some(0)).unwrap()
+  }
+  fn KeyCompareLessThan(&self, o: &Referrable) -> bool {
+    unimplemented!()
+    //return self.id() < o.id();
+  }
+  fn KeyCompareWithValue(&self, val: u64) -> isize {
+    unimplemented!();
+    //let key = id();
+    //if (key < val) {
+    //  return -1;
+    //} else if (key > val) {
+    //  return 1;
+    //} else {
+    //  return 0;
+    //}
+  }
+}
+
+pub struct ReferrableArgs<'a> {
+    pub id: u64,
+    pub _phantom: PhantomData<&'a ()>, // pub for default trait
+}
+impl<'a> Default for ReferrableArgs<'a> {
+    fn default() -> Self {
+        ReferrableArgs {
+            id: 0,
+            _phantom: PhantomData,
+        }
+    }
+}
+pub struct ReferrableBuilder<'a: 'b, 'b> {
+  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
+  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+}
+impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
+  pub fn add_id(&mut self, id: u64) {
+    self.fbb_.push_slot_scalar::<u64>(Referrable::VT_ID, id, 0);
+  }
+  pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> ReferrableBuilder<'a, 'b> {
+    let start = _fbb.start_table(1);
+    ReferrableBuilder {
+      fbb_: _fbb,
+      start_: start,
+    }
+  }
+  // ReferrableBuilder &operator=(const ReferrableBuilder &);
+  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(mut self) -> flatbuffers::Offset<Referrable<'a>> {
+    let o = self.fbb_.end_table(self.start_);
+    //let o = flatbuffers::Offset::<Referrable<'a>>::new(end);
+    flatbuffers::Offset::new(o.value())
+  }
+}
+
+#[inline]
+pub fn CreateReferrable<'a: 'b, 'b: 'c, 'c>(
+    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
+    args: &'b ReferrableArgs<'b>) -> flatbuffers::Offset<Referrable<'a>> {
+  let mut builder = ReferrableBuilder::new(_fbb);
+  builder.add_id(args.id);
+  builder.finish()
+}
+
 /// an example documentation comment: monster object
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, PartialEq)]
@@ -594,12 +659,14 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     pub const VT_VECTOR_OF_LONGS: flatbuffers::VOffsetT = 68;
     pub const VT_VECTOR_OF_DOUBLES: flatbuffers::VOffsetT = 70;
     pub const VT_PARENT_NAMESPACE_TEST: flatbuffers::VOffsetT = 72;
-    pub const VT_FOO0: flatbuffers::VOffsetT = 74;
-    pub const VT_FOO1: flatbuffers::VOffsetT = 76;
-    pub const VT_FOO2: flatbuffers::VOffsetT = 78;
-    pub const VT_FOO3: flatbuffers::VOffsetT = 80;
-    pub const VT_FOO4: flatbuffers::VOffsetT = 82;
-    pub const VT_FOO5: flatbuffers::VOffsetT = 84;
+    pub const VT_VECTOR_OF_REFERRABLES: flatbuffers::VOffsetT = 74;
+    pub const VT_SINGLE_WEAK_REFERENCE: flatbuffers::VOffsetT = 76;
+    pub const VT_VECTOR_OF_WEAK_REFERENCES: flatbuffers::VOffsetT = 78;
+    pub const VT_VECTOR_OF_STRONG_REFERRABLES: flatbuffers::VOffsetT = 80;
+    pub const VT_CO_OWNING_REFERENCE: flatbuffers::VOffsetT = 82;
+    pub const VT_VECTOR_OF_CO_OWNING_REFERENCES: flatbuffers::VOffsetT = 84;
+    pub const VT_NON_OWNING_REFERENCE: flatbuffers::VOffsetT = 86;
+    pub const VT_VECTOR_OF_NON_OWNING_REFERENCES: flatbuffers::VOffsetT = 88;
 
   #[inline]
   pub fn pos(&'a self) -> Option<&'a Vec3> {
@@ -749,28 +816,36 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get::<flatbuffers::ForwardsU32Offset<super::InParentNamespace<'a>>>(Monster::VT_PARENT_NAMESPACE_TEST, None)
   }
   #[inline]
-  pub fn foo0(&'a self) -> Option<&'a [Color]> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<&[Color]>>(Monster::VT_FOO0, None)
+  pub fn vector_of_referrables(&'a self) -> Option<flatbuffers::Vector<Referrable<'a>>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Referrable<'a>>>>(Monster::VT_VECTOR_OF_REFERRABLES, None)
   }
   #[inline]
-  pub fn foo1(&'a self) -> Option<&'a Test> {
-    self._tab.get::<&'a Test>(Monster::VT_FOO1, None)
+  pub fn single_weak_reference(&'a self) -> u64 {
+    self._tab.get::<u64>(Monster::VT_SINGLE_WEAK_REFERENCE, Some(0)).unwrap()
   }
   #[inline]
-  pub fn foo2(&'a self) -> Option<flatbuffers::Vector<super::InParentNamespace<'a>>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<super::InParentNamespace<'a>>>>(Monster::VT_FOO2, None)
+  pub fn vector_of_weak_references(&'a self) -> Option<&'a [u64]> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&[u64]>>(Monster::VT_VECTOR_OF_WEAK_REFERENCES, None)
   }
   #[inline]
-  pub fn foo3(&'a self) -> Option<&'a [Vec3]> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<&[Vec3]>>(Monster::VT_FOO3, None)
+  pub fn vector_of_strong_referrables(&'a self) -> Option<flatbuffers::Vector<Referrable<'a>>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Referrable<'a>>>>(Monster::VT_VECTOR_OF_STRONG_REFERRABLES, None)
   }
   #[inline]
-  pub fn foo4(&'a self) -> Color {
-    unsafe { ::std::mem::transmute(self._tab.get::<i8>(Monster::VT_FOO4, Some(Color::Green as i8)).unwrap()) }
+  pub fn co_owning_reference(&'a self) -> u64 {
+    self._tab.get::<u64>(Monster::VT_CO_OWNING_REFERENCE, Some(0)).unwrap()
   }
   #[inline]
-  pub fn foo5(&'a self) -> Option<Monster<'a>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<Monster<'a>>>(Monster::VT_FOO5, None)
+  pub fn vector_of_co_owning_references(&'a self) -> Option<&'a [u64]> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&[u64]>>(Monster::VT_VECTOR_OF_CO_OWNING_REFERENCES, None)
+  }
+  #[inline]
+  pub fn non_owning_reference(&'a self) -> u64 {
+    self._tab.get::<u64>(Monster::VT_NON_OWNING_REFERENCE, Some(0)).unwrap()
+  }
+  #[inline]
+  pub fn vector_of_non_owning_references(&'a self) -> Option<&'a [u64]> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<&[u64]>>(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, None)
   }
 }
 
@@ -827,12 +902,14 @@ pub struct MonsterArgs<'a> {
     pub vector_of_longs: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  i64>>>,
     pub vector_of_doubles: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  f64>>>,
     pub parent_namespace_test: Option<flatbuffers::Offset<&'a  super::InParentNamespace<'a >>>,
-    pub foo0: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Color>>>,
-    pub foo1: Option<&'a  Test>,
-    pub foo2: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<super::InParentNamespace<'a >>>>>,
-    pub foo3: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Vec3>>>,
-    pub foo4: Color,
-    pub foo5: Option<flatbuffers::Offset<&'a  Monster<'a >>>,
+    pub vector_of_referrables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<Referrable<'a >>>>>,
+    pub single_weak_reference: u64,
+    pub vector_of_weak_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
+    pub vector_of_strong_referrables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<Referrable<'a >>>>>,
+    pub co_owning_reference: u64,
+    pub vector_of_co_owning_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
+    pub non_owning_reference: u64,
+    pub vector_of_non_owning_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for MonsterArgs<'a> {
@@ -873,12 +950,14 @@ impl<'a> Default for MonsterArgs<'a> {
             vector_of_longs: None,
             vector_of_doubles: None,
             parent_namespace_test: None,
-            foo0: None,
-            foo1: None,
-            foo2: None,
-            foo3: None,
-            foo4: Color::Green,
-            foo5: None,
+            vector_of_referrables: None,
+            single_weak_reference: 0,
+            vector_of_weak_references: None,
+            vector_of_strong_referrables: None,
+            co_owning_reference: 0,
+            vector_of_co_owning_references: None,
+            non_owning_reference: 0,
+            vector_of_non_owning_references: None,
             _phantom: PhantomData,
         }
     }
@@ -990,26 +1069,32 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::Offset<&'b  super::InParentNamespace<'b >>) {
     self.fbb_.push_slot_offset_relative::<&super::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
-  pub fn add_foo0(&mut self, foo0: flatbuffers::Offset<flatbuffers::Vector<'b , Color>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_FOO0, foo0);
+  pub fn add_vector_of_referrables(&mut self, vector_of_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<Referrable<'b >>>>) {
+    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_REFERRABLES, vector_of_referrables);
   }
-  pub fn add_foo1(&mut self, foo1: &'b  Test) {
-    self.fbb_.push_slot_struct::<Test/* foo */>(Monster::VT_FOO1, foo1);
+  pub fn add_single_weak_reference(&mut self, single_weak_reference: u64) {
+    self.fbb_.push_slot_scalar::<u64>(Monster::VT_SINGLE_WEAK_REFERENCE, single_weak_reference, 0);
   }
-  pub fn add_foo2(&mut self, foo2: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<super::InParentNamespace<'b >>>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_FOO2, foo2);
+  pub fn add_vector_of_weak_references(&mut self, vector_of_weak_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
+    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_WEAK_REFERENCES, vector_of_weak_references);
   }
-  pub fn add_foo3(&mut self, foo3: flatbuffers::Offset<flatbuffers::Vector<'b , Vec3>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_FOO3, foo3);
+  pub fn add_vector_of_strong_referrables(&mut self, vector_of_strong_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<Referrable<'b >>>>) {
+    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_STRONG_REFERRABLES, vector_of_strong_referrables);
   }
-  pub fn add_foo4(&mut self, foo4: Color) {
-    self.fbb_.push_slot_scalar::<i8>(Monster::VT_FOO4, foo4 as i8, Color::Green as i8);
+  pub fn add_co_owning_reference(&mut self, co_owning_reference: u64) {
+    self.fbb_.push_slot_scalar::<u64>(Monster::VT_CO_OWNING_REFERENCE, co_owning_reference, 0);
   }
-  pub fn add_foo5(&mut self, foo5: flatbuffers::Offset<&'b  Monster<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&Monster>(Monster::VT_FOO5, foo5);
+  pub fn add_vector_of_co_owning_references(&mut self, vector_of_co_owning_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
+    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_CO_OWNING_REFERENCES, vector_of_co_owning_references);
+  }
+  pub fn add_non_owning_reference(&mut self, non_owning_reference: u64) {
+    self.fbb_.push_slot_scalar::<u64>(Monster::VT_NON_OWNING_REFERENCE, non_owning_reference, 0);
+  }
+  pub fn add_vector_of_non_owning_references(&mut self, vector_of_non_owning_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
+    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, vector_of_non_owning_references);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table(41);
+    let start = _fbb.start_table(43);
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -1030,15 +1115,18 @@ pub fn CreateMonster<'a: 'b, 'b: 'c, 'c>(
     _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
     args: &'b MonsterArgs<'b>) -> flatbuffers::Offset<Monster<'a>> {
   let mut builder = MonsterBuilder::new(_fbb);
+  builder.add_non_owning_reference(args.non_owning_reference);
+  builder.add_co_owning_reference(args.co_owning_reference);
+  builder.add_single_weak_reference(args.single_weak_reference);
   builder.add_testhashu64_fnv1a(args.testhashu64_fnv1a);
   builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
   builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
   builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
-  if let Some(x) = args.foo5 { builder.add_foo5(x); }
-  if let Some(x) = args.foo3 { builder.add_foo3(x); }
-  if let Some(x) = args.foo2 { builder.add_foo2(x); }
-  if let Some(x) = args.foo1 { builder.add_foo1(x); }
-  if let Some(x) = args.foo0 { builder.add_foo0(x); }
+  if let Some(x) = args.vector_of_non_owning_references { builder.add_vector_of_non_owning_references(x); }
+  if let Some(x) = args.vector_of_co_owning_references { builder.add_vector_of_co_owning_references(x); }
+  if let Some(x) = args.vector_of_strong_referrables { builder.add_vector_of_strong_referrables(x); }
+  if let Some(x) = args.vector_of_weak_references { builder.add_vector_of_weak_references(x); }
+  if let Some(x) = args.vector_of_referrables { builder.add_vector_of_referrables(x); }
   if let Some(x) = args.parent_namespace_test { builder.add_parent_namespace_test(x); }
   if let Some(x) = args.vector_of_doubles { builder.add_vector_of_doubles(x); }
   if let Some(x) = args.vector_of_longs { builder.add_vector_of_longs(x); }
@@ -1066,7 +1154,6 @@ pub fn CreateMonster<'a: 'b, 'b: 'c, 'c>(
   if let Some(x) = args.pos { builder.add_pos(x); }
   builder.add_hp(args.hp);
   builder.add_mana(args.mana);
-  builder.add_foo4(args.foo4);
   builder.add_testbool(args.testbool);
   builder.add_test_type(args.test_type);
   builder.add_color(args.color);
