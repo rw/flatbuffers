@@ -502,10 +502,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     //pub fn create_vector_of_strings<'a, 'b, T: 'b>(&'a mut self, _: &'b [T]) -> Offset<&'b [T]> {
     //pub fn create_vector_of_strings<'a>(&mut self, _: &'a [&'a str]) -> LabeledUOffsetT<VectorOffset<StringOffset>> {
     pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, Offset<&'fbb str>>> {
-	unimplemented!()
         // TODO: any way to avoid heap allocs?
-        ////let offsets: Vec<Offset<&str>> = xs.iter().map(|s| self.create_string(s)).collect();
-        ////self.create_vector(&offsets[..])
+        let offsets: Vec<Offset<&str>> = xs.iter().rev().map(|s| self.create_string(s)).collect();
+        for o in offsets.iter() {
+            self.push_element_scalar_indirect_uoffset(o.value());
+        }
+        self.push_element_scalar::<UOffsetT>(offsets.len() as UOffsetT);
+        Offset::new(self.get_size() as UOffsetT)
+        //let start_off = self.start_vector(SIZE_UOFFSET, offsets.len());
+        //for i in offsets.iter() {
+        //    self.push_bytes(to_bytes(offsetsi));
+        //}
+        //self.create_vector(&offsets[..])
         //let offsets: Vec<Offset<FBString>> = vec![];// xs.iter().map(|s| self.create_string(s)).collect();
         //let offsets: Vec<Offset<FBString>> = vec![Offset::new(0); xs.len()];//xs.iter().map(|s| self.create_string(s)).collect();
         //self.create_vector::<'a, 'b, Offset<FBString>>(offsets)
@@ -545,9 +553,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_vector_of_sorted_tables<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'a, T>> {
         unimplemented!();
         //Offset::new(0)
-    }
-    pub fn dump_buf(&self, label: &str) {
-        //println!("dump_buf {}: {}/{}: {:?}", label, self.get_size(), self.owned_buf.len(), self.get_active_buf_slice());
     }
     //pub fn end_table3(&mut self, start: UOffsetT) -> UOffsetT {
     //    self.assert_nested();

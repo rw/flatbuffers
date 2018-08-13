@@ -130,35 +130,33 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
 //    //        flatbuffers::LabeledUOffsetT::new(o.value())
 //    //    }
 //    //}
-//    let fred_name = builder.create_string("Fred");
-//    //let inventory = builder.create_vector(&vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-//    let inventory = builder.create_vector(&vec![0, 1, 2, 3, 4][..]);
-//
-//    let test4 = builder.create_vector(&vec![MyGame::Example::Test::new(10, 20),
-//                                            MyGame::Example::Test::new(30, 40)][..]);
-//
-//    let mon = {
-//        let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
-//        let args = MyGame::Example::MonsterArgs{
-//            hp: 80,
-//            mana: 150,
-//            name: Some(builder.create_string("MyMonster")),
-//            pos: Some(&pos),
-//            test_type: MyGame::Example::Any::Monster,
-//            // TODO(rw): better offset ergonomics
-//            test: Some(flatbuffers::Offset::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
-//                name: Some(fred_name),
-//                ..Default::default()
-//            }).value())),
-//            inventory: Some(inventory),
-//            test4: Some(test4),
-//            testarrayofstring: Some(builder.create_vector_of_strings(&["bob", "fred", "bob", "fred"])),
-//            ..Default::default()
-//        };
-//        MyGame::Example::CreateMonster(builder, &args)
-//    };
-//    MyGame::Example::FinishMonsterBuffer(builder, mon);
-//    println!("finished writing");
+    let mon = {
+        let fred_name = builder.create_string("Fred");
+        let inventory = builder.create_vector::<u8>(&vec![0, 1, 2, 3, 4][..]);
+        let test4 = builder.create_vector(&vec![MyGame::Example::Test::new(10, 20),
+                                                MyGame::Example::Test::new(30, 40)][..]);
+        let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
+        let testarrayofstring = builder.create_vector_of_strings(&["test1", "test2"]);
+        let args = MyGame::Example::MonsterArgs{
+            hp: 80,
+            mana: 150,
+            name: Some(builder.create_string("MyMonster")),
+            pos: Some(&pos),
+            test_type: MyGame::Example::Any::Monster,
+            // TODO(rw): better offset ergonomics
+            test: Some(flatbuffers::Offset::new(MyGame::Example::CreateMonster(builder, &MyGame::Example::MonsterArgs{
+                name: Some(fred_name),
+                ..Default::default()
+            }).value())),
+            inventory: Some(inventory),
+            test4: Some(test4),
+            //testarrayofstring: Some(builder.create_vector_of_strings(&["bob", "fred", "bob", "fred"])),
+            testarrayofstring: Some(testarrayofstring),
+            ..Default::default()
+        };
+        MyGame::Example::CreateMonster(builder, &args)
+    };
+    MyGame::Example::FinishMonsterBuffer(builder, mon);
 }
 fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBufferBuilder) {
     let nested_union_mon = {
@@ -168,10 +166,15 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
         builder.end_table(table_start)
     };
     let pos = MyGame::Example::Vec3::new(1.0, 2.0, 3.0, 3.0, MyGame::Example::Color::Green, MyGame::Example::Test::new(5i16, 6i8));
-    let inv = builder.create_vector(&vec![0, 1, 2, 3, 4]);
+    let inv = builder.create_vector::<u8>(&vec![0, 1, 2, 3, 4]);
+
+    let test4 = builder.create_vector(&vec![MyGame::Example::Test::new(10, 20),
+                                            MyGame::Example::Test::new(30, 40)][..]);
+
+    let name = builder.create_string("MyMonster");
+    let testarrayofstring = builder.create_vector_of_strings(&["test1", "test2"][..]);
 
     // begin building
-    let name = builder.create_string("MyMonster");
 
     let table_start = builder.start_table(34);
     builder.push_slot_scalar::<i16>(MyGame::Example::Monster::VT_HP, 80, 100);
@@ -181,6 +184,8 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     builder.push_slot_scalar::<u8>(MyGame::Example::Monster::VT_TEST_TYPE, MyGame::Example::Any::Monster as u8, 0);
     builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST, nested_union_mon);
     builder.push_slot_offset_relative(MyGame::Example::Monster::VT_INVENTORY, inv);
+    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST4, test4);
+    builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
     let root = builder.end_table(table_start);
     builder.finish(root);
 }
@@ -426,7 +431,7 @@ println!("inv: {:?}", inv);
             Some(x) => { x }
         };
         if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
-        if testarrayofstring.get(0) != "test1" { return Err("bad monster.testarrayofstring.get(0)"); }
+        if testarrayofstring.get(0) != "test1" { println!("get(0): {}, get(1): {}", testarrayofstring.get(0), testarrayofstring.get(1)); return Err("bad monster.testarrayofstring.get(0)"); }
         if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring.get(1)"); }
       }
       Ok(())
@@ -2609,7 +2614,8 @@ fn build_and_use_table_with_vector_of_scalars_fuzz() {
             assert_eq!(&vecs[i][..], got2);
         }
     }
-    let n = 20;
+    let n = 10;
+
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<bool>>));
 
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
