@@ -1340,8 +1340,12 @@ pub fn CreateTypeAliases<'a: 'b, 'b: 'c, 'c>(
 
 #[inline]
 pub fn GetRootAsMonster<'a>(buf: &'a [u8]) -> Monster<'a>  {
-  use self::flatbuffers::Follow;
-  <flatbuffers::ForwardsU32Offset<Monster<'a>>>::follow(buf, 0)
+  flatbuffers::get_root::<Monster<'a>>(buf)
+}
+
+#[inline]
+pub fn GetSizePrefixedRootAsMonster<'a>(buf: &'a [u8]) -> Monster<'a>  {
+  flatbuffers::get_size_prefixed_root::<Monster<'a>>(buf)
 }
 
 #[inline]

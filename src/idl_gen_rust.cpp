@@ -353,13 +353,20 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("CPP_NAME", cpp_name);
         code_.SetValue("NULLABLE_EXT", NullableExtension());
 
-        // The root datatype accessor:
+        // The root datatype accessors:
         code_ += "#[inline]";
         code_ +=
             "pub fn GetRootAs{{STRUCT_NAME}}<'a>(buf: &'a [u8])"
             " -> {{CPP_NAME}}<'a> {{NULLABLE_EXT}} {";
-        code_ += "  use self::flatbuffers::Follow;";
-        code_ += "  <flatbuffers::ForwardsU32Offset<{{CPP_NAME}}<'a>>>::follow(buf, 0)";
+        code_ += "  flatbuffers::get_root::<{{CPP_NAME}}<'a>>(buf)";
+        code_ += "}";
+        code_ += "";
+
+        code_ += "#[inline]";
+        code_ +=
+            "pub fn GetSizePrefixedRootAs{{STRUCT_NAME}}<'a>(buf: &'a [u8])"
+            " -> {{CPP_NAME}}<'a> {{NULLABLE_EXT}} {";
+        code_ += "  flatbuffers::get_size_prefixed_root::<{{CPP_NAME}}<'a>>(buf)";
         code_ += "}";
         code_ += "";
 

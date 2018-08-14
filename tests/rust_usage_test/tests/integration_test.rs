@@ -342,13 +342,22 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
 fn test_generated_monster_identifier() {
     assert_eq!("MONS", MyGame::Example::MonsterIdentifier());
 }
-fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_prefixed: bool) -> Result<(), &'static str> {
-    if identifier_prefixed {
-        if !flatbuffers::buffer_has_identifier(bytes, MyGame::Example::MonsterIdentifier(), false) {
+fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_required: bool, size_prefixed: bool) -> Result<(), &'static str> {
+    if identifier_required {
+        let correct = if size_prefixed {
+            MyGame::Example::MonsterSizePrefixedBufferHasIdentifier(bytes)
+        } else {
+            MyGame::Example::MonsterBufferHasIdentifier(bytes)
+        };
+        if !correct {
             return Err("incorrect buffer identifier");
         }
     }
-    let monster1 = MyGame::Example::GetRootAsMonster(bytes);
+    let monster1 = if size_prefixed {
+        MyGame::Example::GetSizePrefixedRootAsMonster(bytes)
+    } else {
+        MyGame::Example::GetRootAsMonster(bytes)
+    };
     for m in vec![monster1] {
         if m.hp() != 80 { assert_eq!(80, m.hp()); return Err("bad m.hp"); }
         if m.mana() != 150 { return Err("bad m.mana"); }
@@ -715,12 +724,12 @@ mod vector_read_obj_tests {
 //  // anything.
 //  AccessFlatBufferTest(flatbuf, length);
 //}
-fn check_read_buffer(buf: &[u8]) {
-	let monster1 = MyGame::Example::GetRootAsMonster(buf);
-	//let monster2 = {
-    //    let mut x = MyGame::Example::Monster::(..Default::default());
-    //};
-}
+//fn check_read_buffer(buf: &[u8]) {
+//	let monster1 = MyGame::Example::GetRootAsMonster(buf);
+//	//let monster2 = {
+//    //    let mut x = MyGame::Example::Monster::(..Default::default());
+//    //};
+//}
 
 //// Unpack a FlatBuffer into objects.
 //void ObjectFlatBuffersTest(uint8_t *flatbuf) {
@@ -2368,7 +2377,7 @@ fn generated_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_generated_code(&mut b);
     let buf = b.get_active_buf_slice();
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
 }
 
 #[test]
@@ -2376,18 +2385,23 @@ fn library_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_library_code(&mut b);
     let buf = b.get_active_buf_slice();
-    assert!(serialized_example_is_accessible_and_correct(buf, true).is_ok());
+    assert!(serialized_example_is_accessible_and_correct(buf, true, false).is_ok());
 }
 
 #[test]
 fn gold_cpp_example_data_is_accessible_and_correct() {
     let buf = load_file("../monsterdata_test.mon");
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
 }
 #[test]
 fn java_wire_example_data_is_accessible_and_correct() {
     let buf = load_file("../monsterdata_java_wire.mon");
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
+}
+#[test]
+fn java_wire_size_prefixed_example_data_is_accessible_and_correct() {
+    let buf = load_file("../monsterdata_java_wire_sp.mon");
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, true).is_ok());
 }
 #[test]
 fn go_wire_example_data_is_accessible_and_correct() {
@@ -2400,12 +2414,12 @@ fn go_wire_example_data_is_accessible_and_correct() {
         }
     };
     let buf = load_file(filename);
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
 }
 #[test]
 fn python_wire_example_data_is_accessible_and_correct() {
     let buf = load_file("../monsterdata_python_wire.mon");
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], false).is_ok());
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], false, false).is_ok());
 }
 
 #[test]
