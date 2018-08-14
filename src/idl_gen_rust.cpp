@@ -1939,6 +1939,11 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
+        //auto nested = field.attributes.Lookup("nested_flatbuffer");
+        //if (nested) {
+        //  const auto typname = GenTypeBasic(field, false);
+        //  return "Option<" + typname + ">";
+        //}
         const auto typname = GenTypeBasic(type.VectorType(), false);
         //return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
         return "Option<&" + lifetime + " [" + typname + "]>";
@@ -2312,12 +2317,6 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("STRUCT_NAME", Name(struct_def));
     code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
     code_ += "pub enum {{OFFSET_TYPELABEL}} {}";
-    //code_ += "impl From<{{OFFSET_TYPELABEL}}> for flatbuffers::TableOffset {";
-    //code_ += "  fn from(o: {{OFFSET_TYPELABEL}}) -> Self {";
-    //code_ += "    o.";
-    ////code_ += "    flatbuffers::LabeledUOffsetT::new(o.value())";
-    //code_ += "  }";
-    //code_ += "}";
     code_ += "#[derive(Copy, Clone, PartialEq)]";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
     code_ += "  pub _tab: flatbuffers::Table<'a>,";
@@ -2336,9 +2335,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "            _phantom: PhantomData,";
     code_ += "        }";
     code_ += "    }";
-    //if (parser_.opts.generate_object_based_api) {
-    //  code_ += "  typedef {{NATIVE_NAME}} NativeTableType;";
-    //}
 
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
@@ -2356,13 +2352,9 @@ class RustGenerator : public BaseGenerator {
 
         code_.SetValue("OFFSET_NAME", GenFieldOffsetName(field));
         code_.SetValue("OFFSET_VALUE", NumToString(field.value.offset));
-        //code_.SetValue("OFFSET_VALUE", NumToString(field.value.offset / 2 - 2 ));
         code_ += "    pub const {{OFFSET_NAME}}: flatbuffers::VOffsetT = {{OFFSET_VALUE}};";
-        //code_ += "    pub const {{OFFSET_NAME}}: flatbuffers::VOffsetT = {{OFFSET_VALUE}}; // TODO(rw): reconsider offset calc";
-        //code_.SetValue("SEP", ",\n");
       }
       code_ += "";
-      //code_ += "  };";
     }
 
     // Generate the accessors.
@@ -2375,164 +2367,16 @@ class RustGenerator : public BaseGenerator {
         continue;
       }
 
-      //auto is_scalar = IsScalar(field.value.type.base_type) &&
-      //                 !IsFloat(field.value.type.base_type);
-      //auto member = "self." + Name(field) + "_";
-      //auto value =
-      //    is_scalar ? "flatbuffers::endian_scalar(" + member + ")" : member;
-
       code_.SetValue("FIELD_NAME", Name(field));
       code_.SetValue("RETURN_TYPE", GenTableAccessorFuncReturnType(field, "'a"));
-      //code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, value));
-      //code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, value));
       code_.SetValue("FUNC_BODY", GenTableAccessorFuncBody(field, "'a", offset_prefix));
-      //code_.SetValue("REF", IsStruct(field.value.type) ? "&" : "");
 
       GenComment(field.doc_comment, "  ");
       code_ += "  #[inline]";
       code_ += "  pub fn {{FIELD_NAME}}(&'a self) -> {{RETURN_TYPE}} {";
       code_ += "    {{FUNC_BODY}}";
-      //code_ += "    {{REF}}{{FIELD_VALUE}}";
       code_ += "  }";
 
-      //Const bool is_struct = IsStruct(field.value.type);
-      //Const bool is_scalar = IsScalar(field.value.type.base_type);
-      //Code_.SetValue("FIELD_NAME", Name(field));
-
-      //// Call a different accessor for pointers, that indirects.
-      //Std::string accessor = "";
-      //Std::string offset_str = "";
-      //Std::string offset_type = "";
-      //If (is_scalar) {
-      //  accessor = "self._tab.get_slot_scalar::<";
-      //  offset_type = GenTypeGet(field.value.type, "", "&", "", false) + ">(";
-      //  offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
-      //} else if (is_struct) {
-      //  accessor = "self._tab.get_struct_unsafe::<";
-      //  offset_type =  GenTypeGet(field.value.type, "", "", "", false) + ">(";
-      //  offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
-      //} else if (field.value.type.base_type == BASE_TYPE_STRING) {
-      //  accessor = "self._tab.get_slot_string_unsafe";
-      //  offset_type = "(";
-      //  offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
-      //} else if (field.value.type.base_type == BASE_TYPE_UNION) {
-      //  accessor = "self._tab.get_slot_union";
-      //  offset_type = "(";
-      //  offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
-      //} else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-      //  accessor = "self._tab.get_slot_vector::<";
-      //  //offset_type = GenTypeGet(field.value.type, " ", "", "", false) + ">(";
-      //  offset_type = GenTypeWire(field.value.type.VectorType(), "", "", false) + ">(";
-      //  offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
-      //} else {
-      //  accessor = "flatbuffers::get_pointer::<";
-      //  offset_type = GenTypeGet(field.value.type, "", "&", "", false) + ">(";
-      //  offset_str = Name(struct_def) + "::" + GenFieldOffsetName(field);
-      //}
-
-      //Auto call = accessor + offset_type + offset_str;
-      //// Default value as second arg for non-pointer types.
-      //If (is_scalar) { call += ", " + GenDefaultConstant(field); }
-      //Call += ")";
-
-      //Std::string afterptr = " " + NullableExtension();
-      //GenComment(field.doc_comment, "  ");
-
-      //If (is_struct) {
-      //  code_.SetValue("FIELD_TYPE", std::string("Option<") + \
-      //                               GenTypeGet(field.value.type, " ", "&",
-      //                                          afterptr.c_str(), true) + \
-      //                               ">");
-      //} else if (field.value.type.base_type == BASE_TYPE_STRING) {
-      //  code_.SetValue("FIELD_TYPE", "Option<&str>");
-      //} else if (field.value.type.base_type == BASE_TYPE_UNION) {
-      //  code_.SetValue("FIELD_TYPE", "Option<flatbuffers::Table>");
-      //} else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-      //  code_.SetValue("FIELD_TYPE", "Option<" + GenTypeGet(field.value.type, " ", " ",
-      //                                          afterptr.c_str(), true) + ">");
-      //} else {
-      //  code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, " ", "&",
-      //                                          afterptr.c_str(), true));
-      //}
-      //Code_.SetValue("FIELD_VALUE", GenUnderlyingCast(field, true, call));
-      //Code_.SetValue("NULLABLE_EXT", NullableExtension());
-
-      //Code_ += "  pub fn {{FIELD_NAME}}(&'a self) -> {{FIELD_TYPE}} {";
-      //Code_ += "    {{FIELD_VALUE}}";
-      //Code_ += "  }";
-
-      //if (field.value.type.base_type == BASE_TYPE_UNION) {
-      //  auto u = field.value.type.enum_def;
-
-      //  code_ +=
-      //      "  // TODO(?) template<typename T> "
-      //      "const T *{{NULLABLE_EXT}}{{FIELD_NAME}}_as() const;";
-
-      //  for (auto u_it = u->vals.vec.begin(); u_it != u->vals.vec.end();
-      //       ++u_it) {
-      //    auto &ev = **u_it;
-      //    if (ev.union_type.base_type == BASE_TYPE_NONE) { continue; }
-      //    auto full_struct_name = GetUnionElement(ev, true, true);
-
-      //    // @TODO: Mby make this decisions more universal? How?
-      //    code_.SetValue("U_GET_TYPE", Name(field) + UnionTypeFieldSuffix());
-      //    code_.SetValue(
-      //        "U_ELEMENT_TYPE",
-      //        WrapInNameSpace(u->defined_namespace, GetEnumValUse(*u, ev)));
-      //    code_.SetValue("U_FIELD_TYPE", "&" + full_struct_name);
-      //    code_.SetValue("U_FIELD_NAME", Name(field) + "_as_" + Name(ev));
-      //    code_.SetValue("U_NULLABLE", NullableExtension());
-
-      //    // `const Type *union_name_asType() const` accessor.
-      //    code_ += "  // TODO: fn {{U_NULLABLE}}{{U_FIELD_NAME}}() -> {{U_FIELD_TYPE}} {";
-      //    code_ +=
-      //        "// TODO:     if {{U_GET_TYPE}}() == {{U_ELEMENT_TYPE}} { "
-      //        "static_cast::<{{U_FIELD_TYPE}}>({{FIELD_NAME}}()) "
-      //        "} else { nullptr }";
-      //    code_ += "// TODO:   }";
-      //  }
-      //}
-
-      //if (parser_.opts.mutable_buffer) {
-      //  std::string mut_accessor = "";
-      //  if (is_scalar) {
-      //    mut_accessor = "flatbuffers::get_field_mut::<";
-      //  } else if (is_struct) {
-      //    mut_accessor = "flatbuffers::get_struct_mut::<";
-      //  } else {
-      //    mut_accessor = "flatbuffers::get_pointer_mut::<";
-      //  }
-      //  if (is_scalar) {
-      //    const auto type = GenTypeWire(field.value.type, "", "", false);
-      //    code_.SetValue("SET_FN", "flatbuffers::set_field::<" + type + ">");
-      //    code_.SetValue("OFFSET_NAME", offset_str);
-      //    code_.SetValue("FIELD_TYPE", GenTypeBasic(field.value.type, true));
-      //    code_.SetValue("FIELD_VALUE",
-      //                   GenUnderlyingCast(field, false, Name(field) + "_"));
-      //    code_.SetValue("DEFAULT_VALUE", GenDefaultConstant(field));
-
-      //    code_ +=
-      //        "  fn mutate_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}_: "
-      //        "{{FIELD_TYPE}}) -> bool {";
-      //    code_ +=
-      //        "    {{SET_FN}}({{OFFSET_NAME}}, {{FIELD_VALUE}}, "
-      //        "{{DEFAULT_VALUE}})";
-      //    code_ += "  }";
-      //  } else {
-      //    auto postptr = " " + NullableExtension();
-      //    auto type =
-      //        GenTypeGet(field.value.type, " ", "&'a mut ", postptr.c_str(), true);
-      //    auto underlying = mut_accessor + type + ">(" + offset_str + ")";
-      //    code_.SetValue("FIELD_TYPE", type);
-      //    code_.SetValue("FIELD_VALUE",
-      //                   GenUnderlyingCast(field, true, underlying));
-
-      //    code_ += "  fn mutable_{{FIELD_NAME}}(&'a mut self) -> {{FIELD_TYPE}} {";
-      //    code_ += "    /* TODO: are there non-reference choices here? */";
-      //    code_ += "    {{FIELD_VALUE}}";
-      //    code_ += "  }";
-      //  }
-      //}
 
       //auto nested = field.attributes.Lookup("nested_flatbuffer");
       //if (nested) {
@@ -2546,6 +2390,10 @@ class RustGenerator : public BaseGenerator {
       //        parser_.current_namespace_, nested_root->defined_namespace) +
       //      nested->constant);
 
+      //  code_ += "  #[inline]";
+      //  code_ += "  pub fn {{FIELD_NAME}}(&'a self) -> {{RETURN_TYPE}} {";
+      //  code_ += "    {{FUNC_BODY}}";
+      //  code_ += "  }";
       //  code_ += "//TODO: mutable nested root";
       //  code_ += "  fn {{FIELD_NAME}}_nested_root(&self) -> &{{CPP_NAME}}{";
       //  code_ += "    unimplemented!()";

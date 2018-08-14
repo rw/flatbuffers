@@ -23,9 +23,6 @@ extern crate flatbuffers;
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::MyGame;
 
-#[test]
-fn foo() {}
-
 //pub use MyGame::Example;
 
 //mod MyGame;
