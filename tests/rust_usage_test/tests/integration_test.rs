@@ -830,19 +830,6 @@ fn size_prefixed_test() {
 //  TEST_EQ_STR(m->name()->c_str(), "bob");
 }
 
-#[test]
-fn trivially_copyable_test() {
-//  // clang-format off
-//  #if __GNUG__ && __GNUC__ < 5
-//    TEST_EQ(__has_trivial_copy(Vec3), true);
-//  #else
-//    #if __cplusplus >= 201103L
-//      TEST_EQ(std::is_trivially_copyable<Vec3>::value, true);
-//    #endif
-//  #endif
-//  // clang-format on
-}
-
 // Check stringify of an default enum value to json
 #[test]
 fn json_default_test() {

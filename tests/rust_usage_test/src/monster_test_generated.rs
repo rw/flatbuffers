@@ -543,21 +543,6 @@ impl<'a> Referrable<'a> /* private flatbuffers::Table */ {
   pub fn id(&'a self) -> u64 {
     self._tab.get::<u64>(Referrable::VT_ID, Some(0)).unwrap()
   }
-  fn KeyCompareLessThan(&self, o: &Referrable) -> bool {
-    unimplemented!()
-    //return self.id() < o.id();
-  }
-  fn KeyCompareWithValue(&self, val: u64) -> isize {
-    unimplemented!();
-    //let key = id();
-    //if (key < val) {
-    //  return -1;
-    //} else if (key > val) {
-    //  return 1;
-    //} else {
-    //  return 0;
-    //}
-  }
 }
 
 pub struct ReferrableArgs<'a> {
@@ -683,15 +668,6 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   #[inline]
   pub fn name(&'a self) -> Option<&'a str> {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&str>>(Monster::VT_NAME, None)
-  }
-  fn KeyCompareLessThan(&self, o: &Monster) -> bool {
-    unimplemented!()
-    //return *self.name() < *o.name();
-  }
-  fn KeyCompareWithValue(&self, _val: &str) -> Ordering {
-    unimplemented!();
-    Ordering::Equal
-    // TODO(rw): self.name().cmp(val)
   }
   #[inline]
   pub fn inventory(&'a self) -> Option<&'a [u8]> {

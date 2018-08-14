@@ -16,6 +16,8 @@
 
 // independent from idl_parser, since this code is not needed for most clients
 
+#include <iostream> // cerr messages for logging warnings
+
 #include "flatbuffers/code_generators.h"
 #include "flatbuffers/flatbuffers.h"
 #include "flatbuffers/idl.h"
@@ -2397,80 +2399,11 @@ class RustGenerator : public BaseGenerator {
         code_ += "  }";
       }
 
-      if (field.flexbuffer) {
-        // TODO(rw)
-        //code_ +=
-        //    "  fn {{FIELD_NAME}}_flexbuffer_root(&self)"
-        //    " -> flexbuffers::Reference {";
-        //code_ += "    let v = self.{{FIELD_NAME}}();";
-        //code_ += "    return flexbuffers::get_root(v.Data(), v.size());";
-        //code_ += "  }";
-      }
-
       // Generate a comparison function for this field if it is a key.
       if (field.key) {
-        const bool is_string = (field.value.type.base_type == BASE_TYPE_STRING);
-
-        code_ += "  fn KeyCompareLessThan(&self, o: &{{STRUCT_NAME}}) -> bool {";
-        code_ += "    unimplemented!()";
-        if (is_string) {
-          code_ += "    //return *self.{{FIELD_NAME}}() < *o.{{FIELD_NAME}}();";
-        } else {
-          code_ += "    //return self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}();";
-        }
-        code_ += "  }";
-
-        if (is_string) {
-          code_ += "  fn KeyCompareWithValue(&self, _val: &str) -> Ordering {";
-          code_ += "    unimplemented!();";
-          code_ += "    Ordering::Equal";
-          code_ += "    // TODO(rw): self.{{FIELD_NAME}}().cmp(val)";
-          code_ += "  }";
-        } else {
-          auto type = GenTypeBasic(field.value.type, false);
-          if (parser_.opts.scoped_enums && field.value.type.enum_def &&
-              IsScalar(field.value.type.base_type)) {
-            type = GenTypeGet(field.value.type, " ", "const ", " *", true);
-          }
-
-          code_.SetValue("KEY_TYPE", type);
-          code_ += "  fn KeyCompareWithValue(&self, val: {{KEY_TYPE}}) -> isize {";
-          code_ += "    unimplemented!();";
-          code_ += "    //let key = {{FIELD_NAME}}();";
-          code_ += "    //if (key < val) {";
-          code_ += "    //  return -1;";
-          code_ += "    //} else if (key > val) {";
-          code_ += "    //  return 1;";
-          code_ += "    //} else {";
-          code_ += "    //  return 0;";
-          code_ += "    //}";
-          code_ += "  }";
-        }
+        std::cerr << "field with comparison key skipped because it is unsupported in rust" << std::endl;
       }
     }
-
-//  // Generate a verifier function that can check a buffer from an untrusted
-//  // source will never cause reads outside the buffer.
-//  code_ += "  fn Verify(&self, verifier: &mut flatbuffers::Verifier) -> bool {";
-//  code_ += "    return flatbuffers::verify_table_start(verifier)\\";
-//  for (auto it = struct_def.fields.vec.begin();
-//       it != struct_def.fields.vec.end(); ++it) {
-//    const auto &field = **it;
-//    if (field.deprecated) { continue; }
-//    GenVerifyCall(field, " &&\n           ");
-//  }
-
-//  code_ += " &&\n           verifier.end_table();";
-//  code_ += "  }";
-
-    //if (parser_.opts.generate_object_based_api) {
-    //  // Generate the UnPack() pre declaration.
-    //  code_ +=
-    //      "  " + TableUnPackSignature(struct_def, true, parser_.opts) + ";";
-    //  code_ +=
-    //      "  " + TableUnPackToSignature(struct_def, true, parser_.opts) + ";";
-    //  code_ += "  " + TablePackSignature(struct_def, true, parser_.opts) + ";";
-    //}
 
     code_ += "}";  // End of table.
     code_ += "";
@@ -2514,13 +2447,6 @@ class RustGenerator : public BaseGenerator {
     }
 
     GenBuilders(struct_def);
-
-    //if (parser_.opts.generate_object_based_api) {
-    //  // Generate a pre-declaration for a CreateX method that works with an
-    //  // unpacked C++ object.
-    //  code_ += TableCreateSignature(struct_def, true, parser_.opts) + ";";
-    //  code_ += "";
-    //}
   }
 
   void GenBuilders(const StructDef &struct_def) {
