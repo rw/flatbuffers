@@ -2,6 +2,8 @@ const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
 
 use std::marker::PhantomData;
 
+const FILE_IDENTIFIER_LENGTH: usize = 4;
+
 // enum causes compile error on type mismatch, whereas newtype () would not.
 pub enum VectorOffset {}
 pub enum StringOffset {}
@@ -144,7 +146,6 @@ pub fn read_scalar<T: ElementScalar>(x: &[u8]) -> T {
     x.from_le()
 }
 
-pub struct TypeTable {}
 pub struct FlatBufferBuilder<'fbb> {
     pub owned_buf: Vec<u8>,
     pub cur_idx: usize,
@@ -456,18 +457,59 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn required<T>(&self, _: &Offset<T>, _: VOffsetT) {
         //TODO: unimplemented!()
     }
-    pub fn finish<T>(&mut self, root: Offset<T>) {
+    pub fn finish_size_prefixed<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
+        self.finish_with_opts(root, file_identifier, true);
+    }
+    pub fn finish<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
+        self.finish_with_opts(root, file_identifier, false);
+    }
+    pub fn finish_minimal<T>(&mut self, root: Offset<T>) {
+        self.finish_with_opts(root, None, false);
+    }
+    // with or without a size prefix changes how we load the data, so finish*
+    // function are split along those lines.
+    fn finish_with_opts<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>, size_prefixed: bool) {
         self.assert_not_finished();
         self.assert_not_nested();
         self.vtables.clear();
-        { let x = self.min_align; self.pre_align(SIZE_UOFFSET, x); }
-        let fwd = self.refer_to(root.value());
-        self.push_element_scalar(fwd);
+        self.vtable.clear();
+
+        let to_align = {
+            // for the root offset:
+            let a = SIZE_UOFFSET;
+            // for the size prefix:
+            let b = if size_prefixed { SIZE_UOFFSET } else { 0 };
+            // for the file identifier (a string but not zero-terminated):
+            let c = if file_identifier.is_some() {
+                FILE_IDENTIFIER_LENGTH
+            } else {
+                0
+            };
+            a + b + c
+        };
+
+        let min_align = self.min_align;
+        self.pre_align(to_align, min_align);
+
+        if let Some(ident) = file_identifier {
+            assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
+            self.push_bytes(ident.as_bytes());
+        }
+
+        {
+            let fwd = self.refer_to(root.value());
+            self.push_element_scalar(fwd);
+        }
+
+        if size_prefixed {
+            let sz = self.get_size() as UOffsetT;
+            self.push_element_scalar::<UOffsetT>(sz);
+        }
         self.finished = true;
     }
-    pub fn finish_with_identifier<'a, T>(&'a mut self, root: Offset<T>, name: &'static str) {
-        self.finish(root)
-    }
+    //pub fn finish_with_identifier<'a, T>(&'a mut self, root: Offset<T>, name: &'static str) {
+    //    self.finish(root)
+    //}
 
     pub fn release_buffer_pointer(&mut self) -> DetachedBuffer  {
        DetachedBuffer{}
@@ -673,6 +715,7 @@ impl<'a> Table<'a> {
     pub fn new(buf: &'a [u8], loc: usize) -> Self {
         Table { buf: buf, loc: loc }
     }
+    #[inline]
     pub fn vtable(&'a self) -> VTable<'a> {
         <BackwardsI32Offset<VTable<'a>>>::follow(self.buf, self.loc)
     }
@@ -879,12 +922,15 @@ pub fn get_pointer_mut<'a, T: 'a>(_: VOffsetT) -> &'a mut T {
 pub fn buffer_has_identifier<S, T>(_: S, _: T) -> bool {
     false
 }
+pub fn get_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
+    <ForwardsU32Offset<T>>::follow(data, 0)
+}
+pub fn get_size_prefixed_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
+    <ForwardsU32Offset<T>>::follow(data, SIZE_UOFFSET)
+}
 pub struct DetachedBuffer {}
 pub mod flexbuffers {
     pub struct Reference {}
-pub fn get_root<T>(_: &[u8], _: isize) -> T {
-    unimplemented!()
-}
 
 
 }

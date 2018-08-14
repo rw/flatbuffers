@@ -419,13 +419,22 @@ class RustGenerator : public BaseGenerator {
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
-          code_ += "  fbb.finish_with_identifier(root, "
-                   "{{STRUCT_NAME}}Identifier());";
+          code_ += "  fbb.finish(root, None);";
         } else {
-          code_ += "  fbb.finish(root);";
+          code_ += "  fbb.finish(root, Some({{STRUCT_NAME}}Identifier()));";
         }
         code_ += "}";
         code_ += "";
+        code_ += "#[inline]";
+        code_ += "pub fn FinishSizePrefixed{{STRUCT_NAME}}Buffer<'a, 'b>(";
+        code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
+        code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
+        if (parser_.file_identifier_.length()) {
+          code_ += "  fbb.finish_size_prefixed(root, None);";
+        } else {
+          code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME}}Identifier()));";
+        }
+        code_ += "}";
 
         //TODO if (parser_.opts.generate_object_based_api) {
         //TODO   // A convenient root unpack function.

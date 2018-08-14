@@ -1370,9 +1370,15 @@ pub fn MonsterExtension() -> &'static str {
 pub fn FinishMonsterBuffer<'a, 'b>(
     fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     root: flatbuffers::Offset<Monster<'a>>) {
-  fbb.finish_with_identifier(root, MonsterIdentifier());
+  fbb.finish(root, None);
 }
 
+#[inline]
+pub fn FinishSizePrefixedMonsterBuffer<'a, 'b>(
+    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
+    root: flatbuffers::Offset<Monster<'a>>) {
+  fbb.finish_size_prefixed(root, None);
+}
 }  // pub mod Example
 }  // pub mod MyGame
 

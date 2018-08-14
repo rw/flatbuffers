@@ -110,17 +110,6 @@ impl LCG {
 
 //std::string test_data_path = "tests/";
 
-//  // example of how to build up a serialized buffer algorithmically:
-//  fn Foo<'fbb, 'a: 'fbb>(
-//      fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>,
-//      root: flatbuffers::Offset<MyGame::Example::MonsterOffset>) {
-//      fbb.finish(root);//, MonsterIdentifier());
-//  }
-//  fn Bar<'a, 'b, 'c: 'a>(
-//      _fbb: &'a mut flatbuffers::FlatBufferBuilder<'c>,
-//      args: &'b MyGame::Example::MonsterArgs<'b>) -> flatbuffers::Offset<MyGame::Example::Monster<'c>> {
-//      flatbuffers::Offset::new(0)
-//  }
 fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder) {
     let mon = {
         let fred_name = builder.create_string("Fred");
@@ -178,7 +167,7 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST4, test4);
     builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
     let root = builder.end_table(table_start);
-    builder.finish(root);
+    builder.finish_minimal(root);
 }
 
 fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatbuffers::FlatBufferBuilder) {
@@ -441,7 +430,7 @@ mod vector_read_scalar_tests {
             b.push_element_scalar::<T>(xs[i]);
         }
         let vecend = b.end_vector::<T>(xs.len());
-        let root = b.finish(vecend);
+        let root = b.finish_minimal(vecend);
 
         let buf = b.get_active_buf_slice();
 
@@ -495,7 +484,7 @@ mod vector_read_obj_tests {
         }
         let vecend = b.end_vector::<flatbuffers::Offset<&str>>(xs.len());
 
-        b.finish(vecend);
+        b.finish_minimal(vecend);
 
         let buf = b.get_active_buf_slice();
         let got = <flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&str>>>>::follow(buf, 0);
@@ -812,22 +801,24 @@ fn check_read_buffer(buf: &[u8]) {
 //
 // Prefix a FlatBuffer with a size field.
 #[test]
-fn size_prefixed_test() {
-//  // Create size prefixed buffer.
-//  flatbuffers::FlatBufferBuilder fbb;
-//  fbb.FinishSizePrefixed(
-//      CreateMonster(fbb, 0, 200, 300, fbb.CreateString("bob")));
-//
-//  // Verify it.
-//  flatbuffers::Verifier verifier(fbb.GetBufferPointer(), fbb.GetSize());
-//  TEST_EQ(verifier.VerifySizePrefixedBuffer<Monster>(nullptr), true);
-//
-//  // Access it.
-//  auto m = flatbuffers::GetSizePrefixedRoot<MyGame::Example::Monster>(
-//      fbb.GetBufferPointer());
-//  TEST_EQ(m->mana(), 200);
-//  TEST_EQ(m->hp(), 300);
-//  TEST_EQ_STR(m->name()->c_str(), "bob");
+fn test_size_prefixed_buffer() {
+    // Create size prefixed buffer.
+    let mut b = flatbuffers::FlatBufferBuilder::new();
+    let args = &MyGame::Example::MonsterArgs{
+        mana: 200,
+        hp: 300,
+        name: Some(b.create_string("bob")),
+        ..Default::default()
+    };
+    let mon = MyGame::Example::CreateMonster(&mut b, &args);
+    b.finish_size_prefixed(mon, None);
+
+    // Access it.
+    let buf = b.get_active_buf_slice();
+    let m = flatbuffers::get_size_prefixed_root::<MyGame::Example::Monster>(buf);
+    assert_eq!(m.mana(), 200);
+    assert_eq!(m.hp(), 300);
+    assert_eq!(m.name(), Some("bob"));
 }
 
 // Check stringify of an default enum value to json
@@ -2575,7 +2566,7 @@ fn table_of_strings_fuzz() {
             b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
         }
         let root = b.end_table(table_start);
-        b.finish(root);
+        b.finish_minimal(root);
 
         // use
         let buf = b.get_active_buf_slice();
@@ -2607,7 +2598,7 @@ fn table_of_byte_strings_fuzz() {
             b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
         }
         let root = b.end_table(table_start);
-        b.finish(root);
+        b.finish_minimal(root);
 
         // use
         let buf = b.get_active_buf_slice();
@@ -2650,7 +2641,7 @@ fn build_and_use_table_with_vector_of_scalars_fuzz() {
             b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
         }
         let root = b.end_table(table_start);
-        b.finish(root);
+        b.finish_minimal(root);
 
         // use
         let buf = b.get_active_buf_slice();
@@ -3338,7 +3329,7 @@ mod byte_layouts {
         b.push_slot_scalar(fi2fo(0), 33i8, 0);
         b.push_slot_scalar(fi2fo(1), 66i16, 0);
         let off2 = b.end_table(off);
-        b.finish(off2);
+        b.finish_minimal(off2);
 
         check(&b, &[
               12, 0, 0, 0, // root of table: points to vtable offset
@@ -3372,7 +3363,7 @@ mod byte_layouts {
             b.push_slot_scalar(fi2fo(1), 66i8, 0);
             b.push_slot_scalar(fi2fo(2), 77i8, 0);
             let off2 = b.end_table(off);
-            b.finish(off2);
+            b.finish_minimal(off2);
         }
 
         check(&b, &[
@@ -3416,7 +3407,7 @@ mod byte_layouts {
         b.push_slot_scalar(fi2fo(6), true, false);
         b.push_slot_scalar(fi2fo(7), true, false);
         let off2 = b.end_table(off);
-        b.finish(off2);
+        b.finish_minimal(off2);
 
         check(&b, &[
               24, 0, 0, 0, // root of table: points to vtable offset
@@ -3452,7 +3443,7 @@ mod byte_layouts {
         b.push_slot_scalar(fi2fo(1), true, false);
         b.push_slot_scalar(fi2fo(2), true, false);
         let off2 = b.end_table(off);
-        b.finish(off2);
+        b.finish_minimal(off2);
 
         check(&b, &[
               16, 0, 0, 0, // root of table: points to vtable offset
@@ -3518,7 +3509,7 @@ mod byte_layouts {
         b.push_slot_scalar::<i16>(fi2fo(1), 3, 2);
         b.push_slot_scalar::<i16>(fi2fo(2), 3, 3);
         let table_end = b.end_table(off);
-        b.finish(table_end);
+        b.finish_minimal(table_end);
         check(&b, &[
               12, 0, 0, 0, // root
 
@@ -3540,7 +3531,7 @@ mod byte_layouts {
         b.push_slot_scalar::<u8>(fi2fo(1), 2, 0);
         b.push_slot_scalar::<f32>(fi2fo(2), 3.0, 0.0);
         let table_end = b.end_table(off);
-        b.finish(table_end);
+        b.finish_minimal(table_end);
         check(&b, &[
               16, 0, 0, 0, // root
               0, 0, // padding
