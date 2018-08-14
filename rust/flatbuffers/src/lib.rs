@@ -919,14 +919,22 @@ pub fn get_pointer<'a, T: 'a>(_: VOffsetT) -> &'a T {
 pub fn get_pointer_mut<'a, T: 'a>(_: VOffsetT) -> &'a mut T {
     unimplemented!()
 }
-pub fn buffer_has_identifier<S, T>(_: S, _: T) -> bool {
-    false
-}
 pub fn get_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
     <ForwardsU32Offset<T>>::follow(data, 0)
 }
 pub fn get_size_prefixed_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
     <ForwardsU32Offset<T>>::follow(data, SIZE_UOFFSET)
+}
+pub fn buffer_has_identifier(data: &[u8], ident: &str, size_prefixed: bool) -> bool {
+    assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
+    let start = SIZE_UOFFSET + if size_prefixed {
+        SIZE_UOFFSET
+    } else {
+        0
+    };
+
+    let got = &data[start..start + FILE_IDENTIFIER_LENGTH];
+    ident.as_bytes() == got
 }
 pub struct DetachedBuffer {}
 pub mod flexbuffers {

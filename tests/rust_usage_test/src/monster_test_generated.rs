@@ -1352,14 +1352,14 @@ pub fn MonsterIdentifier() -> &'static str {
 #[inline]
 pub fn MonsterBufferHasIdentifier(buf: &[u8]) -> bool {
   return flatbuffers::buffer_has_identifier(
-      buf, MonsterIdentifier());
+      buf, MonsterIdentifier(), false);
 }
 
-//#[inline]
-//pub fn VerifyMonsterBuffer(
-//    verifier: &mut flatbuffers::Verifier) -> bool {
-//  return verifier.verify_buffer::<Monster>(MonsterIdentifier());
-//}
+#[inline]
+pub fn MonsterSizePrefixedBufferHasIdentifier(buf: &[u8]) -> bool {
+  return flatbuffers::buffer_has_identifier(
+      buf, MonsterIdentifier(), true);
+}
 
 #[inline]
 pub fn MonsterExtension() -> &'static str {
@@ -1370,14 +1370,14 @@ pub fn MonsterExtension() -> &'static str {
 pub fn FinishMonsterBuffer<'a, 'b>(
     fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     root: flatbuffers::Offset<Monster<'a>>) {
-  fbb.finish(root, None);
+  fbb.finish(root, Some(MonsterIdentifier()));
 }
 
 #[inline]
 pub fn FinishSizePrefixedMonsterBuffer<'a, 'b>(
     fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     root: flatbuffers::Offset<Monster<'a>>) {
-  fbb.finish_size_prefixed(root, None);
+  fbb.finish_size_prefixed(root, Some(MonsterIdentifier()));
 }
 }  // pub mod Example
 }  // pub mod MyGame

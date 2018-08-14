@@ -167,7 +167,8 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TEST4, test4);
     builder.push_slot_offset_relative(MyGame::Example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
     let root = builder.end_table(table_start);
-    builder.finish_minimal(root);
+    builder.finish(root, Some(MyGame::Example::MonsterIdentifier()));
+
 }
 
 fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatbuffers::FlatBufferBuilder) {
@@ -337,47 +338,56 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
 ////
 ////  //return flatbuffers::DetachedBuffer{};
 }
-fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'static str> {
-      let monster1 = MyGame::Example::GetRootAsMonster(bytes);
-      for m in vec![monster1] {
-          if m.hp() != 80 { assert_eq!(80, m.hp()); return Err("bad m.hp"); }
-          if m.mana() != 150 { return Err("bad m.mana"); }
-          match m.name() {
-              Some("MyMonster") => { }
-              _ => { return Err("bad m.name"); }
-          }
-          let pos = match m.pos() {
-              None => { return Err("bad m.pos"); }
-              Some(x) => { x }
-          };
-          if pos.x() != 1.0f32 { return Err("bad pos.x"); }
-          if pos.y() != 2.0f32 { return Err("bad pos.y"); }
-          if pos.z() != 3.0f32 { return Err("bad pos.z"); }
-          if pos.test1() != 3.0f64 { return Err("bad pos.test1"); }
-          if pos.test2() != MyGame::Example::Color::Green { return Err("bad pos.test2"); }
+#[test]
+fn test_generated_monster_identifier() {
+    assert_eq!("MONS", MyGame::Example::MonsterIdentifier());
+}
+fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_prefixed: bool) -> Result<(), &'static str> {
+    if identifier_prefixed {
+        if !flatbuffers::buffer_has_identifier(bytes, MyGame::Example::MonsterIdentifier(), false) {
+            return Err("incorrect buffer identifier");
+        }
+    }
+    let monster1 = MyGame::Example::GetRootAsMonster(bytes);
+    for m in vec![monster1] {
+        if m.hp() != 80 { assert_eq!(80, m.hp()); return Err("bad m.hp"); }
+        if m.mana() != 150 { return Err("bad m.mana"); }
+        match m.name() {
+            Some("MyMonster") => { }
+            _ => { return Err("bad m.name"); }
+        }
+        let pos = match m.pos() {
+            None => { return Err("bad m.pos"); }
+            Some(x) => { x }
+        };
+        if pos.x() != 1.0f32 { return Err("bad pos.x"); }
+        if pos.y() != 2.0f32 { return Err("bad pos.y"); }
+        if pos.z() != 3.0f32 { return Err("bad pos.z"); }
+        if pos.test1() != 3.0f64 { return Err("bad pos.test1"); }
+        if pos.test2() != MyGame::Example::Color::Green { return Err("bad pos.test2"); }
 
-          let pos_test3 = pos.test3();
-          if pos_test3.a() != 5i16 { return Err("bad pos_test3.a"); }
-          if pos_test3.b() != 6i8 { return Err("bad pos_test3.b"); }
+        let pos_test3 = pos.test3();
+        if pos_test3.a() != 5i16 { return Err("bad pos_test3.a"); }
+        if pos_test3.b() != 6i8 { return Err("bad pos_test3.b"); }
 
-          match m.enemy() {
-              None => {
-                  println!("missing m.enemy, most language ports do not generate this yet");
-              }
-              Some(e) => {
-                  match e.name() {
-                      Some("Fred") => { /* woot */ }
-                      _ => { println!("missing m.enemy.name, most language ports do not generate this yet") }
-                  }
-              }
-          }
+        match m.enemy() {
+            None => {
+                println!("missing m.enemy, most language ports do not generate this yet");
+            }
+            Some(e) => {
+                match e.name() {
+                    Some("Fred") => { /* woot */ }
+                    _ => { println!("missing m.enemy.name, most language ports do not generate this yet") }
+                }
+            }
+        }
 
-          if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
+        if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
 
-          let table2 = match m.test() {
-              None => { return Err("bad m.test"); }
-              Some(x) => { x }
-          };
+        let table2 = match m.test() {
+            None => { return Err("bad m.test"); }
+            Some(x) => { x }
+        };
 
         let monster2 = MyGame::Example::Monster::init_from_table(table2);
 
@@ -412,8 +422,8 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8]) -> Result<(), &'st
         if testarrayofstring.len() != 2 { return Err("bad monster.testarrayofstring len"); }
         if testarrayofstring.get(0) != "test1" { return Err("bad monster.testarrayofstring.get(0)"); }
         if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring.get(1)"); }
-      }
-      Ok(())
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -2358,12 +2368,7 @@ fn generated_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_generated_code(&mut b);
     let buf = b.get_active_buf_slice();
-    match serialized_example_is_accessible_and_correct(&buf[..]) {
-        Ok(()) => {}
-        Err(msg) => {
-            assert!(false, msg);
-        }
-    }
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
 }
 
 #[test]
@@ -2371,26 +2376,22 @@ fn library_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_library_code(&mut b);
     let buf = b.get_active_buf_slice();
-    match serialized_example_is_accessible_and_correct(&buf[..]) {
-        Ok(()) => {}
-        Err(msg) => {
-            assert!(false, msg);
-        }
-    }
+    assert!(serialized_example_is_accessible_and_correct(buf, true).is_ok());
 }
 
 #[test]
 fn gold_cpp_example_data_is_accessible_and_correct() {
-    assert_example_data_is_accessible_and_correct("../monsterdata_test.mon");
+    let buf = load_file("../monsterdata_test.mon");
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
 }
 #[test]
 fn java_wire_example_data_is_accessible_and_correct() {
-    assert_example_data_is_accessible_and_correct("../monsterdata_java_wire.mon");
+    let buf = load_file("../monsterdata_java_wire.mon");
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
 }
 #[test]
 fn go_wire_example_data_is_accessible_and_correct() {
     let filename = "../monsterdata_go_wire.mon";
-    use std::io::Read;
     let mut f = match std::fs::File::open(filename) {
         Ok(f) => { f }
         Err(_) => {
@@ -2398,30 +2399,13 @@ fn go_wire_example_data_is_accessible_and_correct() {
             return;
         }
     };
-    let mut buf = Vec::new();
-    f.read_to_end(&mut buf).unwrap();
-    match serialized_example_is_accessible_and_correct(&buf[..]) {
-        Ok(()) => {}
-        Err(msg) => {
-            assert!(false, msg);
-        }
-    }
+    let buf = load_file(filename);
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], true).is_ok());
 }
 #[test]
 fn python_wire_example_data_is_accessible_and_correct() {
-    assert_example_data_is_accessible_and_correct("../monsterdata_python_wire.mon");
-}
-fn assert_example_data_is_accessible_and_correct(filename: &'static str) {
-    use std::io::Read;
-    let mut f = std::fs::File::open(filename).expect("missing wire format example");
-    let mut buf = Vec::new();
-    f.read_to_end(&mut buf).unwrap();
-    match serialized_example_is_accessible_and_correct(&buf[..]) {
-        Ok(()) => {}
-        Err(msg) => {
-            assert!(false, msg);
-        }
-    }
+    let buf = load_file("../monsterdata_python_wire.mon");
+    assert!(serialized_example_is_accessible_and_correct(&buf[..], false).is_ok());
 }
 
 #[test]

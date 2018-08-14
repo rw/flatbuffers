@@ -384,24 +384,17 @@ class RustGenerator : public BaseGenerator {
           code_ += "pub fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &[u8])"
                    " -> bool {";
           code_ += "  return flatbuffers::buffer_has_identifier(";
-          code_ += "      buf, {{STRUCT_NAME}}Identifier());";
+          code_ += "      buf, {{STRUCT_NAME}}Identifier(), false);";
+          code_ += "}";
+          code_ += "";
+          code_ += "#[inline]";
+          code_ += "pub fn {{STRUCT_NAME}}SizePrefixedBufferHasIdentifier(buf: &[u8])"
+                   " -> bool {";
+          code_ += "  return flatbuffers::buffer_has_identifier(";
+          code_ += "      buf, {{STRUCT_NAME}}Identifier(), true);";
           code_ += "}";
           code_ += "";
         }
-
-        // The root verifier.
-        if (parser_.file_identifier_.length()) {
-          code_.SetValue("ID", name + "Identifier()");
-        } else {
-          code_.SetValue("ID", "nullptr");
-        }
-
-        code_ += "//#[inline]";
-        code_ += "//pub fn Verify{{STRUCT_NAME}}Buffer(";
-        code_ += "//    verifier: &mut flatbuffers::Verifier) -> bool {";
-        code_ += "//  return verifier.verify_buffer::<{{CPP_NAME}}>({{ID}});";
-        code_ += "//}";
-        code_ += "";
 
         if (parser_.file_extension_.length()) {
           // Return the extension
@@ -419,9 +412,9 @@ class RustGenerator : public BaseGenerator {
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
-          code_ += "  fbb.finish(root, None);";
-        } else {
           code_ += "  fbb.finish(root, Some({{STRUCT_NAME}}Identifier()));";
+        } else {
+          code_ += "  fbb.finish(root, None);";
         }
         code_ += "}";
         code_ += "";
@@ -430,29 +423,11 @@ class RustGenerator : public BaseGenerator {
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
-          code_ += "  fbb.finish_size_prefixed(root, None);";
-        } else {
           code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME}}Identifier()));";
+        } else {
+          code_ += "  fbb.finish_size_prefixed(root, None);";
         }
         code_ += "}";
-
-        //TODO if (parser_.opts.generate_object_based_api) {
-        //TODO   // A convenient root unpack function.
-        //TODO   auto native_name =
-        //TODO       NativeName(WrapInNameSpace(struct_def), &struct_def, parser_.opts);
-        //TODO   code_.SetValue("UNPACK_RETURN",
-        //TODO                  GenTypeNativePtr(native_name, nullptr, false));
-        //TODO   code_.SetValue("UNPACK_TYPE",
-        //TODO                  GenTypeNativePtr(native_name, nullptr, true));
-
-        //TODO   code_ += "inline {{UNPACK_RETURN}} UnPack{{STRUCT_NAME}}(";
-        //TODO   code_ += "    const void *buf,";
-        //TODO   code_ += "    const flatbuffers::resolver_function_t *res = nullptr) {";
-        //TODO   code_ += "  return {{UNPACK_TYPE}}\\";
-        //TODO   code_ += "(Get{{STRUCT_NAME}}(buf)->UnPack(res));";
-        //TODO   code_ += "}";
-        //TODO   code_ += "";
-        //TODO }
       }
 
     }
