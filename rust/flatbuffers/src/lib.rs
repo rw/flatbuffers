@@ -91,6 +91,8 @@ pub const SIZE_UOFFSET: usize = SIZE_U32;
 pub const SIZE_SOFFSET: usize = SIZE_I32;
 pub const SIZE_VOFFSET: usize = SIZE_I16;
 
+pub const SIZE_SIZEPREFIX: usize = SIZE_U32;
+
 pub type SOffsetT = i32;
 pub type UOffsetT = u32;
 pub type VOffsetT = i16;
@@ -888,6 +890,23 @@ impl<'a, T: Sized> Follow<'a> for &'a T {
     }
 }
 
+pub struct SkipSizePrefix<T>(PhantomData<T>);
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipSizePrefix<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        T::follow(buf, loc + SIZE_SIZEPREFIX)
+    }
+}
+
+pub struct SkipFileIdentifier<T>(PhantomData<T>);
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        T::follow(buf, loc + FILE_IDENTIFIER_LENGTH)
+    }
+}
+
+
 // implementing these using bounds causes them to conflict with the Sized impl
 impl<'a> Follow<'a> for bool { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
 impl<'a> Follow<'a> for u8   { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
@@ -923,7 +942,7 @@ pub fn get_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
     <ForwardsU32Offset<T>>::follow(data, 0)
 }
 pub fn get_size_prefixed_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
-    <ForwardsU32Offset<T>>::follow(data, SIZE_UOFFSET)
+    <SkipSizePrefix<ForwardsU32Offset<T>>>::follow(data, 0)
 }
 pub fn buffer_has_identifier(data: &[u8], ident: &str, size_prefixed: bool) -> bool {
     assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);

@@ -22,6 +22,7 @@ extern crate quickcheck;
 extern crate flatbuffers;
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::MyGame;
+//use rust_usage_test::namespace_test::NamespaceA;
 
 //pub use MyGame::Example;
 
