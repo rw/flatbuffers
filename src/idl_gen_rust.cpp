@@ -76,13 +76,6 @@ bool StructNeedsLifetime(const StructDef &struct_def) {
   return false;
 }
 
-std::string TypeLifetime(const Type &type) {
-  if (TypeNeedsLifetime(type)) {
-    return "<'a>";
-  }
-  return "";
-}
-
 namespace rust {
 
 class RustGenerator : public BaseGenerator {
@@ -211,43 +204,15 @@ class RustGenerator : public BaseGenerator {
     //return qualified_name + name;
   }
 
-  // Iterate through all definitions we haven't generate code for (enums,
+  // Iterate through all definitions we haven't generated code for (enums,
   // structs, and tables) and output them to a single file.
   bool generate() {
     code_.Clear();
     code_ += "// " + std::string(FlatBuffersGeneratedWarning()) + "\n\n";
 
-    if (parser_.opts.gen_nullable) {
-      code_ += "//TODO #pragma clang system_header\n\n";
-    }
-
-    //code_ += "extern crate flatbuffers;";
-    if (parser_.uses_flexbuffers_) {
-      //code_ += "use self::flatbuffers::flexbuffers;";
-      //code_ += "#include \"flatbuffers/flexbuffers.h\"";
-    }
-    code_ += "";
-
     if (parser_.opts.include_dependence_headers) { GenIncludeDependencies(); }
 
     assert(!cur_name_space_);
-
-    //// Generate forward declarations for all structs/tables, since they may
-    //// have circular references.
-    //for (auto it = parser_.structs_.vec.begin();
-    //     it != parser_.structs_.vec.end(); ++it) {
-    //  const auto &struct_def = **it;
-    //  if (!struct_def.generated) {
-    //    SetNameSpace(struct_def.defined_namespace);
-    //    code_ += "struct " + Name(struct_def) + ";";
-    //    if (parser_.opts.generate_object_based_api && !struct_def.fixed) {
-    //      code_ += "struct " +
-    //               NativeName(Name(struct_def), &struct_def, parser_.opts) +
-    //               ";";
-    //    }
-    //    code_ += "";
-    //  }
-    //}
 
     // Generate all code in their namespaces, once, because Rust does not
     // permit re-opening modules. TODO: O(n**2) -> O(n) with a dictionary.
@@ -285,60 +250,6 @@ class RustGenerator : public BaseGenerator {
           GenTable(struct_def);
         }
       }
-      for (auto it = parser_.structs_.vec.begin();
-           it != parser_.structs_.vec.end(); ++it) {
-        const auto &struct_def = **it;
-        if (struct_def.defined_namespace != ns) { continue; }
-        if (!struct_def.fixed && !struct_def.generated) {
-          SetNameSpace(struct_def.defined_namespace);
-          //GenTablePost(struct_def);
-        }
-      }
-
-      // Generate code for union verifiers.
-      for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
-           ++it) {
-        const auto &enum_def = **it;
-        if (enum_def.defined_namespace != ns) { continue; }
-        if (enum_def.is_union && !enum_def.generated) {
-          SetNameSpace(enum_def.defined_namespace);
-          GenUnionPost(enum_def);
-        }
-      }
-
-//TODO      // Generate code for mini reflection.
-//TODO      if (parser_.opts.mini_reflect != IDLOptions::kNone) {
-//TODO        // To break cyclic dependencies, first pre-declare all tables/structs.
-//TODO        for (auto it = parser_.structs_.vec.begin();
-//TODO             it != parser_.structs_.vec.end(); ++it) {
-//TODO          const auto &struct_def = **it;
-//TODO          if (struct_def.defined_namespace != ns) { continue; }
-//TODO          if (!struct_def.generated) {
-//TODO            SetNameSpace(struct_def.defined_namespace);
-//TODO            GenMiniReflectPre(&struct_def);
-//TODO          }
-//TODO        }
-//TODO        // Then the unions/enums that may refer to them.
-//TODO        for (auto it = parser_.enums_.vec.begin(); it != parser_.enums_.vec.end();
-//TODO             ++it) {
-//TODO          const auto &enum_def = **it;
-//TODO          if (enum_def.defined_namespace != ns) { continue; }
-//TODO          if (!enum_def.generated) {
-//TODO            SetNameSpace(enum_def.defined_namespace);
-//TODO            GenMiniReflect(nullptr, &enum_def);
-//TODO          }
-//TODO        }
-//TODO        // Then the full tables/structs.
-//TODO        for (auto it = parser_.structs_.vec.begin();
-//TODO             it != parser_.structs_.vec.end(); ++it) {
-//TODO          const auto &struct_def = **it;
-//TODO          if (struct_def.defined_namespace != ns) { continue; }
-//TODO          if (!struct_def.generated) {
-//TODO            SetNameSpace(struct_def.defined_namespace);
-//TODO            GenMiniReflect(&struct_def, nullptr);
-//TODO          }
-//TODO        }
-//TODO      }
 
       // Generate convenient global helper functions:
       if (parser_.root_struct_def_) {
