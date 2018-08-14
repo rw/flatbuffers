@@ -2445,6 +2445,69 @@ fn assert_example_data_is_accessible_and_correct(filename: &'static str) {
         }
     }
 }
+
+#[test]
+fn test_creation_and_reading_of_nested_flatbuffer_using_generated_code() {
+    let b0 = {
+        let mut b0 = flatbuffers::FlatBufferBuilder::new();
+        let args = MyGame::Example::MonsterArgs{
+            hp: 123,
+            name: Some(b0.create_string("foobar")),
+            ..Default::default()
+        };
+        let mon = MyGame::Example::CreateMonster(&mut b0, &args);
+        MyGame::Example::FinishMonsterBuffer(&mut b0, mon);
+        b0
+    };
+
+    let b1 = {
+        let mut b1 = flatbuffers::FlatBufferBuilder::new();
+        let args = MyGame::Example::MonsterArgs{
+            testnestedflatbuffer: Some(b1.create_vector::<u8>(b0.get_active_buf_slice())),
+            ..Default::default()
+        };
+        let mon = MyGame::Example::CreateMonster(&mut b1, &args);
+        MyGame::Example::FinishMonsterBuffer(&mut b1, mon);
+        b1
+    };
+
+
+    let m = MyGame::Example::GetRootAsMonster(b1.get_active_buf_slice());
+
+    assert!(m.testnestedflatbuffer().is_some());
+    assert_eq!(m.testnestedflatbuffer().unwrap(), b0.get_active_buf_slice());
+
+    println!("nested buf: {:?}", m.testnestedflatbuffer().unwrap());
+
+    let m2_a = MyGame::Example::GetRootAsMonster(m.testnestedflatbuffer().unwrap());
+    assert_eq!(m2_a.hp(), 123);
+    assert_eq!(m2_a.name(), Some("foobar"));
+
+
+    assert!(m.testnestedflatbuffer_nested_flatbuffer().is_some());
+    let m2_b = m.testnestedflatbuffer_nested_flatbuffer().unwrap();
+
+    assert_eq!(m2_b.hp(), 123);
+    assert_eq!(m2_b.name(), Some("foobar"));
+}
+
+#[test]
+#[ignore] // we don't have a gold example of testnestedflatbuffer
+fn test_reading_of_gold_nested_flatbuffer_using_generated_code() {
+    let data = load_file("../monsterdata_test.mon");
+    let m = MyGame::Example::GetRootAsMonster(&data[..]);
+
+    assert!(m.testnestedflatbuffer().is_some());
+
+    let m2_a = MyGame::Example::GetRootAsMonster(m.testnestedflatbuffer().unwrap());
+    assert_eq!(m2_a.name(), Some("NestedMonster"));
+
+    assert!(m.testnestedflatbuffer_nested_flatbuffer().is_some());
+    let m2_b = m.testnestedflatbuffer_nested_flatbuffer().unwrap();
+
+    assert_eq!(m2_b.name(), Some("NestedMonster"));
+}
+
 #[test]
 #[should_panic]
 fn end_table_should_panic_when_not_in_table() {
@@ -3314,7 +3377,6 @@ mod byte_layouts {
             b.push_slot_scalar(fi2fo(0), 33i8, 0);
             b.push_slot_scalar(fi2fo(1), 44i8, 0);
             let off2 = b.end_table(off);
-            b.finish(off2);
         }
 
         {
@@ -3341,7 +3403,7 @@ mod byte_layouts {
               66, // value 1
               55, // value 0
 
-              12, 0, 0, 0, // root of table: points to object
+              //12, 0, 0, 0, // root of table: points to object
 
               8, 0, // vtable bytes
               8, 0, // size of object
@@ -3507,4 +3569,12 @@ mod byte_layouts {
               1, 0, // value #0 => 1 (int16)
         ]);
     }
+}
+
+fn load_file(filename: &str) -> Vec<u8> {
+    use std::io::Read;
+    let mut f = std::fs::File::open(filename).expect("file does not exist");
+    let mut buf = Vec::new();
+    f.read_to_end(&mut buf).expect("file reading failed");
+    buf
 }

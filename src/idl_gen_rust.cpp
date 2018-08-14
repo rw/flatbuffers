@@ -1939,11 +1939,6 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
-        //auto nested = field.attributes.Lookup("nested_flatbuffer");
-        //if (nested) {
-        //  const auto typname = GenTypeBasic(field, false);
-        //  return "Option<" + typname + ">";
-        //}
         const auto typname = GenTypeBasic(type.VectorType(), false);
         //return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
         return "Option<&" + lifetime + " [" + typname + "]>";
@@ -2378,28 +2373,29 @@ class RustGenerator : public BaseGenerator {
       code_ += "  }";
 
 
-      //auto nested = field.attributes.Lookup("nested_flatbuffer");
-      //if (nested) {
-      //  std::string qualified_name =
-      //      parser_.current_namespace_->GetFullyQualifiedName(nested->constant);
-      //  auto nested_root = parser_.LookupStruct(qualified_name);
-      //  assert(nested_root);  // Guaranteed to exist by parser.
-      //  (void)nested_root; // TODO what
-      //  //code_.SetValue("CPP_NAME", TranslateNameSpace(qualified_name));
-      //  code_.SetValue("CPP_NAME", GetRelativeNamespaceTraversal(
-      //        parser_.current_namespace_, nested_root->defined_namespace) +
-      //      nested->constant);
+      auto nested = field.attributes.Lookup("nested_flatbuffer");
+      if (nested) {
+        std::string qualified_name = nested->constant;
+        auto nested_root = parser_.LookupStruct(nested->constant);
+        if (nested_root == nullptr) {
+          qualified_name = parser_.current_namespace_->GetFullyQualifiedName(
+              nested->constant);
+          nested_root = parser_.LookupStruct(qualified_name);
+        }
+        FLATBUFFERS_ASSERT(nested_root);  // Guaranteed to exist by parser.
+        (void)nested_root;
 
-      //  code_ += "  #[inline]";
-      //  code_ += "  pub fn {{FIELD_NAME}}(&'a self) -> {{RETURN_TYPE}} {";
-      //  code_ += "    {{FUNC_BODY}}";
-      //  code_ += "  }";
-      //  code_ += "//TODO: mutable nested root";
-      //  code_ += "  fn {{FIELD_NAME}}_nested_root(&self) -> &{{CPP_NAME}}{";
-      //  code_ += "    unimplemented!()";
-      //  code_ += "    // TODO(rw): return flatbuffers::get_root::<{{CPP_NAME}}>(self.{{FIELD_NAME}}().Data());";
-      //  code_ += "  }";
-      //}
+        code_.SetValue("OFFSET_NAME", offset_prefix + "::" + GenFieldOffsetName(field));
+        code_ += "  pub fn {{FIELD_NAME}}_nested_flatbuffer(&'a self) -> Option<{{STRUCT_NAME}}<'a>> {";
+        code_ += "     match self.{{FIELD_NAME}}() {";
+        code_ += "         None => { None }";
+        code_ += "         Some(data) => {";
+        code_ += "             use self::flatbuffers::Follow;";
+        code_ += "             Some(<flatbuffers::ForwardsU32Offset<{{STRUCT_NAME}}<'a>>>::follow(data, 0))";
+        code_ += "         },";
+        code_ += "     }";
+        code_ += "  }";
+      }
 
       if (field.flexbuffer) {
         // TODO(rw)

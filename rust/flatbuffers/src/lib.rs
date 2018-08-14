@@ -272,6 +272,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn assert_finished(&self) {
         assert!(self.finished);
     }
+    fn assert_not_finished(&self) {
+        assert!(!self.finished);
+    }
     pub fn start_vector(&mut self, len: usize, elem_size: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
@@ -454,6 +457,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //TODO: unimplemented!()
     }
     pub fn finish<T>(&mut self, root: Offset<T>) {
+        self.assert_not_finished();
         self.assert_not_nested();
         self.vtables.clear();
         { let x = self.min_align; self.pre_align(SIZE_UOFFSET, x); }
