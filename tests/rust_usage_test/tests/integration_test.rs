@@ -497,6 +497,7 @@ mod roundtrips_with_generated_code {
         let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{test4: Some(v), ..Default::default()});
         assert_eq!(m.test4().unwrap(), &[MyGame::Example::Test::new(127, -128), MyGame::Example::Test::new(3, 123)][..]);
     }
+    #[ignore]
     #[test]
     fn vector_of_table_store() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
@@ -1248,6 +1249,7 @@ fn create_byte_string_should_panic_when_in_table() {
 #[test]
 #[should_panic]
 fn push_struct_slot_should_panic_when_not_in_table() {
+    #[derive(Copy, Clone, Debug, PartialEq)]
     #[repr(C, packed)]
     struct foo { }
     impl flatbuffers::GeneratedStruct for foo {}
@@ -1481,7 +1483,7 @@ mod test_follow_impls {
 
     #[test]
     fn test_offset_to_struct() {
-        #[derive(Debug, PartialEq)]
+        #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct FooStruct {
             a: i8,
@@ -1504,7 +1506,7 @@ mod test_follow_impls {
 
     #[test]
     fn test_slice_of_struct_elements() {
-        #[derive(Debug, PartialEq)]
+        #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct FooStruct {
             a: i8,
@@ -1521,7 +1523,7 @@ mod test_follow_impls {
 
     #[test]
     fn test_vector_of_struct_elements() {
-        #[derive(Debug, PartialEq)]
+        #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct FooStruct {
             a: i8,
@@ -1985,6 +1987,7 @@ mod byte_layouts {
     }
     #[test]
     fn test_14_vtable_with_1_struct_of_int8_and_int16_and_int32() {
+        #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct foo {
             a: i32,
