@@ -338,6 +338,8 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
                 }
             }
         }
+        //assert_eq!(m.vector_of_longs(), Some(&[1, 100, 10000, 1000000, 100000000][..]));
+        //assert_eq!(m.vector_of_longs(), Some(&[1, 100, 10000, 1000000, 100000000][..]));
 
         if m.test_type() != MyGame::Example::Any::Monster { return Err("bad m.test_type"); }
 
@@ -361,16 +363,47 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
         let invsum: u8 = inv.iter().sum();
         if invsum != 10 { return Err("bad m.inventory sum"); }
 
-        let test4 = match m.test4() {
-            None => { return Err("bad m.test4"); }
-            Some(x) => { x }
-        };
-        if test4.len() != 2 { return Err("bad m.test4 len"); }
+        {
+            let test4 = match m.test4() {
+                None => { return Err("bad m.test4"); }
+                Some(x) => { x }
+            };
+            if test4.len() != 2 { return Err("bad m.test4 len"); }
 
-        let x = test4[0];
-        let y = test4[1];
-        let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
-        if xy_sum != 100 { return Err("bad m.test4 item sum"); }
+            let x = test4[0];
+            let y = test4[1];
+            let xy_sum = x.a() as i32 + x.b() as i32 + y.a() as i32 + y.b() as i32;
+            if xy_sum != 100 { return Err("bad m.test4 item sum"); }
+        }
+
+        {
+            match m.testarrayoftables() {
+                None => { println!("not all monster examples have testarrayoftables, skipping"); }
+                Some(x) => {
+                    println!("foo: {:?}", x.get(0).name());
+                    if x.get(0).name() != Some("Barney") { return Err("bad testarrayoftables.get(0).name()") }
+                    if x.get(1).name() != Some("Frodo") { return Err("bad testarrayoftables.get(1).name()") }
+                    if x.get(2).name() != Some("Wilma") { return Err("bad testarrayoftables.get(2).name()") }
+                }
+            }
+        }
+
+
+        //{
+        //    let test5 = match m.test5() {
+        //        None => { return Err("bad m.test5"); }
+        //        Some(x) => { x }
+        //    };
+        //    if test5.len() != 2 { return Err("bad test5.len") }
+        //    if test5[0].a() != 10 { return Err("bad test5[0].a") }
+        //    if test5[0].b() != 20 { return Err("bad test5[0].b") }
+        //    if test5[1].a() != 10 { return Err("bad test5[1].a") }
+        //    if test5[1].b() != 20 { return Err("bad test5[1].b") }
+        //}
+
+        //if m.testarrayofbools() != Some(&[true, false, true][..]) {
+        //    return Err("bad m.testarrayofbools");
+        //}
 
         let testarrayofstring = match m.testarrayofstring() {
             None => { return Err("bad m.testarrayofstring"); }
@@ -972,7 +1005,7 @@ fn generated_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_generated_code(&mut b);
     let buf = b.get_active_buf_slice();
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
+    serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
 }
 
 #[test]
@@ -980,23 +1013,23 @@ fn library_code_creates_example_data_that_is_accessible_and_correct() {
     let mut b = flatbuffers::FlatBufferBuilder::new();
     create_serialized_example_with_library_code(&mut b);
     let buf = b.get_active_buf_slice();
-    assert!(serialized_example_is_accessible_and_correct(buf, true, false).is_ok());
+    serialized_example_is_accessible_and_correct(buf, true, false).unwrap();
 }
 
 #[test]
 fn gold_cpp_example_data_is_accessible_and_correct() {
     let buf = load_file("../monsterdata_test.mon");
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
+    serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
 }
 #[test]
 fn java_wire_example_data_is_accessible_and_correct() {
     let buf = load_file("../monsterdata_java_wire.mon");
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
+    serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
 }
 #[test]
 fn java_wire_size_prefixed_example_data_is_accessible_and_correct() {
     let buf = load_file("../monsterdata_java_wire_sp.mon");
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, true).is_ok());
+    serialized_example_is_accessible_and_correct(&buf[..], true, true).unwrap();
 }
 #[test]
 fn go_wire_example_data_is_accessible_and_correct() {
@@ -1009,12 +1042,12 @@ fn go_wire_example_data_is_accessible_and_correct() {
         }
     };
     let buf = load_file(filename);
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], true, false).is_ok());
+    serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
 }
 #[test]
 fn python_wire_example_data_is_accessible_and_correct() {
     let buf = load_file("../monsterdata_python_wire.mon");
-    assert!(serialized_example_is_accessible_and_correct(&buf[..], false, false).is_ok());
+    serialized_example_is_accessible_and_correct(&buf[..], false, false).unwrap();
 }
 
 #[test]

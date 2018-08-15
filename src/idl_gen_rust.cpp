@@ -1864,7 +1864,7 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
         //return "Option<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + "<" + lifetime + ">>>>";
-        return "Option<flatbuffers::Vector<" + typname + "<" + lifetime + ">>>";
+        return "Option<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<" + typname + "<" + lifetime + ">>>>";
       }
       case FullElementType::VectorOfString: {
         //return "Option<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " flatbuffers::String<" + lifetime + ">>>";
@@ -1948,7 +1948,7 @@ class RustGenerator : public BaseGenerator {
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
         //return "self._tab.get_slot_vector::<flatbuffers::Offset<" + typname + "<" + lifetime + ">>>(" + offset_name + ")";
-        return "self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<" + typname + "<" + lifetime + ">>>>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<" + typname + "<" + lifetime + ">>>>>(" + offset_name + ", None)";
       }
       case FullElementType::VectorOfString: {
         //return "self._tab.get_slot_vector::<flatbuffers::Offset<&" + lifetime + " str>>(" + offset_name + ")";

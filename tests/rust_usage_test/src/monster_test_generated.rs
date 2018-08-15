@@ -695,8 +695,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   /// an example documentation comment: this will end up in the generated code
   /// multiline too
   #[inline]
-  pub fn testarrayoftables(&'a self) -> Option<flatbuffers::Vector<Monster<'a>>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Monster<'a>>>>(Monster::VT_TESTARRAYOFTABLES, None)
+  pub fn testarrayoftables(&'a self) -> Option<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<Monster<'a>>>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<Monster<'a>>>>>(Monster::VT_TESTARRAYOFTABLES, None)
   }
   #[inline]
   pub fn enemy(&'a self) -> Option<Monster<'a>> {
@@ -800,8 +800,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get::<flatbuffers::ForwardsU32Offset<super::InParentNamespace<'a>>>(Monster::VT_PARENT_NAMESPACE_TEST, None)
   }
   #[inline]
-  pub fn vector_of_referrables(&'a self) -> Option<flatbuffers::Vector<Referrable<'a>>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Referrable<'a>>>>(Monster::VT_VECTOR_OF_REFERRABLES, None)
+  pub fn vector_of_referrables(&'a self) -> Option<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<Referrable<'a>>>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<Referrable<'a>>>>>(Monster::VT_VECTOR_OF_REFERRABLES, None)
   }
   #[inline]
   pub fn single_weak_reference(&'a self) -> u64 {
@@ -812,8 +812,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get::<flatbuffers::ForwardsU32Offset<&[u64]>>(Monster::VT_VECTOR_OF_WEAK_REFERENCES, None)
   }
   #[inline]
-  pub fn vector_of_strong_referrables(&'a self) -> Option<flatbuffers::Vector<Referrable<'a>>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<Referrable<'a>>>>(Monster::VT_VECTOR_OF_STRONG_REFERRABLES, None)
+  pub fn vector_of_strong_referrables(&'a self) -> Option<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<Referrable<'a>>>> {
+    self._tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<Referrable<'a>>>>>(Monster::VT_VECTOR_OF_STRONG_REFERRABLES, None)
   }
   #[inline]
   pub fn co_owning_reference(&'a self) -> u64 {
