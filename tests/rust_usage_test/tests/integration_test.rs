@@ -417,6 +417,116 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
 }
 
 #[cfg(test)]
+mod roundtrips_with_generated_code {
+    extern crate flatbuffers;
+
+    extern crate rust_usage_test;
+    use rust_usage_test::monster_test_generated::MyGame;
+
+    fn build_mon<'a, 'b>(builder: &'a mut flatbuffers::FlatBufferBuilder, args: &'b MyGame::Example::MonsterArgs) -> MyGame::Example::Monster<'a> {
+        let mon = MyGame::Example::CreateMonster(builder, &args);
+        MyGame::Example::FinishMonsterBuffer(builder, mon);
+        MyGame::Example::GetRootAsMonster(builder.get_active_buf_slice())
+    }
+
+    #[test]
+    fn scalar_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{hp: 123, ..Default::default()});
+        assert_eq!(m.hp(), 123);
+    }
+    #[test]
+    fn scalar_default() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{..Default::default()});
+        assert_eq!(m.hp(), 100);
+    }
+    #[test]
+    fn string_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let name = b.create_string("foobar");
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{name: Some(name), ..Default::default()});
+        assert_eq!(m.name(), Some("foobar"));
+    }
+    #[test]
+    fn enum_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{color: MyGame::Example::Color::Red, ..Default::default()});
+        assert_eq!(m.color(), MyGame::Example::Color::Red);
+    }
+    #[test]
+    fn enum_default() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{..Default::default()});
+        assert_eq!(m.color(), MyGame::Example::Color::Blue);
+    }
+    #[test]
+    fn vector_of_string_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let v = b.create_vector_of_strings(&["foobar", "baz"]);
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{testarrayofstring: Some(v), ..Default::default()});
+        assert_eq!(m.testarrayofstring().unwrap().len(), 2);
+        assert_eq!(m.testarrayofstring().unwrap().get(0), "foobar");
+        assert_eq!(m.testarrayofstring().unwrap().get(1), "baz");
+    }
+    #[test]
+    fn vector_of_ubyte_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let v = b.create_vector::<u8>(&[123, 234][..]);
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{inventory: Some(v), ..Default::default()});
+        assert_eq!(m.inventory().unwrap(), &[123, 234][..]);
+    }
+    #[test]
+    fn vector_of_bool_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let v = b.create_vector::<bool>(&[false, true, false, true][..]);
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{testarrayofbools: Some(v), ..Default::default()});
+        assert_eq!(m.testarrayofbools().unwrap(), &[false, true, false, true][..]);
+    }
+    #[test]
+    fn vector_of_f64_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let v = b.create_vector::<f64>(&[3.14159265359][..]);
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{vector_of_doubles: Some(v), ..Default::default()});
+        assert_eq!(m.vector_of_doubles().unwrap(), &[3.14159265359][..]);
+    }
+    #[test]
+    fn vector_of_struct_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let v = b.create_vector::<MyGame::Example::Test>(&[MyGame::Example::Test::new(127, -128), MyGame::Example::Test::new(3, 123)][..]);
+        let m = build_mon(&mut b, &MyGame::Example::MonsterArgs{test4: Some(v), ..Default::default()});
+        assert_eq!(m.test4().unwrap(), &[MyGame::Example::Test::new(127, -128), MyGame::Example::Test::new(3, 123)][..]);
+    }
+    #[test]
+    fn vector_of_table_store() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
+        let t0 = {
+            let name = b.create_string("foo");
+            let args = MyGame::Example::MonsterArgs{hp: 55, name: Some(name), ..Default::default()};
+            MyGame::Example::CreateMonster(b, &args)
+        };
+        let t1 = {
+            let name = b.create_string("bar");
+            let args = MyGame::Example::MonsterArgs{name: Some(name), ..Default::default()};
+            MyGame::Example::CreateMonster(b, &args)
+        };
+        assert!(false, "needs better ergonomics around writing tables re: offsets");
+        let v = b.create_vector::<flatbuffers::Offset<_>>(&[t0, t1][..]);
+        let m = build_mon(b, &MyGame::Example::MonsterArgs{testarrayoftables: Some(v), ..Default::default()});
+        assert_eq!(m.testarrayoftables().unwrap().len(), 2);
+        assert_eq!(m.testarrayoftables().unwrap().get(1).hp(), 55);
+        assert_eq!(m.testarrayoftables().unwrap().get(0).name(), Some("foo"));
+        assert_eq!(m.testarrayoftables().unwrap().get(1).hp(), 100);
+        assert_eq!(m.testarrayoftables().unwrap().get(1).name(), Some("bar"));
+    }
+}
+
+#[test]
+fn force_align() {
+    assert_eq!(std::mem::size_of::<MyGame::Example::Vec3>() % 16, 0);
+}
+
+#[cfg(test)]
 mod vector_read_scalar_tests {
     extern crate quickcheck;
     extern crate flatbuffers;

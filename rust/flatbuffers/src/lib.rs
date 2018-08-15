@@ -359,8 +359,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_vector<'a, 'b, 'c, T: 'fbb>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
-        for i in items.iter().rev() {
-            self.push_bytes(to_bytes(i));
+        for i in (0..items.len()).rev() {
+            self.push_bytes(to_bytes(&items[i]));
         }
         Offset::new(self.end_vector::<'_, '_, T>(items.len()).value())
     }

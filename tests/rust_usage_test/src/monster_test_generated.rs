@@ -226,7 +226,7 @@ pub fn EnumNameAny(e: Any) -> &'static str {
 pub struct AnyUnionTableOffset {}
 // MANUALLY_ALIGNED_STRUCT(2)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default, Debug)]
+#[derive(Clone, Copy, Default, Debug, PartialEq)]
 pub struct Test {
   a_: i16,
   b_: i8,
@@ -258,7 +258,7 @@ impl Test {
 
 // MANUALLY_ALIGNED_STRUCT(16)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default, Debug)]
+#[derive(Clone, Copy, Default, Debug, PartialEq)]
 pub struct Vec3 {
   x_: f32,
   y_: f32,
@@ -316,7 +316,7 @@ impl Vec3 {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default, Debug)]
+#[derive(Clone, Copy, Default, Debug, PartialEq)]
 pub struct Ability {
   id_: u32,
   distance_: u32,

@@ -3026,7 +3026,7 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
     code_ += "#[repr(C, packed)]";
-    code_ += "#[derive(Clone, Copy, Default, Debug)]";
+    code_ += "#[derive(Clone, Copy, Default, Debug, PartialEq)]";
 
     // TODO: maybe only use lifetimes when needed by members, and skip
     //       PhantomData? use TypeNeedsLifetime.
