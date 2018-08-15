@@ -898,6 +898,23 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipSizePrefix<T> {
     }
 }
 
+pub struct SkipRootOffset<T>(PhantomData<T>);
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipRootOffset<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        T::follow(buf, loc + SIZE_UOFFSET)
+    }
+}
+
+pub struct FileIdentifier;
+impl<'a> Follow<'a> for FileIdentifier {
+    type Inner = &'a [u8];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        &buf[loc..loc + FILE_IDENTIFIER_LENGTH]
+    }
+}
+
+
 pub struct SkipFileIdentifier<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
     type Inner = T::Inner;
@@ -946,13 +963,13 @@ pub fn get_size_prefixed_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inne
 }
 pub fn buffer_has_identifier(data: &[u8], ident: &str, size_prefixed: bool) -> bool {
     assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
-    let start = SIZE_UOFFSET + if size_prefixed {
-        SIZE_UOFFSET
+
+    let got = if size_prefixed {
+        <SkipSizePrefix<SkipRootOffset<FileIdentifier>>>::follow(data, 0)
     } else {
-        0
+        <SkipRootOffset<FileIdentifier>>::follow(data, 0)
     };
 
-    let got = &data[start..start + FILE_IDENTIFIER_LENGTH];
     ident.as_bytes() == got
 }
 pub struct DetachedBuffer {}
