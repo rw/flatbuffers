@@ -327,7 +327,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_string<'a, 'b, 'c>(&'a mut self, s: &'b str) -> Offset<&'fbb str> {
         Offset::<&str>::new(self.create_byte_string::<'a, 'b>(s.as_bytes()).value())
     }
-    pub fn create_byte_string<'a, 'b, 'c>(&'a mut self, data: &'b [u8]) -> Offset<&'fbb [u8]> {
+    pub fn create_byte_string<'a, 'b>(&'a mut self, data: &'b [u8]) -> Offset<&'fbb [u8]> {
         self.assert_not_nested();
         self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
         self.fill(1);
@@ -335,7 +335,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
     }
-    pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &[u8]) -> Offset<Vector<'b, u8>> {
+    pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &'b [u8]) -> Offset<Vector<'fbb, u8>> {
         self.assert_not_nested();
         //self.nested = true;
         self.pre_align(data.len(), SIZE_UOFFSET);
@@ -347,25 +347,34 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<StringOffset> {
         Offset::new(0)
     }
-    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, Offset<&'fbb str>>> {
+    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsU32Offset<&'fbb str>>> {
         // TODO: any way to avoid heap allocs?
-        let offsets: Vec<Offset<&str>> = xs.iter().rev().map(|s| self.create_string(s)).collect();
-        for o in offsets.iter() {
+        let offsets: Vec<Offset<&str>> = xs.iter().rev().map(|s| self.create_string(s)).rev().collect();
+        self.create_vector_of_reverse_offsets(&offsets[..])
+    }
+    pub fn create_vector_of_reverse_offsets<'a, 'b, 'c, T: 'fbb>(&'a mut self, items: &'b [Offset<T>]) -> Offset<Vector<'fbb, ForwardsU32Offset<T>>> {
+        let elemsize = std::mem::size_of::<Offset<T>>();
+        let start_off = self.start_vector(elemsize, items.len());
+        for o in items.iter().rev() {
             self.push_element_scalar_indirect_uoffset(o.value());
         }
-        self.push_element_scalar::<UOffsetT>(offsets.len() as UOffsetT);
-        Offset::new(self.get_size() as UOffsetT)
+        Offset::new(self.end_vector::<'_, '_, Offset<Vector<'fbb, ForwardsU32Offset<T>>>>(items.len()).value())
     }
-    pub fn create_vector<'a, 'b, 'c, T: 'fbb>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
+    pub fn create_vector_of_scalars<'a, 'b, 'c, T: ElementScalar + 'fbb>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
+        let elemsize = std::mem::size_of::<T>();
+        let start_off = self.start_vector(elemsize, items.len());
+        for x in items.iter().rev() {
+            self.push_element_scalar(*x);
+        }
+        Offset::new(self.end_vector::<'_, '_, T>(items.len()).value())
+    }
+    pub fn create_vector_of_structs<'a, 'b, T>(&'a mut self, items: &'b [T]) -> Offset<Vector<'fbb, T>> {
         let elemsize = std::mem::size_of::<T>();
         let start_off = self.start_vector(elemsize, items.len());
         for i in (0..items.len()).rev() {
             self.push_bytes(to_bytes(&items[i]));
         }
         Offset::new(self.end_vector::<'_, '_, T>(items.len()).value())
-    }
-    pub fn create_vector_of_structs<'a, T: 'a>(&'fbb mut self, _: &'a [T]) -> Offset<&'a [T]> {
-        unimplemented!();
     }
     pub fn create_vector_of_sorted_structs<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'a, T>> {
         unimplemented!();

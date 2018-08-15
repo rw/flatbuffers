@@ -861,8 +861,8 @@ pub struct MonsterArgs<'a> {
     pub test_type: Any,
     pub test: Option<flatbuffers::Offset<AnyUnionTableOffset>>,
     pub test4: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Test>>>,
-    pub testarrayofstring: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<&'a  str>>>>,
-    pub testarrayoftables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<Monster<'a >>>>>,
+    pub testarrayofstring: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<&'a  str>>>>,
+    pub testarrayoftables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<Monster<'a >>>>>,
     pub enemy: Option<flatbuffers::Offset<&'a  Monster<'a >>>,
     pub testnestedflatbuffer: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u8>>>,
     pub testempty: Option<flatbuffers::Offset<&'a  Stat<'a >>>,
@@ -879,17 +879,17 @@ pub struct MonsterArgs<'a> {
     pub testf: f32,
     pub testf2: f32,
     pub testf3: f32,
-    pub testarrayofstring2: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<&'a  str>>>>,
+    pub testarrayofstring2: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<&'a  str>>>>,
     pub testarrayofsortedstruct: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Ability>>>,
     pub flex: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u8>>>,
     pub test5: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Test>>>,
     pub vector_of_longs: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  i64>>>,
     pub vector_of_doubles: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  f64>>>,
     pub parent_namespace_test: Option<flatbuffers::Offset<&'a  super::InParentNamespace<'a >>>,
-    pub vector_of_referrables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<Referrable<'a >>>>>,
+    pub vector_of_referrables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<Referrable<'a >>>>>,
     pub single_weak_reference: u64,
     pub vector_of_weak_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
-    pub vector_of_strong_referrables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::Offset<Referrable<'a >>>>>,
+    pub vector_of_strong_referrables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<Referrable<'a >>>>>,
     pub co_owning_reference: u64,
     pub vector_of_co_owning_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
     pub non_owning_reference: u64,
@@ -978,10 +978,10 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<'b , Test>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TEST4, test4);
   }
-  pub fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<&'b  str>>>) {
+  pub fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsU32Offset<&'b  str>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
   }
-  pub fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<Monster<'b >>>>) {
+  pub fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsU32Offset<Monster<'b >>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
   }
   pub fn add_enemy(&mut self, enemy: flatbuffers::Offset<&'b  Monster<'b >>) {
@@ -1032,7 +1032,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_testf3(&mut self, testf3: f32) {
     self.fbb_.push_slot_scalar::<f32>(Monster::VT_TESTF3, testf3, 0.0);
   }
-  pub fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<&'b  str>>>) {
+  pub fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsU32Offset<&'b  str>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
   }
   pub fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<'b , Ability>>) {
@@ -1053,7 +1053,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::Offset<&'b  super::InParentNamespace<'b >>) {
     self.fbb_.push_slot_offset_relative::<&super::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
-  pub fn add_vector_of_referrables(&mut self, vector_of_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<Referrable<'b >>>>) {
+  pub fn add_vector_of_referrables(&mut self, vector_of_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsU32Offset<Referrable<'b >>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_REFERRABLES, vector_of_referrables);
   }
   pub fn add_single_weak_reference(&mut self, single_weak_reference: u64) {
@@ -1062,7 +1062,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_vector_of_weak_references(&mut self, vector_of_weak_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_WEAK_REFERENCES, vector_of_weak_references);
   }
-  pub fn add_vector_of_strong_referrables(&mut self, vector_of_strong_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::Offset<Referrable<'b >>>>) {
+  pub fn add_vector_of_strong_referrables(&mut self, vector_of_strong_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsU32Offset<Referrable<'b >>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_STRONG_REFERRABLES, vector_of_strong_referrables);
   }
   pub fn add_co_owning_reference(&mut self, co_owning_reference: u64) {

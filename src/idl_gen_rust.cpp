@@ -1594,10 +1594,10 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + "<" + lifetime + ">>>>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsU32Offset<" + typname + "<" + lifetime + ">>>>>";
       }
       case FullElementType::VectorOfString: {
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<&" + lifetime + " str>>>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsU32Offset<&" + lifetime + " str>>>>";
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
@@ -1636,7 +1636,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + "<" + lifetime + ">>>>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsU32Offset<" + typname + "<" + lifetime + ">>>>";
       }
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
@@ -1649,7 +1649,7 @@ class RustGenerator : public BaseGenerator {
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>";
       }
       case FullElementType::VectorOfString: {
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<&" + lifetime + " str>>>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsU32Offset<&" + lifetime + " str>>>";
       }
       case FullElementType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
