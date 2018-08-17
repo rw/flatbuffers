@@ -4,18 +4,16 @@
 // #include "include_test1_generated.rs"
 // #include "include_test2_generated.rs"
 
-pub mod MyGame {
-  #[allow(unused_imports)]
+pub mod my_game {
+  #![allow(dead_code)]
+  #![allow(unused_imports)]
+
   use std::mem;
-  #[allow(unused_imports)]
   use std::marker::PhantomData;
-  #[allow(unused_imports)]
-  #[allow(unreachable_code)]
-  extern crate flatbuffers;
-  #[allow(unused_imports)]
-  use self::flatbuffers::flexbuffers;
-  #[allow(unused_imports)]
   use std::cmp::Ordering;
+
+  extern crate flatbuffers;
+  use self::flatbuffers::flexbuffers;
 
 pub enum InParentNamespaceOffset {}
 #[derive(Copy, Clone, PartialEq)]
@@ -36,6 +34,13 @@ impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        _args: &'y InParentNamespaceArgs<'y>) -> flatbuffers::Offset<InParentNamespace<'x>> {
+      let mut builder = InParentNamespaceBuilder::new(_fbb);
+      builder.finish()
+    }
+
 }
 
 pub struct InParentNamespaceArgs<'a> {
@@ -61,34 +66,24 @@ impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
     }
   }
   // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<InParentNamespace<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<InParentNamespace<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<InParentNamespace<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
 }
 
-#[inline]
-pub fn CreateInParentNamespace<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b InParentNamespaceArgs<'b>) -> flatbuffers::Offset<InParentNamespace<'a>> {
-  let mut builder = InParentNamespaceBuilder::new(_fbb);
-  builder.finish()
-}
+pub mod example_2 {
+  #![allow(dead_code)]
+  #![allow(unused_imports)]
 
-pub mod Example2 {
-  #[allow(unused_imports)]
   use std::mem;
-  #[allow(unused_imports)]
   use std::marker::PhantomData;
-  #[allow(unused_imports)]
-  #[allow(unreachable_code)]
-  extern crate flatbuffers;
-  #[allow(unused_imports)]
-  use self::flatbuffers::flexbuffers;
-  #[allow(unused_imports)]
   use std::cmp::Ordering;
+
+  extern crate flatbuffers;
+  use self::flatbuffers::flexbuffers;
 
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, PartialEq)]
@@ -109,6 +104,13 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        _args: &'y MonsterArgs<'y>) -> flatbuffers::Offset<Monster<'x>> {
+      let mut builder = MonsterBuilder::new(_fbb);
+      builder.finish()
+    }
+
 }
 
 pub struct MonsterArgs<'a> {
@@ -134,36 +136,26 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<Monster<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<Monster<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<Monster<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
 }
 
-#[inline]
-pub fn CreateMonster<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b MonsterArgs<'b>) -> flatbuffers::Offset<Monster<'a>> {
-  let mut builder = MonsterBuilder::new(_fbb);
-  builder.finish()
-}
-
 }  // pub mod Example2
 
-pub mod Example {
-  #[allow(unused_imports)]
+pub mod example {
+  #![allow(dead_code)]
+  #![allow(unused_imports)]
+
   use std::mem;
-  #[allow(unused_imports)]
   use std::marker::PhantomData;
-  #[allow(unused_imports)]
-  #[allow(unreachable_code)]
-  extern crate flatbuffers;
-  #[allow(unused_imports)]
-  use self::flatbuffers::flexbuffers;
-  #[allow(unused_imports)]
   use std::cmp::Ordering;
+
+  extern crate flatbuffers;
+  use self::flatbuffers::flexbuffers;
 
 #[repr(i8)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -173,7 +165,7 @@ pub enum Color {
   Blue = 8
 }
 
-const EnumValuesColor:[Color; 3] = [
+const ENUM_VALUES_COLOR:[Color; 3] = [
   Color::Red,
   Color::Green,
   Color::Blue
@@ -204,7 +196,7 @@ pub enum Any {
   MyGame_Example2_Monster = 3
 }
 
-const EnumValuesAny:[Any; 4] = [
+const ENUM_VALUES_ANY:[Any; 4] = [
   Any::NONE,
   Any::Monster,
   Any::TestSimpleTableWithEnum,
@@ -370,6 +362,14 @@ impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y TestSimpleTableWithEnumArgs<'y>) -> flatbuffers::Offset<TestSimpleTableWithEnum<'x>> {
+      let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
+      builder.add_color(args.color);
+      builder.finish()
+    }
+
     pub const VT_COLOR: flatbuffers::VOffsetT = 4;
 
   #[inline]
@@ -406,21 +406,12 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
     }
   }
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<TestSimpleTableWithEnum<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
-}
-
-#[inline]
-pub fn CreateTestSimpleTableWithEnum<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b TestSimpleTableWithEnumArgs<'b>) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
-  let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
-  builder.add_color(args.color);
-  builder.finish()
 }
 
 pub enum StatOffset {}
@@ -442,6 +433,16 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y StatArgs<'y>) -> flatbuffers::Offset<Stat<'x>> {
+      let mut builder = StatBuilder::new(_fbb);
+      builder.add_val(args.val);
+      if let Some(x) = args.id { builder.add_id(x); }
+      builder.add_count(args.count);
+      builder.finish()
+    }
+
     pub const VT_ID: flatbuffers::VOffsetT = 4;
     pub const VT_VAL: flatbuffers::VOffsetT = 6;
     pub const VT_COUNT: flatbuffers::VOffsetT = 8;
@@ -498,23 +499,12 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
     }
   }
   // StatBuilder &operator=(const StatBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<Stat<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<Stat<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<Stat<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
-}
-
-#[inline]
-pub fn CreateStat<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b StatArgs<'b>) -> flatbuffers::Offset<Stat<'a>> {
-  let mut builder = StatBuilder::new(_fbb);
-  builder.add_val(args.val);
-  if let Some(x) = args.id { builder.add_id(x); }
-  builder.add_count(args.count);
-  builder.finish()
 }
 
 pub enum ReferrableOffset {}
@@ -536,6 +526,14 @@ impl<'a> Referrable<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y ReferrableArgs<'y>) -> flatbuffers::Offset<Referrable<'x>> {
+      let mut builder = ReferrableBuilder::new(_fbb);
+      builder.add_id(args.id);
+      builder.finish()
+    }
+
     pub const VT_ID: flatbuffers::VOffsetT = 4;
 
   #[inline]
@@ -572,21 +570,12 @@ impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
     }
   }
   // ReferrableBuilder &operator=(const ReferrableBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<Referrable<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<Referrable<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<Referrable<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
-}
-
-#[inline]
-pub fn CreateReferrable<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b ReferrableArgs<'b>) -> flatbuffers::Offset<Referrable<'a>> {
-  let mut builder = ReferrableBuilder::new(_fbb);
-  builder.add_id(args.id);
-  builder.finish()
 }
 
 /// an example documentation comment: monster object
@@ -609,6 +598,55 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y MonsterArgs<'y>) -> flatbuffers::Offset<Monster<'x>> {
+      let mut builder = MonsterBuilder::new(_fbb);
+      builder.add_non_owning_reference(args.non_owning_reference);
+      builder.add_co_owning_reference(args.co_owning_reference);
+      builder.add_single_weak_reference(args.single_weak_reference);
+      builder.add_testhashu64_fnv1a(args.testhashu64_fnv1a);
+      builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
+      builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
+      builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
+      if let Some(x) = args.vector_of_non_owning_references { builder.add_vector_of_non_owning_references(x); }
+      if let Some(x) = args.vector_of_co_owning_references { builder.add_vector_of_co_owning_references(x); }
+      if let Some(x) = args.vector_of_strong_referrables { builder.add_vector_of_strong_referrables(x); }
+      if let Some(x) = args.vector_of_weak_references { builder.add_vector_of_weak_references(x); }
+      if let Some(x) = args.vector_of_referrables { builder.add_vector_of_referrables(x); }
+      if let Some(x) = args.parent_namespace_test { builder.add_parent_namespace_test(x); }
+      if let Some(x) = args.vector_of_doubles { builder.add_vector_of_doubles(x); }
+      if let Some(x) = args.vector_of_longs { builder.add_vector_of_longs(x); }
+      if let Some(x) = args.test5 { builder.add_test5(x); }
+      if let Some(x) = args.flex { builder.add_flex(x); }
+      if let Some(x) = args.testarrayofsortedstruct { builder.add_testarrayofsortedstruct(x); }
+      if let Some(x) = args.testarrayofstring2 { builder.add_testarrayofstring2(x); }
+      builder.add_testf3(args.testf3);
+      builder.add_testf2(args.testf2);
+      builder.add_testf(args.testf);
+      if let Some(x) = args.testarrayofbools { builder.add_testarrayofbools(x); }
+      builder.add_testhashu32_fnv1a(args.testhashu32_fnv1a);
+      builder.add_testhashs32_fnv1a(args.testhashs32_fnv1a);
+      builder.add_testhashu32_fnv1(args.testhashu32_fnv1);
+      builder.add_testhashs32_fnv1(args.testhashs32_fnv1);
+      if let Some(x) = args.testempty { builder.add_testempty(x); }
+      if let Some(x) = args.testnestedflatbuffer { builder.add_testnestedflatbuffer(x); }
+      if let Some(x) = args.enemy { builder.add_enemy(x); }
+      if let Some(x) = args.testarrayoftables { builder.add_testarrayoftables(x); }
+      if let Some(x) = args.testarrayofstring { builder.add_testarrayofstring(x); }
+      if let Some(x) = args.test4 { builder.add_test4(x); }
+      if let Some(x) = args.test { builder.add_test(x); }
+      if let Some(x) = args.inventory { builder.add_inventory(x); }
+      if let Some(x) = args.name { builder.add_name(x); }
+      if let Some(x) = args.pos { builder.add_pos(x); }
+      builder.add_hp(args.hp);
+      builder.add_mana(args.mana);
+      builder.add_testbool(args.testbool);
+      builder.add_test_type(args.test_type);
+      builder.add_color(args.color);
+      builder.finish()
+    }
+
     pub const VT_POS: flatbuffers::VOffsetT = 4;
     pub const VT_MANA: flatbuffers::VOffsetT = 6;
     pub const VT_HP: flatbuffers::VOffsetT = 8;
@@ -1085,63 +1123,13 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<Monster<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<Monster<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<Monster<'a>>::new(end);
     self.fbb_.required(&o, Monster::VT_NAME);
     flatbuffers::Offset::new(o.value())
   }
-}
-
-#[inline]
-pub fn CreateMonster<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b MonsterArgs<'b>) -> flatbuffers::Offset<Monster<'a>> {
-  let mut builder = MonsterBuilder::new(_fbb);
-  builder.add_non_owning_reference(args.non_owning_reference);
-  builder.add_co_owning_reference(args.co_owning_reference);
-  builder.add_single_weak_reference(args.single_weak_reference);
-  builder.add_testhashu64_fnv1a(args.testhashu64_fnv1a);
-  builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
-  builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
-  builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
-  if let Some(x) = args.vector_of_non_owning_references { builder.add_vector_of_non_owning_references(x); }
-  if let Some(x) = args.vector_of_co_owning_references { builder.add_vector_of_co_owning_references(x); }
-  if let Some(x) = args.vector_of_strong_referrables { builder.add_vector_of_strong_referrables(x); }
-  if let Some(x) = args.vector_of_weak_references { builder.add_vector_of_weak_references(x); }
-  if let Some(x) = args.vector_of_referrables { builder.add_vector_of_referrables(x); }
-  if let Some(x) = args.parent_namespace_test { builder.add_parent_namespace_test(x); }
-  if let Some(x) = args.vector_of_doubles { builder.add_vector_of_doubles(x); }
-  if let Some(x) = args.vector_of_longs { builder.add_vector_of_longs(x); }
-  if let Some(x) = args.test5 { builder.add_test5(x); }
-  if let Some(x) = args.flex { builder.add_flex(x); }
-  if let Some(x) = args.testarrayofsortedstruct { builder.add_testarrayofsortedstruct(x); }
-  if let Some(x) = args.testarrayofstring2 { builder.add_testarrayofstring2(x); }
-  builder.add_testf3(args.testf3);
-  builder.add_testf2(args.testf2);
-  builder.add_testf(args.testf);
-  if let Some(x) = args.testarrayofbools { builder.add_testarrayofbools(x); }
-  builder.add_testhashu32_fnv1a(args.testhashu32_fnv1a);
-  builder.add_testhashs32_fnv1a(args.testhashs32_fnv1a);
-  builder.add_testhashu32_fnv1(args.testhashu32_fnv1);
-  builder.add_testhashs32_fnv1(args.testhashs32_fnv1);
-  if let Some(x) = args.testempty { builder.add_testempty(x); }
-  if let Some(x) = args.testnestedflatbuffer { builder.add_testnestedflatbuffer(x); }
-  if let Some(x) = args.enemy { builder.add_enemy(x); }
-  if let Some(x) = args.testarrayoftables { builder.add_testarrayoftables(x); }
-  if let Some(x) = args.testarrayofstring { builder.add_testarrayofstring(x); }
-  if let Some(x) = args.test4 { builder.add_test4(x); }
-  if let Some(x) = args.test { builder.add_test(x); }
-  if let Some(x) = args.inventory { builder.add_inventory(x); }
-  if let Some(x) = args.name { builder.add_name(x); }
-  if let Some(x) = args.pos { builder.add_pos(x); }
-  builder.add_hp(args.hp);
-  builder.add_mana(args.mana);
-  builder.add_testbool(args.testbool);
-  builder.add_test_type(args.test_type);
-  builder.add_color(args.color);
-  builder.finish()
 }
 
 pub enum TypeAliasesOffset {}
@@ -1163,6 +1151,25 @@ impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y TypeAliasesArgs<'y>) -> flatbuffers::Offset<TypeAliases<'x>> {
+      let mut builder = TypeAliasesBuilder::new(_fbb);
+      builder.add_f64_(args.f64_);
+      builder.add_u64_(args.u64_);
+      builder.add_i64_(args.i64_);
+      if let Some(x) = args.vf64 { builder.add_vf64(x); }
+      if let Some(x) = args.v8 { builder.add_v8(x); }
+      builder.add_f32_(args.f32_);
+      builder.add_u32_(args.u32_);
+      builder.add_i32_(args.i32_);
+      builder.add_u16_(args.u16_);
+      builder.add_i16_(args.i16_);
+      builder.add_u8_(args.u8_);
+      builder.add_i8_(args.i8_);
+      builder.finish()
+    }
+
     pub const VT_I8_: flatbuffers::VOffsetT = 4;
     pub const VT_U8_: flatbuffers::VOffsetT = 6;
     pub const VT_I16_: flatbuffers::VOffsetT = 8;
@@ -1309,32 +1316,12 @@ impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
     }
   }
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<TypeAliases<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<TypeAliases<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<TypeAliases<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
-}
-
-#[inline]
-pub fn CreateTypeAliases<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b TypeAliasesArgs<'b>) -> flatbuffers::Offset<TypeAliases<'a>> {
-  let mut builder = TypeAliasesBuilder::new(_fbb);
-  builder.add_f64_(args.f64_);
-  builder.add_u64_(args.u64_);
-  builder.add_i64_(args.i64_);
-  if let Some(x) = args.vf64 { builder.add_vf64(x); }
-  if let Some(x) = args.v8 { builder.add_v8(x); }
-  builder.add_f32_(args.f32_);
-  builder.add_u32_(args.u32_);
-  builder.add_i32_(args.i32_);
-  builder.add_u16_(args.u16_);
-  builder.add_i16_(args.i16_);
-  builder.add_u8_(args.u8_);
-  builder.add_i8_(args.i8_);
-  builder.finish()
 }
 
 #[inline]

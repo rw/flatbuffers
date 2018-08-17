@@ -3,18 +3,16 @@
 
 // #include "namespace_test1_generated.rs"
 
-pub mod NamespaceA {
-  #[allow(unused_imports)]
+pub mod namespace_a {
+  #![allow(dead_code)]
+  #![allow(unused_imports)]
+
   use std::mem;
-  #[allow(unused_imports)]
   use std::marker::PhantomData;
-  #[allow(unused_imports)]
-  #[allow(unreachable_code)]
-  extern crate flatbuffers;
-  #[allow(unused_imports)]
-  use self::flatbuffers::flexbuffers;
-  #[allow(unused_imports)]
   use std::cmp::Ordering;
+
+  extern crate flatbuffers;
+  use self::flatbuffers::flexbuffers;
 
 pub enum TableInFirstNSOffset {}
 #[derive(Copy, Clone, PartialEq)]
@@ -35,6 +33,16 @@ impl<'a> TableInFirstNS<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y TableInFirstNSArgs<'y>) -> flatbuffers::Offset<TableInFirstNS<'x>> {
+      let mut builder = TableInFirstNSBuilder::new(_fbb);
+      if let Some(x) = args.foo_struct { builder.add_foo_struct(x); }
+      if let Some(x) = args.foo_table { builder.add_foo_table(x); }
+      builder.add_foo_enum(args.foo_enum);
+      builder.finish()
+    }
+
     pub const VT_FOO_TABLE: flatbuffers::VOffsetT = 4;
     pub const VT_FOO_ENUM: flatbuffers::VOffsetT = 6;
     pub const VT_FOO_STRUCT: flatbuffers::VOffsetT = 8;
@@ -91,23 +99,12 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<TableInFirstNS<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
-}
-
-#[inline]
-pub fn CreateTableInFirstNS<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b TableInFirstNSArgs<'b>) -> flatbuffers::Offset<TableInFirstNS<'a>> {
-  let mut builder = TableInFirstNSBuilder::new(_fbb);
-  if let Some(x) = args.foo_struct { builder.add_foo_struct(x); }
-  if let Some(x) = args.foo_table { builder.add_foo_table(x); }
-  builder.add_foo_enum(args.foo_enum);
-  builder.finish()
 }
 
 pub enum SecondTableInAOffset {}
@@ -129,6 +126,14 @@ impl<'a> SecondTableInA<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y SecondTableInAArgs<'y>) -> flatbuffers::Offset<SecondTableInA<'x>> {
+      let mut builder = SecondTableInABuilder::new(_fbb);
+      if let Some(x) = args.refer_to_c { builder.add_refer_to_c(x); }
+      builder.finish()
+    }
+
     pub const VT_REFER_TO_C: flatbuffers::VOffsetT = 4;
 
   #[inline]
@@ -165,37 +170,26 @@ impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<SecondTableInA<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<SecondTableInA<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<SecondTableInA<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
 }
 
-#[inline]
-pub fn CreateSecondTableInA<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b SecondTableInAArgs<'b>) -> flatbuffers::Offset<SecondTableInA<'a>> {
-  let mut builder = SecondTableInABuilder::new(_fbb);
-  if let Some(x) = args.refer_to_c { builder.add_refer_to_c(x); }
-  builder.finish()
-}
-
 }  // pub mod NamespaceA
 
-pub mod NamespaceC {
-  #[allow(unused_imports)]
+pub mod namespace_c {
+  #![allow(dead_code)]
+  #![allow(unused_imports)]
+
   use std::mem;
-  #[allow(unused_imports)]
   use std::marker::PhantomData;
-  #[allow(unused_imports)]
-  #[allow(unreachable_code)]
-  extern crate flatbuffers;
-  #[allow(unused_imports)]
-  use self::flatbuffers::flexbuffers;
-  #[allow(unused_imports)]
   use std::cmp::Ordering;
+
+  extern crate flatbuffers;
+  use self::flatbuffers::flexbuffers;
 
 pub enum TableInCOffset {}
 #[derive(Copy, Clone, PartialEq)]
@@ -216,6 +210,15 @@ impl<'a> TableInC<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    pub fn create<'x: 'y, 'y: 'z, 'z>(
+        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
+        args: &'y TableInCArgs<'y>) -> flatbuffers::Offset<TableInC<'x>> {
+      let mut builder = TableInCBuilder::new(_fbb);
+      if let Some(x) = args.refer_to_a2 { builder.add_refer_to_a2(x); }
+      if let Some(x) = args.refer_to_a1 { builder.add_refer_to_a1(x); }
+      builder.finish()
+    }
+
     pub const VT_REFER_TO_A1: flatbuffers::VOffsetT = 4;
     pub const VT_REFER_TO_A2: flatbuffers::VOffsetT = 6;
 
@@ -262,22 +265,12 @@ impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
-  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
-  pub fn finish<'c>(mut self) -> flatbuffers::Offset<TableInC<'a>> {
+  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
+  pub fn finish<'c>(self) -> flatbuffers::Offset<TableInC<'a>> {
     let o = self.fbb_.end_table(self.start_);
     //let o = flatbuffers::Offset::<TableInC<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
-}
-
-#[inline]
-pub fn CreateTableInC<'a: 'b, 'b: 'c, 'c>(
-    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,
-    args: &'b TableInCArgs<'b>) -> flatbuffers::Offset<TableInC<'a>> {
-  let mut builder = TableInCBuilder::new(_fbb);
-  if let Some(x) = args.refer_to_a2 { builder.add_refer_to_a2(x); }
-  if let Some(x) = args.refer_to_a1 { builder.add_refer_to_a1(x); }
-  builder.finish()
 }
 
 }  // pub mod NamespaceC

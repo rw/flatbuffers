@@ -33,6 +33,33 @@ static std::string GeneratedFileName(const std::string &path,
   return path + file_name + "_generated.rs";
 }
 
+// Convert a camelCaseIdentifier or CamelCaseIdentifier to an
+// underscore_based_indentifier.
+std::string MakeSnakeCase(const std::string &in) {
+  std::string s;
+  for (size_t i = 0; i < in.length(); i++) {
+    if (islower(in[i])) {
+      s += static_cast<char>(in[i]);
+    } else {
+      if (i > 0) {
+        s += '_';
+      }
+      s += static_cast<char>(tolower(in[i]));
+    }
+  }
+  return s;
+}
+
+// Convert a string to all uppercase.
+std::string MakeUpper(const std::string &in) {
+  std::string s;
+  for (size_t i = 0; i < in.length(); i++) {
+    s += static_cast<char>(toupper(in[i]));
+  }
+  return s;
+}
+
+
 bool TypeNeedsLifetime(const Type &type) {
   switch (type.base_type) {
     case BASE_TYPE_STRING: {
@@ -1010,6 +1037,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "}";
     code_.SetValue("ENUM_NAME", Name(enum_def));
+    code_.SetValue("ENUM_NAME_CAPS", MakeUpper(MakeSnakeCase(Name(enum_def))));
 
     //     code_ += "//#[repr({{BASE_TYPE}})]";
     //     code_ += "#[derive(Clone, Copy, PartialEq, Debug)]";
@@ -1043,7 +1071,7 @@ class RustGenerator : public BaseGenerator {
 
     // Generate an array of all enumeration values
     auto num_fields = NumToString(enum_def.vals.vec.size());
-    code_ += "const EnumValues{{ENUM_NAME}}:[{{ENUM_NAME}}; " +
+    code_ += "const ENUM_VALUES_{{ENUM_NAME_CAPS}}:[{{ENUM_NAME}}; " +
               num_fields + "] = [";
     for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
          ++it) {
@@ -2235,6 +2263,42 @@ class RustGenerator : public BaseGenerator {
     code_ += "        }";
     code_ += "    }";
 
+    // Generate a convenient CreateX function that uses the above builder
+    // to create a table in one go.
+    code_.SetValue("MAYBE_UNDERSCORE",
+        struct_def.fields.vec.size() == 0 ? "_" : "");
+    code_ += "    pub fn create<'x: 'y, 'y: 'z, 'z>(";
+    code_ += "        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,";
+    code_ += "        {{MAYBE_UNDERSCORE}}args: &'y {{STRUCT_NAME}}Args<'y>) -> \\";
+    code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'x>> {";
+    //for (auto it = struct_def.fields.vec.begin();
+    //     it != struct_def.fields.vec.end(); ++it) {
+    //  const auto &field = **it;
+    //  if (!field.deprecated) { GenParam(field, false, ",\n    "); }
+    //}
+
+    code_ += "      let mut builder = {{STRUCT_NAME}}Builder::new(_fbb);";
+    for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
+         size; size /= 2) {
+      for (auto it = struct_def.fields.vec.rbegin();
+           it != struct_def.fields.vec.rend(); ++it) {
+        const auto &field = **it;
+        // TODO(rw): fully understand this sortbysize usage
+        if (!field.deprecated && (!struct_def.sortbysize ||
+                                  size == SizeOf(field.value.type.base_type))) {
+          code_.SetValue("FIELD_NAME", Name(field));
+          if (ElementTypeUsesOption(field.value.type)) {
+            code_ += "      if let Some(x) = args.{{FIELD_NAME}} { builder.add_{{FIELD_NAME}}(x); }";
+          } else {
+            code_ += "      builder.add_{{FIELD_NAME}}(args.{{FIELD_NAME}});";
+          }
+        }
+      }
+    }
+    code_ += "      builder.finish()";
+    code_ += "    }";
+    code_ += "";
+
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate field id constants.
@@ -2353,6 +2417,7 @@ class RustGenerator : public BaseGenerator {
 
   void GenBuilders(const StructDef &struct_def) {
     code_.SetValue("STRUCT_NAME", Name(struct_def));
+    code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(Name(struct_def)));
     code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
     code_.SetValue("PARENT_LIFETIME",
         StructNeedsLifetime(struct_def) ? "<'a>" : "");
@@ -2501,8 +2566,8 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  //pub fn finish<'c>(mut self) -> flatbuffers::Offset<flatbuffers::TableOffset> {";
-    code_ += "  pub fn finish<'c>(mut self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
+    code_ += "  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {";
+    code_ += "  pub fn finish<'c>(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
     code_ += "    //let o = flatbuffers::Offset::<{{STRUCT_NAME}}<'a>>::new(end);";
 
@@ -2510,7 +2575,7 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated && field.required) {
-        code_.SetValue("FIELD_NAME", Name(field));
+        code_.SetValue("FIELD_NAME", MakeSnakeCase(Name(field)));
         code_.SetValue("OFFSET_NAME", GenFieldOffsetName(field));
         code_ += "    self.fbb_.required(&o, {{STRUCT_NAME}}::{{OFFSET_NAME}});";
       }
@@ -2519,105 +2584,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
     code_ += "}";
     code_ += "";
-
-    // Generate a convenient CreateX function that uses the above builder
-    // to create a table in one go.
-    code_ += "#[inline]";
-    code_ += "pub fn Create{{STRUCT_NAME}}<'a: 'b, 'b: 'c, 'c>(";
-    code_ += "    _fbb: &'c mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "    args: &'b {{STRUCT_NAME}}Args<'b>) -> \\";
-    code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
-    //for (auto it = struct_def.fields.vec.begin();
-    //     it != struct_def.fields.vec.end(); ++it) {
-    //  const auto &field = **it;
-    //  if (!field.deprecated) { GenParam(field, false, ",\n    "); }
-    //}
-
-    code_ += "  let mut builder = {{STRUCT_NAME}}Builder::new(_fbb);";
-    for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
-         size; size /= 2) {
-      for (auto it = struct_def.fields.vec.rbegin();
-           it != struct_def.fields.vec.rend(); ++it) {
-        const auto &field = **it;
-        if (!field.deprecated && (!struct_def.sortbysize ||
-                                  size == SizeOf(field.value.type.base_type))) {
-          code_.SetValue("FIELD_NAME", Name(field));
-          if (ElementTypeUsesOption(field.value.type)) {
-            code_ += "  if let Some(x) = args.{{FIELD_NAME}} { builder.add_{{FIELD_NAME}}(x); }";
-          } else {
-            code_ += "  builder.add_{{FIELD_NAME}}(args.{{FIELD_NAME}});";
-          }
-        }
-      }
-    }
-    code_ += "  builder.finish()";
-    code_ += "}";
-    code_ += "";
-
-  //TODO  // Generate a CreateXDirect function with vector types as parameters
-  //TODO  // TODO
-  //TODO  if (has_string_or_vector_fields && false) {
-  //TODO    code_ += "#[inline]";
-  //TODO    code_ += "pub fn Create{{STRUCT_NAME}}Direct<'fbb>(";
-  //TODO    code_ += "    _fbb: &'fbb mut flatbuffers::FlatBufferBuilder<'fbb>\\";
-  //TODO    for (auto it = struct_def.fields.vec.begin();
-  //TODO         it != struct_def.fields.vec.end(); ++it) {
-  //TODO      const auto &field = **it;
-  //TODO      if (!field.deprecated) {
-  //TODO        GenParam(field, true, ",\n    ", "",
-  //TODO                "{{PRE}}{{PARAM_NAME}}: {{PARAM_TYPE}} /* = {{PARAM_VALUE}} */\\");
-  //TODO      }
-  //TODO    }
-
-  //TODO    // Need to call "Create" with the struct namespace.
-  //TODO    const auto qualified_create_name =
-  //TODO        struct_def.defined_namespace->GetFullyQualifiedName("Create");
-  //TODO    code_.SetValue("CREATE_NAME", TranslateNameSpace(qualified_create_name));
-
-  //TODO    code_ += ") -> flatbuffers::LabeledUOffsetT<{{STRUCT_NAME}}<'fbb>> {";
-  //TODO    for (auto it = struct_def.fields.vec.begin();
-  //TODO         it != struct_def.fields.vec.end(); ++it) {
-  //TODO      const auto &field = **it;
-  //TODO      if (!field.deprecated) {
-  //TODO        code_.SetValue("FIELD_NAME", Name(field));
-
-  //TODO        if (field.value.type.base_type == BASE_TYPE_STRING) {
-  //TODO          code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_string(x) } else { flatbuffers::LabeledUOffsetT::new(0) };";
-  //TODO        } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-  //TODO          const auto vtype = field.value.type.VectorType();
-  //TODO          if (IsStruct(vtype)) {
-  //TODO            const auto type = WrapInNameSpace(*vtype.struct_def);
-  //TODO            code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector_of_structs::<&" + type + ">(x /* slice */) } else { flatbuffers::LabeledUOffsetT::new(0) };";
-  //TODO          } else {
-  //TODO            const auto type = GenTypeWire(vtype, "", "", false);
-  //TODO            code_ += "  let _offset_{{FIELD_NAME}} = if let Some(x) = {{FIELD_NAME}} { _fbb.create_vector::<" + type + ">(x /* slice */) } else { flatbuffers::LabeledUOffsetT::new(0) };";
-  //TODO          }
-  //TODO        } else {
-  //TODO          // PASS
-  //TODO        }
-  //TODO      }
-  //TODO    }
-  //TODO    code_ += "  return Create{{STRUCT_NAME}}(";
-  //TODO    code_ += "      _fbb\\";
-  //TODO    for (auto it = struct_def.fields.vec.begin();
-  //TODO         it != struct_def.fields.vec.end(); ++it) {
-  //TODO      const auto &field = **it;
-  //TODO      if (!field.deprecated) {
-  //TODO        code_.SetValue("FIELD_NAME", Name(field));
-
-  //TODO        if (field.value.type.base_type == BASE_TYPE_STRING) {
-  //TODO          code_ += ",\n      _offset_{{FIELD_NAME}}\\";
-  //TODO        } else if (field.value.type.base_type == BASE_TYPE_VECTOR) {
-  //TODO          code_ += ",\n      _offset_{{FIELD_NAME}}\\";
-  //TODO        } else {
-  //TODO          code_ += ",\n      {{FIELD_NAME}}\\";
-  //TODO        }
-  //TODO      }
-  //TODO    }
-  //TODO    code_ += ");";
-  //TODO    code_ += "}";
-  //TODO    code_ += "";
-  //TODO  }
   }
 
   std::string GenUnionUnpackVal(const FieldDef &afield,
@@ -3220,18 +3186,16 @@ class RustGenerator : public BaseGenerator {
     // open namespace parts to reach the ns namespace
     // in the previous example, E, then F, then G are opened
     for (auto j = common_prefix_size; j != new_size; ++j) {
-      code_ += "pub mod " + ns->components[j] + " {";
-      code_ += "  #[allow(unused_imports)]";
+      code_ += "pub mod " + MakeSnakeCase(ns->components[j]) + " {";
+      code_ += "  #![allow(dead_code)]";
+      code_ += "  #![allow(unused_imports)]";
+      code_ += "";
       code_ += "  use std::mem;";
-      code_ += "  #[allow(unused_imports)]";
       code_ += "  use std::marker::PhantomData;";
-      code_ += "  #[allow(unused_imports)]";
-      code_ += "  #[allow(unreachable_code)]";
-      code_ += "  extern crate flatbuffers;";
-      code_ += "  #[allow(unused_imports)]";
-      code_ += "  use self::flatbuffers::flexbuffers;";
-      code_ += "  #[allow(unused_imports)]";
       code_ += "  use std::cmp::Ordering;";
+      code_ += "";
+      code_ += "  extern crate flatbuffers;";
+      code_ += "  use self::flatbuffers::flexbuffers;";
     }
     if (new_size != common_prefix_size) { code_ += ""; }
 
