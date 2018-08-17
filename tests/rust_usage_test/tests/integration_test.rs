@@ -56,8 +56,6 @@ impl LCG {
     }
 }
 
-//std::string test_data_path = "tests/";
-
 fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder) {
     let mon = {
         let fred_name = builder.create_string("Fred");
@@ -72,10 +70,10 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
             pos: Some(&pos),
             test_type: my_game::example::Any::Monster,
             // TODO(rw): better offset ergonomics
-            test: Some(flatbuffers::Offset::new(my_game::example::Monster::create(builder, &my_game::example::MonsterArgs{
+            test: Some(my_game::example::Monster::create(builder, &my_game::example::MonsterArgs{
                 name: Some(fred_name),
                 ..Default::default()
-            }).value())),
+            }).as_union_value()),
             inventory: Some(inventory),
             test4: Some(test4),
             testarrayofstring: Some(builder.create_vector_of_strings(&["test1", "test2"])),
@@ -322,7 +320,7 @@ mod roundtrips_with_generated_code {
             let outer = my_game::example::Monster::create(b, &my_game::example::MonsterArgs{
                 name: Some(name_outer),
                 test_type: my_game::example::Any::Monster,
-                test: Some(inner.union()),
+                test: Some(inner.as_union_value()),
                 ..Default::default()
             });
             my_game::example::finish_monster_buffer(b, outer);

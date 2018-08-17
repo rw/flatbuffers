@@ -673,7 +673,7 @@ impl<'a, T: 'a> Offset<T> {
     pub fn new(o: UOffsetT) -> Offset<T> {
         Offset { 0: o, 1: PhantomData}
     }
-    pub fn union(&self) -> Offset<UnionMarker> {
+    pub fn as_union_value(&self) -> Offset<UnionMarker> {
         Offset::new(self.0)
     }
     pub fn value(&self) -> UOffsetT {
