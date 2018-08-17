@@ -2566,10 +2566,8 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {";
     code_ += "  pub fn finish<'c>(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
-    code_ += "    //let o = flatbuffers::Offset::<{{STRUCT_NAME}}<'a>>::new(end);";
 
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {

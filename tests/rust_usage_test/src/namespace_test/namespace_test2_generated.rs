@@ -99,10 +99,8 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
-  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
   pub fn finish<'c>(self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
     let o = self.fbb_.end_table(self.start_);
-    //let o = flatbuffers::Offset::<TableInFirstNS<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
 }
@@ -170,10 +168,8 @@ impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
   pub fn finish<'c>(self) -> flatbuffers::Offset<SecondTableInA<'a>> {
     let o = self.fbb_.end_table(self.start_);
-    //let o = flatbuffers::Offset::<SecondTableInA<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
 }
@@ -265,10 +261,8 @@ impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
-  //pub fn finish<'c>(self) -> flatbuffers::Offset<flatbuffers::TableOffset> {
   pub fn finish<'c>(self) -> flatbuffers::Offset<TableInC<'a>> {
     let o = self.fbb_.end_table(self.start_);
-    //let o = flatbuffers::Offset::<TableInC<'a>>::new(end);
     flatbuffers::Offset::new(o.value())
   }
 }
