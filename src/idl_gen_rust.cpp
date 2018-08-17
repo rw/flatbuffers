@@ -963,8 +963,6 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::String: {
         return "Option<flatbuffers::Offset<&" + lifetime + " str>>";
-        //return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", u8>>>";
-        //return "Option<flatbuffers::Offset<flatbuffers::StringOffset>>";
       }
       case FullElementType::EnumKey:
       case FullElementType::UnionKey: {
@@ -973,24 +971,20 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::UnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        //return "Option<flatbuffers::Offset<" + typname + "UnionTableOffset>>";
         return "Option<flatbuffers::Offset<flatbuffers::UnionMarker>>";
       }
 
       case FullElementType::VectorOfInteger:
       case FullElementType::VectorOfFloat: {
         const auto typname = GenTypeBasic(type.VectorType(), false);
-        //const auto basetype = GenTypeBasic(type.VectorType(), false);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ",  " + typname + ">>>";
       }
       case FullElementType::VectorOfBool: {
         const auto typname = GenTypeBasic(type, false);
-        //const auto basetype = GenTypeBasic(type.VectorType(), false);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>>";
       }
       case FullElementType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        //const auto basetype = GenTypeBasic(type.VectorType(), false);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>";
       }
       case FullElementType::VectorOfStruct: {
@@ -1006,7 +1000,6 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
-        //return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " Into<" + typname + "<" + lifetime + ">>>>>";
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsU32Offset<flatbuffers::Table<" + lifetime + ">>>>";
       }
     }

@@ -361,9 +361,20 @@ mod roundtrips_with_generated_code {
         assert_eq!(m.enemy(), None);
     }
     #[test]
-    fn vector_of_string_store() {
+    fn vector_of_string_store_auto() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let v = b.create_vector_of_strings(&["foobar", "baz"]);
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{testarrayofstring: Some(v), ..Default::default()});
+        assert_eq!(m.testarrayofstring().unwrap().len(), 2);
+        assert_eq!(m.testarrayofstring().unwrap().get(0), "foobar");
+        assert_eq!(m.testarrayofstring().unwrap().get(1), "baz");
+    }
+    #[test]
+    fn vector_of_string_store_manual_a() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let s0 = b.create_string("foobar");
+        let s1 = b.create_string("baz");
+        let v = b.create_vector_of_reverse_offsets(&[s0, s1]);
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{testarrayofstring: Some(v), ..Default::default()});
         assert_eq!(m.testarrayofstring().unwrap().len(), 2);
         assert_eq!(m.testarrayofstring().unwrap().get(0), "foobar");
@@ -1102,23 +1113,6 @@ fn test_creation_and_reading_of_nested_flatbuffer_using_generated_code() {
 
     assert_eq!(m2_b.hp(), 123);
     assert_eq!(m2_b.name(), Some("foobar"));
-}
-
-#[test]
-#[ignore] // we don't have a gold example of testnestedflatbuffer
-fn test_reading_of_gold_nested_flatbuffer_using_generated_code() {
-    let data = load_file("../monsterdata_test.mon");
-    let m = my_game::example::get_root_as_monster(&data[..]);
-
-    assert!(m.testnestedflatbuffer().is_some());
-
-    let m2_a = my_game::example::get_root_as_monster(m.testnestedflatbuffer().unwrap());
-    assert_eq!(m2_a.name(), Some("NestedMonster"));
-
-    assert!(m.testnestedflatbuffer_nested_flatbuffer().is_some());
-    let m2_b = m.testnestedflatbuffer_nested_flatbuffer().unwrap();
-
-    assert_eq!(m2_b.name(), Some("NestedMonster"));
 }
 
 #[test]
