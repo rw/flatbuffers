@@ -84,9 +84,9 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         };
         my_game::example::Monster::create(builder, &args)
     };
-    my_game::example::FinishMonsterBuffer(builder, mon);
+    my_game::example::finish_monster_buffer(builder, mon);
 }
-fn create_serialized_example_with_library_code<'a>(builder: &'a mut flatbuffers::FlatBufferBuilder<'a>) {
+fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBufferBuilder) {
     let nested_union_mon = {
         let name = builder.create_string("Fred");
         let table_start = builder.start_table(34);
@@ -115,7 +115,7 @@ fn create_serialized_example_with_library_code<'a>(builder: &'a mut flatbuffers:
     builder.push_slot_offset_relative(my_game::example::Monster::VT_TEST4, test4);
     builder.push_slot_offset_relative(my_game::example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
     let root = builder.end_table(table_start);
-    builder.finish(root, Some(my_game::example::MonsterIdentifier()));
+    builder.finish(root, Some(my_game::example::MONSTER_IDENTIFIER));
 
 }
 
@@ -288,23 +288,23 @@ fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatb
 }
 #[test]
 fn test_generated_monster_identifier() {
-    assert_eq!("MONS", my_game::example::MonsterIdentifier());
+    assert_eq!("MONS", my_game::example::MONSTER_IDENTIFIER);
 }
 fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_required: bool, size_prefixed: bool) -> Result<(), &'static str> {
     if identifier_required {
         let correct = if size_prefixed {
-            my_game::example::MonsterSizePrefixedBufferHasIdentifier(bytes)
+            my_game::example::monster_size_prefixed_buffer_has_identifier(bytes)
         } else {
-            my_game::example::MonsterBufferHasIdentifier(bytes)
+            my_game::example::monster_buffer_has_identifier(bytes)
         };
         if !correct {
             return Err("incorrect buffer identifier");
         }
     }
     let monster1 = if size_prefixed {
-        my_game::example::GetSizePrefixedRootAsMonster(bytes)
+        my_game::example::get_size_prefixed_root_as_monster(bytes)
     } else {
-        my_game::example::GetRootAsMonster(bytes)
+        my_game::example::get_root_as_monster(bytes)
     };
     for m in vec![monster1] {
         if m.hp() != 80 { assert_eq!(80, m.hp()); return Err("bad m.hp"); }
@@ -425,8 +425,8 @@ mod roundtrips_with_generated_code {
 
     fn build_mon<'a, 'b>(builder: &'a mut flatbuffers::FlatBufferBuilder, args: &'b my_game::example::MonsterArgs) -> my_game::example::Monster<'a> {
         let mon = my_game::example::Monster::create(builder, &args);
-        my_game::example::FinishMonsterBuffer(builder, mon);
-        my_game::example::GetRootAsMonster(builder.get_active_buf_slice())
+        my_game::example::finish_monster_buffer(builder, mon);
+        my_game::example::get_root_as_monster(builder.get_active_buf_slice())
     }
 
     #[test]
@@ -817,7 +817,7 @@ mod vector_read_obj_tests {
 //  AccessFlatBufferTest(flatbuf, length);
 //}
 //fn check_read_buffer(buf: &[u8]) {
-//	let monster1 = my_game::example::GetRootAsMonster(buf);
+//	let monster1 = my_game::example::get_root_as_monster(buf);
 //	//let monster2 = {
 //    //    let mut x = my_game::example::Monster::(..Default::default());
 //    //};
@@ -1122,7 +1122,7 @@ fn generated_code_creates_example_data_that_is_accessible_and_correct() {
 #[test]
 fn library_code_creates_example_data_that_is_accessible_and_correct() {
     let b = &mut flatbuffers::FlatBufferBuilder::new();
-    create_serialized_example_with_generated_code(b);
+    create_serialized_example_with_library_code(b);
     let buf = b.get_active_buf_slice();
     serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
 }
@@ -1145,7 +1145,7 @@ fn java_wire_size_prefixed_example_data_is_accessible_and_correct() {
 #[test]
 fn go_wire_example_data_is_accessible_and_correct() {
     let filename = "../monsterdata_go_wire.mon";
-    let mut f = match std::fs::File::open(filename) {
+    let f = match std::fs::File::open(filename) {
         Ok(f) => { f }
         Err(_) => {
             println!("missing go file, deal with this later");
@@ -1171,7 +1171,7 @@ fn test_creation_and_reading_of_nested_flatbuffer_using_generated_code() {
             ..Default::default()
         };
         let mon = my_game::example::Monster::create(&mut b0, &args);
-        my_game::example::FinishMonsterBuffer(&mut b0, mon);
+        my_game::example::finish_monster_buffer(&mut b0, mon);
         b0
     };
 
@@ -1182,19 +1182,19 @@ fn test_creation_and_reading_of_nested_flatbuffer_using_generated_code() {
             ..Default::default()
         };
         let mon = my_game::example::Monster::create(&mut b1, &args);
-        my_game::example::FinishMonsterBuffer(&mut b1, mon);
+        my_game::example::finish_monster_buffer(&mut b1, mon);
         b1
     };
 
 
-    let m = my_game::example::GetRootAsMonster(b1.get_active_buf_slice());
+    let m = my_game::example::get_root_as_monster(b1.get_active_buf_slice());
 
     assert!(m.testnestedflatbuffer().is_some());
     assert_eq!(m.testnestedflatbuffer().unwrap(), b0.get_active_buf_slice());
 
     println!("nested buf: {:?}", m.testnestedflatbuffer().unwrap());
 
-    let m2_a = my_game::example::GetRootAsMonster(m.testnestedflatbuffer().unwrap());
+    let m2_a = my_game::example::get_root_as_monster(m.testnestedflatbuffer().unwrap());
     assert_eq!(m2_a.hp(), 123);
     assert_eq!(m2_a.name(), Some("foobar"));
 
@@ -1210,11 +1210,11 @@ fn test_creation_and_reading_of_nested_flatbuffer_using_generated_code() {
 #[ignore] // we don't have a gold example of testnestedflatbuffer
 fn test_reading_of_gold_nested_flatbuffer_using_generated_code() {
     let data = load_file("../monsterdata_test.mon");
-    let m = my_game::example::GetRootAsMonster(&data[..]);
+    let m = my_game::example::get_root_as_monster(&data[..]);
 
     assert!(m.testnestedflatbuffer().is_some());
 
-    let m2_a = my_game::example::GetRootAsMonster(m.testnestedflatbuffer().unwrap());
+    let m2_a = my_game::example::get_root_as_monster(m.testnestedflatbuffer().unwrap());
     assert_eq!(m2_a.name(), Some("NestedMonster"));
 
     assert!(m.testnestedflatbuffer_nested_flatbuffer().is_some());

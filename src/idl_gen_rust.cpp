@@ -288,55 +288,46 @@ class RustGenerator : public BaseGenerator {
         auto cpp_name = WrapInNameSpace(struct_def.defined_namespace, name);
 
         code_.SetValue("STRUCT_NAME", name);
+        code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(name));
+        code_.SetValue("STRUCT_NAME_CAPS", MakeUpper(MakeSnakeCase(name)));
         code_.SetValue("CPP_NAME", cpp_name);
-        code_.SetValue("NULLABLE_EXT", NullableExtension());
 
         // The root datatype accessors:
         code_ += "#[inline]";
         code_ +=
-            "pub fn GetRootAs{{STRUCT_NAME}}<'a>(buf: &'a [u8])"
-            " -> {{CPP_NAME}}<'a> {{NULLABLE_EXT}} {";
+            "pub fn get_root_as_{{STRUCT_NAME_SNAKECASE}}<'a>(buf: &'a [u8])"
+            " -> {{CPP_NAME}}<'a> {";
         code_ += "  flatbuffers::get_root::<{{CPP_NAME}}<'a>>(buf)";
         code_ += "}";
         code_ += "";
 
         code_ += "#[inline]";
         code_ +=
-            "pub fn GetSizePrefixedRootAs{{STRUCT_NAME}}<'a>(buf: &'a [u8])"
-            " -> {{CPP_NAME}}<'a> {{NULLABLE_EXT}} {";
+            "pub fn get_size_prefixed_root_as_{{STRUCT_NAME_SNAKECASE}}<'a>(buf: &'a [u8])"
+            " -> {{CPP_NAME}}<'a> {";
         code_ += "  flatbuffers::get_size_prefixed_root::<{{CPP_NAME}}<'a>>(buf)";
         code_ += "}";
         code_ += "";
 
-        if (parser_.opts.mutable_buffer) {
-          code_ += "#[inline]";
-          code_ += "pub fn GetMutable{{STRUCT_NAME}}(buf: &[u8]) -> &{{STRUCT_NAME}} {";
-          code_ += "  return flatbuffers::get_mutable_root::<&{{STRUCT_NAME}}>(buf);";
-          code_ += "}";
-          code_ += "";
-        }
-
         if (parser_.file_identifier_.length()) {
-          // Return the identifier
-          code_ += "#[inline]";
-          code_ += "pub fn {{STRUCT_NAME}}Identifier() -> &'static str {";
-          code_ += "  return \"" + parser_.file_identifier_ + "\";";
-          code_ += "}";
+          // Declare the identifier
+          code_ += "pub const {{STRUCT_NAME_CAPS}}_IDENTIFIER: &'static str\\";
+          code_ += " = \"" + parser_.file_identifier_ + "\";";
           code_ += "";
 
           // Check if a buffer has the identifier.
           code_ += "#[inline]";
-          code_ += "pub fn {{STRUCT_NAME}}BufferHasIdentifier(buf: &[u8])"
+          code_ += "pub fn {{STRUCT_NAME_SNAKECASE}}_buffer_has_identifier(buf: &[u8])"
                    " -> bool {";
           code_ += "  return flatbuffers::buffer_has_identifier(";
-          code_ += "      buf, {{STRUCT_NAME}}Identifier(), false);";
+          code_ += "      buf, {{STRUCT_NAME_CAPS}}_IDENTIFIER, false);";
           code_ += "}";
           code_ += "";
           code_ += "#[inline]";
-          code_ += "pub fn {{STRUCT_NAME}}SizePrefixedBufferHasIdentifier(buf: &[u8])"
+          code_ += "pub fn {{STRUCT_NAME_SNAKECASE}}_size_prefixed_buffer_has_identifier(buf: &[u8])"
                    " -> bool {";
           code_ += "  return flatbuffers::buffer_has_identifier(";
-          code_ += "      buf, {{STRUCT_NAME}}Identifier(), true);";
+          code_ += "      buf, {{STRUCT_NAME_CAPS}}_IDENTIFIER, true);";
           code_ += "}";
           code_ += "";
         }
@@ -353,11 +344,11 @@ class RustGenerator : public BaseGenerator {
         // Finish a buffer with a given root object:
         code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
         code_ += "#[inline]";
-        code_ += "pub fn Finish{{STRUCT_NAME}}Buffer<'a, 'b>(";
+        code_ += "pub fn finish_{{STRUCT_NAME_SNAKECASE}}_buffer<'a, 'b>(";
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
-          code_ += "  fbb.finish(root, Some({{STRUCT_NAME}}Identifier()));";
+          code_ += "  fbb.finish(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
         } else {
           code_ += "  fbb.finish(root, None);";
         }
@@ -368,7 +359,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
-          code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME}}Identifier()));";
+          code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
         } else {
           code_ += "  fbb.finish_size_prefixed(root, None);";
         }
@@ -515,10 +506,6 @@ class RustGenerator : public BaseGenerator {
     } else {
       return "flatbuffers::UOffsetT";
     }
-  }
-
-  std::string NullableExtension() {
-    return parser_.opts.gen_nullable ? " /* TODO _Nullable */ " : "";
   }
 
   static std::string NativeName(const std::string &name, const StructDef *sd,
@@ -1037,6 +1024,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "}";
     code_.SetValue("ENUM_NAME", Name(enum_def));
+    code_.SetValue("ENUM_NAME_SNAKE", MakeSnakeCase(Name(enum_def)));
     code_.SetValue("ENUM_NAME_CAPS", MakeUpper(MakeSnakeCase(Name(enum_def))));
 
     //     code_ += "//#[repr({{BASE_TYPE}})]";
@@ -1094,7 +1082,8 @@ class RustGenerator : public BaseGenerator {
     static const int kMaxSparseness = 5;
     if (range / static_cast<int64_t>(enum_def.vals.vec.size()) <
         kMaxSparseness) {
-      code_ += "const EnumNames{{ENUM_NAME}}:[&'static str; " +
+      code_ += "#[allow(non_camel_case_types)]";
+      code_ += "const ENUM_NAMES_{{ENUM_NAME_CAPS}}:[&'static str; " +
                 NumToString(range) + "] = [";
 
       auto val = enum_def.vals.vec.front()->value;
@@ -1108,7 +1097,7 @@ class RustGenerator : public BaseGenerator {
       code_ += "];";
       code_ += "";
 
-      code_ += "pub fn EnumName{{ENUM_NAME}}(e: {{ENUM_NAME}}) -> &'static str {";
+      code_ += "pub fn enum_name_{{ENUM_NAME_SNAKE}}(e: {{ENUM_NAME}}) -> &'static str {";
 
       code_ += "  let index: usize = e as usize\\";
       if (enum_def.vals.vec.front()->value) {
@@ -1117,7 +1106,7 @@ class RustGenerator : public BaseGenerator {
       }
       code_ += ";";
 
-      code_ += "  EnumNames{{ENUM_NAME}}[index]";
+      code_ += "  ENUM_NAMES_{{ENUM_NAME_CAPS}}[index]";
       code_ += "}";
       code_ += "";
     }
@@ -2267,6 +2256,7 @@ class RustGenerator : public BaseGenerator {
     // to create a table in one go.
     code_.SetValue("MAYBE_UNDERSCORE",
         struct_def.fields.vec.size() == 0 ? "_" : "");
+    code_ += "    #[allow(unused_mut)]";
     code_ += "    pub fn create<'x: 'y, 'y: 'z, 'z>(";
     code_ += "        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,";
     code_ += "        {{MAYBE_UNDERSCORE}}args: &'y {{STRUCT_NAME}}Args<'y>) -> \\";
@@ -2566,7 +2556,7 @@ class RustGenerator : public BaseGenerator {
         "(const {{STRUCT_NAME}}Builder &);";
 
     // Finish() function.
-    code_ += "  pub fn finish<'c>(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
+    code_ += "  pub fn finish(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
 
     for (auto it = struct_def.fields.vec.begin();
@@ -3027,8 +3017,12 @@ class RustGenerator : public BaseGenerator {
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate a default constructor.
-    code_ += "  pub fn Reset(&mut self) {";
-    code_ += "    //memset(this, 0, size_of({{STRUCT_NAME}}));";
+    code_ += "  pub fn reset(&mut self) {";
+    code_ += "    let ptr = self as *mut {{STRUCT_NAME}};";
+    code_ += "    let sz =  ::std::mem::size_of::<({{STRUCT_NAME}})>();";
+    code_ += "    unsafe {";
+    code_ += "        ::std::ptr::write_bytes(ptr, 0, sz);";
+    code_ += "    }";
     code_ += "  }";
 
     // Generate a constructor that takes all fields as arguments.

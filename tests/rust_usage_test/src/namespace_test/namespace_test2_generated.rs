@@ -33,6 +33,7 @@ impl<'a> TableInFirstNS<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y TableInFirstNSArgs<'y>) -> flatbuffers::Offset<TableInFirstNS<'x>> {
@@ -99,7 +100,7 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
     }
   }
   // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
@@ -124,6 +125,7 @@ impl<'a> SecondTableInA<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y SecondTableInAArgs<'y>) -> flatbuffers::Offset<SecondTableInA<'x>> {
@@ -168,7 +170,7 @@ impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
     }
   }
   // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<SecondTableInA<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<SecondTableInA<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
@@ -206,6 +208,7 @@ impl<'a> TableInC<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y TableInCArgs<'y>) -> flatbuffers::Offset<TableInC<'x>> {
@@ -261,7 +264,7 @@ impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
     }
   }
   // TableInCBuilder &operator=(const TableInCBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<TableInC<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<TableInC<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }

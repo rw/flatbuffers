@@ -34,6 +34,7 @@ impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         _args: &'y InParentNamespaceArgs<'y>) -> flatbuffers::Offset<InParentNamespace<'x>> {
@@ -66,7 +67,7 @@ impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
     }
   }
   // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<InParentNamespace<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<InParentNamespace<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
@@ -102,6 +103,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         _args: &'y MonsterArgs<'y>) -> flatbuffers::Offset<Monster<'x>> {
@@ -134,7 +136,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<Monster<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
@@ -167,7 +169,8 @@ const ENUM_VALUES_COLOR:[Color; 3] = [
   Color::Blue
 ];
 
-const EnumNamesColor:[&'static str; 8] = [
+#[allow(non_camel_case_types)]
+const ENUM_NAMES_COLOR:[&'static str; 8] = [
     "Red",
     "Green",
     "",
@@ -178,9 +181,9 @@ const EnumNamesColor:[&'static str; 8] = [
     "Blue"
 ];
 
-pub fn EnumNameColor(e: Color) -> &'static str {
+pub fn enum_name_color(e: Color) -> &'static str {
   let index: usize = e as usize - Color::Red as usize;
-  EnumNamesColor[index]
+  ENUM_NAMES_COLOR[index]
 }
 
 #[repr(u8)]
@@ -199,16 +202,17 @@ const ENUM_VALUES_ANY:[Any; 4] = [
   Any::MyGame_Example2_Monster
 ];
 
-const EnumNamesAny:[&'static str; 4] = [
+#[allow(non_camel_case_types)]
+const ENUM_NAMES_ANY:[&'static str; 4] = [
     "NONE",
     "Monster",
     "TestSimpleTableWithEnum",
     "MyGame_Example2_Monster"
 ];
 
-pub fn EnumNameAny(e: Any) -> &'static str {
+pub fn enum_name_any(e: Any) -> &'static str {
   let index: usize = e as usize;
-  EnumNamesAny[index]
+  ENUM_NAMES_ANY[index]
 }
 
 pub struct AnyUnionTableOffset {}
@@ -223,8 +227,12 @@ pub struct Test {
 //impl flatbuffers::GeneratedStruct for Test {}
 
 impl Test {
-  pub fn Reset(&mut self) {
-    //memset(this, 0, size_of(Test));
+  pub fn reset(&mut self) {
+    let ptr = self as *mut Test;
+    let sz =  ::std::mem::size_of::<(Test)>();
+    unsafe {
+        ::std::ptr::write_bytes(ptr, 0, sz);
+    }
   }
   pub fn new(_a: i16, _b: i8) -> Self {
     Test {
@@ -261,8 +269,12 @@ pub struct Vec3 {
 //impl flatbuffers::GeneratedStruct for Vec3 {}
 
 impl Vec3 {
-  pub fn Reset(&mut self) {
-    //memset(this, 0, size_of(Vec3));
+  pub fn reset(&mut self) {
+    let ptr = self as *mut Vec3;
+    let sz =  ::std::mem::size_of::<(Vec3)>();
+    unsafe {
+        ::std::ptr::write_bytes(ptr, 0, sz);
+    }
   }
   pub fn new(_x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: Test/* foo */) -> Self {
     Vec3 {
@@ -312,8 +324,12 @@ pub struct Ability {
 //impl flatbuffers::GeneratedStruct for Ability {}
 
 impl Ability {
-  pub fn Reset(&mut self) {
-    //memset(this, 0, size_of(Ability));
+  pub fn reset(&mut self) {
+    let ptr = self as *mut Ability;
+    let sz =  ::std::mem::size_of::<(Ability)>();
+    unsafe {
+        ::std::ptr::write_bytes(ptr, 0, sz);
+    }
   }
   pub fn new(_id: u32, _distance: u32) -> Self {
     Ability {
@@ -358,6 +374,7 @@ impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y TestSimpleTableWithEnumArgs<'y>) -> flatbuffers::Offset<TestSimpleTableWithEnum<'x>> {
@@ -402,7 +419,7 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
     }
   }
   // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
@@ -427,6 +444,7 @@ impl<'a> Stat<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y StatArgs<'y>) -> flatbuffers::Offset<Stat<'x>> {
@@ -493,7 +511,7 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
     }
   }
   // StatBuilder &operator=(const StatBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<Stat<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<Stat<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
@@ -518,6 +536,7 @@ impl<'a> Referrable<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y ReferrableArgs<'y>) -> flatbuffers::Offset<Referrable<'x>> {
@@ -562,7 +581,7 @@ impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
     }
   }
   // ReferrableBuilder &operator=(const ReferrableBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<Referrable<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<Referrable<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
@@ -588,6 +607,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y MonsterArgs<'y>) -> flatbuffers::Offset<Monster<'x>> {
@@ -1113,7 +1133,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     }
   }
   // MonsterBuilder &operator=(const MonsterBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<Monster<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
     let o = self.fbb_.end_table(self.start_);
     self.fbb_.required(&o, Monster::VT_NAME);
     flatbuffers::Offset::new(o.value())
@@ -1139,6 +1159,7 @@ impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y TypeAliasesArgs<'y>) -> flatbuffers::Offset<TypeAliases<'x>> {
@@ -1304,37 +1325,34 @@ impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
     }
   }
   // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<TypeAliases<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<TypeAliases<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
 }
 
 #[inline]
-pub fn GetRootAsMonster<'a>(buf: &'a [u8]) -> Monster<'a>  {
+pub fn get_root_as_monster<'a>(buf: &'a [u8]) -> Monster<'a> {
   flatbuffers::get_root::<Monster<'a>>(buf)
 }
 
 #[inline]
-pub fn GetSizePrefixedRootAsMonster<'a>(buf: &'a [u8]) -> Monster<'a>  {
+pub fn get_size_prefixed_root_as_monster<'a>(buf: &'a [u8]) -> Monster<'a> {
   flatbuffers::get_size_prefixed_root::<Monster<'a>>(buf)
 }
 
+pub const MONSTER_IDENTIFIER: &'static str = "MONS";
+
 #[inline]
-pub fn MonsterIdentifier() -> &'static str {
-  return "MONS";
+pub fn monster_buffer_has_identifier(buf: &[u8]) -> bool {
+  return flatbuffers::buffer_has_identifier(
+      buf, MONSTER_IDENTIFIER, false);
 }
 
 #[inline]
-pub fn MonsterBufferHasIdentifier(buf: &[u8]) -> bool {
+pub fn monster_size_prefixed_buffer_has_identifier(buf: &[u8]) -> bool {
   return flatbuffers::buffer_has_identifier(
-      buf, MonsterIdentifier(), false);
-}
-
-#[inline]
-pub fn MonsterSizePrefixedBufferHasIdentifier(buf: &[u8]) -> bool {
-  return flatbuffers::buffer_has_identifier(
-      buf, MonsterIdentifier(), true);
+      buf, MONSTER_IDENTIFIER, true);
 }
 
 #[inline]
@@ -1343,17 +1361,17 @@ pub fn MonsterExtension() -> &'static str {
 }
 
 #[inline]
-pub fn FinishMonsterBuffer<'a, 'b>(
+pub fn finish_monster_buffer<'a, 'b>(
     fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     root: flatbuffers::Offset<Monster<'a>>) {
-  fbb.finish(root, Some(MonsterIdentifier()));
+  fbb.finish(root, Some(MONSTER_IDENTIFIER));
 }
 
 #[inline]
 pub fn FinishSizePrefixedMonsterBuffer<'a, 'b>(
     fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     root: flatbuffers::Offset<Monster<'a>>) {
-  fbb.finish_size_prefixed(root, Some(MonsterIdentifier()));
+  fbb.finish_size_prefixed(root, Some(MONSTER_IDENTIFIER));
 }
 }  // pub mod Example
 }  // pub mod MyGame

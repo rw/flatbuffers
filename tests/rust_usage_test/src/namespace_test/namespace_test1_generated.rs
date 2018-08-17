@@ -36,15 +36,16 @@ const ENUM_VALUES_ENUM_IN_NESTED_N_S:[EnumInNestedNS; 3] = [
   EnumInNestedNS::C
 ];
 
-const EnumNamesEnumInNestedNS:[&'static str; 3] = [
+#[allow(non_camel_case_types)]
+const ENUM_NAMES_ENUM_IN_NESTED_N_S:[&'static str; 3] = [
     "A",
     "B",
     "C"
 ];
 
-pub fn EnumNameEnumInNestedNS(e: EnumInNestedNS) -> &'static str {
+pub fn enum_name_enum_in_nested_n_s(e: EnumInNestedNS) -> &'static str {
   let index: usize = e as usize;
-  EnumNamesEnumInNestedNS[index]
+  ENUM_NAMES_ENUM_IN_NESTED_N_S[index]
 }
 
 // MANUALLY_ALIGNED_STRUCT(4)
@@ -57,8 +58,12 @@ pub struct StructInNestedNS {
 //impl flatbuffers::GeneratedStruct for StructInNestedNS {}
 
 impl StructInNestedNS {
-  pub fn Reset(&mut self) {
-    //memset(this, 0, size_of(StructInNestedNS));
+  pub fn reset(&mut self) {
+    let ptr = self as *mut StructInNestedNS;
+    let sz =  ::std::mem::size_of::<(StructInNestedNS)>();
+    unsafe {
+        ::std::ptr::write_bytes(ptr, 0, sz);
+    }
   }
   pub fn new(_a: i32, _b: i32) -> Self {
     StructInNestedNS {
@@ -95,6 +100,7 @@ impl<'a> TableInNestedNS<'a> /* private flatbuffers::Table */ {
             _phantom: PhantomData,
         }
     }
+    #[allow(unused_mut)]
     pub fn create<'x: 'y, 'y: 'z, 'z>(
         _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
         args: &'y TableInNestedNSArgs<'y>) -> flatbuffers::Offset<TableInNestedNS<'x>> {
@@ -139,7 +145,7 @@ impl<'a: 'b, 'b> TableInNestedNSBuilder<'a, 'b> {
     }
   }
   // TableInNestedNSBuilder &operator=(const TableInNestedNSBuilder &);
-  pub fn finish<'c>(self) -> flatbuffers::Offset<TableInNestedNS<'a>> {
+  pub fn finish(self) -> flatbuffers::Offset<TableInNestedNS<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
   }
