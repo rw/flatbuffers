@@ -123,6 +123,11 @@ fn test_generated_monster_identifier() {
     assert_eq!("MONS", my_game::example::MONSTER_IDENTIFIER);
 }
 
+#[test]
+fn test_generated_monster_file_extension() {
+    assert_eq!("mon", my_game::example::MONSTER_EXTENSION);
+}
+
 fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_required: bool, size_prefixed: bool) -> Result<(), &'static str> {
     if identifier_required {
         let correct = if size_prefixed {
@@ -331,7 +336,7 @@ mod roundtrips_with_generated_code {
         assert_eq!(m.test(), None);
     }
     #[test]
-    fn table_field_store() {
+    fn table_full_namespace_store() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
         {
             let name_inner = b.create_string("foo");
@@ -354,11 +359,41 @@ mod roundtrips_with_generated_code {
         assert_eq!(mon.enemy().unwrap().name(), Some("foo"));
     }
     #[test]
-    fn table_field_default() {
+    fn table_full_namespace_default() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let name = b.create_string("foo");
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{name: Some(name), ..Default::default()});
         assert_eq!(m.enemy(), None);
+    }
+    #[test]
+    fn table_store() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
+        {
+            let id_inner = b.create_string("foo");
+            let name_outer = b.create_string("bar");
+
+            let inner = my_game::example::Stat::create(b, &my_game::example::StatArgs{
+                id: Some(id_inner),
+                ..Default::default()
+            });
+            let outer = my_game::example::Monster::create(b, &my_game::example::MonsterArgs{
+                name: Some(name_outer),
+                testempty: Some(inner),
+                ..Default::default()
+            });
+            my_game::example::finish_monster_buffer(b, outer);
+        }
+
+        let mon = my_game::example::get_root_as_monster(b.finished_bytes());
+        assert_eq!(mon.name(), Some("bar"));
+        assert_eq!(mon.testempty().unwrap().id(), Some("foo"));
+    }
+    #[test]
+    fn table_default() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{name: Some(name), ..Default::default()});
+        assert_eq!(m.testempty(), None);
     }
     #[test]
     fn nested_flatbuffer_store() {
@@ -1711,10 +1746,8 @@ mod byte_layouts {
     fn test_07_empty_vtable() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off0 = b.start_table(0);
-        //assert_eq!(4, off0.value());
         check(&b, &[]);
-        let off1 = b.end_table(off0);
-        //assert_eq!(4, off1.value());
+        b.end_table(off0);
         check(&b, &[4, 0, // vtable length
                     4, 0, // length of table including vtable offset
                     4, 0, 0, 0]); // offset for start of vtable
@@ -1916,6 +1949,7 @@ mod byte_layouts {
   	// test 15: vtable with 1 vector of 2 struct of 2 int8
     #[test]
     fn test_15_vtable_with_1_vector_of_2_struct_2_int8() {
+        #[allow(dead_code)]
         struct FooStruct {
             a: i8,
             b: i8,
@@ -1983,7 +2017,7 @@ mod byte_layouts {
             let off = b.start_table(2);
             b.push_slot_scalar(fi2fo(0), 33i8, 0);
             b.push_slot_scalar(fi2fo(1), 44i8, 0);
-            let off2 = b.end_table(off);
+            b.end_table(off);
         }
 
         {
@@ -2117,7 +2151,7 @@ mod byte_layouts {
         b.push_slot_scalar::<i8>(fi2fo(0), 1, 1);
         b.push_slot_scalar::<i8>(fi2fo(1), 3, 2);
         b.push_slot_scalar::<i8>(fi2fo(2), 3, 3);
-        let table_end = b.end_table(off);
+        b.end_table(off);
         check(&b, &[
               8, 0, // vtable size in bytes
               8, 0, // object inline data in bytes

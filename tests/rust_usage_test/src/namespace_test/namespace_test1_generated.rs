@@ -22,6 +22,7 @@ pub mod namespace_b {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
 
+#[allow(non_camel_case_types)]
 #[repr(i8)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum EnumInNestedNS {

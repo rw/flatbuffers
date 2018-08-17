@@ -155,6 +155,7 @@ pub mod example {
   extern crate flatbuffers;
   use self::flatbuffers::flexbuffers;
 
+#[allow(non_camel_case_types)]
 #[repr(i8)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Color {
@@ -186,6 +187,7 @@ pub fn enum_name_color(e: Color) -> &'static str {
   ENUM_NAMES_COLOR[index]
 }
 
+#[allow(non_camel_case_types)]
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Any {
@@ -1354,10 +1356,7 @@ pub fn monster_size_prefixed_buffer_has_identifier(buf: &[u8]) -> bool {
       buf, MONSTER_IDENTIFIER, true);
 }
 
-#[inline]
-pub fn MonsterExtension() -> &'static str {
-  return "mon";
-}
+pub const MONSTER_EXTENSION: &'static str = "mon";
 
 #[inline]
 pub fn finish_monster_buffer<'a, 'b>(
@@ -1367,7 +1366,7 @@ pub fn finish_monster_buffer<'a, 'b>(
 }
 
 #[inline]
-pub fn FinishSizePrefixedMonsterBuffer<'a, 'b>(
+pub fn finish_size_prefixed_monster_buffer<'a, 'b>(
     fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
     root: flatbuffers::Offset<Monster<'a>>) {
   fbb.finish_size_prefixed(root, Some(MONSTER_IDENTIFIER));

@@ -313,10 +313,8 @@ class RustGenerator : public BaseGenerator {
 
         if (parser_.file_extension_.length()) {
           // Return the extension
-          code_ += "#[inline]";
-          code_ += "pub fn {{STRUCT_NAME}}Extension() -> &'static str {";
-          code_ += "  return \"" + parser_.file_extension_ + "\";";
-          code_ += "}";
+          code_ += "pub const {{STRUCT_NAME_CAPS}}_EXTENSION: &'static str =\\";
+          code_ += " \"" + parser_.file_extension_ + "\";";
           code_ += "";
         }
 
@@ -334,7 +332,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "}";
         code_ += "";
         code_ += "#[inline]";
-        code_ += "pub fn FinishSizePrefixed{{STRUCT_NAME}}Buffer<'a, 'b>(";
+        code_ += "pub fn finish_size_prefixed_{{STRUCT_NAME_SNAKECASE}}_buffer<'a, 'b>(";
         code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
         code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
         if (parser_.file_identifier_.length()) {
@@ -399,7 +397,7 @@ class RustGenerator : public BaseGenerator {
     return ctypename[type.base_type];
   }
 
-  std::string GenTypeBasicForRepr(const Type &type) const {
+  std::string GenEnumTypeForDecl(const Type &type) const {
     static const char *ctypename[] = {
     // clang-format off
     #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE, \
@@ -742,10 +740,11 @@ class RustGenerator : public BaseGenerator {
   // and an enum array of values
   void GenEnum(const EnumDef &enum_def) {
     code_.SetValue("ENUM_NAME", Name(enum_def));
-    code_.SetValue("BASE_TYPE", GenTypeBasicForRepr(enum_def.underlying_type));
+    code_.SetValue("BASE_TYPE", GenEnumTypeForDecl(enum_def.underlying_type));
     code_.SetValue("SEP", "");
 
     GenComment(enum_def.doc_comment);
+    code_ += "#[allow(non_camel_case_types)]";
     code_ += "#[repr({{BASE_TYPE}})]";
     code_ += "#[derive(Clone, Copy, PartialEq, Debug)]";
     code_ += "pub enum " + Name(enum_def) + " {";
