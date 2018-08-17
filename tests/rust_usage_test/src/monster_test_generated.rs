@@ -907,7 +907,7 @@ pub struct MonsterArgs<'a> {
     pub inventory: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u8>>>,
     pub color: Color,
     pub test_type: Any,
-    pub test: Option<flatbuffers::Offset<AnyUnionTableOffset>>,
+    pub test: Option<flatbuffers::Offset<flatbuffers::UnionMarker>>,
     pub test4: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Test>>>,
     pub testarrayofstring: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<&'a  str>>>>,
     pub testarrayoftables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<Monster<'a >>>>>,
@@ -1020,7 +1020,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_test_type(&mut self, test_type: Any) {
     self.fbb_.push_slot_scalar::<u8>(Monster::VT_TEST_TYPE, test_type as u8, Any::NONE as u8);
   }
-  pub fn add_test(&mut self, test: flatbuffers::Offset<AnyUnionTableOffset>) {
+  pub fn add_test(&mut self, test: flatbuffers::Offset<flatbuffers::UnionMarker>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TEST, test);
   }
   pub fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<'b , Test>>) {

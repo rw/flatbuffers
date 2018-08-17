@@ -19,6 +19,9 @@ pub trait GeneratedStruct  : Sized{
         bytes
     }
 }
+pub enum UnionMarker {}
+
+
 pub trait ElementScalar : Sized + PartialEq + Copy + Clone {
     fn to_le(self) -> Self;
     fn from_le(self) -> Self;
@@ -670,7 +673,7 @@ impl<'a, T: 'a> Offset<T> {
     pub fn new(o: UOffsetT) -> Offset<T> {
         Offset { 0: o, 1: PhantomData}
     }
-    pub fn union(&self) -> Offset<UnionOffset> {
+    pub fn union(&self) -> Offset<UnionMarker> {
         Offset::new(self.0)
     }
     pub fn value(&self) -> UOffsetT {

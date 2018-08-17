@@ -465,7 +465,7 @@ class RustGenerator : public BaseGenerator {
         return s;
       }
       case BASE_TYPE_UNION: {
-        return "flatbuffers::UnionOffset";
+        return "flatbuffers::Table<" + lifetime + ">";
       }
       default: {
         assert(false);
@@ -1111,13 +1111,6 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("NAME", Name(enum_def));
       code_.SetValue("UNION_OFFSET_NAME", Name(enum_def) + "UnionTableOffset");
       code_ += "pub struct {{UNION_OFFSET_NAME}} {}";
-      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
-           ++it) {
-        const auto &ev = **it;
-        //code_.SetValue("KEY", GenEnumValDecl(enum_def, Name(ev)));
-        code_.SetValue("TABLE_NAME", GetUnionElement(ev, true, true, true));
-        code_ += "impl<'a> Into<{{UNION_OFFSET_NAME}}> for {{TABLE_NAME}}<'a> { fn into(self) -> {{UNION_OFFSET_NAME}} { {{UNION_OFFSET_NAME}}{} } }";
-      }
     }
   }
 
@@ -1487,7 +1480,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::UnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "Option<flatbuffers::Offset<" + typname + "UnionTableOffset>>";
+        //return "Option<flatbuffers::Offset<" + typname + "UnionTableOffset>>";
+        return "Option<flatbuffers::Offset<flatbuffers::UnionMarker>>";
       }
 
       case FullElementType::VectorOfInteger:
@@ -1519,7 +1513,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " Into<" + typname + "<" + lifetime + ">>>>>";
+        //return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", &" + lifetime + " Into<" + typname + "<" + lifetime + ">>>>>";
+        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsU32Offset<flatbuffers::Table<" + lifetime + ">>>>";
       }
     }
   }
@@ -1579,7 +1574,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + ">>>";
+        //return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::Offset<" + typname + ">>>";
+        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsU32Offset<flatbuffers::Table<" + lifetime + ">>>";
         //const auto typname = WrapInNameSpace(*type.enum_def);
         //return typname;
       }
@@ -1614,7 +1610,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::UnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::Offset<" + typname + "UnionTableOffset>";
+        return "flatbuffers::Offset<flatbuffers::UnionMarker>";
       }
     }
   }
