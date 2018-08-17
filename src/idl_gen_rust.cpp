@@ -211,6 +211,10 @@ class RustGenerator : public BaseGenerator {
     return keywords_.find(name) == keywords_.end() ? name : name + "_";
   }
 
+  std::string EscapeKeywordPath(const std::string &name) const {
+    return keywords_.find(name) == keywords_.end() ? name : name + "::";
+  }
+
   std::string Name(const Definition &def) const {
     return EscapeKeyword(def.name);
   }
@@ -721,11 +725,6 @@ class RustGenerator : public BaseGenerator {
   //  }
   //}
 
-  std::string GenEnumDecl(const EnumDef &enum_def) const {
-    const IDLOptions &opts = parser_.opts;
-    return (opts.scoped_enums ? "pub enum class " : "pub enum ") + Name(enum_def);
-  }
-
   std::string GenEnumValDecl(const EnumDef &enum_def,
                              const std::string &enum_val) const {
     return enum_val;
@@ -975,9 +974,7 @@ class RustGenerator : public BaseGenerator {
     GenComment(enum_def.doc_comment);
     code_ += "#[repr({{BASE_TYPE}})]";
     code_ += "#[derive(Clone, Copy, PartialEq, Debug)]";
-    code_ += GenEnumDecl(enum_def) + "\\";
-    //if (parser_.opts.scoped_enums) code_ += " : {{BASE_TYPE}}\\";
-    code_ += " {";
+    code_ += "pub enum " + Name(enum_def) + " {";
 
     int64_t anyv = 0;
     const EnumVal *minv = nullptr, *maxv = nullptr;
@@ -1069,7 +1066,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "];";
     code_ += "";
 
-    // Generate a generate string table for enum values.
+    // Generate a string table for enum values.
     // Problem is, if values are very sparse that could generate really big
     // tables. Ideally in that case we generate a map lookup instead, but for
     // the moment we simply don't output a table at all.
@@ -1112,7 +1109,15 @@ class RustGenerator : public BaseGenerator {
     if (enum_def.is_union) {
       // Generate tyoesafe offset(s) for unions
       code_.SetValue("NAME", Name(enum_def));
-      code_ += "pub struct {{NAME}}UnionTableOffset {}";
+      code_.SetValue("UNION_OFFSET_NAME", Name(enum_def) + "UnionTableOffset");
+      code_ += "pub struct {{UNION_OFFSET_NAME}} {}";
+      for (auto it = enum_def.vals.vec.begin(); it != enum_def.vals.vec.end();
+           ++it) {
+        const auto &ev = **it;
+        //code_.SetValue("KEY", GenEnumValDecl(enum_def, Name(ev)));
+        code_.SetValue("TABLE_NAME", GetUnionElement(ev, true, true, true));
+        code_ += "impl<'a> Into<{{UNION_OFFSET_NAME}}> for {{TABLE_NAME}}<'a> { fn into(self) -> {{UNION_OFFSET_NAME}} { {{UNION_OFFSET_NAME}}{} } }";
+      }
     }
   }
 
