@@ -331,6 +331,36 @@ mod roundtrips_with_generated_code {
         assert_eq!(m.test(), None);
     }
     #[test]
+    fn nested_flatbuffer_store() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
+        {
+            let name_inner = b.create_string("foo");
+            let name_outer = b.create_string("bar");
+
+            let inner = my_game::example::Monster::create(b, &my_game::example::MonsterArgs{
+                name: Some(name_inner),
+                ..Default::default()
+            });
+            let outer = my_game::example::Monster::create(b, &my_game::example::MonsterArgs{
+                name: Some(name_outer),
+                enemy: Some(inner),
+                ..Default::default()
+            });
+            my_game::example::finish_monster_buffer(b, outer);
+        }
+
+        let mon = my_game::example::get_root_as_monster(b.get_active_buf_slice());
+        assert_eq!(mon.name(), Some("bar"));
+        assert_eq!(mon.enemy().unwrap().name(), Some("foo"));
+    }
+    #[test]
+    fn nested_flatbuffer_default() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{name: Some(name), ..Default::default()});
+        assert_eq!(m.enemy(), None);
+    }
+    #[test]
     fn vector_of_string_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let v = b.create_vector_of_strings(&["foobar", "baz"]);

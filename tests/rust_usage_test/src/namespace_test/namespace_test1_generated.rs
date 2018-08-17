@@ -82,7 +82,7 @@ impl StructInNestedNS {
 // STRUCT_END(StructInNestedNS, 8);
 
 pub enum TableInNestedNSOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct TableInNestedNS<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,

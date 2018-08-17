@@ -959,7 +959,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Offset<&" + lifetime + " " + typname + "<" + lifetime + ">>>";
+        return "Option<flatbuffers::Offset<" + typname + "<" + lifetime + ">>>";
       }
       case FullElementType::String: {
         return "Option<flatbuffers::Offset<&" + lifetime + " str>>";
@@ -1069,7 +1069,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<&" + lifetime + " " + typname + "<" + lifetime + ">>";
+        return "flatbuffers::Offset<" + typname + "<" + lifetime + ">>";
       }
       case FullElementType::Integer:
       case FullElementType::Float: {
@@ -1112,7 +1112,7 @@ class RustGenerator : public BaseGenerator {
           }
           case FullElementType::Table: {
             const auto typname = WrapInNameSpace(*type.struct_def);
-            return "self.fbb_.push_slot_offset_relative::<&" + typname + ">";
+            return "self.fbb_.push_slot_offset_relative::<" + typname + ">";
           }
 
           case FullElementType::EnumKey:
@@ -1553,7 +1553,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("STRUCT_NAME", Name(struct_def));
     code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
     code_ += "pub enum {{OFFSET_TYPELABEL}} {}";
-    code_ += "#[derive(Copy, Clone, PartialEq)]";
+    code_ += "#[derive(Copy, Clone, Debug, PartialEq)]";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
     code_ += "  pub _tab: flatbuffers::Table<'a>,";
     code_ += "  _phantom: PhantomData<&'a ()>,";

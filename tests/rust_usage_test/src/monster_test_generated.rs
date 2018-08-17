@@ -16,7 +16,7 @@ pub mod my_game {
   use self::flatbuffers::flexbuffers;
 
 pub enum InParentNamespaceOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct InParentNamespace<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -85,7 +85,7 @@ pub mod example_2 {
   use self::flatbuffers::flexbuffers;
 
 pub enum MonsterOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -355,7 +355,7 @@ impl Ability {
 // STRUCT_END(Ability, 8);
 
 pub enum TestSimpleTableWithEnumOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct TestSimpleTableWithEnum<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -425,7 +425,7 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
 }
 
 pub enum StatOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Stat<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -517,7 +517,7 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
 }
 
 pub enum ReferrableOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Referrable<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -588,7 +588,7 @@ impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
 
 /// an example documentation comment: monster object
 pub enum MonsterOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -910,9 +910,9 @@ pub struct MonsterArgs<'a> {
     pub test4: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Test>>>,
     pub testarrayofstring: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<&'a  str>>>>,
     pub testarrayoftables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<Monster<'a >>>>>,
-    pub enemy: Option<flatbuffers::Offset<&'a  Monster<'a >>>,
+    pub enemy: Option<flatbuffers::Offset<Monster<'a >>>,
     pub testnestedflatbuffer: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u8>>>,
-    pub testempty: Option<flatbuffers::Offset<&'a  Stat<'a >>>,
+    pub testempty: Option<flatbuffers::Offset<Stat<'a >>>,
     pub testbool: bool,
     pub testhashs32_fnv1: i32,
     pub testhashu32_fnv1: u32,
@@ -932,7 +932,7 @@ pub struct MonsterArgs<'a> {
     pub test5: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Test>>>,
     pub vector_of_longs: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  i64>>>,
     pub vector_of_doubles: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  f64>>>,
-    pub parent_namespace_test: Option<flatbuffers::Offset<&'a  super::InParentNamespace<'a >>>,
+    pub parent_namespace_test: Option<flatbuffers::Offset<super::InParentNamespace<'a >>>,
     pub vector_of_referrables: Option<flatbuffers::Offset<flatbuffers::Vector<'a , flatbuffers::ForwardsU32Offset<Referrable<'a >>>>>,
     pub single_weak_reference: u64,
     pub vector_of_weak_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
@@ -1031,14 +1031,14 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsU32Offset<Monster<'b >>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
   }
-  pub fn add_enemy(&mut self, enemy: flatbuffers::Offset<&'b  Monster<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&Monster>(Monster::VT_ENEMY, enemy);
+  pub fn add_enemy(&mut self, enemy: flatbuffers::Offset<Monster<'b >>) {
+    self.fbb_.push_slot_offset_relative::<Monster>(Monster::VT_ENEMY, enemy);
   }
   pub fn add_testnestedflatbuffer(&mut self, testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<'b , u8>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer);
   }
-  pub fn add_testempty(&mut self, testempty: flatbuffers::Offset<&'b  Stat<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&Stat>(Monster::VT_TESTEMPTY, testempty);
+  pub fn add_testempty(&mut self, testempty: flatbuffers::Offset<Stat<'b >>) {
+    self.fbb_.push_slot_offset_relative::<Stat>(Monster::VT_TESTEMPTY, testempty);
   }
   pub fn add_testbool(&mut self, testbool: bool) {
     self.fbb_.push_slot_scalar::<bool>(Monster::VT_TESTBOOL, testbool, false);
@@ -1097,8 +1097,8 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_vector_of_doubles(&mut self, vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<'b , f64>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
   }
-  pub fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::Offset<&'b  super::InParentNamespace<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&super::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
+  pub fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::Offset<super::InParentNamespace<'b >>) {
+    self.fbb_.push_slot_offset_relative::<super::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
   }
   pub fn add_vector_of_referrables(&mut self, vector_of_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsU32Offset<Referrable<'b >>>>) {
     self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_REFERRABLES, vector_of_referrables);
@@ -1140,7 +1140,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
 }
 
 pub enum TypeAliasesOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct TypeAliases<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,

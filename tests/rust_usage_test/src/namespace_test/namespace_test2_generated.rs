@@ -15,7 +15,7 @@ pub mod namespace_a {
   use self::flatbuffers::flexbuffers;
 
 pub enum TableInFirstNSOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct TableInFirstNS<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -63,7 +63,7 @@ impl<'a> TableInFirstNS<'a> /* private flatbuffers::Table */ {
 }
 
 pub struct TableInFirstNSArgs<'a> {
-    pub foo_table: Option<flatbuffers::Offset<&'a  NamespaceB::TableInNestedNS<'a >>>,
+    pub foo_table: Option<flatbuffers::Offset<NamespaceB::TableInNestedNS<'a >>>,
     pub foo_enum: NamespaceB::EnumInNestedNS,
     pub foo_struct: Option<&'a  NamespaceB::StructInNestedNS>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
@@ -83,8 +83,8 @@ pub struct TableInFirstNSBuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
-  pub fn add_foo_table(&mut self, foo_table: flatbuffers::Offset<&'b  NamespaceB::TableInNestedNS<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&NamespaceB::TableInNestedNS>(TableInFirstNS::VT_FOO_TABLE, foo_table);
+  pub fn add_foo_table(&mut self, foo_table: flatbuffers::Offset<NamespaceB::TableInNestedNS<'b >>) {
+    self.fbb_.push_slot_offset_relative::<NamespaceB::TableInNestedNS>(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
   pub fn add_foo_enum(&mut self, foo_enum: NamespaceB::EnumInNestedNS) {
     self.fbb_.push_slot_scalar::<i8>(TableInFirstNS::VT_FOO_ENUM, foo_enum as i8, NamespaceB::EnumInNestedNS::A as i8);
@@ -107,7 +107,7 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
 }
 
 pub enum SecondTableInAOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct SecondTableInA<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -143,7 +143,7 @@ impl<'a> SecondTableInA<'a> /* private flatbuffers::Table */ {
 }
 
 pub struct SecondTableInAArgs<'a> {
-    pub refer_to_c: Option<flatbuffers::Offset<&'a  super::NamespaceC::TableInC<'a >>>,
+    pub refer_to_c: Option<flatbuffers::Offset<super::NamespaceC::TableInC<'a >>>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for SecondTableInAArgs<'a> {
@@ -159,8 +159,8 @@ pub struct SecondTableInABuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
-  pub fn add_refer_to_c(&mut self, refer_to_c: flatbuffers::Offset<&'b  super::NamespaceC::TableInC<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&super::NamespaceC::TableInC>(SecondTableInA::VT_REFER_TO_C, refer_to_c);
+  pub fn add_refer_to_c(&mut self, refer_to_c: flatbuffers::Offset<super::NamespaceC::TableInC<'b >>) {
+    self.fbb_.push_slot_offset_relative::<super::NamespaceC::TableInC>(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> SecondTableInABuilder<'a, 'b> {
     let start = _fbb.start_table(1);
@@ -190,7 +190,7 @@ pub mod namespace_c {
   use self::flatbuffers::flexbuffers;
 
 pub enum TableInCOffset {}
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct TableInC<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
@@ -232,8 +232,8 @@ impl<'a> TableInC<'a> /* private flatbuffers::Table */ {
 }
 
 pub struct TableInCArgs<'a> {
-    pub refer_to_a1: Option<flatbuffers::Offset<&'a  super::NamespaceA::TableInFirstNS<'a >>>,
-    pub refer_to_a2: Option<flatbuffers::Offset<&'a  super::NamespaceA::SecondTableInA<'a >>>,
+    pub refer_to_a1: Option<flatbuffers::Offset<super::NamespaceA::TableInFirstNS<'a >>>,
+    pub refer_to_a2: Option<flatbuffers::Offset<super::NamespaceA::SecondTableInA<'a >>>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for TableInCArgs<'a> {
@@ -250,11 +250,11 @@ pub struct TableInCBuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
-  pub fn add_refer_to_a1(&mut self, refer_to_a1: flatbuffers::Offset<&'b  super::NamespaceA::TableInFirstNS<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&super::NamespaceA::TableInFirstNS>(TableInC::VT_REFER_TO_A1, refer_to_a1);
+  pub fn add_refer_to_a1(&mut self, refer_to_a1: flatbuffers::Offset<super::NamespaceA::TableInFirstNS<'b >>) {
+    self.fbb_.push_slot_offset_relative::<super::NamespaceA::TableInFirstNS>(TableInC::VT_REFER_TO_A1, refer_to_a1);
   }
-  pub fn add_refer_to_a2(&mut self, refer_to_a2: flatbuffers::Offset<&'b  super::NamespaceA::SecondTableInA<'b >>) {
-    self.fbb_.push_slot_offset_relative::<&super::NamespaceA::SecondTableInA>(TableInC::VT_REFER_TO_A2, refer_to_a2);
+  pub fn add_refer_to_a2(&mut self, refer_to_a2: flatbuffers::Offset<super::NamespaceA::SecondTableInA<'b >>) {
+    self.fbb_.push_slot_offset_relative::<super::NamespaceA::SecondTableInA>(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TableInCBuilder<'a, 'b> {
     let start = _fbb.start_table(2);
