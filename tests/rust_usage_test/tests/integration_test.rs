@@ -612,303 +612,6 @@ mod vector_read_obj_tests {
     }
 }
 
-
-////  example of accessing a buffer loaded in memory:
-//void AccessFlatBufferTest(const uint8_t *flatbuf, size_t length,
-//                          bool pooled = true) {
-//  // First, verify the buffers integrity (optional)
-//  flatbuffers::Verifier verifier(flatbuf, length);
-//  TEST_EQ(VerifyMonsterBuffer(verifier), true);
-//
-//  std::vector<uint8_t> test_buff;
-//  test_buff.resize(length * 2);
-//  std::memcpy(&test_buff[0], flatbuf, length);
-//  std::memcpy(&test_buff[length], flatbuf, length);
-//
-//  flatbuffers::Verifier verifier1(&test_buff[0], length);
-//  TEST_EQ(VerifyMonsterBuffer(verifier1), true);
-//  TEST_EQ(verifier1.GetComputedSize(), length);
-//
-//  flatbuffers::Verifier verifier2(&test_buff[length], length);
-//  TEST_EQ(VerifyMonsterBuffer(verifier2), true);
-//  TEST_EQ(verifier2.GetComputedSize(), length);
-//
-//  TEST_EQ(strcmp(MonsterIdentifier(), "MONS"), 0);
-//  TEST_EQ(MonsterBufferHasIdentifier(flatbuf), true);
-//  TEST_EQ(strcmp(MonsterExtension(), "mon"), 0);
-//
-//  // Access the buffer from the root.
-//  auto monster = GetMonster(flatbuf);
-//
-//  TEST_EQ(monster->hp(), 80);
-//  TEST_EQ(monster->mana(), 150);  // default
-//  TEST_EQ_STR(monster->name()->c_str(), "MyMonster");
-//  // Can't access the following field, it is deprecated in the schema,
-//  // which means accessors are not generated:
-//  // monster.friendly()
-//
-//  auto pos = monster->pos();
-//  TEST_NOTNULL(pos);
-//  TEST_EQ(pos->z(), 3);
-//  TEST_EQ(pos->test3().a(), 10);
-//  TEST_EQ(pos->test3().b(), 20);
-//
-//  auto inventory = monster->inventory();
-//  TEST_EQ(VectorLength(inventory), 10UL);  // Works even if inventory is null.
-//  TEST_NOTNULL(inventory);
-//  unsigned char inv_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-//  for (auto it = inventory->begin(); it != inventory->end(); ++it)
-//    TEST_EQ(*it, inv_data[it - inventory->begin()]);
-//
-//  TEST_EQ(monster->color(), Color_Blue);
-//
-//  // Example of accessing a union:
-//  TEST_EQ(monster->test_type(), Any_Monster);  // First make sure which it is.
-//  auto monster2 = reinterpret_cast<const Monster *>(monster->test());
-//  TEST_NOTNULL(monster2);
-//  TEST_EQ_STR(monster2->name()->c_str(), "Fred");
-//
-//  // Example of accessing a vector of strings:
-//  auto vecofstrings = monster->testarrayofstring();
-//  TEST_EQ(vecofstrings->Length(), 4U);
-//  TEST_EQ_STR(vecofstrings->Get(0)->c_str(), "bob");
-//  TEST_EQ_STR(vecofstrings->Get(1)->c_str(), "fred");
-//  if (pooled) {
-//    // These should have pointer equality because of string pooling.
-//    TEST_EQ(vecofstrings->Get(0)->c_str(), vecofstrings->Get(2)->c_str());
-//    TEST_EQ(vecofstrings->Get(1)->c_str(), vecofstrings->Get(3)->c_str());
-//  }
-//
-//  auto vecofstrings2 = monster->testarrayofstring2();
-//  if (vecofstrings2) {
-//    TEST_EQ(vecofstrings2->Length(), 2U);
-//    TEST_EQ_STR(vecofstrings2->Get(0)->c_str(), "jane");
-//    TEST_EQ_STR(vecofstrings2->Get(1)->c_str(), "mary");
-//  }
-//
-//  // Example of accessing a vector of tables:
-//  auto vecoftables = monster->testarrayoftables();
-//  TEST_EQ(vecoftables->Length(), 3U);
-//  for (auto it = vecoftables->begin(); it != vecoftables->end(); ++it)
-//    TEST_EQ(strlen(it->name()->c_str()) >= 4, true);
-//  TEST_EQ_STR(vecoftables->Get(0)->name()->c_str(), "Barney");
-//  TEST_EQ(vecoftables->Get(0)->hp(), 1000);
-//  TEST_EQ_STR(vecoftables->Get(1)->name()->c_str(), "Fred");
-//  TEST_EQ_STR(vecoftables->Get(2)->name()->c_str(), "Wilma");
-//  TEST_NOTNULL(vecoftables->LookupByKey("Barney"));
-//  TEST_NOTNULL(vecoftables->LookupByKey("Fred"));
-//  TEST_NOTNULL(vecoftables->LookupByKey("Wilma"));
-//
-//  // Test accessing a vector of sorted structs
-//  auto vecofstructs = monster->testarrayofsortedstruct();
-//  if (vecofstructs) {  // not filled in monster_test.bfbs
-//    for (flatbuffers::uoffset_t i = 0; i < vecofstructs->size() - 1; i++) {
-//      auto left = vecofstructs->Get(i);
-//      auto right = vecofstructs->Get(i + 1);
-//      TEST_EQ(true, (left->KeyCompareLessThan(right)));
-//    }
-//    TEST_NOTNULL(vecofstructs->LookupByKey(3));
-//    TEST_EQ(static_cast<const Ability *>(nullptr),
-//            vecofstructs->LookupByKey(5));
-//  }
-//
-//  // Test nested FlatBuffers if available:
-//  auto nested_buffer = monster->testnestedflatbuffer();
-//  if (nested_buffer) {
-//    // nested_buffer is a vector of bytes you can memcpy. However, if you
-//    // actually want to access the nested data, this is a convenient
-//    // accessor that directly gives you the root table:
-//    auto nested_monster = monster->testnestedflatbuffer_nested_root();
-//    TEST_EQ_STR(nested_monster->name()->c_str(), "NestedMonster");
-//  }
-//
-//  // Test flexbuffer if available:
-//  auto flex = monster->flex();
-//  // flex is a vector of bytes you can memcpy etc.
-//  TEST_EQ(flex->size(), 4);  // Encoded FlexBuffer bytes.
-//  // However, if you actually want to access the nested data, this is a
-//  // convenient accessor that directly gives you the root value:
-//  TEST_EQ(monster->flex_flexbuffer_root().AsInt16(), 1234);
-//
-//  // Since Flatbuffers uses explicit mechanisms to override the default
-//  // compiler alignment, double check that the compiler indeed obeys them:
-//  // (Test consists of a short and byte):
-//  TEST_EQ(flatbuffers::AlignOf<Test>(), 2UL);
-//  TEST_EQ(sizeof(Test), 4UL);
-//
-//  const flatbuffers::Vector<const Test *> *tests_array[] = {
-//    monster->test4(),
-//    monster->test5(),
-//  };
-//  for (size_t i = 0; i < sizeof(tests_array) / sizeof(tests_array[0]); ++i) {
-//    auto tests = tests_array[i];
-//    TEST_NOTNULL(tests);
-//    auto test_0 = tests->Get(0);
-//    auto test_1 = tests->Get(1);
-//    TEST_EQ(test_0->a(), 10);
-//    TEST_EQ(test_0->b(), 20);
-//    TEST_EQ(test_1->a(), 30);
-//    TEST_EQ(test_1->b(), 40);
-//    for (auto it = tests->begin(); it != tests->end(); ++it) {
-//      TEST_EQ(it->a() == 10 || it->a() == 30, true);  // Just testing iterators.
-//    }
-//  }
-//
-//  // Checking for presence of fields:
-//  TEST_EQ(flatbuffers::IsFieldPresent(monster, Monster::VT_HP), true);
-//  TEST_EQ(flatbuffers::IsFieldPresent(monster, Monster::VT_MANA), false);
-//
-//  // Obtaining a buffer from a root:
-//  TEST_EQ(GetBufferStartFromRootPointer(monster), flatbuf);
-//}
-//
-//// Change a FlatBuffer in-place, after it has been constructed.
-//void MutateFlatBuffersTest(uint8_t *flatbuf, std::size_t length) {
-//  // Get non-const pointer to root.
-//  auto monster = GetMutableMonster(flatbuf);
-//
-//  // Each of these tests mutates, then tests, then set back to the original,
-//  // so we can test that the buffer in the end still passes our original test.
-//  auto hp_ok = monster->mutate_hp(10);
-//  TEST_EQ(hp_ok, true);  // Field was present.
-//  TEST_EQ(monster->hp(), 10);
-//  // Mutate to default value
-//  auto hp_ok_default = monster->mutate_hp(100);
-//  TEST_EQ(hp_ok_default, true);  // Field was present.
-//  TEST_EQ(monster->hp(), 100);
-//  // Test that mutate to default above keeps field valid for further mutations
-//  auto hp_ok_2 = monster->mutate_hp(20);
-//  TEST_EQ(hp_ok_2, true);
-//  TEST_EQ(monster->hp(), 20);
-//  monster->mutate_hp(80);
-//
-//  // Monster originally at 150 mana (default value)
-//  auto mana_default_ok = monster->mutate_mana(150);  // Mutate to default value.
-//  TEST_EQ(mana_default_ok,
-//          true);  // Mutation should succeed, because default value.
-//  TEST_EQ(monster->mana(), 150);
-//  auto mana_ok = monster->mutate_mana(10);
-//  TEST_EQ(mana_ok, false);  // Field was NOT present, because default value.
-//  TEST_EQ(monster->mana(), 150);
-//
-//  // Mutate structs.
-//  auto pos = monster->mutable_pos();
-//  auto test3 = pos->mutable_test3();  // Struct inside a struct.
-//  test3.mutate_a(50);                 // Struct fields never fail.
-//  TEST_EQ(test3.a(), 50);
-//  test3.mutate_a(10);
-//
-//  // Mutate vectors.
-//  auto inventory = monster->mutable_inventory();
-//  inventory->Mutate(9, 100);
-//  TEST_EQ(inventory->Get(9), 100);
-//  inventory->Mutate(9, 9);
-//
-//  auto tables = monster->mutable_testarrayoftables();
-//  auto first = tables->GetMutableObject(0);
-//  TEST_EQ(first->hp(), 1000);
-//  first->mutate_hp(0);
-//  TEST_EQ(first->hp(), 0);
-//  first->mutate_hp(1000);
-//
-//  // Run the verifier and the regular test to make sure we didn't trample on
-//  // anything.
-//  AccessFlatBufferTest(flatbuf, length);
-//}
-//fn check_read_buffer(buf: &[u8]) {
-//	let monster1 = my_game::example::get_root_as_monster(buf);
-//	//let monster2 = {
-//    //    let mut x = my_game::example::Monster::(..Default::default());
-//    //};
-//}
-
-//// Unpack a FlatBuffer into objects.
-//void ObjectFlatBuffersTest(uint8_t *flatbuf) {
-//  // Optional: we can specify resolver and rehasher functions to turn hashed
-//  // strings into object pointers and back, to implement remote references
-//  // and such.
-//  auto resolver = flatbuffers::resolver_function_t(
-//      [](void **pointer_adr, flatbuffers::hash_value_t hash) {
-//        (void)pointer_adr;
-//        (void)hash;
-//        // Don't actually do anything, leave variable null.
-//      });
-//  auto rehasher = flatbuffers::rehasher_function_t(
-//      [](void *pointer) -> flatbuffers::hash_value_t {
-//        (void)pointer;
-//        return 0;
-//      });
-//
-//  // Turn a buffer into C++ objects.
-//  auto monster1 = UnPackMonster(flatbuf, &resolver);
-//
-//  // Re-serialize the data.
-//  flatbuffers::FlatBufferBuilder fbb1;
-//  fbb1.Finish(create_monster(fbb1, monster1.get(), &rehasher),
-//              MonsterIdentifier());
-//
-//  // Unpack again, and re-serialize again.
-//  auto monster2 = UnPackMonster(fbb1.GetBufferPointer(), &resolver);
-//  flatbuffers::FlatBufferBuilder fbb2;
-//  fbb2.Finish(create_monster(fbb2, monster2.get(), &rehasher),
-//              MonsterIdentifier());
-//
-//  // Now we've gone full round-trip, the two buffers should match.
-//  auto len1 = fbb1.GetSize();
-//  auto len2 = fbb2.GetSize();
-//  TEST_EQ(len1, len2);
-//  TEST_EQ(memcmp(fbb1.GetBufferPointer(), fbb2.GetBufferPointer(), len1), 0);
-//
-//  // Test it with the original buffer test to make sure all data survived.
-//  AccessFlatBufferTest(fbb2.GetBufferPointer(), len2, false);
-//
-//  // Test accessing fields, similar to AccessFlatBufferTest above.
-//  TEST_EQ(monster2->hp, 80);
-//  TEST_EQ(monster2->mana, 150);  // default
-//  TEST_EQ_STR(monster2->name.c_str(), "MyMonster");
-//
-//  auto &pos = monster2->pos;
-//  TEST_NOTNULL(pos);
-//  TEST_EQ(pos->z(), 3);
-//  TEST_EQ(pos->test3().a(), 10);
-//  TEST_EQ(pos->test3().b(), 20);
-//
-//  auto &inventory = monster2->inventory;
-//  TEST_EQ(inventory.size(), 10UL);
-//  unsigned char inv_data[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-//  for (auto it = inventory.begin(); it != inventory.end(); ++it)
-//    TEST_EQ(*it, inv_data[it - inventory.begin()]);
-//
-//  TEST_EQ(monster2->color, Color_Blue);
-//
-//  auto monster3 = monster2->test.AsMonster();
-//  TEST_NOTNULL(monster3);
-//  TEST_EQ_STR(monster3->name.c_str(), "Fred");
-//
-//  auto &vecofstrings = monster2->testarrayofstring;
-//  TEST_EQ(vecofstrings.size(), 4U);
-//  TEST_EQ_STR(vecofstrings[0].c_str(), "bob");
-//  TEST_EQ_STR(vecofstrings[1].c_str(), "fred");
-//
-//  auto &vecofstrings2 = monster2->testarrayofstring2;
-//  TEST_EQ(vecofstrings2.size(), 2U);
-//  TEST_EQ_STR(vecofstrings2[0].c_str(), "jane");
-//  TEST_EQ_STR(vecofstrings2[1].c_str(), "mary");
-//
-//  auto &vecoftables = monster2->testarrayoftables;
-//  TEST_EQ(vecoftables.size(), 3U);
-//  TEST_EQ_STR(vecoftables[0]->name.c_str(), "Barney");
-//  TEST_EQ(vecoftables[0]->hp, 1000);
-//  TEST_EQ_STR(vecoftables[1]->name.c_str(), "Fred");
-//  TEST_EQ_STR(vecoftables[2]->name.c_str(), "Wilma");
-//
-//  auto &tests = monster2->test4;
-//  TEST_EQ(tests[0].a(), 10);
-//  TEST_EQ(tests[0].b(), 20);
-//  TEST_EQ(tests[1].a(), 30);
-//  TEST_EQ(tests[1].b(), 40);
-//}
-//
 // Prefix a FlatBuffer with a size field.
 #[test]
 fn test_size_prefixed_buffer() {
@@ -948,7 +651,7 @@ fn fuzz_scalar_table_serialization() {
     let double_val: f64 = 3.14159265359;
 
     let test_values_max: isize = 11;
-    let max_fields_per_object: flatbuffers::VOffsetT = 20;
+    let max_fields_per_object: flatbuffers::VOffsetT = 100;
     let num_fuzz_objects: isize = 1000;  // The higher, the more thorough :)
 
     let mut builder = flatbuffers::FlatBufferBuilder::new();
@@ -989,7 +692,7 @@ fn fuzz_scalar_table_serialization() {
     let mut stats: HashMap<u64, u64> = HashMap::new();
     let mut values_generated: u64 = 0;
 
-    // Embrace RNG determinism:
+    // Embrace PRNG determinism:
     lcg.reset();
 
     // Test that all objects we generated are readable and return the
@@ -1110,20 +813,29 @@ fn test_emplace_and_read_scalar_fuzz() {
     //doit::<i64>();
 }
 
-#[test]
-fn generated_code_creates_example_data_that_is_accessible_and_correct() {
-    let b = &mut flatbuffers::FlatBufferBuilder::new();
-    create_serialized_example_with_generated_code(b);
-    let buf = b.finished_bytes();
-    serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
-}
+#[cfg(test)]
+mod write_and_read_examples {
+    extern crate flatbuffers;
 
-#[test]
-fn library_code_creates_example_data_that_is_accessible_and_correct() {
-    let b = &mut flatbuffers::FlatBufferBuilder::new();
-    create_serialized_example_with_library_code(b);
-    let buf = b.finished_bytes();
-    serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
+    use super::create_serialized_example_with_library_code;
+    use super::create_serialized_example_with_generated_code;
+    use super::serialized_example_is_accessible_and_correct;
+
+    #[test]
+    fn generated_code_creates_correct_example() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
+        create_serialized_example_with_generated_code(b);
+        let buf = b.finished_bytes();
+        serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
+    }
+
+    #[test]
+    fn library_code_creates_correct_example() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
+        create_serialized_example_with_library_code(b);
+        let buf = b.finished_bytes();
+        serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
+    }
 }
 
 #[cfg(test)]
