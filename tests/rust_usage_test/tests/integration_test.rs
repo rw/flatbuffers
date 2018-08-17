@@ -263,6 +263,28 @@ mod roundtrips_with_generated_code {
         assert_eq!(m.name(), Some("foobar"));
     }
     #[test]
+    fn struct_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            pos: Some(&my_game::example::Vec3::new(1.0, 2.0, 3.0, 4.0,
+                                                   my_game::example::Color::Green,
+                                                   my_game::example::Test::new(98, 99))),
+            ..Default::default()
+        });
+        assert_eq!(m.pos(), Some(&my_game::example::Vec3::new(1.0, 2.0, 3.0, 4.0,
+                                                              my_game::example::Color::Green,
+                                                              my_game::example::Test::new(98, 99))));
+    }
+    #[test]
+    fn struct_default() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{name: Some(name), ..Default::default()});
+        assert_eq!(m.pos(), None);
+    }
+    #[test]
     fn enum_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{color: my_game::example::Color::Red, ..Default::default()});
