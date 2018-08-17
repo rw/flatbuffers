@@ -19,7 +19,7 @@ pub trait GeneratedStruct  : Sized{
         bytes
     }
 }
-pub enum UnionMarker {}
+pub struct UnionMarker;
 
 
 pub trait ElementScalar : Sized + PartialEq + Copy + Clone {
