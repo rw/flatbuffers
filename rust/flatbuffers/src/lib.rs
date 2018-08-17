@@ -220,19 +220,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         Offset::new(self.get_size() as UOffsetT)
     }
-    pub fn get_buf_slice(&self) -> &[u8] {
-        &self.owned_buf[..]
-    }
     pub fn get_active_buf_slice<'a>(&'a self) -> &'a [u8] {
         &self.owned_buf[self.cur_idx..]
     }
-    fn pad(&mut self, n: usize) {
-        self.dec_cur_idx(n);
-        for i in 0..n {
-            self.owned_buf[self.cur_idx + i] = 0;
-        }
-    }
-
     fn grow_owned_buf(&mut self) {
         let starting_active_size = self.get_size();
 
@@ -244,7 +234,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         let diff = new_len - old_len;
         self.owned_buf.resize(new_len, 0);
-        self.inc_cur_idx(diff);
+        self.cur_idx += diff;
 
         let ending_active_size = self.get_size();
         assert_eq!(starting_active_size, ending_active_size);
@@ -269,7 +259,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn assert_nested(&self) {
         assert!(self.nested);
         // we don't assert that self.field_locs.len() >0 because the vtable
-        // could be empty (e.g. for all-default values).
+        // could be empty (e.g. for empty tables, or for all-default values).
     }
     fn assert_not_nested(&self) {
         assert!(!self.nested);
@@ -303,18 +293,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let s = self.get_size() as usize;
         self.fill(padding_bytes(s + len, alignment));
     }
-    #[inline]
-    pub fn inc_cur_idx(&mut self, diff: usize) {
-        self.cur_idx += diff;
-    }
-    #[inline]
-    pub fn dec_cur_idx(&mut self, diff: usize) {
-        self.cur_idx -= diff;
-    }
     pub fn get_size(&self) -> usize {
         let a = self.cur_idx;
         let b = self.owned_buf.len();
-        assert!(self.cur_idx <= self.owned_buf.len(), "{}, {}", a, b);
+        //assert!(self.cur_idx <= self.owned_buf.len(), "{}, {}", a, b);
         self.owned_buf.len() - self.cur_idx as usize
     }
     fn fill_big(&mut self, zero_pad_bytes: usize) {

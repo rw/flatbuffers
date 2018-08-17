@@ -651,7 +651,7 @@ fn fuzz_scalar_table_serialization() {
     let float_val: f32 = 3.14159;
     let double_val: f64 = 3.14159265359;
 
-    let test_values_max: isize = 11;
+    let test_value_types_max: isize = 11;
     let max_fields_per_object: flatbuffers::VOffsetT = 100;
     let num_fuzz_objects: isize = 1000;  // The higher, the more thorough :)
 
@@ -667,7 +667,7 @@ fn fuzz_scalar_table_serialization() {
         let start = builder.start_table(fields_per_object);
 
         for j in 0..fields_per_object {
-            let choice = lcg.next() % (test_values_max as u64);
+            let choice = lcg.next() % (test_value_types_max as u64);
 
             let f = flatbuffers::field_index_to_field_offset(j);
 
@@ -701,14 +701,14 @@ fn fuzz_scalar_table_serialization() {
     // so this is deterministic:
     for i in 0..(num_fuzz_objects as usize) {
         let table = {
-            let buf = builder.get_buf_slice();
+            let buf = builder.get_active_buf_slice();
             let loc = buf.len() as flatbuffers::UOffsetT - objects[i];
             flatbuffers::Table::new(buf, loc as usize)
         };
 
         let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
         for j in 0..fields_per_object {
-            let choice = lcg.next() % (test_values_max as u64);
+            let choice = lcg.next() % (test_value_types_max as u64);
 
             *stats.entry(choice).or_insert(0) += 1;
             values_generated += 1;
@@ -732,11 +732,11 @@ fn fuzz_scalar_table_serialization() {
         }
     }
 
-    // Assert that we tested all the fuzz cases, at least 5% each:
-    let min_tests_per_choice = values_generated / 20;
+    // Assert that we tested all the fuzz cases enough:
+    let min_tests_per_choice = 1000;
     assert!(values_generated > 0);
     assert!(min_tests_per_choice > 0);
-    for i in 0..test_values_max as u64 {
+    for i in 0..test_value_types_max as u64 {
         assert!(stats[&i] >= min_tests_per_choice,
                 format!("inadequately-tested fuzz case: {}", i));
     }
