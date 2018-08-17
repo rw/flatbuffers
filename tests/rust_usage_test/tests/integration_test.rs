@@ -528,50 +528,63 @@ mod alignment_and_padding {
 }
 
 #[cfg(test)]
-mod vector_read_scalar_tests {
-    extern crate quickcheck;
-    extern crate flatbuffers;
+mod roundtrip_objects {
 
-    fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(xs: Vec<T>) {
-        use flatbuffers::Follow;
+    #[cfg(test)]
+    mod vector_of_scalar {
+        extern crate quickcheck;
+        extern crate flatbuffers;
 
-        let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.start_vector(xs.len(), ::std::mem::size_of::<T>());
-        for i in (0..xs.len()).rev() {
-            b.push_element_scalar::<T>(xs[i]);
+        const N: u64 = 20;
+
+        fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(xs: Vec<T>) {
+            use flatbuffers::Follow;
+
+            let mut b = flatbuffers::FlatBufferBuilder::new();
+            b.start_vector(xs.len(), ::std::mem::size_of::<T>());
+            for i in (0..xs.len()).rev() {
+                b.push_element_scalar::<T>(xs[i]);
+            }
+            let vecend = b.end_vector::<T>(xs.len());
+            b.finish_minimal(vecend);
+
+            let buf = b.finished_bytes();
+
+            let got = <flatbuffers::ForwardsU32Offset<&[T]>>::follow(buf, 0);
+            assert_eq!(got, &xs[..]);
         }
-        let vecend = b.end_vector::<T>(xs.len());
-        b.finish_minimal(vecend);
 
-        let buf = b.finished_bytes();
+        #[test]
+        fn easy() {
+            prop::<u8>(vec![]);
+            prop::<u8>(vec![1u8]);
+            prop::<u8>(vec![1u8, 2u8]);
+            prop::<u8>(vec![1u8, 2u8, 3u8]);
+            prop::<u8>(vec![1u8, 2u8, 3u8, 4u8]);
+        }
 
-        let got = <flatbuffers::ForwardsU32Offset<&[T]>>::follow(buf, 0);
-        assert_eq!(got, &xs[..]);
-    }
-
-    #[test]
-    fn easy() {
-        prop::<u8>(vec![]);
-        prop::<u8>(vec![1u8]);
-        prop::<u8>(vec![1u8, 2u8]);
-        prop::<u8>(vec![1u8, 2u8, 3u8]);
-        prop::<u8>(vec![1u8, 2u8, 3u8, 4u8]);
-    }
-
-    #[test]
-    fn fuzz() {
-        let n = 20;
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u8> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<i8> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u16> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<i16> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u32> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<i32> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<u64> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<i64> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<f32> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<f64> as fn(Vec<_>));
-        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop::<bool> as fn(Vec<_>));
+        #[test]
+        fn fuzz_bool() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<bool> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u8> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_i8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i8> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_u16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u16> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_i16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i16> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_u32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u32> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_i32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i32> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_u64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u64> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_i64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i64> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_f32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f32> as fn(Vec<_>)); }
+        #[test]
+        fn fuzz_f64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f64> as fn(Vec<_>)); }
     }
 }
 

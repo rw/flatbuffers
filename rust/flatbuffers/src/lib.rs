@@ -913,7 +913,8 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
 }
 
 
-// implementing these using bounds causes them to conflict with the Sized impl
+// Implementing Follow using trait bounds (ElementScalar) causes them to
+// conflict with the Sized impl. So, they are implemented here on concrete types.
 impl<'a> Follow<'a> for bool { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
 impl<'a> Follow<'a> for u8   { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
 impl<'a> Follow<'a> for u16  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
