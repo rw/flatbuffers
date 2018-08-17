@@ -582,8 +582,12 @@ class RustGenerator : public BaseGenerator {
         case FullElementType::Table: { return FullElementType::VectorOfTable; }
         case FullElementType::String: { return FullElementType::VectorOfString; }
         case FullElementType::EnumKey: { return FullElementType::VectorOfEnumKey; }
-        case FullElementType::UnionValue: { return FullElementType::VectorOfUnionValue; }
-        default: { assert(false); }
+        case FullElementType::UnionValue: {
+          // vectors of unions are not supported yet
+          FLATBUFFERS_ASSERT(false);
+          return FullElementType::VectorOfUnionValue;
+        }
+        default: { FLATBUFFERS_ASSERT(false); }
       }
     } else if (type.enum_def != nullptr) {
       if (type.enum_def->is_union) {
