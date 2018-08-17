@@ -143,6 +143,9 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
             None => { return Err("bad m.pos"); }
             Some(x) => { x }
         };
+        if pos as *const my_game::example::Vec3 as usize % 16 != 0 {
+            return Err("bad Vec3 alignment");
+        }
         if pos.x() != 1.0f32 { return Err("bad pos.x"); }
         if pos.y() != 2.0f32 { return Err("bad pos.y"); }
         if pos.z() != 3.0f32 { return Err("bad pos.z"); }
@@ -518,10 +521,10 @@ mod roundtrips_with_generated_code {
 }
 
 #[cfg(test)]
-mod alignment {
+mod alignment_and_padding {
     use super::my_game;
     #[test]
-    fn force_align_generated_vec3() {
+    fn vec3_is_padded_to_mod_16() {
         assert_eq!(::std::mem::size_of::<my_game::example::Vec3>() % 16, 0);
     }
 }
