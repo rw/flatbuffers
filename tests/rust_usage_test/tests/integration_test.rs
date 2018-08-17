@@ -78,7 +78,6 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
             }).value())),
             inventory: Some(inventory),
             test4: Some(test4),
-            //testarrayofstring: Some(builder.create_vector_of_strings(&["bob", "fred", "bob", "fred"])),
             testarrayofstring: Some(builder.create_vector_of_strings(&["test1", "test2"])),
             ..Default::default()
         };
@@ -106,7 +105,6 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
 
     let table_start = builder.start_table(34);
     builder.push_slot_scalar::<i16>(my_game::example::Monster::VT_HP, 80, 100);
-//    builder.push_slot_scalar::<i16>(my_game::example::Monster::VT_MANA, 150, 150);
     builder.push_slot_offset_relative::<&str>(my_game::example::Monster::VT_NAME, name);
     builder.push_slot_struct(my_game::example::Monster::VT_POS, &pos);
     builder.push_slot_scalar::<u8>(my_game::example::Monster::VT_TEST_TYPE, my_game::example::Any::Monster as u8, 0);
@@ -116,16 +114,6 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     builder.push_slot_offset_relative(my_game::example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
     let root = builder.end_table(table_start);
     builder.finish(root, Some(my_game::example::MONSTER_IDENTIFIER));
-}
-
-#[test]
-fn test_generated_monster_identifier() {
-    assert_eq!("MONS", my_game::example::MONSTER_IDENTIFIER);
-}
-
-#[test]
-fn test_generated_monster_file_extension() {
-    assert_eq!("mon", my_game::example::MONSTER_EXTENSION);
 }
 
 fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_required: bool, size_prefixed: bool) -> Result<(), &'static str> {
@@ -233,6 +221,22 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
         if testarrayofstring.get(1) != "test2" { return Err("bad monster.testarrayofstring.get(1)"); }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod generated_constants {
+    extern crate flatbuffers;
+    use super::my_game;
+
+    #[test]
+    fn monster_identifier() {
+        assert_eq!("MONS", my_game::example::MONSTER_IDENTIFIER);
+    }
+
+    #[test]
+    fn monster_file_extension() {
+        assert_eq!("mon", my_game::example::MONSTER_EXTENSION);
+    }
 }
 
 #[cfg(test)]
@@ -513,9 +517,13 @@ mod roundtrips_with_generated_code {
     }
 }
 
-#[test]
-fn force_align() {
-    assert_eq!(std::mem::size_of::<my_game::example::Vec3>() % 16, 0);
+#[cfg(test)]
+mod alignment {
+    use super::my_game;
+    #[test]
+    fn force_align_generated_vec3() {
+        assert_eq!(::std::mem::size_of::<my_game::example::Vec3>() % 16, 0);
+    }
 }
 
 #[cfg(test)]
@@ -1336,69 +1344,69 @@ fn build_and_use_table_with_vector_of_scalars_fuzz() {
 }
 
 #[cfg(test)]
-mod test_follow_impls {
+mod follow_impls {
     extern crate flatbuffers;
     use flatbuffers::Follow;
     use flatbuffers::field_index_to_field_offset as fi2fo;
 
     #[test]
-    fn test_offset_to_ref_u8() {
+    fn offset_to_ref_u8() {
         let vec: Vec<u8> = vec![255, 3];
         let fs: flatbuffers::FollowStart<&u8> = flatbuffers::FollowStart::new();
         assert_eq!(*fs.self_follow(&vec[..], 1), 3);
     }
 
     #[test]
-    fn test_offset_to_u8() {
+    fn offset_to_u8() {
         let vec: Vec<u8> = vec![255, 3];
         let fs: flatbuffers::FollowStart<u8> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&vec[..], 1), 3);
     }
 
     #[test]
-    fn test_offset_to_ref_u16() {
+    fn offset_to_ref_u16() {
         let vec: Vec<u8> = vec![255, 255, 3, 4];
         let fs: flatbuffers::FollowStart<&u16> = flatbuffers::FollowStart::new();
         assert_eq!(*fs.self_follow(&vec[..], 2), 1027);
     }
 
     #[test]
-    fn test_offset_to_u16() {
+    fn offset_to_u16() {
         let vec: Vec<u8> = vec![255, 255, 3, 4];
         let fs: flatbuffers::FollowStart<u16> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&vec[..], 2), 1027);
     }
 
     #[test]
-    fn test_offset_to_f32() {
+    fn offset_to_f32() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, /* start of value */ 208, 15, 73, 64];
         let fs: flatbuffers::FollowStart<&f32> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&vec[..], 4), &3.14159);
     }
 
     #[test]
-    fn test_offset_to_string() {
+    fn offset_to_string() {
         let vec: Vec<u8> = vec![255,255,255,255, 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         let off: flatbuffers::FollowStart<&str> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4), "foo");
     }
 
     #[test]
-    fn test_offset_to_byte_string() {
+    fn offset_to_byte_string() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 3, 0, 0, 0, 1, 2, 3, 0];
         let off: flatbuffers::FollowStart<&[u8]> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4), &vec![1, 2, 3][..]);
     }
 
     #[test]
-    fn test_offset_to_slice_of_u16() {
+    fn offset_to_slice_of_u16() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];
         let off: flatbuffers::FollowStart<&[u16]> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4), &vec![513, 1027][..]);
     }
 
     #[test]
-    fn test_offset_to_vector_of_u16() {
+    fn offset_to_vector_of_u16() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];
         let off: flatbuffers::FollowStart<flatbuffers::Vector<u16>> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4).len(), 2);
@@ -1407,7 +1415,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_offset_to_struct() {
+    fn offset_to_struct() {
         #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct FooStruct {
@@ -1422,7 +1430,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_vector_of_offset_to_string_elements() {
+    fn vector_of_offset_to_string_elements() {
         let buf: Vec<u8> = vec![/* vec len */ 1, 0, 0, 0, /* offset to string */ 4, 0, 0, 0, /* str length */ 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
         let s: flatbuffers::FollowStart<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&str>>> = flatbuffers::FollowStart::new();
         assert_eq!(s.self_follow(&buf[..], 0).len(), 1);
@@ -1430,7 +1438,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_slice_of_struct_elements() {
+    fn slice_of_struct_elements() {
         #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct FooStruct {
@@ -1447,7 +1455,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_vector_of_struct_elements() {
+    fn vector_of_struct_elements() {
         #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct FooStruct {
@@ -1463,7 +1471,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_root_to_empty_table() {
+    fn root_to_empty_table() {
 	let buf: Vec<u8> = vec![
 	    12, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -1478,7 +1486,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_scalar_u8() {
+    fn table_get_slot_scalar_u8() {
 	let buf: Vec<u8> = vec![
 	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -1496,7 +1504,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_scalar_u8_default_via_vtable_len() {
+    fn table_get_slot_scalar_u8_default_via_vtable_len() {
 	let buf: Vec<u8> = vec![
 	    12, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -1512,7 +1520,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_scalar_u8_default_via_vtable_zero() {
+    fn table_get_slot_scalar_u8_default_via_vtable_zero() {
 	let buf: Vec<u8> = vec![
 	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -1529,7 +1537,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_string_multiple_types() {
+    fn table_get_slot_string_multiple_types() {
 	let buf: Vec<u8> = vec![
 	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -1553,7 +1561,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_string_multiple_types_default_via_vtable_len() {
+    fn table_get_slot_string_multiple_types_default_via_vtable_len() {
 	let buf: Vec<u8> = vec![
 	    12, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -1574,7 +1582,7 @@ mod test_follow_impls {
     }
 
     #[test]
-    fn test_table_get_slot_string_multiple_types_default_via_vtable_zero() {
+    fn table_get_slot_string_multiple_types_default_via_vtable_zero() {
 	let buf: Vec<u8> = vec![
 	    14, 0, 0, 0, // offset to root table
 	    // enter vtable
@@ -1614,7 +1622,7 @@ mod byte_layouts {
     //fn run<f: Fn(&mut flatbuffers::FlatBufferBuilder, &)(label: &'static str, f: F
 
     #[test]
-    fn test_01_basic_numbers() {
+    fn layout_01_basic_numbers() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.push_element_scalar(true);
         check(&b, &[1]);
@@ -1633,14 +1641,14 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_01b_bigger_numbers() {
+    fn layout_01b_bigger_numbers() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.push_element_scalar(0x1122334455667788u64);
         check(&b, &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]);
     }
 
     #[test]
-    fn test_02_1xbyte_vector() {
+    fn layout_02_1xbyte_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
         b.start_vector(flatbuffers::SIZE_U8, 1);
@@ -1652,7 +1660,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_03_2xbyte_vector() {
+    fn layout_03_2xbyte_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U8, 2);
         check(&b, &[0, 0]); // align to 4bytes
@@ -1665,7 +1673,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_03b_11xbyte_vector_matches_builder_size() {
+    fn layout_03b_11xbyte_vector_matches_builder_size() {
         let mut b = flatbuffers::FlatBufferBuilder::new_with_capacity(12);
         b.start_vector(flatbuffers::SIZE_U8, 8);
 
@@ -1682,7 +1690,7 @@ mod byte_layouts {
         check(&b, &want[..]);
     }
     #[test]
-    fn test_04_1xuint16_vector() {
+    fn layout_04_1xuint16_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U16, 1);
         check(&b, &[0, 0]); // align to 4bytes
@@ -1693,7 +1701,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_05_2xuint16_vector() {
+    fn layout_05_2xuint16_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let _off = b.start_vector(flatbuffers::SIZE_U16, 2);
         check(&b, &[]); // align to 4bytes
@@ -1706,7 +1714,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_06_create_string() {
+    fn layout_06_create_string() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off0 = b.create_string("foo");
         assert_eq!(8, off0.value());
@@ -1718,7 +1726,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_06b_create_string_unicode() {
+    fn layout_06b_create_string_unicode() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         // These characters are chinese from blog.golang.org/strings
         // We use escape codes here so that editors without unicode support
@@ -1731,7 +1739,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_06c_create_byte_string() {
+    fn layout_06c_create_byte_string() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off0 = b.create_byte_string(b"foo");
         assert_eq!(8, off0.value());
@@ -1743,7 +1751,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_07_empty_vtable() {
+    fn layout_07_empty_vtable() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off0 = b.start_table(0);
         check(&b, &[]);
@@ -1754,7 +1762,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_08_vtable_with_one_true_bool() {
+    fn layout_08_vtable_with_one_true_bool() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
         let off0 = b.start_table(1);
@@ -1775,7 +1783,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_09_vtable_with_one_default_bool() {
+    fn layout_09_vtable_with_one_default_bool() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
         let off = b.start_table(1);
@@ -1791,7 +1799,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_10_vtable_with_one_int16() {
+    fn layout_10_vtable_with_one_int16() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
         let off = b.start_table(1);
@@ -1808,7 +1816,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_11_vtable_with_two_int16() {
+    fn layout_11_vtable_with_two_int16() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(2);
         b.push_slot_scalar(fi2fo(0), 0x3456i16, 0);
@@ -1826,7 +1834,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_12_vtable_with_int16_and_bool() {
+    fn layout_12_vtable_with_int16_and_bool() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(2);
         b.push_slot_scalar(fi2fo(0), 0x3456i16, 0);
@@ -1845,7 +1853,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_12b_vtable_with_empty_vector() {
+    fn layout_12b_vtable_with_empty_vector() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U8, 0);
         let vecend = b.end_vector::<&u8>(0);
@@ -1863,7 +1871,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_12c_vtable_with_empty_vector_of_byte_and_some_scalars() {
+    fn layout_12c_vtable_with_empty_vector_of_byte_and_some_scalars() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U8, 0);
         let vecend = b.end_vector::<&u8>(0);
@@ -1884,7 +1892,7 @@ mod byte_layouts {
         ]);
     }
     #[test]
-    fn test_13_vtable_with_1_int16_and_2_vector_of_i16() {
+    fn layout_13_vtable_with_1_int16_and_2_vector_of_i16() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_I16, 2);
         b.push_element_scalar(0x1234i16);
@@ -1909,7 +1917,7 @@ mod byte_layouts {
         ]);
     }
     #[test]
-    fn test_14_vtable_with_1_struct_of_int8_and_int16_and_int32() {
+    fn layout_14_vtable_with_1_struct_of_int8_and_int16_and_int32() {
         #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct foo {
@@ -1948,7 +1956,7 @@ mod byte_layouts {
     }
   	// test 15: vtable with 1 vector of 2 struct of 2 int8
     #[test]
-    fn test_15_vtable_with_1_vector_of_2_struct_2_int8() {
+    fn layout_15_vtable_with_1_vector_of_2_struct_2_int8() {
         #[allow(dead_code)]
         struct FooStruct {
             a: i8,
@@ -1986,7 +1994,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_16_table_with_some_elements() {
+    fn layout_16_table_with_some_elements() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(2);
         b.push_slot_scalar(fi2fo(0), 33i8, 0);
@@ -2011,7 +2019,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_17_one_unfinished_table_and_one_finished_table() {
+    fn layout_17_one_unfinished_table_and_one_finished_table() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         {
             let off = b.start_table(2);
@@ -2058,7 +2066,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_18_a_bunch_of_bools() {
+    fn layout_18_a_bunch_of_bools() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(8);
         b.push_slot_scalar(fi2fo(0), true, false);
@@ -2099,7 +2107,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_19_three_bools() {
+    fn layout_19_three_bools() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(3);
         b.push_slot_scalar(fi2fo(0), true, false);
@@ -2128,7 +2136,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_20_some_floats() {
+    fn layout_20_some_floats() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(1);
         b.push_slot_scalar(fi2fo(0), 1.0f32, 0.0);
@@ -2145,7 +2153,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_21_vtable_defaults() {
+    fn layout_21_vtable_defaults() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(3);
         b.push_slot_scalar::<i8>(fi2fo(0), 1, 1);
@@ -2165,7 +2173,7 @@ mod byte_layouts {
     }
 
     #[test]
-    fn test_22_root() {
+    fn layout_22_root() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(3);
         // skipped: b.push_slot_scalar::<i16>(0, 1, 1);
@@ -2187,7 +2195,7 @@ mod byte_layouts {
         ]);
     }
     #[test]
-    fn test_23_varied_slots_and_root() {
+    fn layout_23_varied_slots_and_root() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(3);
         b.push_slot_scalar::<i16>(fi2fo(0), 1, 0);
