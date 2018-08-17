@@ -341,11 +341,10 @@ impl Ability {
   pub fn id(&self) -> u32 {
     flatbuffers::endian_scalar(self.id_)
   }
-  fn KeyCompareLessThan(&self, o: &Ability) -> bool {
-    unimplemented!();
-    //self.id() < o.id()
+  fn key_compare_less_than(&self, o: &Ability) -> bool {
+    self.id() < o.id()
   }
-  fn KeyCompareWithValue(&self, val: u32) -> isize {
+  fn key_compare_with_value(&self, val: u32) -> isize {
     let key = self.id();
     (key > val) as isize - (key < val) as isize
   }
