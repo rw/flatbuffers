@@ -116,180 +116,13 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     builder.push_slot_offset_relative(my_game::example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
     let root = builder.end_table(table_start);
     builder.finish(root, Some(my_game::example::MONSTER_IDENTIFIER));
-
 }
 
-fn create_serialized_example_with_generated_code_more_fields(builder: &mut flatbuffers::FlatBufferBuilder) {
-////  let x = my_game::example::test::new(10, 20);
-////  let _vec = my_game::example::Vec3::new(1.0,2.0,3.0,0.0, my_game::example::Color::Red, x);
-////  let _name = builder.create_string("MyMonster");
-////  let inv_data = vec![0, 1, 2, 3, 4];//, 5, 6, 7, 8, 9];
-////  let inventory = builder.create_vector(&inv_data);
-////
-////  // Alternatively, create the vector first, and fill in data later:
-////  // unsigned char *inv_buf = nullptr;
-////  // auto inventory = builder.CreateUninitializedVector<unsigned char>(
-////  //                                                              10, &inv_buf);
-////  // memcpy(inv_buf, inv_data, 10);
-////
-////  let tests = vec![my_game::example::test::new(10, 20), my_game::example::test::new(30, 40)];
-////
-////  // Create a vector of structures from a lambda.
-////  let testv = builder.create_vector_of_structs_from_fn(2, |i, s| *s = tests[i]);
-////
-////  // create monster with very few fields set:
-////  // (same functionality as create_monster below, but sets fields manually)
-////  let mut mlocs: [flatbuffers::Offset<my_game::example::Monster<'_>>; 3] = [flatbuffers::Offset::<_>::new(0); 3];
-////  let fred = builder.create_string("Fred");
-////  let barney = builder.create_string("Barney");
-////  let wilma = builder.create_string("Wilma");
-////
-////  {
-////      let mut mb1 = my_game::example::MonsterBuilder::new(builder);
-////      mb1.add_name(fred);
-////      mlocs[0] = mb1.finish();
-////  }
-////
-////  {
-////      let mut mb2 = my_game::example::MonsterBuilder::new(builder);
-////      mb2.add_name(barney);
-////      mb2.add_hp(1000);
-////      mlocs[1] = mb2.finish();
-////  }
-////
-////  {
-////      let mut mb3 = my_game::example::MonsterBuilder::new(builder);
-////      mb3.add_name(wilma);
-////      mlocs[2] = mb3.finish();
-////  }
-////
-////  // Create an array of strings. Also test string pooling, and lambdas.
-////  let names: [&'static str; 4] = ["bob", "fred", "bob", "fred"];
-////  let vecofstrings = builder.create_vector_of_strings(&names);
-////  //let vecofstrings = builder.create_vector_from_fn::<_, _>(
-////  //    4,
-////  //    |i, b| -> flatbuffers::Offset<flatbuffers::StringOffset> {
-////  //        b.create_shared_string(names[i])
-////  //    });
-////
-////  // Creating vectors of strings in one convenient call.
-////  let names2 = vec!["jane", "mary"];
-////  let vecofstrings2 = builder.create_vector_of_strings(&names2);
-////
-////  // Create an array of sorted tables, can be used with binary search when read:
-////  let vecoftables = builder.create_vector_of_sorted_tables(&mut mlocs);
-////
-////  // Create an array of sorted structs,
-////  // can be used with binary search when read:
-////  let mut abilities = vec![];
-////  abilities.push(my_game::example::Ability::new(4, 40));
-////  abilities.push(my_game::example::Ability::new(3, 30));
-////  abilities.push(my_game::example::Ability::new(2, 20));
-////  abilities.push(my_game::example::Ability::new(1, 10));
-////  let vecofstructs = builder.create_vector_of_sorted_structs(&mut abilities);
-////
-////  // Create a nested FlatBuffer.
-////  // Nested FlatBuffers are stored in a ubyte vector, which can be convenient
-////  // since they can be memcpy'd around much easier than other FlatBuffer
-////  // values. They have little overhead compared to storing the table directly.
-////  // As a test, create a mostly empty Monster buffer:
-////  let mut nested_builder = flatbuffers::FlatBufferBuilder::new();
-////  let args = my_game::example::MonsterArgs{
-////      mana: 0,
-////      hp: 0,
-////      name: Some(nested_builder.create_string("NestedMonster")),
-////      ..Default::default()
-////  };
-////  let nmloc = my_game::example::create_monster(&mut nested_builder, &args);
-////  my_game::example::FinishMonsterBuffer(&mut nested_builder, nmloc);
-////
-////  // Now we can store the buffer in the parent. Note that by default, vectors
-////  // are only aligned to their elements or size field, so in this case if the
-////  // buffer contains 64-bit elements, they may not be correctly aligned. We fix
-////  // that with:
-////  //builder.ForceVectorAlignment(nested_builder.get_size(), size_of(uint8_t),
-////  //                             nested_builder.get_buffer_min_alignment());
-////  // If for whatever reason you don't have the nested_builder available, you
-////  // can substitute flatbuffers::largest_scalar_t (64-bit) for the alignment, or
-////  // the largest force_align value in your schema if you're using it.
-////  // TODO
-////  let nested_flatbuffer_vector = builder.create_vector(&vec![0, 0][..]);
-////  //    nested_builder.get_buffer_pointer(), nested_builder.get_size());
-////
-//////  // Test a nested FlexBuffer:
-//////  flexbuffers::Builder flexbuild;
-//////  flexbuild.Int(1234);
-//////  flexbuild.Finish();
-//////  auto flex = builder.CreateVector(flexbuild.GetBuffer());
-//////
-////    // shortcut for creating monster with all fields set:
-////    let mloc = my_game::example::create_monster(builder, &my_game::example::MonsterArgs{
-////        pos: Some(&_vec),
-////        mana: 150,
-////        hp: 80,
-////        name: Some(_name),
-////        inventory: Some(inventory),
-////        color: my_game::example::Color::Blue,
-////        test_type: my_game::example::Any::Monster,
-////        test: None,//Some(mlocs[1].union()),  // Store a union.
-////        test4: Some(testv),
-////        testarrayofstring: Some(vecofstrings),
-////        //testarrayoftables: vecoftables, // TODO
-////        enemy: Some(flatbuffers::Offset::new(0)),
-////        testnestedflatbuffer: Some(nested_flatbuffer_vector),
-////        testempty: Some(flatbuffers::Offset::new(0)),
-////        testbool: false,
-////        testhashs32_fnv1: 0,
-////        testhashu32_fnv1: 0,
-////        testhashs64_fnv1: 0,
-////        testhashu64_fnv1: 0,
-////        testhashs32_fnv1a: 0,
-////        testhashu32_fnv1a: 0,
-////        testhashs64_fnv1a: 0,
-////        testhashu64_fnv1a: 0,
-////        testarrayofbools: Some(flatbuffers::Offset::new(0)),
-////        testf: 3.14159f32,
-////        testf2: 3.0f32,
-////        testf3: 0.0f32,
-////        //testarrayofstring2: vecofstrings2, // TODO
-////        testarrayofsortedstruct: Some(vecofstructs),
-////        flex: Some(flatbuffers::Offset::new(0)),
-////        test5: Some(flatbuffers::Offset::new(0)),
-////        vector_of_longs: Some(flatbuffers::Offset::new(0)),
-////        vector_of_doubles: Some(flatbuffers::Offset::new(0)),
-////        //parent_namespace_test: flatbuffers::Offset::new(0),
-////
-////        ..Default::default() // for phantom
-////    });
-////
-////
-////    let mloc = my_game::example::create_monster(builder, &args);
-////    //builder.finish(mloc.value());
-////    my_game::example::FinishMonsterBuffer(builder, mloc);
-//////
-//////  // clang-format off
-//////  #ifdef FLATBUFFERS_TEST_VERBOSE
-//////  // print byte data for debugging:
-//////  auto p = builder.GetBufferPointer();
-//////  for (flatbuffers::uoffset_t i = 0; i < builder.GetSize(); i++)
-//////    printf("%d ", p[i]);
-//////  #endif
-//////  // clang-format on
-//////
-//////  // return the buffer for the caller to use.
-//////  auto bufferpointer =
-//////      reinterpret_cast<const char *>(builder.GetBufferPointer());
-//////  buffer.assign(bufferpointer, bufferpointer + builder.GetSize());
-//////
-////  //return builder.get_active_buf_slice();
-////  //return builder.release_buffer_pointer();
-////
-////  //return flatbuffers::DetachedBuffer{};
-}
 #[test]
 fn test_generated_monster_identifier() {
     assert_eq!("MONS", my_game::example::MONSTER_IDENTIFIER);
 }
+
 fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_required: bool, size_prefixed: bool) -> Result<(), &'static str> {
     if identifier_required {
         let correct = if size_prefixed {
@@ -338,8 +171,6 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
                 }
             }
         }
-        //assert_eq!(m.vector_of_longs(), Some(&[1, 100, 10000, 1000000, 100000000][..]));
-        //assert_eq!(m.vector_of_longs(), Some(&[1, 100, 10000, 1000000, 100000000][..]));
 
         if m.test_type() != my_game::example::Any::Monster { return Err("bad m.test_type"); }
 
@@ -387,23 +218,6 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
                 }
             }
         }
-
-
-        //{
-        //    let test5 = match m.test5() {
-        //        None => { return Err("bad m.test5"); }
-        //        Some(x) => { x }
-        //    };
-        //    if test5.len() != 2 { return Err("bad test5.len") }
-        //    if test5[0].a() != 10 { return Err("bad test5[0].a") }
-        //    if test5[0].b() != 20 { return Err("bad test5[0].b") }
-        //    if test5[1].a() != 10 { return Err("bad test5[1].a") }
-        //    if test5[1].b() != 20 { return Err("bad test5[1].b") }
-        //}
-
-        //if m.testarrayofbools() != Some(&[true, false, true][..]) {
-        //    return Err("bad m.testarrayofbools");
-        //}
 
         let testarrayofstring = match m.testarrayofstring() {
             None => { return Err("bad m.testarrayofstring"); }
@@ -531,7 +345,6 @@ mod roundtrips_with_generated_code {
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{test4: Some(v), ..Default::default()});
         assert_eq!(m.test4().unwrap(), &[my_game::example::Test::new(127, -128), my_game::example::Test::new(3, 123)][..]);
     }
-    #[ignore]
     #[test]
     fn vector_of_table_store() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
@@ -545,11 +358,10 @@ mod roundtrips_with_generated_code {
             let args = my_game::example::MonsterArgs{name: Some(name), ..Default::default()};
             my_game::example::Monster::create(b, &args)
         };
-        assert!(false, "needs better ergonomics around writing tables re: offsets");
         let v = b.create_vector_of_reverse_offsets::<my_game::example::Monster>(&[t0, t1][..]);
         let m = build_mon(b, &my_game::example::MonsterArgs{testarrayoftables: Some(v), ..Default::default()});
         assert_eq!(m.testarrayoftables().unwrap().len(), 2);
-        assert_eq!(m.testarrayoftables().unwrap().get(1).hp(), 55);
+        assert_eq!(m.testarrayoftables().unwrap().get(0).hp(), 55);
         assert_eq!(m.testarrayoftables().unwrap().get(0).name(), Some("foo"));
         assert_eq!(m.testarrayoftables().unwrap().get(1).hp(), 100);
         assert_eq!(m.testarrayoftables().unwrap().get(1).name(), Some("bar"));
