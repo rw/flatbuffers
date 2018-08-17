@@ -2094,7 +2094,6 @@ class RustGenerator : public BaseGenerator {
       code_ += "  use std::cmp::Ordering;";
       code_ += "";
       code_ += "  extern crate flatbuffers;";
-      code_ += "  use self::flatbuffers::flexbuffers;";
     }
     if (new_size != common_prefix_size) { code_ += ""; }
 

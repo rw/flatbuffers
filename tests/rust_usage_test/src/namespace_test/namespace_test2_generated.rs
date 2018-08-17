@@ -12,7 +12,6 @@ pub mod namespace_a {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
-  use self::flatbuffers::flexbuffers;
 
 pub enum TableInFirstNSOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -187,7 +186,6 @@ pub mod namespace_c {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
-  use self::flatbuffers::flexbuffers;
 
 pub enum TableInCOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]

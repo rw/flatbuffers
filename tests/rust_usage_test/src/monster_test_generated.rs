@@ -13,7 +13,6 @@ pub mod my_game {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
-  use self::flatbuffers::flexbuffers;
 
 pub enum InParentNamespaceOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -82,7 +81,6 @@ pub mod example_2 {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
-  use self::flatbuffers::flexbuffers;
 
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -153,7 +151,6 @@ pub mod example {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
-  use self::flatbuffers::flexbuffers;
 
 #[allow(non_camel_case_types)]
 #[repr(i8)]

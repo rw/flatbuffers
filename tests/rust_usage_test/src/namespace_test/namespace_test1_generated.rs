@@ -10,7 +10,6 @@ pub mod namespace_a {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
-  use self::flatbuffers::flexbuffers;
 pub mod namespace_b {
   #![allow(dead_code)]
   #![allow(unused_imports)]
@@ -20,7 +19,6 @@ pub mod namespace_b {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
-  use self::flatbuffers::flexbuffers;
 
 #[allow(non_camel_case_types)]
 #[repr(i8)]
