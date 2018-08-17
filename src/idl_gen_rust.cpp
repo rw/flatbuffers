@@ -285,27 +285,25 @@ class RustGenerator : public BaseGenerator {
         SetNameSpace(struct_def.defined_namespace);
         auto name = Name(struct_def);
         //auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
-        auto cpp_name = WrapInNameSpace(struct_def.defined_namespace, name);
 
         code_.SetValue("STRUCT_NAME", name);
         code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(name));
         code_.SetValue("STRUCT_NAME_CAPS", MakeUpper(MakeSnakeCase(name)));
-        code_.SetValue("CPP_NAME", cpp_name);
 
         // The root datatype accessors:
         code_ += "#[inline]";
         code_ +=
             "pub fn get_root_as_{{STRUCT_NAME_SNAKECASE}}<'a>(buf: &'a [u8])"
-            " -> {{CPP_NAME}}<'a> {";
-        code_ += "  flatbuffers::get_root::<{{CPP_NAME}}<'a>>(buf)";
+            " -> {{STRUCT_NAME}}<'a> {";
+        code_ += "  flatbuffers::get_root::<{{STRUCT_NAME}}<'a>>(buf)";
         code_ += "}";
         code_ += "";
 
         code_ += "#[inline]";
         code_ +=
             "pub fn get_size_prefixed_root_as_{{STRUCT_NAME_SNAKECASE}}<'a>(buf: &'a [u8])"
-            " -> {{CPP_NAME}}<'a> {";
-        code_ += "  flatbuffers::get_size_prefixed_root::<{{CPP_NAME}}<'a>>(buf)";
+            " -> {{STRUCT_NAME}}<'a> {";
+        code_ += "  flatbuffers::get_size_prefixed_root::<{{STRUCT_NAME}}<'a>>(buf)";
         code_ += "}";
         code_ += "";
 
