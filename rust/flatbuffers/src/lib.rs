@@ -1,8 +1,5 @@
-const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
 
 use std::marker::PhantomData;
-
-const FILE_IDENTIFIER_LENGTH: usize = 4;
 
 // enum causes compile error on type mismatch, whereas newtype () would not.
 pub enum VectorOffset {}
@@ -72,6 +69,11 @@ impl ElementScalar for f64 {
     fn to_le(self) -> f64 { f64::to_le(self) }
     fn from_le(self) -> f64 { self } //f32::from_le(self) }
 }
+
+
+pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
+
+pub const FILE_IDENTIFIER_LENGTH: usize = 4;
 
 pub const VTABLE_METADATA_FIELDS: usize = 2;
 
@@ -195,7 +197,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.vtable.clear();
         self.vtables.clear();
 
-        self.cur_idx = 0;
+        self.cur_idx = self.owned_buf.len();
 
         self.nested = false;
         self.finished = false;
@@ -204,10 +206,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.max_voffset = 0;
     }
 
-    fn track_field(&mut self, field_id: VOffsetT, off: UOffsetT) {
-        let fl = FieldLoc{id: field_id, off: off};
+    fn track_field(&mut self, slot_off: VOffsetT, off: UOffsetT) {
+        let fl = FieldLoc{id: slot_off, off: off};
         self.field_locs.push(fl);
-        self.max_voffset = std::cmp::max(self.max_voffset, field_id);
+        self.max_voffset = std::cmp::max(self.max_voffset, slot_off);
     }
     pub fn start_table(&mut self, num_fields: VOffsetT) -> Offset<TableOffset> {
         self.assert_not_nested();
@@ -385,8 +387,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // Write the vtable offset, which is the start of any Table.
         // We fill it's value later.
         let vtableoffsetloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0xFF);
-       // println!("vtableoffsetloc: {}", vtableoffsetloc);
-       // println!("field_locs: {:?}", self.field_locs);
         // Write a vtable, which consists entirely of voffset_t elements.
         // It starts with the number of offsets, followed by a type id, followed
         // by the offsets themselves. In reverse:
@@ -395,21 +395,28 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.max_voffset = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
                                          field_index_to_field_offset(0));
         { let s = self.max_voffset; self.fill_big(s as usize); }
+        let idx = self.owned_buf.len() - vtableoffsetloc as usize;
+        let vt_use = self.get_size();
+        {
+        let vtfw = &mut VTableForWriting::init(&mut self.owned_buf[self.cur_idx..self.cur_idx + self.max_voffset as usize]);
+        vtfw.write_vtable_byte_length(self.max_voffset);
         let table_object_size = vtableoffsetloc - start;
+        vtfw.write_object_inline_size(table_object_size as VOffsetT);
         // TODO: always true?
         debug_assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
         //WriteScalar<voffset_t>(buf_.data() + sizeof(voffset_t),
         //                       static_cast<voffset_t>(table_object_size));
-        emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + SIZE_VOFFSET..],
-                                   table_object_size as VOffsetT);
+        //////emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + SIZE_VOFFSET..],
+        //////                           table_object_size as VOffsetT);
 
         //   WriteScalar<voffset_t>(buf_.data(), max_voffset_);
-        emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx..],
-                                   self.max_voffset);
+        //////emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx..],
+        //////                           self.max_voffset);
         // Write the offsets into the table
         for (i, &fl) in self.field_locs.iter().enumerate() {
             let pos: VOffsetT = (vtableoffsetloc - fl.off) as VOffsetT;
-            emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + fl.id as usize..], pos);
+            vtfw.write_field_offset(fl.id, pos);
+            //emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + fl.id as usize..], pos);
         //|  // If this asserts, it means you've set a field twice.
         //|  assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
         //|  WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
@@ -417,7 +424,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //|ClearOffsets();
         //let vt1 = reinterpret_cast<voffset_t *>(buf_.data());
         //let vt1_size = read_scalar_at::<VOffsetT>(self.get_active_buf_slice());
-        let vt_use = self.get_size();
         //   // See if we already have generated a vtable with this exact same
         //   // layout before. If so, make it point to the old one, remove this one.
         //   if (dedup_vtables_) {
@@ -444,9 +450,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //                static_cast<soffset_t>(vtableoffsetloc));
         //let idx = self.rev_cur_idx() as usize - vtableoffsetloc as usize;
         //let idx = self.cur_idx as usize + vtableoffsetloc as usize;
-        let idx = self.owned_buf.len() - vtableoffsetloc as usize;
+        }
         emplace_scalar::<SOffsetT>(&mut self.owned_buf[idx..],
                                    vt_use as SOffsetT - vtableoffsetloc as SOffsetT);
+
 
         vtableoffsetloc
     }
@@ -762,10 +769,34 @@ impl<'a> VTable<'a> {
     }
 }
 
-//pub trait Push<'a> {
-//    type Outer;
-//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner;
-//}
+#[derive(Debug)]
+pub struct VTableForWriting<'a> {
+    buf: &'a mut [u8],
+}
+impl<'a> VTableForWriting<'a> {
+    pub fn init(buf: &'a mut [u8]) -> Self {
+        VTableForWriting {
+            buf: buf,
+        }
+    }
+    #[inline]
+    pub fn write_vtable_byte_length(&mut self, n: VOffsetT) {
+        emplace_scalar::<VOffsetT>(&mut self.buf[..SIZE_VOFFSET], n);
+        assert_eq!(n as usize, self.buf.len());
+    }
+
+    #[inline]
+    pub fn write_object_inline_size(&mut self, n: VOffsetT) {
+        emplace_scalar::<VOffsetT>(&mut self.buf[SIZE_VOFFSET..2*SIZE_VOFFSET], n);
+    }
+
+    #[inline]
+    pub fn write_field_offset(&mut self, vtable_off: VOffsetT, n: VOffsetT) {
+        let idx = vtable_off as usize;
+        emplace_scalar::<VOffsetT>(&mut self.buf[idx..idx + SIZE_VOFFSET], n);
+    }
+}
+
 
 pub trait Follow<'a> {
     type Inner;

@@ -1359,6 +1359,36 @@ mod follow_impls {
 }
 
 #[cfg(test)]
+mod vtable_deduplication {
+    extern crate flatbuffers;
+    use flatbuffers::field_index_to_field_offset as fi2fo;
+
+    fn check<'a>(b: &'a flatbuffers::FlatBufferBuilder, want: &'a [u8]) {
+        let got = b.get_active_buf_slice();
+        assert_eq!(want, got);
+    }
+
+    #[test]
+    fn two_empty_tables_are_deduplicated() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let start0 = b.start_table(0);
+        b.end_table(start0);
+        let start1 = b.start_table(0);
+        b.end_table(start1);
+        check(&b, &[
+              4, 0, // vtable size in bytes
+              4, 0, // object inline data in bytes
+
+              4, 0, 0, 0, // backwards offset to vtable
+
+              4, 0, // vtable size in bytes
+              4, 0, // object inline data in bytes
+              4, 0, 0, 0, // backwards offset to vtable
+        ]);
+    }
+}
+
+#[cfg(test)]
 mod byte_layouts {
     extern crate flatbuffers;
     use flatbuffers::field_index_to_field_offset as fi2fo;
@@ -1963,7 +1993,7 @@ mod byte_layouts {
               10, 0, // offset to value #1 (i16)
               9, 0, // offset to value #2 (u8)
               4, 0, // offset to value #3 (f32)
-              10, 0, // size of table data in bytes
+              10, 0, // offset to vtable
               0, 0, // padding
               0, 0, 64, 64, // value #3 => 3.0 (float32)
               0, 2, // value #1 => 2 (u8)
