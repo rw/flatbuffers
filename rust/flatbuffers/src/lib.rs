@@ -280,9 +280,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.pre_align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
         self.rev_cur_idx()
     }
-    pub fn flip_forwards<T>(&self, x: Offset<T>) -> UOffsetT {
-        unimplemented!();
-        //(self.get_size() - x.0) as UOffsetT
+    pub fn flip_forwards(&self, x: UOffsetT) -> UOffsetT {
+        self.get_size() as UOffsetT - x
     }
     // Offset relative to the end of the buffer.
     pub fn rev_cur_idx(&self) -> UOffsetT {
@@ -385,7 +384,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let o = Offset::new(n);
         o
     }
-    fn write_vtable(&mut self, start: UOffsetT) -> UOffsetT {
+    fn write_vtable(&mut self, table_tail: UOffsetT) -> UOffsetT {
         // If you get this assert, a corresponding start_table wasn't called.
         self.assert_nested("write_vtable must be called after a call to start_table");
 
@@ -395,29 +394,42 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         // Layout of the data this function will create when a new vtable is
         // needed.
-        //
+        // --------------------------------------------------------------------
+        // vtable starts here
         // | x, x -- vtable len (bytes) [u16]
         // | x, x -- object inline len (bytes) [u16]
         // | x, x -- zero, or num bytes from start of object to field #0   [u16]
         // | ...
         // | x, x -- zero, or num bytes from start of object to field #n-1 [u16]
-        //
+        // vtable ends here
+        // table starts here
         // | x, x, x, x -- offset (negative direction) to our vtable [i32]
         // |               aka "vtableoffset"
         // | -- table inline data begins here, we don't touch it --
+        // table ends here -- aka "table_start"
+        // --------------------------------------------------------------------
         //
         // Layout of the data this function will create when we re-use an
         // existing vtable.
-        // We always serialize this particular vtable, then compare to the
+        //
+        // We always serialize this particular vtable, then compare it to the
         // other vtables we know about to see if there is a duplicate. If there
         // is, then we erase the serialized vtable we just made.
-        // (We serialize it first so that we can compare to other vtables on
-        // a byte-by-byte basis, instead of comparing VOffsetTs, so that we
-        // only have to convert to little endian once.)
+        // We serialize it first so that we are able to do byte-by-byte
+        // comparisons with already-serialized vtables. This 1) saves
+        // bookkeeping space (we only keep revlocs to existing vtables), 2)
+        // allows us to convert to little-endian once, then do
+        // fast memcmp comparisons, and 3) by ensuring we are comparing real
+        // serialized vtables, we can be more assured that we are doing the
+        // comparisons correctly.
         //
-        // | x, x, x, x -- offset (negative direction) to a different vtable [i32]
+        // --------------------------------------------------------------------
+        // table starts here
+        // | x, x, x, x -- offset (negative direction) to an existing vtable [i32]
         // |               aka "vtableoffset"
         // | -- table inline data begins here, we don't touch it --
+        // table starts here: aka "table_start"
+        // --------------------------------------------------------------------
 
 
         // Write a vtable, which consists entirely of voffset_t elements.
@@ -429,7 +441,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
                                          field_index_to_field_offset(0));
         { let s = self.max_voffset; self.fill_big(s as usize); }
         let idx = self.owned_buf.len() - vtableoffsetloc as usize;
-        let table_object_size = vtableoffsetloc - start;
+        let table_object_size = vtableoffsetloc - table_tail;
         debug_assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
         let vt_use = self.get_size();
 
@@ -452,14 +464,22 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         for (i, &fl) in self.field_locs.iter().enumerate() {
             let pos: VOffsetT = (vtableoffsetloc - fl.off) as VOffsetT;
             vtfw.write_field_offset(fl.id, pos);
+        }
             //emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + fl.id as usize..], pos);
         //|  // If this asserts, it means you've set a field twice.
         //|  assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
         //|  WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
         }
-        }
-        for &vt_rev_pos in self.written_vtable_revpos.iter() {
-            //let vt = VTable { buf: self.buf, loc: self.flip_forwards(self.get_size() - vt_rev_pos) };
+        {
+            let this_vt = VTable { buf: self.get_active_buf_slice(), loc: self.cur_idx };
+            for &vt_rev_pos in self.written_vtable_revpos.iter() {
+                let other_vt = VTable { buf: self.get_active_buf_slice(), loc: self.flip_forwards(vt_rev_pos) as usize };
+                if other_vt == this_vt {
+                    println!("equal!");
+                }
+                println!("left:  {:?}", this_vt.as_bytes());
+                println!("right: {:?}", other_vt.as_bytes());
+            }
         }
         //|ClearOffsets();
         //let vt1 = reinterpret_cast<voffset_t *>(buf_.data());
