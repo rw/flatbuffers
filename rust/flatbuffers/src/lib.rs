@@ -158,7 +158,7 @@ pub struct FlatBufferBuilder<'fbb> {
     pub cur_idx: usize,
 
     vtable: Vec<UOffsetT>,
-    vtables: Vec<UOffsetT>,
+    written_vtable_revpos: Vec<UOffsetT>,
     field_locs: Vec<FieldLoc>,
 
     nested: bool,
@@ -177,7 +177,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         FlatBufferBuilder{
             owned_buf: vec![0u8; size],
             vtable: Vec::new(),
-            vtables: Vec::new(),
+            written_vtable_revpos: Vec::new(),
             field_locs: Vec::new(),
 
             cur_idx: size,
@@ -195,7 +195,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn reset(&mut self) {
         self.owned_buf.clear();
         self.vtable.clear();
-        self.vtables.clear();
+        self.written_vtable_revpos.clear();
 
         self.cur_idx = self.owned_buf.len();
 
@@ -258,8 +258,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             *x = 0;
         }
     }
-    fn assert_nested(&self) {
-        assert!(self.nested);
+    fn assert_nested(&self, msg: &'static str) {
+        assert!(self.nested, msg);
         // we don't assert that self.field_locs.len() >0 because the vtable
         // could be empty (e.g. for empty tables, or for all-default values).
     }
@@ -280,12 +280,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.pre_align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
         self.rev_cur_idx()
     }
+    pub fn flip_forwards<T>(&self, x: Offset<T>) -> UOffsetT {
+        unimplemented!();
+        //(self.get_size() - x.0) as UOffsetT
+    }
     // Offset relative to the end of the buffer.
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
     pub fn end_vector<'a, 'b, T: 'fbb>(&'a mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
-      self.assert_nested();
+      self.assert_nested("end_vector must be called after a call to start_vector");
       self.nested = false;
       let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
       Offset::new(off)
@@ -374,19 +378,48 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         unimplemented!();
     }
     pub fn end_table(&mut self, off: Offset<TableOffset>) -> Offset<TableOffset> {
-        self.assert_nested();
+        self.assert_nested("end_table must be called after a call to start_table");
         let n = self.write_vtable(off.value());
         self.nested = false;
         self.field_locs.clear();
         let o = Offset::new(n);
         o
     }
-    pub fn write_vtable(&mut self, start: UOffsetT) -> UOffsetT {
-        // If you get this assert, a corresponding StartTable wasn't called.
-        self.assert_nested();
+    fn write_vtable(&mut self, start: UOffsetT) -> UOffsetT {
+        // If you get this assert, a corresponding start_table wasn't called.
+        self.assert_nested("write_vtable must be called after a call to start_table");
+
         // Write the vtable offset, which is the start of any Table.
         // We fill it's value later.
         let vtableoffsetloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0xFF);
+
+        // Layout of the data this function will create when a new vtable is
+        // needed.
+        //
+        // | x, x -- vtable len (bytes) [u16]
+        // | x, x -- object inline len (bytes) [u16]
+        // | x, x -- zero, or num bytes from start of object to field #0   [u16]
+        // | ...
+        // | x, x -- zero, or num bytes from start of object to field #n-1 [u16]
+        //
+        // | x, x, x, x -- offset (negative direction) to our vtable [i32]
+        // |               aka "vtableoffset"
+        // | -- table inline data begins here, we don't touch it --
+        //
+        // Layout of the data this function will create when we re-use an
+        // existing vtable.
+        // We always serialize this particular vtable, then compare to the
+        // other vtables we know about to see if there is a duplicate. If there
+        // is, then we erase the serialized vtable we just made.
+        // (We serialize it first so that we can compare to other vtables on
+        // a byte-by-byte basis, instead of comparing VOffsetTs, so that we
+        // only have to convert to little endian once.)
+        //
+        // | x, x, x, x -- offset (negative direction) to a different vtable [i32]
+        // |               aka "vtableoffset"
+        // | -- table inline data begins here, we don't touch it --
+
+
         // Write a vtable, which consists entirely of voffset_t elements.
         // It starts with the number of offsets, followed by a type id, followed
         // by the offsets themselves. In reverse:
@@ -396,14 +429,17 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
                                          field_index_to_field_offset(0));
         { let s = self.max_voffset; self.fill_big(s as usize); }
         let idx = self.owned_buf.len() - vtableoffsetloc as usize;
-        let vt_use = self.get_size();
-        {
-        let vtfw = &mut VTableForWriting::init(&mut self.owned_buf[self.cur_idx..self.cur_idx + self.max_voffset as usize]);
-        vtfw.write_vtable_byte_length(self.max_voffset);
         let table_object_size = vtableoffsetloc - start;
-        vtfw.write_object_inline_size(table_object_size as VOffsetT);
-        // TODO: always true?
         debug_assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
+        let vt_use = self.get_size();
+
+        let vt_start_pos = self.cur_idx;
+        let vt_end_pos = self.cur_idx + self.max_voffset as usize;
+        {
+            let vtfw = &mut VTableForWriting::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]);
+            vtfw.write_vtable_byte_length(self.max_voffset);
+            vtfw.write_object_inline_size(table_object_size as VOffsetT);
+            // TODO: always true?
         //WriteScalar<voffset_t>(buf_.data() + sizeof(voffset_t),
         //                       static_cast<voffset_t>(table_object_size));
         //////emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + SIZE_VOFFSET..],
@@ -420,6 +456,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //|  // If this asserts, it means you've set a field twice.
         //|  assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
         //|  WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
+        }
+        }
+        for &vt_rev_pos in self.written_vtable_revpos.iter() {
+            //let vt = VTable { buf: self.buf, loc: self.flip_forwards(self.get_size() - vt_rev_pos) };
         }
         //|ClearOffsets();
         //let vt1 = reinterpret_cast<voffset_t *>(buf_.data());
@@ -450,7 +490,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //                static_cast<soffset_t>(vtableoffsetloc));
         //let idx = self.rev_cur_idx() as usize - vtableoffsetloc as usize;
         //let idx = self.cur_idx as usize + vtableoffsetloc as usize;
-        }
         emplace_scalar::<SOffsetT>(&mut self.owned_buf[idx..],
                                    vt_use as SOffsetT - vtableoffsetloc as SOffsetT);
 
@@ -474,7 +513,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn finish_with_opts<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>, size_prefixed: bool) {
         self.assert_not_finished();
         self.assert_not_nested();
-        self.vtables.clear();
+        self.written_vtable_revpos.clear();
         self.vtable.clear();
 
         let to_align = {
@@ -570,7 +609,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn push_slot_struct<T: Sized>(&mut self, slotoff: VOffsetT, x: &T) {
 	// using to_bytes as a trait makes it easier to mix references into T
-        self.assert_nested();
+        self.assert_nested("");
         let bytes = to_bytes(x);
         self.align(bytes.len());
         self.push_bytes(bytes);
@@ -742,6 +781,12 @@ impl<'a> Follow<'a> for VTable<'a> {
     }
 }
 
+impl<'a> PartialEq for VTable<'a> {
+    fn eq(&self, other: &VTable) -> bool {
+        self.as_bytes().eq(other.as_bytes())
+    }
+}
+
 impl<'a> VTable<'a> {
     pub fn num_fields(&self) -> usize {
         (self.num_bytes() / SIZE_VOFFSET) - 2
@@ -766,6 +811,10 @@ impl<'a> VTable<'a> {
             return 0;
         }
         read_scalar_at::<VOffsetT>(self.buf, self.loc + byte_loc as usize)
+    }
+    pub fn as_bytes(&self) -> &[u8] {
+        let len = self.num_bytes();
+        &self.buf[self.loc..self.loc + len]
     }
 }
 
