@@ -1426,6 +1426,18 @@ mod vtable_deduplication {
               100, 0, 0, 0, 0, 0, 0, 0 // value #0
         ]);
     }
+
+    #[test]
+    fn many_identical_tables_use_few_vtables() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        for _ in 0..1000 {
+        let start = b.start_table(1);
+            b.push_slot_scalar::<u8>(fi2fo(0), 100, 0);
+            b.push_slot_scalar::<u32>(fi2fo(1), 101, 0);
+            b.end_table(start);
+        }
+        assert!(b.num_written_vtables() <= 10);
+    }
 }
 
 #[cfg(test)]

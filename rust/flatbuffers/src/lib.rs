@@ -206,6 +206,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.max_voffset = 0;
     }
 
+    pub fn num_written_vtables(&self) -> usize {
+        self.written_vtable_revpos.len()
+    }
+
     fn track_field(&mut self, slot_off: VOffsetT, off: UOffsetT) {
         let fl = FieldLoc{id: slot_off, off: off};
         self.field_locs.push(fl);
