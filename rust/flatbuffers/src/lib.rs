@@ -486,7 +486,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             }
             ret
         };
-        { let n = self.rev_cur_idx(); self.written_vtable_revpos.push(n); }
+        if ret == self.get_size() {
+            let n = self.rev_cur_idx(); self.written_vtable_revpos.push(n);
+        }
 
         {
             //let n = self.flip_forwards(object_vtable_revloc) as usize;

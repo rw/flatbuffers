@@ -1400,7 +1400,7 @@ mod vtable_deduplication {
     }
 
     #[test]
-    fn two_tables_with_one_inline_element_are_deduplicated() {
+    fn two_tables_with_two_conveniently_sized_inline_elements_are_deduplicated() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let start0 = b.start_table(1);
         b.push_slot_scalar::<u64>(fi2fo(0), 100, 0);
