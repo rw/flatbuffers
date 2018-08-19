@@ -392,7 +392,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // We fill its value later.
         //let object_vtable_revloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0x99999999 as SOffsetT);
         let object_vtable_revloc: UOffsetT = self.push_element_scalar::<UOffsetT>(0xF0F0F0F0 as UOffsetT);
-        println!("just wrote filler: {:?}", self.get_active_buf_slice());
+        //println!("just wrote filler: {:?}", self.get_active_buf_slice());
 
         // Layout of the data this function will create when a new vtable is
         // needed.
@@ -442,13 +442,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let vtable_len = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
                                        field_index_to_field_offset(0)) as usize;
         self.fill_big(vtable_len);
-        println!("just filled vtable with zero: {:?}", self.get_active_buf_slice());
+        //println!("just filled vtable with zero: {:?}", self.get_active_buf_slice());
         //let idx = self.owned_buf.len() - object_vtable_revloc as usize;
         let table_object_size = object_vtable_revloc - table_tail_revloc;
-        println!("object_vtable_revloc: {}", object_vtable_revloc);
-        println!("table_tail_revloc: {}", table_tail_revloc);
-        println!("table_object_size: {}", table_object_size);
-        println!("field_locs: {:?}", &self.field_locs[..]);
+        //println!("object_vtable_revloc: {}", object_vtable_revloc);
+        //println!("table_tail_revloc: {}", table_tail_revloc);
+        //println!("table_object_size: {}", table_object_size);
+        //println!("field_locs: {:?}", &self.field_locs[..]);
         debug_assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
 
         let vt_start_pos = self.cur_idx;
@@ -456,18 +456,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         {
             let vtfw = &mut VTableForWriting::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]);
             vtfw.write_vtable_byte_length(vtable_len as VOffsetT);
-            println!("just wrote vtable len; data: {:?}", vtfw.buf);
+            //println!("just wrote vtable len; data: {:?}", vtfw.buf);
             vtfw.write_object_inline_size(table_object_size as VOffsetT);
-            println!("just wrote vtable obj size; data: {:?}", vtfw.buf);
+            //println!("just wrote vtable obj size; data: {:?}", vtfw.buf);
             for (i, &fl) in self.field_locs.iter().enumerate() {
                 let pos: VOffsetT = (object_vtable_revloc - fl.off) as VOffsetT;
                 assert_eq!(vtfw.get_field_offset(fl.id), 0,
                 "tried to write a vtable field multiple times");
                 vtfw.write_field_offset(fl.id, pos);
-                println!("just wrote vtable item; data: {:?}", vtfw.buf);
+                //println!("just wrote vtable item; data: {:?}", vtfw.buf);
             }
         }
-        println!("just filled vtable with data: {:?}", self.get_active_buf_slice());
+        //println!("just filled vtable with data: {:?}", self.get_active_buf_slice());
         let vt_use = {
             let mut ret: usize = self.get_size();
 
@@ -491,15 +491,15 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         {
             //let n = self.flip_forwards(object_vtable_revloc) as usize;
             let n = self.cur_idx + self.get_size() - object_vtable_revloc as usize;
-            println!("object_vtable_revloc: {}", object_vtable_revloc);
-            println!("get_size: {}", self.get_size());
-            println!("n: {}", n);
+            //println!("object_vtable_revloc: {}", object_vtable_revloc);
+            //println!("get_size: {}", self.get_size());
+            //println!("n: {}", n);
             let saw = read_scalar::<UOffsetT>(&self.owned_buf[n..n + SIZE_SOFFSET]);
             assert_eq!(saw, 0xF0F0F0F0);
             emplace_scalar::<SOffsetT>(&mut self.owned_buf[n..n + SIZE_SOFFSET],
                                        vt_use as SOffsetT - object_vtable_revloc as SOffsetT);
         }
-        println!("just wrote offset from object to vtable: {:?}", self.get_active_buf_slice());
+        //println!("just wrote offset from object to vtable: {:?}", self.get_active_buf_slice());
 
         self.field_locs.clear();
         self.max_voffset = 0;

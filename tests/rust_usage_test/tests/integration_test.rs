@@ -525,9 +525,6 @@ mod generated_code_alignment_and_padding {
         assert_eq!(::std::mem::size_of::<my_game::example::Vec3>() % 16, 0);
     }
 
-    // This alignment check is technically out-of-scope because allocators can
-    // do whatever they want. Nonetheless, this works with the standard
-    // allocator on my machine...
     #[test]
     fn vec3_is_aligned_to_mod_16() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
@@ -541,11 +538,15 @@ mod generated_code_alignment_and_padding {
                                                        ..Default::default()});
             my_game::example::finish_monster_buffer(b, mon);
         }
-        let mon = my_game::example::get_root_as_monster(b.finished_bytes());
-
+        let buf = b.finished_bytes();
+        let mon = my_game::example::get_root_as_monster(buf);
         let vec3 = mon.pos().unwrap();
 
-        assert_eq!(vec3 as *const my_game::example::Vec3 as usize % 16, 0);
+        let start_ptr = buf.as_ptr() as usize;
+        let vec3_ptr = vec3 as *const my_game::example::Vec3 as usize;
+
+        assert!(vec3_ptr > start_ptr);
+        assert_eq!((vec3_ptr - start_ptr) % 16, 0);
     }
 }
 
@@ -1402,42 +1403,27 @@ mod vtable_deduplication {
     fn two_tables_with_one_inline_element_are_deduplicated() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let start0 = b.start_table(1);
-        b.push_slot_scalar::<u16>(fi2fo(0), 100, 0);
+        b.push_slot_scalar::<u64>(fi2fo(0), 100, 0);
+        b.push_slot_scalar::<u32>(fi2fo(1), 101, 0);
         b.end_table(start0);
-        check(&b, &[
-              6, 0, // vtable size in bytes
-              8, 0, // object inline data in bytes
-              6, 0, // offset in object for value #0
-
-              6, 0, 0, 0, // backwards offset to vtable
-              0, 0, // padding for alignment
-              100, 0, // value #0
-        ]);
         let start1 = b.start_table(1);
-        b.push_slot_scalar::<u32>(fi2fo(0), 101, 0);
-        check(&b, &[
-              101, 0, // value #0
-
-              6, 0, // vtable size in bytes
-              8, 0, // object inline data in bytes
-              6, 0, // offset in object for value #0
-
-              6, 0, 0, 0, // backwards offset to vtable
-              0, 0, // padding for alignment
-              100, 0, // value #0
-        ]);
+        b.push_slot_scalar::<u64>(fi2fo(0), 200, 0);
+        b.push_slot_scalar::<u32>(fi2fo(1), 201, 0);
         b.end_table(start1);
         check(&b, &[
-              252, 255, 255, 255, // forwards offset to vtable
-              101, 0, // value #0
+              240, 255, 255, 255, // forwards offset to vtable
 
-              6, 0, // vtable size in bytes
-              8, 0, // object inline data in bytes
-              6, 0, // offset in object for value #0
+              201, 0, 0, 0, // value #1
+              200, 0, 0, 0, 0, 0, 0, 0, // value #0
 
-              6, 0, 0, 0, // backwards offset to vtable
-              0, 0, // padding for alignment
-              100, 0, // value #0
+              8, 0, // vtable size in bytes
+              16, 0, // object inline data in bytes
+              8, 0, // offset in object for value #0
+              4, 0, // offset in object for value #1
+
+              8, 0, 0, 0, // backwards offset to vtable
+              101, 0, 0, 0, // value #1
+              100, 0, 0, 0, 0, 0, 0, 0 // value #0
         ]);
     }
 }
