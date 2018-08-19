@@ -1369,6 +1369,19 @@ mod vtable_deduplication {
     }
 
     #[test]
+    fn one_empty_table() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let start0 = b.start_table(0);
+        b.end_table(start0);
+        check(&b, &[
+              4, 0, // vtable size in bytes
+              4, 0, // object inline data in bytes
+
+              4, 0, 0, 0, // backwards offset to vtable
+        ]);
+    }
+
+    #[test]
     fn two_empty_tables_are_deduplicated() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let start0 = b.start_table(0);
@@ -1376,14 +1389,55 @@ mod vtable_deduplication {
         let start1 = b.start_table(0);
         b.end_table(start1);
         check(&b, &[
+              252, 255, 255, 255, // forwards offset to vtable
+
               4, 0, // vtable size in bytes
               4, 0, // object inline data in bytes
 
               4, 0, 0, 0, // backwards offset to vtable
+        ]);
+    }
 
-              4, 0, // vtable size in bytes
-              4, 0, // object inline data in bytes
-              4, 0, 0, 0, // backwards offset to vtable
+    #[test]
+    fn two_tables_with_one_inline_element_are_deduplicated() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let start0 = b.start_table(1);
+        b.push_slot_scalar::<u16>(fi2fo(0), 100, 0);
+        b.end_table(start0);
+        check(&b, &[
+              6, 0, // vtable size in bytes
+              8, 0, // object inline data in bytes
+              6, 0, // offset in object for value #0
+
+              6, 0, 0, 0, // backwards offset to vtable
+              0, 0, // padding for alignment
+              100, 0, // value #0
+        ]);
+        let start1 = b.start_table(1);
+        b.push_slot_scalar::<u32>(fi2fo(0), 101, 0);
+        check(&b, &[
+              101, 0, // value #0
+
+              6, 0, // vtable size in bytes
+              8, 0, // object inline data in bytes
+              6, 0, // offset in object for value #0
+
+              6, 0, 0, 0, // backwards offset to vtable
+              0, 0, // padding for alignment
+              100, 0, // value #0
+        ]);
+        b.end_table(start1);
+        check(&b, &[
+              252, 255, 255, 255, // forwards offset to vtable
+              101, 0, // value #0
+
+              6, 0, // vtable size in bytes
+              8, 0, // object inline data in bytes
+              6, 0, // offset in object for value #0
+
+              6, 0, 0, 0, // backwards offset to vtable
+              0, 0, // padding for alignment
+              100, 0, // value #0
         ]);
     }
 }

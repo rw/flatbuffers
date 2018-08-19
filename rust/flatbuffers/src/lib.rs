@@ -216,7 +216,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.nested = true;
 
         self.field_locs.clear();
-
         self.vtable.clear();
         self.vtable.resize(num_fields as usize, 0);
 
@@ -381,16 +380,19 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let n = self.write_vtable(off.value());
         self.nested = false;
         self.field_locs.clear();
+        self.max_voffset = 0;
         let o = Offset::new(n);
         o
     }
-    fn write_vtable(&mut self, table_tail: UOffsetT) -> UOffsetT {
+    fn write_vtable(&mut self, table_tail_revloc: UOffsetT) -> UOffsetT {
         // If you get this assert, a corresponding start_table wasn't called.
         self.assert_nested("write_vtable must be called after a call to start_table");
 
         // Write the vtable offset, which is the start of any Table.
-        // We fill it's value later.
-        let vtableoffsetloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0xFF);
+        // We fill its value later.
+        //let object_vtable_revloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0x99999999 as SOffsetT);
+        let object_vtable_revloc: UOffsetT = self.push_element_scalar::<UOffsetT>(0xF0F0F0F0 as UOffsetT);
+        println!("just wrote filler: {:?}", self.get_active_buf_slice());
 
         // Layout of the data this function will create when a new vtable is
         // needed.
@@ -437,84 +439,72 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // by the offsets themselves. In reverse:
         // Include space for the last offset and ensure empty tables have a
         // minimum size.
-        self.max_voffset = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
-                                         field_index_to_field_offset(0));
-        { let s = self.max_voffset; self.fill_big(s as usize); }
-        let idx = self.owned_buf.len() - vtableoffsetloc as usize;
-        let table_object_size = vtableoffsetloc - table_tail;
+        let vtable_len = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
+                                       field_index_to_field_offset(0)) as usize;
+        self.fill_big(vtable_len);
+        println!("just filled vtable with zero: {:?}", self.get_active_buf_slice());
+        //let idx = self.owned_buf.len() - object_vtable_revloc as usize;
+        let table_object_size = object_vtable_revloc - table_tail_revloc;
+        println!("object_vtable_revloc: {}", object_vtable_revloc);
+        println!("table_tail_revloc: {}", table_tail_revloc);
+        println!("table_object_size: {}", table_object_size);
+        println!("field_locs: {:?}", &self.field_locs[..]);
         debug_assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
-        let vt_use = self.get_size();
 
         let vt_start_pos = self.cur_idx;
-        let vt_end_pos = self.cur_idx + self.max_voffset as usize;
+        let vt_end_pos = self.cur_idx + vtable_len;
         {
             let vtfw = &mut VTableForWriting::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]);
-            vtfw.write_vtable_byte_length(self.max_voffset);
+            vtfw.write_vtable_byte_length(vtable_len as VOffsetT);
+            println!("just wrote vtable len; data: {:?}", vtfw.buf);
             vtfw.write_object_inline_size(table_object_size as VOffsetT);
-            // TODO: always true?
-        //WriteScalar<voffset_t>(buf_.data() + sizeof(voffset_t),
-        //                       static_cast<voffset_t>(table_object_size));
-        //////emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + SIZE_VOFFSET..],
-        //////                           table_object_size as VOffsetT);
-
-        //   WriteScalar<voffset_t>(buf_.data(), max_voffset_);
-        //////emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx..],
-        //////                           self.max_voffset);
-        // Write the offsets into the table
-        for (i, &fl) in self.field_locs.iter().enumerate() {
-            let pos: VOffsetT = (vtableoffsetloc - fl.off) as VOffsetT;
-            vtfw.write_field_offset(fl.id, pos);
-        }
-            //emplace_scalar::<VOffsetT>(&mut self.owned_buf[self.cur_idx + fl.id as usize..], pos);
-        //|  // If this asserts, it means you've set a field twice.
-        //|  assert(!ReadScalar<voffset_t>(buf_.data() + field_location->id));
-        //|  WriteScalar<voffset_t>(buf_.data() + field_location->id, pos);
-        }
-        {
-            let this_vt = VTable { buf: self.get_active_buf_slice(), loc: self.cur_idx };
-            for &vt_rev_pos in self.written_vtable_revpos.iter() {
-                let other_vt = VTable { buf: self.get_active_buf_slice(), loc: self.flip_forwards(vt_rev_pos) as usize };
-                if other_vt == this_vt {
-                    println!("equal!");
-                }
-                println!("left:  {:?}", this_vt.as_bytes());
-                println!("right: {:?}", other_vt.as_bytes());
+            println!("just wrote vtable obj size; data: {:?}", vtfw.buf);
+            for (i, &fl) in self.field_locs.iter().enumerate() {
+                let pos: VOffsetT = (object_vtable_revloc - fl.off) as VOffsetT;
+                assert_eq!(vtfw.get_field_offset(fl.id), 0,
+                "tried to write a vtable field multiple times");
+                vtfw.write_field_offset(fl.id, pos);
+                println!("just wrote vtable item; data: {:?}", vtfw.buf);
             }
         }
-        //|ClearOffsets();
-        //let vt1 = reinterpret_cast<voffset_t *>(buf_.data());
-        //let vt1_size = read_scalar_at::<VOffsetT>(self.get_active_buf_slice());
-        //   // See if we already have generated a vtable with this exact same
-        //   // layout before. If so, make it point to the old one, remove this one.
-        //   if (dedup_vtables_) {
-        //     for (auto it = buf_.scratch_data(); it < buf_.scratch_end();
-        //          it += sizeof(uoffset_t)) {
-        //       auto vt_offset_ptr = reinterpret_cast<uoffset_t *>(it);
-        //       auto vt2 = reinterpret_cast<voffset_t *>(buf_.data_at(*vt_offset_ptr));
-        //       auto vt2_size = *vt2;
-        //       if (vt1_size != vt2_size || memcmp(vt2, vt1, vt1_size)) continue;
-        //       vt_use = *vt_offset_ptr;
-        //       buf_.pop(GetSize() - vtableoffsetloc);
-        //       break;
-        //     }
-        //   }
-        //   // If this is a new vtable, remember it.
-        //   if (vt_use == GetSize()) { buf_.scratch_push_small(vt_use); }
-        // Fill the vtable offset we created above.
-        // The offset points from the beginning of the object to where the
-        // vtable is stored.
-        // Offsets default direction is downward in memory for future format
-        // flexibility (storing all vtables at the start of the file).
-        //WriteScalar(buf_.data_at(vtableoffsetloc),
-        //            static_cast<soffset_t>(vt_use) -
-        //                static_cast<soffset_t>(vtableoffsetloc));
-        //let idx = self.rev_cur_idx() as usize - vtableoffsetloc as usize;
-        //let idx = self.cur_idx as usize + vtableoffsetloc as usize;
-        emplace_scalar::<SOffsetT>(&mut self.owned_buf[idx..],
-                                   vt_use as SOffsetT - vtableoffsetloc as SOffsetT);
+        println!("just filled vtable with data: {:?}", self.get_active_buf_slice());
+        let vt_use = {
+            let mut ret: usize = self.get_size();
 
+            'l: for &vt_rev_pos in self.written_vtable_revpos.iter() {
+                let eq = {
+                    let this_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx };
+                    let other_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx + self.get_size() - vt_rev_pos as usize };
+                    other_vt == this_vt
+                };
+                if eq {
+                    VTableForWriting::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]).clear();
+                    self.cur_idx += vtable_len;
+                    ret = vt_rev_pos as usize;
+                    break 'l
+                }
+            }
+            ret
+        };
+        { let n = self.rev_cur_idx(); self.written_vtable_revpos.push(n); }
 
-        vtableoffsetloc
+        {
+            //let n = self.flip_forwards(object_vtable_revloc) as usize;
+            let n = self.cur_idx + self.get_size() - object_vtable_revloc as usize;
+            println!("object_vtable_revloc: {}", object_vtable_revloc);
+            println!("get_size: {}", self.get_size());
+            println!("n: {}", n);
+            let saw = read_scalar::<UOffsetT>(&self.owned_buf[n..n + SIZE_SOFFSET]);
+            assert_eq!(saw, 0xF0F0F0F0);
+            emplace_scalar::<SOffsetT>(&mut self.owned_buf[n..n + SIZE_SOFFSET],
+                                       vt_use as SOffsetT - object_vtable_revloc as SOffsetT);
+        }
+        println!("just wrote offset from object to vtable: {:?}", self.get_active_buf_slice());
+
+        self.field_locs.clear();
+        self.max_voffset = 0;
+
+        object_vtable_revloc
     }
     pub fn required<T>(&self, _: &Offset<T>, _: VOffsetT) {
         //TODO: unimplemented!()
@@ -850,19 +840,36 @@ impl<'a> VTableForWriting<'a> {
     }
     #[inline]
     pub fn write_vtable_byte_length(&mut self, n: VOffsetT) {
+        println!("write_vtable_byte_length: {}", n);
         emplace_scalar::<VOffsetT>(&mut self.buf[..SIZE_VOFFSET], n);
         assert_eq!(n as usize, self.buf.len());
     }
 
     #[inline]
     pub fn write_object_inline_size(&mut self, n: VOffsetT) {
+        println!("write_object_inline_size: {}", n);
         emplace_scalar::<VOffsetT>(&mut self.buf[SIZE_VOFFSET..2*SIZE_VOFFSET], n);
+    }
+
+    #[inline]
+    pub fn get_field_offset(&self, vtable_off: VOffsetT) -> VOffsetT {
+        let idx = vtable_off as usize;
+        read_scalar::<VOffsetT>(&self.buf[idx..idx + SIZE_VOFFSET])
     }
 
     #[inline]
     pub fn write_field_offset(&mut self, vtable_off: VOffsetT, n: VOffsetT) {
         let idx = vtable_off as usize;
         emplace_scalar::<VOffsetT>(&mut self.buf[idx..idx + SIZE_VOFFSET], n);
+    }
+
+    #[inline]
+    pub fn clear(&mut self) {
+        let len = self.buf.len();
+        let p = self.buf.as_mut_ptr() as *mut u8;
+        unsafe {
+            std::ptr::write_bytes(p, 199, len);
+        }
     }
 }
 
