@@ -253,13 +253,15 @@ mod roundtrips_with_generated_code {
     #[test]
     fn scalar_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{hp: 123, ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{hp: 123, name: Some(name), ..Default::default()});
         assert_eq!(m.hp(), 123);
     }
     #[test]
     fn scalar_default() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{name: Some(name), ..Default::default()});
         assert_eq!(m.hp(), 100);
     }
     #[test]
@@ -294,13 +296,15 @@ mod roundtrips_with_generated_code {
     #[test]
     fn enum_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{color: my_game::example::Color::Red, ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{name: Some(name), color: my_game::example::Color::Red, ..Default::default()});
         assert_eq!(m.color(), my_game::example::Color::Red);
     }
     #[test]
     fn enum_default() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{name: Some(name), ..Default::default()});
         assert_eq!(m.color(), my_game::example::Color::Blue);
     }
     #[test]
@@ -415,6 +419,7 @@ mod roundtrips_with_generated_code {
             let mut b1 = flatbuffers::FlatBufferBuilder::new();
             let args = my_game::example::MonsterArgs{
                 testnestedflatbuffer: Some(b1.create_vector_of_scalars::<u8>(b0.finished_bytes())),
+                name: Some(b1.create_string("foo")),
                 ..Default::default()
             };
             let mon = my_game::example::Monster::create(&mut b1, &args);
@@ -448,7 +453,10 @@ mod roundtrips_with_generated_code {
     fn vector_of_string_store_helper_build() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let v = b.create_vector_of_strings(&["foobar", "baz"]);
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{testarrayofstring: Some(v), ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            testarrayofstring: Some(v), ..Default::default()});
         assert_eq!(m.testarrayofstring().unwrap().len(), 2);
         assert_eq!(m.testarrayofstring().unwrap().get(0), "foobar");
         assert_eq!(m.testarrayofstring().unwrap().get(1), "baz");
@@ -459,7 +467,10 @@ mod roundtrips_with_generated_code {
         let s0 = b.create_string("foobar");
         let s1 = b.create_string("baz");
         let v = b.create_vector_of_reverse_offsets(&[s0, s1]);
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{testarrayofstring: Some(v), ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            testarrayofstring: Some(v), ..Default::default()});
         assert_eq!(m.testarrayofstring().unwrap().len(), 2);
         assert_eq!(m.testarrayofstring().unwrap().get(0), "foobar");
         assert_eq!(m.testarrayofstring().unwrap().get(1), "baz");
@@ -468,28 +479,40 @@ mod roundtrips_with_generated_code {
     fn vector_of_ubyte_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let v = b.create_vector_of_scalars::<u8>(&[123, 234][..]);
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{inventory: Some(v), ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            inventory: Some(v), ..Default::default()});
         assert_eq!(m.inventory().unwrap(), &[123, 234][..]);
     }
     #[test]
     fn vector_of_bool_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let v = b.create_vector_of_scalars::<bool>(&[false, true, false, true][..]);
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{testarrayofbools: Some(v), ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            testarrayofbools: Some(v), ..Default::default()});
         assert_eq!(m.testarrayofbools().unwrap(), &[false, true, false, true][..]);
     }
     #[test]
     fn vector_of_f64_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let v = b.create_vector_of_scalars::<f64>(&[3.14159265359][..]);
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{vector_of_doubles: Some(v), ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            vector_of_doubles: Some(v), ..Default::default()});
         assert_eq!(m.vector_of_doubles().unwrap(), &[3.14159265359][..]);
     }
     #[test]
     fn vector_of_struct_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let v = b.create_vector_of_structs::<my_game::example::Test>(&[my_game::example::Test::new(127, -128), my_game::example::Test::new(3, 123)][..]);
-        let m = build_mon(&mut b, &my_game::example::MonsterArgs{test4: Some(v), ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            test4: Some(v), ..Default::default()});
         assert_eq!(m.test4().unwrap(), &[my_game::example::Test::new(127, -128), my_game::example::Test::new(3, 123)][..]);
     }
     #[test]
@@ -506,7 +529,10 @@ mod roundtrips_with_generated_code {
             my_game::example::Monster::create(b, &args)
         };
         let v = b.create_vector_of_reverse_offsets::<my_game::example::Monster>(&[t0, t1][..]);
-        let m = build_mon(b, &my_game::example::MonsterArgs{testarrayoftables: Some(v), ..Default::default()});
+        let name = b.create_string("foo");
+        let m = build_mon(b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            testarrayoftables: Some(v), ..Default::default()});
         assert_eq!(m.testarrayoftables().unwrap().len(), 2);
         assert_eq!(m.testarrayoftables().unwrap().get(0).hp(), 55);
         assert_eq!(m.testarrayoftables().unwrap().get(0).name(), Some("foo"));
@@ -924,9 +950,23 @@ mod read_examples_from_other_language_ports {
     }
 }
 
+#[cfg(test)]
+mod generated_code_asserts {
+    extern crate flatbuffers;
+
+    extern crate rust_usage_test;
+    use rust_usage_test::monster_test_generated::my_game;
+
+    #[test]
+    #[should_panic]
+    fn monster_builder_fails_when_name_is_missing() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
+        my_game::example::Monster::create(b, &my_game::example::MonsterArgs{..Default::default()});
+    }
+}
 
 #[cfg(test)]
-mod should_panic {
+mod builder_asserts {
     extern crate flatbuffers;
 
     #[test]
@@ -969,6 +1009,15 @@ mod should_panic {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_table(0);
         b.finished_bytes();
+    }
+
+    #[test]
+    #[should_panic]
+    fn required_panics_when_field_not_set() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let start = b.start_table(0);
+        let o = b.end_table(start);
+        b.required(o, 4 /* byte offset to first field */, "test field");
     }
 }
 

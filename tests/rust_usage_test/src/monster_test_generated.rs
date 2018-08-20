@@ -1133,7 +1133,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   // MonsterBuilder &operator=(const MonsterBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
     let o = self.fbb_.end_table(self.start_);
-    self.fbb_.required(&o, Monster::VT_NAME);
+    self.fbb_.required(o, Monster::VT_NAME, "name");
     flatbuffers::Offset::new(o.value())
   }
 }

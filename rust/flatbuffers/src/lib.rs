@@ -284,18 +284,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &'b [u8]) -> Offset<Vector<'fbb, u8>> {
         self.assert_not_nested();
-        //self.nested = true;
         self.pre_align(data.len(), SIZE_UOFFSET);
-        //self.fill(1);
         self.push_bytes(data);
         self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
     }
-    pub fn create_shared_string<'a>(&mut self, _: &'a str) -> Offset<StringOffset> {
-        Offset::new(0)
-    }
-    pub fn create_vector_of_strings<'a, 'b, 'c>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsU32Offset<&'fbb str>>> {
-        // TODO: any way to avoid heap allocs?
+    pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsU32Offset<&'fbb str>>> {
+        // TODO(rw): write these in-place, then swap their order, to avoid a
+        // heap allocation.
         let offsets: Vec<Offset<&str>> = xs.iter().rev().map(|s| self.create_string(s)).rev().collect();
         self.create_vector_of_reverse_offsets(&offsets[..])
     }
@@ -308,6 +304,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         Offset::new(self.end_vector::<Offset<Vector<'fbb, ForwardsU32Offset<T>>>>(items.len()).value())
     }
     pub fn create_vector_of_scalars<T: ElementScalar + 'fbb>(&mut self, items: &[T]) -> Offset<Vector<'fbb, T>> {
+        // TODO(rw): if host is little-endian, just do a memcpy
         let elemsize = std::mem::size_of::<T>();
         self.start_vector(elemsize, items.len());
         for x in items.iter().rev() {
@@ -316,22 +313,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         Offset::new(self.end_vector::<T>(items.len()).value())
     }
     pub fn create_vector_of_structs<T>(&mut self, items: &[T]) -> Offset<Vector<'fbb, T>> {
+        // TODO(rw): just do a memcpy
         let elemsize = std::mem::size_of::<T>();
         self.start_vector(elemsize, items.len());
         for i in (0..items.len()).rev() {
             self.push_bytes(to_bytes(&items[i]));
         }
         Offset::new(self.end_vector::<T>(items.len()).value())
-    }
-    pub fn create_vector_of_sorted_structs<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'a, T>> {
-        unimplemented!();
-    }
-    pub fn create_vector_of_structs_from_fn<'a, T: Follow<'a> + 'a, F>(&mut self, _len: usize, _f: F) -> Offset<Vector<'a, T>>
-        where F: FnMut(usize, &mut T) {
-      unimplemented!();
-    }
-    pub fn create_vector_of_sorted_tables<'a, T: Follow<'a> + 'a>(&mut self, _: &'a mut [T]) -> Offset<Vector<'a, T>> {
-        unimplemented!();
     }
     pub fn end_table(&mut self, off: Offset<TableOffset>) -> Offset<TableOffset> {
         self.assert_nested("end_table must be called after a call to start_table");
@@ -450,9 +438,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.max_voffset = 0;
 
         object_vtable_revloc
-    }
-    pub fn required<T>(&self, _: &Offset<T>, _: VOffsetT) {
-        //TODO: unimplemented!()
     }
     pub fn finish_size_prefixed<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, true);
@@ -604,6 +589,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_finished();
         &self.owned_buf[self.cur_idx..]
     }
+    pub fn required(&self, tab_revloc: Offset<TableOffset>, slot_byte_loc: VOffsetT, assert_msg_name: &'static str) {
+        let tab = Table::new(&self.owned_buf[..], self.cur_idx + (self.get_size() - tab_revloc.0 as usize));
+        let o = tab.vtable().get(slot_byte_loc) as usize;
+        assert!(o != 0, "missing required field {}", assert_msg_name);
+    }
+
 }
 
 #[derive(Debug, PartialEq)]
