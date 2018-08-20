@@ -465,7 +465,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let vt_use = {
             let mut ret: usize = self.get_size();
 
-            'l: for &vt_rev_pos in self.written_vtable_revpos.iter() {
+            for &vt_rev_pos in self.written_vtable_revpos.iter() {
                 let eq = {
                     let this_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx };
                     let other_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx + self.get_size() - vt_rev_pos as usize };
@@ -475,7 +475,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
                     VTableForWriting::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]).clear();
                     self.cur_idx += vtable_len;
                     ret = vt_rev_pos as usize;
-                    break 'l
+                    break;
                 }
             }
             ret
