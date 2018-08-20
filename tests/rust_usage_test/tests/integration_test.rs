@@ -958,7 +958,6 @@ mod should_panic {
         #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct foo { }
-        impl flatbuffers::GeneratedStruct for foo {}
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let x = foo{};
         b.push_slot_struct(0, &x);
@@ -1761,7 +1760,6 @@ mod byte_layouts {
             _pad1: [u8; 3],
             c: i8,
         }
-        impl flatbuffers::GeneratedStruct for foo {}
 
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table(1);
