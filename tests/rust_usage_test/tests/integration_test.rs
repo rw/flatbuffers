@@ -700,26 +700,33 @@ mod roundtrip_vectors {
     }
 }
 
-// Prefix a FlatBuffer with a size field.
-#[test]
-fn test_size_prefixed_buffer() {
-    // Create size prefixed buffer.
-    let mut b = flatbuffers::FlatBufferBuilder::new();
-    let args = &my_game::example::MonsterArgs{
-        mana: 200,
-        hp: 300,
-        name: Some(b.create_string("bob")),
-        ..Default::default()
-    };
-    let mon = my_game::example::Monster::create(&mut b, &args);
-    b.finish_size_prefixed(mon, None);
+#[cfg(test)]
+mod framing_format {
+    extern crate flatbuffers;
 
-    // Access it.
-    let buf = b.finished_bytes();
-    let m = flatbuffers::get_size_prefixed_root::<my_game::example::Monster>(buf);
-    assert_eq!(m.mana(), 200);
-    assert_eq!(m.hp(), 300);
-    assert_eq!(m.name(), Some("bob"));
+    extern crate rust_usage_test;
+    use rust_usage_test::monster_test_generated::my_game;
+
+    #[test]
+    fn test_size_prefixed_buffer() {
+        // Create size prefixed buffer.
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let args = &my_game::example::MonsterArgs{
+            mana: 200,
+            hp: 300,
+            name: Some(b.create_string("bob")),
+            ..Default::default()
+        };
+        let mon = my_game::example::Monster::create(&mut b, &args);
+        b.finish_size_prefixed(mon, None);
+
+        // Access it.
+        let buf = b.finished_bytes();
+        let m = flatbuffers::get_size_prefixed_root::<my_game::example::Monster>(buf);
+        assert_eq!(m.mana(), 200);
+        assert_eq!(m.hp(), 300);
+        assert_eq!(m.name(), Some("bob"));
+    }
 }
 
 #[test]
@@ -838,67 +845,42 @@ fn fuzz_scalar_table_serialization() {
 //  TEST_EQ(flatbuffers::EndianSwap(flatbuffers::EndianSwap(3.14f)), 3.14f);
 //}
 
-#[test]
-fn test_emplace_and_read_scalar_fuzz() {
-    // TODO(rw): random generate values, probably with a macro
-    // because num traits are annoying.
-        for n in u8::min_value()..=u8::max_value() {
-            let mut buf = vec![0u8; 1];
-            flatbuffers::emplace_scalar(&mut buf[..], n);
-            let m = flatbuffers::read_scalar(&buf[..]);
-            assert_eq!(n, m);
-        }
-        for n in i8::min_value()..=i8::max_value() {
-            let mut buf = vec![0u8; 1];
-            flatbuffers::emplace_scalar(&mut buf[..], n);
-            let m = flatbuffers::read_scalar(&buf[..]);
-            assert_eq!(n, m);
-        }
-        for n in u16::min_value()..=u16::max_value() {
-            let mut buf = vec![0u8; 2];
-            flatbuffers::emplace_scalar(&mut buf[..], n);
-            let m = flatbuffers::read_scalar(&buf[..]);
-            assert_eq!(n, m);
-        }
-        for n in i16::min_value()..=i16::max_value() {
-            let mut buf = vec![0u8; 2];
-            flatbuffers::emplace_scalar(&mut buf[..], n);
-            let m = flatbuffers::read_scalar(&buf[..]);
-            assert_eq!(n, m);
-        }
+#[cfg(test)]
+mod roundtrips_scalars {
+    extern crate flatbuffers;
+    extern crate quickcheck;
 
-    //fn doit<T: flatbuffers::EndianScalar>() {
-    //    let mut lcg = LCG::new();
-    //    //let mut rng = rand::thread_rng();
+    const N: u64 = 1000;
 
-    //    for i in 0..1000 {
-    //        let sz = std::mem::size_of::<T>();
-    //        let n = T::From(i);
-    //        //let x = lcg.next();
-    //        //let mut xx = vec![0u8; sz];
-    //        //for i in 0..sz {
-    //        //    xx[i] = x as u8;
-    //        //    x = x >> 8;
-    //        //}
-    //        //let n: T = unsafe {
-    //        //    std::mem::transmute(xx.as_ptr())
-    //        //};
-    //        //let n = (lcg.next() % std::mem::size_of::<T>()) as T;
-    //        //let n = rng.gen::<T>();
-    //        let mut buf = vec![0u8; sz];
-    //        flatbuffers::emplace_scalar(&mut buf[..], n);
-    //        let m: T = flatbuffers::read_scalar(&buf[..]);
-    //        assert!(n == m);
-    //    }
-    //}
-    //doit::<u8>();
-    //doit::<i8>();
-    //doit::<u16>();
-    //doit::<i16>();
-    //doit::<u32>();
-    //doit::<i32>();
-    //doit::<u64>();
-    //doit::<i64>();
+    fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::EndianScalar>(x: T) {
+        let mut buf = vec![0u8; ::std::mem::size_of::<T>()];
+        flatbuffers::emplace_scalar(&mut buf[..], x);
+        let y = flatbuffers::read_scalar(&buf[..]);
+        assert_eq!(x, y);
+    }
+
+    #[test]
+    fn fuzz_bool() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<bool> as fn(_)); }
+    #[test]
+    fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u8> as fn(_)); }
+    #[test]
+    fn fuzz_i8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i8> as fn(_)); }
+    #[test]
+    fn fuzz_u16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u16> as fn(_)); }
+    #[test]
+    fn fuzz_i16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i16> as fn(_)); }
+    #[test]
+    fn fuzz_u32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u32> as fn(_)); }
+    #[test]
+    fn fuzz_i32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i32> as fn(_)); }
+    #[test]
+    fn fuzz_u64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u64> as fn(_)); }
+    #[test]
+    fn fuzz_i64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i64> as fn(_)); }
+    #[test]
+    fn fuzz_f32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f32> as fn(_)); }
+    #[test]
+    fn fuzz_f64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f64> as fn(_)); }
 }
 
 #[cfg(test)]
