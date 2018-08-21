@@ -15,8 +15,6 @@
  * limitations under the License.
  */
 
-use std::collections::HashMap;
-
 extern crate quickcheck;
 
 extern crate flatbuffers;
@@ -238,7 +236,7 @@ mod generated_constants {
 }
 
 #[cfg(test)]
-mod roundtrips_with_generated_code {
+mod roundtrip_generated_code {
     extern crate flatbuffers;
 
     extern crate rust_usage_test;
@@ -729,111 +727,222 @@ mod framing_format {
     }
 }
 
-#[test]
-fn fuzz_scalar_table_serialization() {
-    // Values we're testing against: chosen to ensure no bits get chopped
-    // off anywhere, and also be different from eachother.
-    let bool_val: bool = true;
-    let char_val: i8 = -127;  // 0x81
-    let uchar_val: u8 = 0xFF;
-    let short_val: i16 = -32222;  // 0x8222;
-    let ushort_val: u16 = 0xFEEE;
-    let int_val: i32 = unsafe { std::mem::transmute(0x83333333u32) };
-    let uint_val: u32 = 0xFDDDDDDD;
-    let long_val: i64 = unsafe { std::mem::transmute(0x8444444444444444u64) }; // TODO: byte literal?
-    let ulong_val: u64 = 0xFCCCCCCCCCCCCCCCu64;
-    let float_val: f32 = 3.14159;
-    let double_val: f64 = 3.14159265359;
+#[cfg(test)]
+mod roundtrip_table {
+    use std::collections::HashMap;
 
-    let test_value_types_max: isize = 11;
-    let max_fields_per_object: flatbuffers::VOffsetT = 100;
-    let num_fuzz_objects: isize = 1000;  // The higher, the more thorough :)
+    extern crate flatbuffers;
+    extern crate quickcheck;
 
-    let mut builder = flatbuffers::FlatBufferBuilder::new();
-    let mut lcg = LCG::new();
+    use super::LCG;
 
-    let mut objects: Vec<flatbuffers::UOffsetT> = vec![0; num_fuzz_objects as usize];
+    #[test]
+    fn fuzz_table_of_mixed_scalars() {
+        // Values we're testing against: chosen to ensure no bits get chopped
+        // off anywhere, and also be different from eachother.
+        let bool_val: bool = true;
+        let char_val: i8 = -127;  // 0x81
+        let uchar_val: u8 = 0xFF;
+        let short_val: i16 = -32222;  // 0x8222;
+        let ushort_val: u16 = 0xFEEE;
+        let int_val: i32 = unsafe { ::std::mem::transmute(0x83333333u32) };
+        let uint_val: u32 = 0xFDDDDDDD;
+        let long_val: i64 = unsafe { ::std::mem::transmute(0x8444444444444444u64) }; // TODO: byte literal?
+        let ulong_val: u64 = 0xFCCCCCCCCCCCCCCCu64;
+        let float_val: f32 = 3.14159;
+        let double_val: f64 = 3.14159265359;
 
-    // Generate num_fuzz_objects random objects each consisting of
-    // fields_per_object fields, each of a random type.
-    for i in 0..(num_fuzz_objects as usize) {
-        let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
-        let start = builder.start_table(fields_per_object);
+        let test_value_types_max: isize = 11;
+        let max_fields_per_object: flatbuffers::VOffsetT = 100;
+        let num_fuzz_objects: isize = 1000;  // The higher, the more thorough :)
 
-        for j in 0..fields_per_object {
-            let choice = lcg.next() % (test_value_types_max as u64);
+        let mut builder = flatbuffers::FlatBufferBuilder::new();
+        let mut lcg = LCG::new();
 
-            let f = flatbuffers::field_index_to_field_offset(j);
+        let mut objects: Vec<flatbuffers::UOffsetT> = vec![0; num_fuzz_objects as usize];
 
-            match choice {
-                0 => {builder.push_slot_scalar::<bool>(f, bool_val, false);}
-                1 => {builder.push_slot_scalar::<i8>(f, char_val, 0);}
-                2 => {builder.push_slot_scalar::<u8>(f, uchar_val, 0);}
-                3 => {builder.push_slot_scalar::<i16>(f, short_val, 0);}
-                4 => {builder.push_slot_scalar::<u16>(f, ushort_val, 0);}
-                5 => {builder.push_slot_scalar::<i32>(f, int_val, 0);}
-                6 => {builder.push_slot_scalar::<u32>(f, uint_val, 0);}
-                7 => {builder.push_slot_scalar::<i64>(f, long_val, 0);}
-                8 => {builder.push_slot_scalar::<u64>(f, ulong_val, 0);}
-                9 => {builder.push_slot_scalar::<f32>(f, float_val, 0.0);}
-                10 => {builder.push_slot_scalar::<f64>(f, double_val, 0.0);}
-                _ => { panic!("unknown choice: {}", choice); }
+        // Generate num_fuzz_objects random objects each consisting of
+        // fields_per_object fields, each of a random type.
+        for i in 0..(num_fuzz_objects as usize) {
+            let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
+            let start = builder.start_table(fields_per_object);
+
+            for j in 0..fields_per_object {
+                let choice = lcg.next() % (test_value_types_max as u64);
+
+                let f = flatbuffers::field_index_to_field_offset(j);
+
+                match choice {
+                    0 => {builder.push_slot_scalar::<bool>(f, bool_val, false);}
+                    1 => {builder.push_slot_scalar::<i8>(f, char_val, 0);}
+                    2 => {builder.push_slot_scalar::<u8>(f, uchar_val, 0);}
+                    3 => {builder.push_slot_scalar::<i16>(f, short_val, 0);}
+                    4 => {builder.push_slot_scalar::<u16>(f, ushort_val, 0);}
+                    5 => {builder.push_slot_scalar::<i32>(f, int_val, 0);}
+                    6 => {builder.push_slot_scalar::<u32>(f, uint_val, 0);}
+                    7 => {builder.push_slot_scalar::<i64>(f, long_val, 0);}
+                    8 => {builder.push_slot_scalar::<u64>(f, ulong_val, 0);}
+                    9 => {builder.push_slot_scalar::<f32>(f, float_val, 0.0);}
+                    10 => {builder.push_slot_scalar::<f64>(f, double_val, 0.0);}
+                    _ => { panic!("unknown choice: {}", choice); }
+                }
+            }
+            objects[i] = builder.end_table(start).value();
+        }
+
+        // Do some bookkeeping to generate stats on fuzzes:
+        let mut stats: HashMap<u64, u64> = HashMap::new();
+        let mut values_generated: u64 = 0;
+
+        // Embrace PRNG determinism:
+        lcg.reset();
+
+        // Test that all objects we generated are readable and return the
+        // expected values. We generate random objects in the same order
+        // so this is deterministic:
+        for i in 0..(num_fuzz_objects as usize) {
+            let table = {
+                let buf = builder.get_active_buf_slice();
+                let loc = buf.len() as flatbuffers::UOffsetT - objects[i];
+                flatbuffers::Table::new(buf, loc as usize)
+            };
+
+            let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
+            for j in 0..fields_per_object {
+                let choice = lcg.next() % (test_value_types_max as u64);
+
+                *stats.entry(choice).or_insert(0) += 1;
+                values_generated += 1;
+
+                let f = flatbuffers::field_index_to_field_offset(j);
+
+                match choice {
+                    0 => { assert_eq!(bool_val, table.get::<bool>(f, Some(false)).unwrap()); }
+                    1 => { assert_eq!(char_val, table.get::<i8>(f, Some(0)).unwrap()); }
+                    2 => { assert_eq!(uchar_val, table.get::<u8>(f, Some(0)).unwrap()); }
+                    3 => { assert_eq!(short_val, table.get::<i16>(f, Some(0)).unwrap()); }
+                    4 => { assert_eq!(ushort_val, table.get::<u16>(f, Some(0)).unwrap()); }
+                    5 => { assert_eq!(int_val, table.get::<i32>(f, Some(0)).unwrap()); }
+                    6 => { assert_eq!(uint_val, table.get::<u32>(f, Some(0)).unwrap()); }
+                    7 => { assert_eq!(long_val, table.get::<i64>(f, Some(0)).unwrap()); }
+                    8 => { assert_eq!(ulong_val, table.get::<u64>(f, Some(0)).unwrap()); }
+                    9 => { assert_eq!(float_val, table.get::<f32>(f, Some(0.0)).unwrap()); }
+                    10 => { assert_eq!(double_val, table.get::<f64>(f, Some(0.0)).unwrap()); }
+                    _ => { panic!("unknown choice: {}", choice); }
+                }
             }
         }
-        objects[i] = builder.end_table(start).value();
-    }
 
-    // Do some bookkeeping to generate stats on fuzzes:
-    let mut stats: HashMap<u64, u64> = HashMap::new();
-    let mut values_generated: u64 = 0;
-
-    // Embrace PRNG determinism:
-    lcg.reset();
-
-    // Test that all objects we generated are readable and return the
-    // expected values. We generate random objects in the same order
-    // so this is deterministic:
-    for i in 0..(num_fuzz_objects as usize) {
-        let table = {
-            let buf = builder.get_active_buf_slice();
-            let loc = buf.len() as flatbuffers::UOffsetT - objects[i];
-            flatbuffers::Table::new(buf, loc as usize)
-        };
-
-        let fields_per_object = (lcg.next() % (max_fields_per_object as u64)) as flatbuffers::VOffsetT;
-        for j in 0..fields_per_object {
-            let choice = lcg.next() % (test_value_types_max as u64);
-
-            *stats.entry(choice).or_insert(0) += 1;
-            values_generated += 1;
-
-            let f = flatbuffers::field_index_to_field_offset(j);
-
-            match choice {
-                0 => { assert_eq!(bool_val, table.get::<bool>(f, Some(false)).unwrap()); }
-                1 => { assert_eq!(char_val, table.get::<i8>(f, Some(0)).unwrap()); }
-                2 => { assert_eq!(uchar_val, table.get::<u8>(f, Some(0)).unwrap()); }
-                3 => { assert_eq!(short_val, table.get::<i16>(f, Some(0)).unwrap()); }
-                4 => { assert_eq!(ushort_val, table.get::<u16>(f, Some(0)).unwrap()); }
-                5 => { assert_eq!(int_val, table.get::<i32>(f, Some(0)).unwrap()); }
-                6 => { assert_eq!(uint_val, table.get::<u32>(f, Some(0)).unwrap()); }
-                7 => { assert_eq!(long_val, table.get::<i64>(f, Some(0)).unwrap()); }
-                8 => { assert_eq!(ulong_val, table.get::<u64>(f, Some(0)).unwrap()); }
-                9 => { assert_eq!(float_val, table.get::<f32>(f, Some(0.0)).unwrap()); }
-                10 => { assert_eq!(double_val, table.get::<f64>(f, Some(0.0)).unwrap()); }
-                _ => { panic!("unknown choice: {}", choice); }
-            }
+        // Assert that we tested all the fuzz cases enough:
+        let min_tests_per_choice = 1000;
+        assert!(values_generated > 0);
+        assert!(min_tests_per_choice > 0);
+        for i in 0..test_value_types_max as u64 {
+            assert!(stats[&i] >= min_tests_per_choice,
+                    format!("inadequately-tested fuzz case: {}", i));
         }
     }
 
-    // Assert that we tested all the fuzz cases enough:
-    let min_tests_per_choice = 1000;
-    assert!(values_generated > 0);
-    assert!(min_tests_per_choice > 0);
-    for i in 0..test_value_types_max as u64 {
-        assert!(stats[&i] >= min_tests_per_choice,
-                format!("inadequately-tested fuzz case: {}", i));
+    #[test]
+    fn fuzz_table_of_strings() {
+        fn prop(vec: Vec<String>) {
+            use flatbuffers::field_index_to_field_offset as fi2fo;
+            use flatbuffers::Follow;
+
+            let xs = &vec[..];
+
+            // build
+            let mut b = flatbuffers::FlatBufferBuilder::new();
+            let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_string(&s[..])).collect();
+            let table_start = b.start_table(xs.len() as flatbuffers::VOffsetT);
+
+            for i in 0..xs.len() {
+                b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+            }
+            let root = b.end_table(table_start);
+            b.finish_minimal(root);
+
+            // use
+            let buf = b.finished_bytes();
+            let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(buf, 0);
+
+            for i in 0..xs.len() {
+                let v = tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(i as flatbuffers::VOffsetT), None);
+                assert_eq!(v, Some(&xs[i][..]));
+            }
+        }
+        let n = 20;
+        quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<String>));
     }
+
+    mod vectors_of_scalars {
+        extern crate flatbuffers;
+        extern crate quickcheck;
+    const N: u64 = 20;
+    fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::EndianScalar + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
+        use flatbuffers::field_index_to_field_offset as fi2fo;
+        use flatbuffers::Follow;
+
+        // build
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let mut offs = vec![];
+        for vec in &vecs {
+            b.start_vector(vec.len(), ::std::mem::size_of::<T>());
+
+            let xs = &vec[..];
+            for i in (0..xs.len()).rev() {
+                b.push_element_scalar::<T>(xs[i]);
+            }
+            let vecend = b.end_vector::<T>(xs.len());
+            offs.push(vecend);
+        }
+
+        let table_start = b.start_table(vecs.len() as flatbuffers::VOffsetT);
+
+        for i in 0..vecs.len() {
+            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
+        }
+        let root = b.end_table(table_start);
+        b.finish_minimal(root);
+
+        // use
+        let buf = b.finished_bytes();
+        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(buf, 0);
+
+        for i in 0..vecs.len() {
+            let got = tab.get::<flatbuffers::ForwardsUOffset<&[T]>>(fi2fo(i as flatbuffers::VOffsetT), None);
+            assert!(got.is_some());
+            let got2 = got.unwrap();
+            assert_eq!(&vecs[i][..], got2);
+        }
+    }
+
+    #[test]
+    fn fuzz_bool() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<bool>>)); }
+
+    #[test]
+    fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u8>>)); }
+    #[test]
+    fn fuzz_u16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u16>>)); }
+    #[test]
+    fn fuzz_u32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u32>>)); }
+    #[test]
+    fn fuzz_u64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u64>>)); }
+
+    #[test]
+    fn fuzz_i8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u8>>)); }
+    #[test]
+    fn fuzz_i16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u16>>)); }
+    #[test]
+    fn fuzz_i32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u32>>)); }
+    #[test]
+    fn fuzz_i64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<u64>>)); }
+
+    #[test]
+    fn fuzz_f32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<f32>>)); }
+    #[test]
+    fn fuzz_f64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop as fn(Vec<Vec<f64>>)); }
+}
 }
 
 //void EndianSwapTest() {
@@ -846,7 +955,7 @@ fn fuzz_scalar_table_serialization() {
 //}
 
 #[cfg(test)]
-mod roundtrips_scalars {
+mod roundtrip_scalars {
     extern crate flatbuffers;
     extern crate quickcheck;
 
@@ -1067,63 +1176,6 @@ fn table_of_byte_strings_fuzz() {
 
     let n = 20;
     quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<_>));
-}
-
-#[test]
-fn build_and_use_table_with_vector_of_scalars_fuzz() {
-    fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::EndianScalar + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
-        use flatbuffers::field_index_to_field_offset as fi2fo;
-        use flatbuffers::Follow;
-
-        // build
-        let mut b = flatbuffers::FlatBufferBuilder::new();
-        let mut offs = vec![];
-        for vec in &vecs {
-            b.start_vector(vec.len(), ::std::mem::size_of::<T>());
-
-            let xs = &vec[..];
-            for i in (0..xs.len()).rev() {
-                b.push_element_scalar::<T>(xs[i]);
-            }
-            let vecend = b.end_vector::<T>(xs.len());
-            offs.push(vecend);
-        }
-
-        let table_start = b.start_table(vecs.len() as flatbuffers::VOffsetT);
-
-        for i in 0..vecs.len() {
-            b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), offs[i]);
-        }
-        let root = b.end_table(table_start);
-        b.finish_minimal(root);
-
-        // use
-        let buf = b.finished_bytes();
-        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(buf, 0);
-
-        for i in 0..vecs.len() {
-            let got = tab.get::<flatbuffers::ForwardsUOffset<&[T]>>(fi2fo(i as flatbuffers::VOffsetT), None);
-            assert!(got.is_some());
-            let got2 = got.unwrap();
-            assert_eq!(&vecs[i][..], got2);
-        }
-    }
-    let n = 10;
-
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<bool>>));
-
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u16>>));
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u32>>));
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u64>>));
-
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u8>>));
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u16>>));
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u32>>));
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<u64>>));
-
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<f32>>));
-    quickcheck::QuickCheck::new().max_tests(n).quickcheck(prop as fn(Vec<Vec<f64>>));
 }
 
 #[cfg(test)]
