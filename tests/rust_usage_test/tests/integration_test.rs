@@ -586,7 +586,7 @@ mod roundtrip_vectors {
 
         const N: u64 = 20;
 
-        fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::ElementScalar>(xs: Vec<T>) {
+        fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::EndianScalar>(xs: Vec<T>) {
             use flatbuffers::Follow;
 
             let mut b = flatbuffers::FlatBufferBuilder::new();
@@ -599,7 +599,7 @@ mod roundtrip_vectors {
 
             let buf = b.finished_bytes();
 
-            let got = <flatbuffers::ForwardsU32Offset<&[T]>>::follow(buf, 0);
+            let got = <flatbuffers::ForwardsUOffset<&[T]>>::follow(buf, 0);
             assert_eq!(got, &xs[..]);
         }
 
@@ -659,7 +659,7 @@ mod roundtrip_vectors {
             b.finish_minimal(vecend);
 
             let buf = b.finished_bytes();
-            let got = <flatbuffers::ForwardsU32Offset<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&str>>>>::follow(buf, 0);
+            let got = <flatbuffers::ForwardsUOffset<flatbuffers::Vector<flatbuffers::ForwardsUOffset<&str>>>>::follow(buf, 0);
 
             assert_eq!(got.len(), xs.len());
             for i in 0..xs.len() {
@@ -867,7 +867,7 @@ fn test_emplace_and_read_scalar_fuzz() {
             assert_eq!(n, m);
         }
 
-    //fn doit<T: flatbuffers::ElementScalar>() {
+    //fn doit<T: flatbuffers::EndianScalar>() {
     //    let mut lcg = LCG::new();
     //    //let mut rng = rand::thread_rng();
 
@@ -1042,10 +1042,10 @@ fn table_of_strings_fuzz() {
 
         // use
         let buf = b.finished_bytes();
-        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(buf, 0);
+        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(buf, 0);
 
         for i in 0..xs.len() {
-            let v = tab.get::<flatbuffers::ForwardsU32Offset<&str>>(fi2fo(i as flatbuffers::VOffsetT), None);
+            let v = tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(i as flatbuffers::VOffsetT), None);
             assert_eq!(v, Some(&xs[i][..]));
         }
     }
@@ -1074,10 +1074,10 @@ fn table_of_byte_strings_fuzz() {
 
         // use
         let buf = b.finished_bytes();
-        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(buf, 0);
+        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(buf, 0);
 
         for i in 0..xs.len() {
-            let v = tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(i as flatbuffers::VOffsetT), None);
+            let v = tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(i as flatbuffers::VOffsetT), None);
             assert_eq!(v, Some(&xs[i][..]));
         }
     }
@@ -1089,7 +1089,7 @@ fn table_of_byte_strings_fuzz() {
 
 #[test]
 fn build_and_use_table_with_vector_of_scalars_fuzz() {
-    fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::ElementScalar + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
+    fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::EndianScalar + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
         use flatbuffers::field_index_to_field_offset as fi2fo;
         use flatbuffers::Follow;
 
@@ -1117,10 +1117,10 @@ fn build_and_use_table_with_vector_of_scalars_fuzz() {
 
         // use
         let buf = b.finished_bytes();
-        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(buf, 0);
+        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(buf, 0);
 
         for i in 0..vecs.len() {
-            let got = tab.get::<flatbuffers::ForwardsU32Offset<&[T]>>(fi2fo(i as flatbuffers::VOffsetT), None);
+            let got = tab.get::<flatbuffers::ForwardsUOffset<&[T]>>(fi2fo(i as flatbuffers::VOffsetT), None);
             assert!(got.is_some());
             let got2 = got.unwrap();
             assert_eq!(&vecs[i][..], got2);
@@ -1233,7 +1233,7 @@ mod follow_impls {
     #[test]
     fn vector_of_offset_to_string_elements() {
         let buf: Vec<u8> = vec![/* vec len */ 1, 0, 0, 0, /* offset to string */ 4, 0, 0, 0, /* str length */ 3, 0, 0, 0, 'f' as u8, 'o' as u8, 'o' as u8, 0];
-        let s: flatbuffers::FollowStart<flatbuffers::Vector<flatbuffers::ForwardsU32Offset<&str>>> = flatbuffers::FollowStart::new();
+        let s: flatbuffers::FollowStart<flatbuffers::Vector<flatbuffers::ForwardsUOffset<&str>>> = flatbuffers::FollowStart::new();
         assert_eq!(s.self_follow(&buf[..], 0).len(), 1);
         assert_eq!(s.self_follow(&buf[..], 0).get(0), "foo");
     }
@@ -1282,7 +1282,7 @@ mod follow_impls {
 	    // enter table
 	    8, 0, 0, 0, // vtable location
 	];
-        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&buf[..], 0), flatbuffers::Table::new(&buf[..], 12));
     }
 
@@ -1299,7 +1299,7 @@ mod follow_impls {
 	    10, 0, 0, 0, // vtable location
 	    0, 99 // value (with padding)
 	];
-        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
         assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(99));
     }
@@ -1315,7 +1315,7 @@ mod follow_impls {
 	    // enter table
 	    8, 0, 0, 0, // vtable location
 	];
-        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
         assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(123));
     }
@@ -1332,7 +1332,7 @@ mod follow_impls {
 	    // enter table
 	    10, 0, 0, 0, // vtable location
 	];
-        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsU32Offset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
+        let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
         assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(123));
     }
@@ -1354,10 +1354,10 @@ mod follow_impls {
 	    // enter string
 	    3, 0, 0, 0, 109, 111, 111, 0 // string length and contents
 	];
-        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(&buf[..], 0);
-        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&str>>(fi2fo(0), None), Some("moo"));
-        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(0), None), Some(&vec![109, 111, 111][..]));
-        let v = tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<u8>>>(fi2fo(0), None);
+        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(&buf[..], 0);
+        assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(0), None), Some("moo"));
+        assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(0), None), Some(&vec![109, 111, 111][..]));
+        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), None);
         assert_eq!(v.map(|x| x.into_slice_unfollowed()), Some(&vec![109, 111, 111][..]));
     }
 
@@ -1372,13 +1372,13 @@ mod follow_impls {
 	    // enter table
 	    8, 0, 0, 0, // vtable location
 	];
-        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(&buf[..], 0);
-        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&str>>(fi2fo(0), Some("abc")), Some("abc"));
-        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(0), Some(&vec![70, 71, 72][..])), Some(&vec![70, 71, 72][..]));
+        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(&buf[..], 0);
+        assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(0), Some("abc")), Some("abc"));
+        assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(0), Some(&vec![70, 71, 72][..])), Some(&vec![70, 71, 72][..]));
 
         let default_vec_buf: Vec<u8> = vec![3, 0, 0, 0, 70, 71, 72, 0];
         let default_vec = flatbuffers::Vector::new(&default_vec_buf[..], 0);
-        let v = tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec));
+        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec));
         assert_eq!(v.map(|x| x.into_slice_unfollowed()), Some(&vec![70, 71, 72][..]));
     }
 
@@ -1394,13 +1394,13 @@ mod follow_impls {
 	    // enter table
 	    10, 0, 0, 0, // vtable location
 	];
-        let tab = <flatbuffers::ForwardsU32Offset<flatbuffers::Table>>::follow(&buf[..], 0);
-        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&str>>(fi2fo(0), Some("abc")), Some("abc"));
-        assert_eq!(tab.get::<flatbuffers::ForwardsU32Offset<&[u8]>>(fi2fo(0), Some(&vec![70, 71, 72][..])), Some(&vec![70, 71, 72][..]));
+        let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(&buf[..], 0);
+        assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(0), Some("abc")), Some("abc"));
+        assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(0), Some(&vec![70, 71, 72][..])), Some(&vec![70, 71, 72][..]));
 
         let default_vec_buf: Vec<u8> = vec![3, 0, 0, 0, 70, 71, 72, 0];
         let default_vec = flatbuffers::Vector::new(&default_vec_buf[..], 0);
-        let v = tab.get::<flatbuffers::ForwardsU32Offset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec));
+        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec));
         assert!(v.is_some());
         assert_eq!(v.unwrap().as_slice_unfollowed(), &vec![70, 71, 72][..]);
     }

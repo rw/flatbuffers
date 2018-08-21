@@ -10,6 +10,7 @@ pub mod namespace_a {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
+  use self::flatbuffers::EndianScalar;
 pub mod namespace_b {
   #![allow(dead_code)]
   #![allow(unused_imports)]
@@ -19,6 +20,7 @@ pub mod namespace_b {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
+  use self::flatbuffers::EndianScalar;
 
 #[allow(non_camel_case_types)]
 #[repr(i8)]
@@ -29,6 +31,18 @@ pub enum EnumInNestedNS {
   C = 2
 }
 
+impl flatbuffers::EndianScalar for EnumInNestedNS {
+    fn to_little_endian(self) -> Self {
+        self
+        //i8::to_le(self as i8) as Self
+    }
+    fn from_little_endian(self) -> Self {
+        self
+        //i8::from_le(self as i8) as Self
+    }
+}
+
+#[allow(non_camel_case_types)]
 const ENUM_VALUES_ENUM_IN_NESTED_N_S:[EnumInNestedNS; 3] = [
   EnumInNestedNS::A,
   EnumInNestedNS::B,
@@ -66,16 +80,16 @@ impl StructInNestedNS {
   }
   pub fn new(_a: i32, _b: i32) -> Self {
     StructInNestedNS {
-      a_: flatbuffers::endian_scalar(_a),
-      b_: flatbuffers::endian_scalar(_b),
+      a_: _a.to_little_endian(),
+      b_: _b.to_little_endian(),
 
     }
   }
   pub fn a(&self) -> i32 {
-    flatbuffers::endian_scalar(self.a_)
+    self.a_.from_little_endian()
   }
   pub fn b(&self) -> i32 {
-    flatbuffers::endian_scalar(self.b_)
+    self.b_.from_little_endian()
   }
 }
 // STRUCT_END(StructInNestedNS, 8);

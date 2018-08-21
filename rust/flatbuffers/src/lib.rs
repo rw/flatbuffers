@@ -10,21 +10,21 @@ pub enum TableOffset {}
 pub struct UnionMarker;
 
 
-pub trait ElementScalar : Sized + PartialEq + Copy + Clone {
+pub trait EndianScalar : Sized + PartialEq + Copy + Clone {
     fn to_little_endian(self) -> Self;
     fn from_little_endian(self) -> Self;
 }
-impl ElementScalar for bool { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
-impl ElementScalar for u8 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
-impl ElementScalar for i8 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl ElementScalar for u16 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl ElementScalar for i16 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl ElementScalar for u32 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl ElementScalar for i32 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl ElementScalar for u64 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl ElementScalar for i64 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl ElementScalar for f32 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
-impl ElementScalar for f64 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
+impl EndianScalar for bool { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
+impl EndianScalar for u8 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
+impl EndianScalar for i8 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
+impl EndianScalar for u16 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
+impl EndianScalar for i16 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
+impl EndianScalar for u32 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
+impl EndianScalar for i32 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
+impl EndianScalar for u64 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
+impl EndianScalar for i64 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
+impl EndianScalar for f32 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
+impl EndianScalar for f64 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
 
 
 pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
@@ -88,7 +88,7 @@ pub fn to_bytes<'a, T: 'a + Sized>(t: &'a T) -> &'a [u8] {
         std::slice::from_raw_parts((t as *const T) as *const u8, sz)
     }
 }
-pub fn emplace_scalar<T: ElementScalar>(s: &mut [u8], x: T) {
+pub fn emplace_scalar<T: EndianScalar>(s: &mut [u8], x: T) {
     let sz = std::mem::size_of::<T>();
     debug_assert!(s.len() >= sz);
     let mut_ptr = s.as_mut_ptr() as *mut T;
@@ -97,11 +97,11 @@ pub fn emplace_scalar<T: ElementScalar>(s: &mut [u8], x: T) {
         *mut_ptr = val;
     }
 }
-pub fn read_scalar_at<T: ElementScalar>(x: &[u8], loc: usize) -> T {
+pub fn read_scalar_at<T: EndianScalar>(x: &[u8], loc: usize) -> T {
     let buf = &x[loc..loc+std::mem::size_of::<T>()];
     read_scalar(buf)
 }
-pub fn read_scalar<T: ElementScalar>(x: &[u8]) -> T {
+pub fn read_scalar<T: EndianScalar>(x: &[u8]) -> T {
     let p = x.as_ptr();
     let x = unsafe {
         let p2 = std::mem::transmute::<*const u8, *const T>(p);
@@ -289,21 +289,21 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
     }
-    pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsU32Offset<&'fbb str>>> {
+    pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
         // TODO(rw): write these in-place, then swap their order, to avoid a
         // heap allocation.
         let offsets: Vec<Offset<&str>> = xs.iter().rev().map(|s| self.create_string(s)).rev().collect();
         self.create_vector_of_reverse_offsets(&offsets[..])
     }
-    pub fn create_vector_of_reverse_offsets<'a, 'b, 'c, T: 'fbb>(&'a mut self, items: &'b [Offset<T>]) -> Offset<Vector<'fbb, ForwardsU32Offset<T>>> {
+    pub fn create_vector_of_reverse_offsets<'a, 'b, 'c, T: 'fbb>(&'a mut self, items: &'b [Offset<T>]) -> Offset<Vector<'fbb, ForwardsUOffset<T>>> {
         let elemsize = std::mem::size_of::<Offset<T>>();
         self.start_vector(elemsize, items.len());
         for o in items.iter().rev() {
             self.push_element_scalar_indirect_uoffset(o.value());
         }
-        Offset::new(self.end_vector::<Offset<Vector<'fbb, ForwardsU32Offset<T>>>>(items.len()).value())
+        Offset::new(self.end_vector::<Offset<Vector<'fbb, ForwardsUOffset<T>>>>(items.len()).value())
     }
-    pub fn create_vector_of_scalars<T: ElementScalar + 'fbb>(&mut self, items: &[T]) -> Offset<Vector<'fbb, T>> {
+    pub fn create_vector_of_scalars<T: EndianScalar + 'fbb>(&mut self, items: &[T]) -> Offset<Vector<'fbb, T>> {
         // TODO(rw): if host is little-endian, just do a memcpy
         let elemsize = std::mem::size_of::<T>();
         self.start_vector(elemsize, items.len());
@@ -407,7 +407,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let vt_use = {
             let mut ret: usize = self.get_size();
 
-            for &vt_rev_pos in self.written_vtable_revpos.iter() {
+            // LIFO order
+            for &vt_rev_pos in self.written_vtable_revpos.iter().rev() {
                 let eq = {
                     let this_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx };
                     let other_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx + self.get_size() - vt_rev_pos as usize };
@@ -498,19 +499,19 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let s = self.get_size();
         self.fill(padding_bytes(s, elem_size));
     }
-    pub fn push_element_scalar<T: ElementScalar>(&mut self, t: T) -> UOffsetT {
+    pub fn push_element_scalar<T: EndianScalar>(&mut self, t: T) -> UOffsetT {
         self.align(std::mem::size_of::<T>());
         self.push_small(t);
         self.get_size() as UOffsetT
     }
-    pub fn place_element_scalar<T: ElementScalar>(&mut self, t: T) {
+    pub fn place_element_scalar<T: EndianScalar>(&mut self, t: T) {
         //let t = t.to_le(); // convert to little-endian
         self.cur_idx -= std::mem::size_of::<T>();
         let cur_idx = self.cur_idx;
         emplace_scalar(&mut self.owned_buf[cur_idx..], t);
 
     }
-    fn push_small<T: ElementScalar>(&mut self, x: T) {
+    fn push_small<T: EndianScalar>(&mut self, x: T) {
         self.make_space(std::mem::size_of::<T>());
         emplace_scalar(&mut self.owned_buf[self.cur_idx..], x);
     }
@@ -561,7 +562,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.track_field(slotoff, off);
         //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
-    pub fn push_slot_scalar<T: ElementScalar + std::fmt::Display>(&mut self, slotoff: VOffsetT, x: T, default: T) {
+    pub fn push_slot_scalar<T: EndianScalar + std::fmt::Display>(&mut self, slotoff: VOffsetT, x: T, default: T) {
         if x != default {
             let off = self.push_element_scalar(x);
             self.track_field(slotoff, off);
@@ -624,11 +625,6 @@ impl<'a, T: 'a> Offset<T> {
     }
 }
 
-pub fn endian_scalar<T>(x: T) -> T {
-    x
-    //x.to_le()
-}
-
 #[derive(Debug)]
 pub struct FollowStart<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> FollowStart<T> {
@@ -647,13 +643,13 @@ impl<'a, T: Follow<'a>> Follow<'a> for FollowStart<T> {
 }
 
 #[derive(Debug)]
-pub struct ForwardsU32Offset<T>(u32, PhantomData<T>); // data unused
+pub struct ForwardsUOffset<T>(UOffsetT, PhantomData<T>); // data unused
 
 #[derive(Debug)]
-pub struct ForwardsU16Offset<T>(u16, PhantomData<T>); // data unused
+pub struct ForwardsVOffset<T>(VOffsetT, PhantomData<T>); // data unused
 
 #[derive(Debug)]
-pub struct BackwardsI32Offset<T>(i32, PhantomData<T>); // data unused
+pub struct BackwardsSOffset<T>(SOffsetT, PhantomData<T>); // data unused
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Table<'a> {
@@ -674,10 +670,9 @@ impl<'a> Table<'a> {
     }
     #[inline]
     pub fn vtable(&'a self) -> VTable<'a> {
-        <BackwardsI32Offset<VTable<'a>>>::follow(self.buf, self.loc)
+        <BackwardsSOffset<VTable<'a>>>::follow(self.buf, self.loc)
     }
     pub fn get<T: Follow<'a> + 'a>(&'a self, slot_byte_loc: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
-        //debug_assert!(slot_byte_loc as usize >= SIZE_VOFFSET + SIZE_VOFFSET);
         let o = self.vtable().get(slot_byte_loc) as usize;
         if o == 0 {
             return default;
@@ -695,7 +690,6 @@ pub struct VTable<'a> {
 impl<'a> Follow<'a> for VTable<'a> {
     type Inner = VTable<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        //println!("entering follow for VTable with {:?}", &buf[loc..]);
         VTable{buf: buf, loc: loc}
     }
 }
@@ -713,7 +707,7 @@ impl<'a> VTable<'a> {
     pub fn num_bytes(&self) -> usize {
         read_scalar_at::<VOffsetT>(self.buf, self.loc) as usize
     }
-    pub fn table_inline_num_bytes(&self) -> usize {
+    pub fn object_inline_num_bytes(&self) -> usize {
         let n = read_scalar_at::<VOffsetT>(self.buf, self.loc + SIZE_VOFFSET);
         n as usize
     }
@@ -749,14 +743,12 @@ impl<'a> VTableForWriting<'a> {
     }
     #[inline]
     pub fn write_vtable_byte_length(&mut self, n: VOffsetT) {
-        //println!("write_vtable_byte_length: {}", n);
         emplace_scalar::<VOffsetT>(&mut self.buf[..SIZE_VOFFSET], n);
-        assert_eq!(n as usize, self.buf.len());
+        debug_assert_eq!(n as usize, self.buf.len());
     }
 
     #[inline]
     pub fn write_object_inline_size(&mut self, n: VOffsetT) {
-       // println!("write_object_inline_size: {}", n);
         emplace_scalar::<VOffsetT>(&mut self.buf[SIZE_VOFFSET..2*SIZE_VOFFSET], n);
     }
 
@@ -777,7 +769,7 @@ impl<'a> VTableForWriting<'a> {
         let len = self.buf.len();
         let p = self.buf.as_mut_ptr() as *mut u8;
         unsafe {
-            std::ptr::write_bytes(p, 199, len);
+            std::ptr::write_bytes(p, 0, len);
         }
     }
 }
@@ -788,30 +780,27 @@ pub trait Follow<'a> {
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner;
 }
 
-impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU32Offset<T> {
+impl<'a, T: Follow<'a>> Follow<'a> for ForwardsUOffset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-       //println!("entering follow for ForwardsU32Offset<T> with {:?}", &buf[loc..]);
         let slice = &buf[loc..loc + SIZE_UOFFSET];
         let off = read_scalar::<u32>(slice) as usize;
         T::follow(buf, loc + off)
     }
 }
 
-impl<'a, T: Follow<'a>> Follow<'a> for ForwardsU16Offset<T> {
+impl<'a, T: Follow<'a>> Follow<'a> for ForwardsVOffset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-       //println!("entering follow for ForwardsU16Offset<T> with {:?}", &buf[loc..]);
-        let slice = &buf[loc..loc + 2];
+        let slice = &buf[loc..loc + SIZE_VOFFSET];
         let off = read_scalar::<u16>(slice) as usize;
         T::follow(buf, loc + off)
     }
 }
-impl<'a, T: Follow<'a>> Follow<'a> for BackwardsI32Offset<T> {
+impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        //println!("entering follow for ForwardsI32Offset<T> with {:?}", &buf[loc..]);
-        let slice = &buf[loc..loc + 4];
+        let slice = &buf[loc..loc + SIZE_SOFFSET];
         let off = read_scalar::<i32>(slice);
         T::follow(buf, (loc as i32 - off) as usize)
     }
@@ -929,7 +918,7 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
 }
 
 
-// Implementing Follow using trait bounds (ElementScalar) causes them to
+// Implementing Follow using trait bounds (EndianScalar) causes them to
 // conflict with the Sized impl. So, they are implemented here on concrete types.
 impl<'a> Follow<'a> for bool { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
 impl<'a> Follow<'a> for u8   { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
@@ -950,10 +939,10 @@ pub fn lifted_follow<'a, T: Follow<'a>>(buf: &'a [u8], loc: usize) -> T::Inner {
     T::follow(buf, loc)
 }
 pub fn get_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
-    <ForwardsU32Offset<T>>::follow(data, 0)
+    <ForwardsUOffset<T>>::follow(data, 0)
 }
 pub fn get_size_prefixed_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
-    <SkipSizePrefix<ForwardsU32Offset<T>>>::follow(data, 0)
+    <SkipSizePrefix<ForwardsUOffset<T>>>::follow(data, 0)
 }
 pub fn buffer_has_identifier(data: &[u8], ident: &str, size_prefixed: bool) -> bool {
     assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);

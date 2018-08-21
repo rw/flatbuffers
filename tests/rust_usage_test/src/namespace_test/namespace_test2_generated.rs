@@ -12,6 +12,7 @@ pub mod namespace_a {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
+  use self::flatbuffers::EndianScalar;
 
 pub enum TableInFirstNSOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -49,7 +50,7 @@ impl<'a> TableInFirstNS<'a> /* private flatbuffers::Table */ {
 
   #[inline]
   pub fn foo_table(&'a self) -> Option<NamespaceB::TableInNestedNS<'a>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<NamespaceB::TableInNestedNS<'a>>>(TableInFirstNS::VT_FOO_TABLE, None)
+    self._tab.get::<flatbuffers::ForwardsUOffset<NamespaceB::TableInNestedNS<'a>>>(TableInFirstNS::VT_FOO_TABLE, None)
   }
   #[inline]
   pub fn foo_enum(&'a self) -> NamespaceB::EnumInNestedNS {
@@ -137,7 +138,7 @@ impl<'a> SecondTableInA<'a> /* private flatbuffers::Table */ {
 
   #[inline]
   pub fn refer_to_c(&'a self) -> Option<super::NamespaceC::TableInC<'a>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<super::NamespaceC::TableInC<'a>>>(SecondTableInA::VT_REFER_TO_C, None)
+    self._tab.get::<flatbuffers::ForwardsUOffset<super::NamespaceC::TableInC<'a>>>(SecondTableInA::VT_REFER_TO_C, None)
   }
 }
 
@@ -186,6 +187,7 @@ pub mod namespace_c {
   use std::cmp::Ordering;
 
   extern crate flatbuffers;
+  use self::flatbuffers::EndianScalar;
 
 pub enum TableInCOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -221,11 +223,11 @@ impl<'a> TableInC<'a> /* private flatbuffers::Table */ {
 
   #[inline]
   pub fn refer_to_a1(&'a self) -> Option<super::NamespaceA::TableInFirstNS<'a>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<super::NamespaceA::TableInFirstNS<'a>>>(TableInC::VT_REFER_TO_A1, None)
+    self._tab.get::<flatbuffers::ForwardsUOffset<super::NamespaceA::TableInFirstNS<'a>>>(TableInC::VT_REFER_TO_A1, None)
   }
   #[inline]
   pub fn refer_to_a2(&'a self) -> Option<super::NamespaceA::SecondTableInA<'a>> {
-    self._tab.get::<flatbuffers::ForwardsU32Offset<super::NamespaceA::SecondTableInA<'a>>>(TableInC::VT_REFER_TO_A2, None)
+    self._tab.get::<flatbuffers::ForwardsUOffset<super::NamespaceA::SecondTableInA<'a>>>(TableInC::VT_REFER_TO_A2, None)
   }
 }
 
