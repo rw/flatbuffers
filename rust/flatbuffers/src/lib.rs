@@ -76,10 +76,7 @@ pub fn field_index_to_field_offset(field_id: VOffsetT) -> VOffsetT {
 }
 pub fn field_offset_to_field_index(field_o: VOffsetT) -> VOffsetT {
     debug_assert!(field_o >= 2);
-    //if field_o == 0 {
-    //    return 0;
-    //}
-    let fixed_fields = 2;  // Vtable size and Object Size.
+    let fixed_fields = 2;  // VTable size and Object Size.
     (field_o / (SIZE_VOFFSET as VOffsetT)) - fixed_fields
 }
 pub fn to_bytes<'a, T: 'a + Sized>(t: &'a T) -> &'a [u8] {
@@ -91,22 +88,29 @@ pub fn to_bytes<'a, T: 'a + Sized>(t: &'a T) -> &'a [u8] {
 pub fn emplace_scalar<T: EndianScalar>(s: &mut [u8], x: T) {
     let sz = std::mem::size_of::<T>();
     debug_assert!(s.len() >= sz);
+
     let mut_ptr = s.as_mut_ptr() as *mut T;
     let val = x.to_little_endian();
     unsafe {
         *mut_ptr = val;
     }
 }
-pub fn read_scalar_at<T: EndianScalar>(x: &[u8], loc: usize) -> T {
-    let buf = &x[loc..loc+std::mem::size_of::<T>()];
+pub fn read_scalar_at<T: EndianScalar>(s: &[u8], loc: usize) -> T {
+    let buf = &s[loc..loc+std::mem::size_of::<T>()];
     read_scalar(buf)
 }
-pub fn read_scalar<T: EndianScalar>(x: &[u8]) -> T {
-    let p = x.as_ptr();
+pub fn read_scalar<T: EndianScalar>(s: &[u8]) -> T {
+    let sz = std::mem::size_of::<T>();
+    debug_assert!(s.len() >= sz);
+
+    let p = s.as_ptr() as *const T;
     let x = unsafe {
-        let p2 = std::mem::transmute::<*const u8, *const T>(p);
-        (*p2).clone()
+        *p
     };
+
+    // TODO(rw): is this clone necessary?
+    let x = x.clone();
+
     x.from_little_endian()
 }
 

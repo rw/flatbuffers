@@ -164,14 +164,25 @@ pub enum Color {
   Blue = 8
 }
 
+const ENUM_MIN_COLOR:i8 = 1;
+const ENUM_MAX_COLOR:i8 = 8;
+
+impl<'a> flatbuffers::Follow<'a> for Color {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        flatbuffers::read_scalar_at::<Self>(buf, loc)
+    }
+}
 impl flatbuffers::EndianScalar for Color {
     fn to_little_endian(self) -> Self {
-        self
-        //i8::to_le(self as i8) as Self
+        let n = i8::to_le(self as i8);
+        let ptr = (&n) as *const i8 as *const Color;
+        unsafe { *ptr }
     }
     fn from_little_endian(self) -> Self {
-        self
-        //i8::from_le(self as i8) as Self
+        let n = i8::from_le(self as i8);
+        let ptr = (&n) as *const i8 as *const Color;
+        unsafe { *ptr }
     }
 }
 
@@ -209,14 +220,25 @@ pub enum Any {
   MyGame_Example2_Monster = 3
 }
 
+const ENUM_MIN_ANY:u8 = 0;
+const ENUM_MAX_ANY:u8 = 3;
+
+impl<'a> flatbuffers::Follow<'a> for Any {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        flatbuffers::read_scalar_at::<Self>(buf, loc)
+    }
+}
 impl flatbuffers::EndianScalar for Any {
     fn to_little_endian(self) -> Self {
-        self
-        //u8::to_le(self as u8) as Self
+        let n = u8::to_le(self as u8);
+        let ptr = (&n) as *const u8 as *const Any;
+        unsafe { *ptr }
     }
     fn from_little_endian(self) -> Self {
-        self
-        //u8::from_le(self as u8) as Self
+        let n = u8::from_le(self as u8);
+        let ptr = (&n) as *const u8 as *const Any;
+        unsafe { *ptr }
     }
 }
 
@@ -244,7 +266,7 @@ pub fn enum_name_any(e: Any) -> &'static str {
 pub struct AnyUnionTableOffset {}
 // MANUALLY_ALIGNED_STRUCT(2)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default, Debug, PartialEq)]
+#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
 pub struct Test {
   a_: i16,
   b_: i8,
@@ -280,14 +302,14 @@ impl Test {
 
 // MANUALLY_ALIGNED_STRUCT(16)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default, Debug, PartialEq)]
+#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
 pub struct Vec3 {
   x_: f32,
   y_: f32,
   z_: f32,
   padding0__: u32,
   test1_: f64,
-  test2_: i8,
+  test2_: Color,
   padding1__: u8,
   test3_: Test/* foo */,
   padding2__: u16,
@@ -342,7 +364,7 @@ impl Vec3 {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default, Debug, PartialEq)]
+#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
 pub struct Ability {
   id_: u32,
   distance_: u32,
@@ -412,7 +434,7 @@ impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
 
   #[inline]
   pub fn color(&'a self) -> Color {
-    unsafe { ::std::mem::transmute(self._tab.get::<i8>(TestSimpleTableWithEnum::VT_COLOR, Some(Color::Green as i8)).unwrap()) }
+    self._tab.get::<Color>(TestSimpleTableWithEnum::VT_COLOR, Some(Color::Green)).unwrap()
   }
 }
 
@@ -747,11 +769,11 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
   }
   #[inline]
   pub fn color(&'a self) -> Color {
-    unsafe { ::std::mem::transmute(self._tab.get::<i8>(Monster::VT_COLOR, Some(Color::Blue as i8)).unwrap()) }
+    self._tab.get::<Color>(Monster::VT_COLOR, Some(Color::Blue)).unwrap()
   }
   #[inline]
   pub fn test_type(&'a self) -> Any {
-    unsafe { ::std::mem::transmute(self._tab.get::<u8>(Monster::VT_TEST_TYPE, Some(Any::NONE as u8)).unwrap()) }
+    self._tab.get::<Any>(Monster::VT_TEST_TYPE, Some(Any::NONE)).unwrap()
   }
   #[inline]
   pub fn test(&'a self) -> Option<flatbuffers::Table<'a>> {

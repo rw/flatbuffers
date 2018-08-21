@@ -769,20 +769,35 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "}";
     code_ += "";
-    code_ += "impl flatbuffers::EndianScalar for {{ENUM_NAME}} {";
-    code_ += "    fn to_little_endian(self) -> Self {";
-    code_ += "        self";
-    code_ += "        //{{BASE_TYPE}}::to_le(self as {{BASE_TYPE}}) as Self";
-    code_ += "    }";
-    code_ += "    fn from_little_endian(self) -> Self {";
-    code_ += "        self";
-    code_ += "        //{{BASE_TYPE}}::from_le(self as {{BASE_TYPE}}) as Self";
-    code_ += "    }";
-    code_ += "}";
-    code_ += "";
+
     code_.SetValue("ENUM_NAME", Name(enum_def));
     code_.SetValue("ENUM_NAME_SNAKE", MakeSnakeCase(Name(enum_def)));
     code_.SetValue("ENUM_NAME_CAPS", MakeUpper(MakeSnakeCase(Name(enum_def))));
+    code_.SetValue("ENUM_MIN_BASE_VALUE", NumToString(minv->value));
+    code_.SetValue("ENUM_MAX_BASE_VALUE", NumToString(maxv->value));
+
+    code_ += "const ENUM_MIN_{{ENUM_NAME_CAPS}}:{{BASE_TYPE}} = {{ENUM_MIN_BASE_VALUE}};";
+    code_ += "const ENUM_MAX_{{ENUM_NAME_CAPS}}:{{BASE_TYPE}} = {{ENUM_MAX_BASE_VALUE}};";
+    code_ += "";
+    code_ += "impl<'a> flatbuffers::Follow<'a> for {{ENUM_NAME}} {";
+    code_ += "    type Inner = Self;";
+    code_ += "    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "        flatbuffers::read_scalar_at::<Self>(buf, loc)";
+    code_ += "    }";
+    code_ += "}";
+    code_ += "impl flatbuffers::EndianScalar for {{ENUM_NAME}} {";
+    code_ += "    fn to_little_endian(self) -> Self {";
+    code_ += "        let n = {{BASE_TYPE}}::to_le(self as {{BASE_TYPE}});";
+    code_ += "        let ptr = (&n) as *const {{BASE_TYPE}} as *const {{ENUM_NAME}};";
+    code_ += "        unsafe { *ptr }";
+    code_ += "    }";
+    code_ += "    fn from_little_endian(self) -> Self {";
+    code_ += "        let n = {{BASE_TYPE}}::from_le(self as {{BASE_TYPE}});";
+    code_ += "        let ptr = (&n) as *const {{BASE_TYPE}} as *const {{ENUM_NAME}};";
+    code_ += "        unsafe { *ptr }";
+    code_ += "    }";
+    code_ += "}";
+    code_ += "";
 
     // Generate an array of all enumeration values
     auto num_fields = NumToString(enum_def.vals.vec.size());
@@ -853,6 +868,14 @@ class RustGenerator : public BaseGenerator {
   // underlying type to the interface type.
   std::string GenUnderlyingCast(const FieldDef &field, bool from,
                                 const std::string &val) {
+    //switch (GetFullElementType(field.value.type)) {
+    //  case FullElementType::Integer: { return GenDefaultConstant(field); }
+    //  case FullElementType::Float: { return GenDefaultConstant(field); }
+    //  case FullElementType::Bool: { return field.value.constant == "0" ? "false" : "true"; }
+    //  case FullElementType::UnionKey:
+    //  case FullElementType::EnumKey: {}
+    //  case default: {
+    //}
     if (from && field.value.type.base_type == BASE_TYPE_BOOL) {
       return val + " != 0";
     } else if ((field.value.type.enum_def &&
@@ -1254,7 +1277,8 @@ class RustGenerator : public BaseGenerator {
         const std::string underlying_typname = GenTypeBasic(type, false);
         const std::string typname = WrapInNameSpace(*type.enum_def);
         const std::string default_value = GetDefaultScalarValue(field);
-        return "unsafe { ::std::mem::transmute(self._tab.get::<" + underlying_typname + ">(" + offset_name + ", Some(" + default_value + " as " + underlying_typname + ")).unwrap()) }";
+        //return "unsafe { ::std::mem::transmute(self._tab.get::<" + underlying_typname + ">(" + offset_name + ", Some(" + default_value + " as " + underlying_typname + ")).unwrap()) }";
+        return "self._tab.get::<" + typname + ">(" + offset_name + ", Some(" + default_value + ")).unwrap()";
       }
       case FullElementType::String: {
         //return "self._tab.get_slot_string(" + offset_name + ").map(|s| s.as_str())";
@@ -1896,7 +1920,7 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
     code_ += "#[repr(C, packed)]";
-    code_ += "#[derive(Clone, Copy, Default, Debug, PartialEq)]";
+    code_ += "#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]";
 
     // TODO: maybe only use lifetimes when needed by members, and skip
     //       PhantomData? use TypeNeedsLifetime.
@@ -1910,7 +1934,7 @@ class RustGenerator : public BaseGenerator {
       const auto lifetime = needs_lifetime ? "<'a>" : "";
       code_.SetValue("FIELD_TYPE",
                      GenTypeGet(field.value.type, "", "", lifetime,
-                                false));
+                                true));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
@@ -2014,26 +2038,6 @@ class RustGenerator : public BaseGenerator {
       code_ += "  pub fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
       code_ += "    {{REF}}{{FIELD_VALUE}}";
       code_ += "  }";
-
-      if (parser_.opts.mutable_buffer) {
-        auto mut_field_type = GenTypeGet(field.value.type, " ", "", " ", true);
-        code_.SetValue("FIELD_TYPE", mut_field_type);
-        if (is_scalar) {
-          code_.SetValue("ARG", GenTypeBasic(field.value.type, true));
-          code_.SetValue("FIELD_VALUE",
-                         GenUnderlyingCast(field, false, "_" + Name(field)));
-
-          code_ += "  fn mutate_{{FIELD_NAME}}(&mut self, _{{FIELD_NAME}}: {{ARG}}) {";
-          code_ +=
-              "    flatbuffers::write_scalar(&self.{{FIELD_NAME}}_, "
-              "{{FIELD_VALUE}});";
-          code_ += "  }";
-        } else {
-          code_ += "  fn mutable_{{FIELD_NAME}}(&mut self) -> &mut {{FIELD_TYPE}}{";
-          code_ += "    &mut self.{{FIELD_NAME}}_";
-          code_ += "  }";
-        }
-      }
 
       // Generate a comparison function for this field if it is a key.
       if (field.key) {

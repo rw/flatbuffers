@@ -31,14 +31,25 @@ pub enum EnumInNestedNS {
   C = 2
 }
 
+const ENUM_MIN_ENUM_IN_NESTED_N_S:i8 = 0;
+const ENUM_MAX_ENUM_IN_NESTED_N_S:i8 = 2;
+
+impl<'a> flatbuffers::Follow<'a> for EnumInNestedNS {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        flatbuffers::read_scalar_at::<Self>(buf, loc)
+    }
+}
 impl flatbuffers::EndianScalar for EnumInNestedNS {
     fn to_little_endian(self) -> Self {
-        self
-        //i8::to_le(self as i8) as Self
+        let n = i8::to_le(self as i8);
+        let ptr = (&n) as *const i8 as *const EnumInNestedNS;
+        unsafe { *ptr }
     }
     fn from_little_endian(self) -> Self {
-        self
-        //i8::from_le(self as i8) as Self
+        let n = i8::from_le(self as i8);
+        let ptr = (&n) as *const i8 as *const EnumInNestedNS;
+        unsafe { *ptr }
     }
 }
 
@@ -63,7 +74,7 @@ pub fn enum_name_enum_in_nested_n_s(e: EnumInNestedNS) -> &'static str {
 
 // MANUALLY_ALIGNED_STRUCT(4)
 #[repr(C, packed)]
-#[derive(Clone, Copy, Default, Debug, PartialEq)]
+#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
 pub struct StructInNestedNS {
   a_: i32,
   b_: i32,

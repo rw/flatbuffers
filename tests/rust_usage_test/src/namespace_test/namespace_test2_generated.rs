@@ -54,7 +54,7 @@ impl<'a> TableInFirstNS<'a> /* private flatbuffers::Table */ {
   }
   #[inline]
   pub fn foo_enum(&'a self) -> NamespaceB::EnumInNestedNS {
-    unsafe { ::std::mem::transmute(self._tab.get::<i8>(TableInFirstNS::VT_FOO_ENUM, Some(NamespaceB::EnumInNestedNS::A as i8)).unwrap()) }
+    self._tab.get::<NamespaceB::EnumInNestedNS>(TableInFirstNS::VT_FOO_ENUM, Some(NamespaceB::EnumInNestedNS::A)).unwrap()
   }
   #[inline]
   pub fn foo_struct(&'a self) -> Option<&'a NamespaceB::StructInNestedNS> {
