@@ -20,7 +20,7 @@ extern crate quickcheck;
 extern crate flatbuffers;
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::my_game;
-//use rust_usage_test::namespace_test::NamespaceA;
+use rust_usage_test::namespace_test;//::NamespaceA;
 
 //pub use my_game::Example;
 
@@ -37,7 +37,7 @@ use rust_usage_test::monster_test_generated::my_game;
 //#include "union_vector/union_vector_generated.h"
 
 // Include simple random number generator to ensure results will be the
-// same cross platform.
+// same across platforms.
 // http://en.wikipedia.org/wiki/Park%E2%80%93Miller_random_number_generator
 struct LCG(u64);
 impl LCG {
@@ -1089,6 +1089,26 @@ mod generated_code_asserts {
     fn monster_builder_fails_when_name_is_missing() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
         my_game::example::Monster::create(b, &my_game::example::MonsterArgs{..Default::default()});
+    }
+}
+
+#[cfg(test)]
+mod included_schema_generated_code {
+    extern crate flatbuffers;
+
+    extern crate rust_usage_test;
+
+    #[test]
+    fn namespace_test_mod_is_importable() {
+        use rust_usage_test::namespace_test;
+    }
+    #[test]
+    fn namespace_test1_mod_is_importable() {
+        use rust_usage_test::namespace_test::namespace_test1_generated;
+    }
+    #[test]
+    fn namespace_test2_mod_is_importable() {
+        use rust_usage_test::namespace_test::namespace_test2_generated;
     }
 }
 

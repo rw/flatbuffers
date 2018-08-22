@@ -2123,16 +2123,17 @@ bool GenerateRust(const Parser &parser, const std::string &path,
   return generator.generate();
 }
 
-//std::string RustMakeRule(const Parser &parser, const std::string &path,
-//                        const std::string &file_name) {
-//  const auto filebase =
-//      flatbuffers::StripPath(flatbuffers::StripExtension(file_name));
-//  const auto included_files = parser.GetIncludedFilesRecursive(file_name);
-//  std::string make_rule = GeneratedFileName(path, filebase) + ": ";
-//  for (auto it = included_files.begin(); it != included_files.end(); ++it) {
-//    make_rule += " " + *it;
-//  }
-//  return make_rule;
-//}
+std::string RustMakeRule(const Parser &parser, const std::string &path,
+                         const std::string &file_name) {
+  std::string filebase =
+      flatbuffers::StripPath(flatbuffers::StripExtension(file_name));
+  std::string make_rule = GeneratedFileName(path, filebase) + ": ";
+
+  auto included_files = parser.GetIncludedFilesRecursive(file_name);
+  for (auto it = included_files.begin(); it != included_files.end(); ++it) {
+    make_rule += " " + *it;
+  }
+  return make_rule;
+}
 
 }  // namespace flatbuffers
