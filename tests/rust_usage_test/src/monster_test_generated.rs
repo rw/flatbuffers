@@ -942,7 +942,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
 //
 //TODO: inject these functions into impl for type
 //#[inline]
-//fn Monster_MEMBER_test_as_X_super::Example2::Monster_X() -> &super::Example2::Monster {
+//fn Monster_MEMBER_test_as_X_super::example_2::Monster_X() -> &super::example_2::Monster {
 //  return test_as_MyGame_Example2_Monster();
 //}
 //
