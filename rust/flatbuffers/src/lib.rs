@@ -8,6 +8,8 @@ pub enum UnionOffset {}
 pub enum TableOffset {}
 pub struct UnionMarker;
 
+pub trait GeneratedStruct {}
+
 pub trait EndianScalar: Sized + PartialEq + Copy + Clone {
     fn to_little_endian(self) -> Self;
     fn from_little_endian(self) -> Self;
@@ -226,9 +228,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
     pub fn reset(&mut self) {
         self.owned_buf.clear();
-        self.written_vtable_revpos.clear();
+	let cap = self.owned_buf.capacity();
+        unsafe {
+	    self.owned_buf.set_len(cap);
+	}
+        self.cur_idx = self.owned_buf.len();
 
-        self.cur_idx = 0;
+        self.written_vtable_revpos.clear();
 
         self.nested = false;
         self.finished = false;
@@ -1015,6 +1021,22 @@ impl<'a> Follow<'a> for &'a str {
 //        s
 //    }
 //}
+
+pub struct SliceOfGeneratedStruct<T: GeneratedStruct>(T);
+
+/// Implement direct slice access to structs (they are safe on both endiannesses).
+impl<'a, T: GeneratedStruct + 'a> Follow<'a> for SliceOfGeneratedStruct<T> {
+    type Inner = &'a [T];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let sz = std::mem::size_of::<T>();
+        assert!(sz > 0);
+        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
+        let ptr = data_buf.as_ptr() as *const T;
+        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
+        s
+    }
+}
 
 /// Implement direct slice access iff the host is little-endian.
 #[cfg(target_endian = "little")]

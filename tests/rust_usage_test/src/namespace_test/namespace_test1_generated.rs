@@ -80,6 +80,30 @@ pub struct StructInNestedNS {
   b_: i32,
 } // pub struct StructInNestedNS
 impl flatbuffers::GeneratedStruct for StructInNestedNS {}
+impl<'a> flatbuffers::Follow<'a> for StructInNestedNS {
+    type Inner = &'a StructInNestedNS;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let this_buf = &buf[loc..loc + ::std::mem::size_of::<StructInNestedNS>()];
+        let ptr = this_buf.as_ptr() as *const StructInNestedNS;
+        unsafe { &*ptr }
+    }
+}
+//impl<'a> flatbuffers::Follow<'a> for &'a [StructInNestedNS] {
+//    type Inner = Self;//&'a [StructInNestedNS];
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//    //    let this_buf = &buf[loc..loc + ::std::mem::size_of::<StructInNestedNS>()];
+//    //    let ptr = this_buf.as_ptr() as *const StructInNestedNS;
+//    //    unsafe { &*ptr }
+//    //}
+//        let sz = ::std::mem::size_of::<StructInNestedNS>();
+//        assert!(sz > 0);
+//        let len = flatbuffers::read_scalar::<flatbuffers::UOffsetT>(&buf[loc..loc + flatbuffers::SIZE_UOFFSET]) as usize;
+//        let data_buf = &buf[loc + flatbuffers::SIZE_UOFFSET..loc + flatbuffers::SIZE_UOFFSET + len * sz];
+//        let ptr = data_buf.as_ptr() as *const StructInNestedNS;
+//        let s: &'a [StructInNestedNS] = unsafe { ::std::slice::from_raw_parts(ptr, len) };
+//        s
+//    }
+//}
 
 impl StructInNestedNS {
   pub fn reset(&mut self) {

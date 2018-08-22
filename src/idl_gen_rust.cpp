@@ -1288,7 +1288,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self._tab.get::<flatbuffers::ForwardsUOffset<&[" + typname + "]>>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<" + typname + ">>>(" + offset_name + ", None)";
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
@@ -1928,6 +1928,30 @@ class RustGenerator : public BaseGenerator {
     // Impl the dummy GeneratedStruct trait to help users write structs
     // correctly:
 		code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
+    code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
+    code_ += "    type Inner = &'a {{STRUCT_NAME}};";
+    code_ += "    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "        let this_buf = &buf[loc..loc + ::std::mem::size_of::<{{STRUCT_NAME}}>()];";
+    code_ += "        let ptr = this_buf.as_ptr() as *const {{STRUCT_NAME}};";
+    code_ += "        unsafe { &*ptr }";
+    code_ += "    }";
+    code_ += "}";
+    code_ += "//impl<'a> flatbuffers::Follow<'a> for &'a [{{STRUCT_NAME}}] {";
+    code_ += "//    type Inner = Self;//&'a [{{STRUCT_NAME}}];";
+    code_ += "//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "//    //    let this_buf = &buf[loc..loc + ::std::mem::size_of::<{{STRUCT_NAME}}>()];";
+    code_ += "//    //    let ptr = this_buf.as_ptr() as *const {{STRUCT_NAME}};";
+    code_ += "//    //    unsafe { &*ptr }";
+    code_ += "//    //}";
+    code_ += "//        let sz = ::std::mem::size_of::<{{STRUCT_NAME}}>();";
+    code_ += "//        assert!(sz > 0);";
+    code_ += "//        let len = flatbuffers::read_scalar::<flatbuffers::UOffsetT>(&buf[loc..loc + flatbuffers::SIZE_UOFFSET]) as usize;";
+    code_ += "//        let data_buf = &buf[loc + flatbuffers::SIZE_UOFFSET..loc + flatbuffers::SIZE_UOFFSET + len * sz];";
+    code_ += "//        let ptr = data_buf.as_ptr() as *const {{STRUCT_NAME}};";
+    code_ += "//        let s: &'a [{{STRUCT_NAME}}] = unsafe { ::std::slice::from_raw_parts(ptr, len) };";
+    code_ += "//        s";
+    code_ += "//    }";
+    code_ += "//}";
 
     // Generate GetFullyQualifiedName
     code_ += "";
