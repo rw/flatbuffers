@@ -1927,7 +1927,7 @@ class RustGenerator : public BaseGenerator {
 
     // Impl the dummy GeneratedStruct trait to help users write structs
     // correctly:
-		code_ += "//impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
+		code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
 
     // Generate GetFullyQualifiedName
     code_ += "";

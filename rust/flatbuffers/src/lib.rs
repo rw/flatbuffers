@@ -58,6 +58,9 @@ pub type SOffsetT = i32;
 pub type UOffsetT = u32;
 pub type VOffsetT = i16;
 
+pub type HeadUOffsetT = UOffsetT;
+pub type TailUOffsetT = UOffsetT;
+
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {
     off: UOffsetT,
@@ -136,11 +139,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn new_with_capacity(size: usize) -> Self {
         FlatBufferBuilder{
             owned_buf: vec![0u8; size],
-
-            written_vtable_revpos: Vec::new(),
-            field_locs: Vec::new(),
-
             cur_idx: size,
+
+            field_locs: Vec::new(),
+            written_vtable_revpos: Vec::new(),
 
             nested: false,
             finished: false,
@@ -156,7 +158,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.owned_buf.clear();
         self.written_vtable_revpos.clear();
 
-        self.cur_idx = self.owned_buf.len();
+        self.cur_idx = 0;
 
         self.nested = false;
         self.finished = false;
@@ -394,7 +396,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let vt_start_pos = self.cur_idx;
         let vt_end_pos = self.cur_idx + vtable_len;
         {
-            let vtfw = &mut VTableForWriting::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]);
+            let vtfw = &mut VTableWriter::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]);
             vtfw.write_vtable_byte_length(vtable_len as VOffsetT);
             vtfw.write_object_inline_size(table_object_size as VOffsetT);
             for &fl in self.field_locs.iter() {
@@ -415,7 +417,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
                     other_vt == this_vt
                 };
                 if eq {
-                    VTableForWriting::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]).clear();
+                    VTableWriter::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]).clear();
                     self.cur_idx += vtable_len;
                     ret = vt_rev_pos as usize;
                     break;
@@ -499,10 +501,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_small(t);
         self.get_size() as UOffsetT
     }
-    pub fn place_element_scalar<T: EndianScalar>(&mut self, t: T) {
+    pub fn place_element_scalar<T: EndianScalar>(&mut self, t: T) -> UOffsetT {
         self.cur_idx -= std::mem::size_of::<T>();
         let cur_idx = self.cur_idx;
         emplace_scalar(&mut self.owned_buf[cur_idx..], t);
+        self.get_size() as UOffsetT
 
     }
     fn push_small<T: EndianScalar>(&mut self, x: T) {
@@ -537,7 +540,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     // Offsets initially are relative to the end of the buffer (downwards).
     // This function converts them to be relative to the current location
     // in the buffer (when stored here), pointing upwards.
-    pub fn refer_to(&mut self, off: UOffsetT) -> UOffsetT {
+    pub fn refer_to(&mut self, off: TailUOffsetT) -> HeadUOffsetT {
         // Align to ensure GetSize() below is correct.
         self.align(SIZE_UOFFSET);
         // Offset must refer to something already in buffer.
@@ -728,41 +731,63 @@ impl<'a> VTable<'a> {
     }
 }
 
+/// VTableWriter compartmentalizes actions needed to create a vtable.
 #[derive(Debug)]
-pub struct VTableForWriting<'a> {
+pub struct VTableWriter<'a> {
     buf: &'a mut [u8],
 }
-impl<'a> VTableForWriting<'a> {
+
+impl<'a> VTableWriter<'a> {
     pub fn init(buf: &'a mut [u8]) -> Self {
-        VTableForWriting {
+        VTableWriter {
             buf: buf,
         }
     }
+
+    /// Writes the vtable length (in bytes) into the vtable.
+    ///
+    /// Note that callers already need to have computed this to initialize
+    /// a VTableWriter.
+    ///
+    /// In debug mode, asserts that the length of the underlying data is equal
+    /// to the provided value.
     #[inline]
     pub fn write_vtable_byte_length(&mut self, n: VOffsetT) {
         emplace_scalar::<VOffsetT>(&mut self.buf[..SIZE_VOFFSET], n);
         debug_assert_eq!(n as usize, self.buf.len());
     }
 
+    /// Writes an object length (in bytes) into the vtable.
     #[inline]
     pub fn write_object_inline_size(&mut self, n: VOffsetT) {
         emplace_scalar::<VOffsetT>(&mut self.buf[SIZE_VOFFSET..2*SIZE_VOFFSET], n);
     }
 
+    /// Gets an object field offset from the vtable. Only used for debugging.
+    ///
+    /// Note that this expects field offsets (which are like pointers), not
+    /// field ids (which are like array indices).
     #[inline]
-    pub fn get_field_offset(&self, vtable_off: VOffsetT) -> VOffsetT {
-        let idx = vtable_off as usize;
+    pub fn get_field_offset(&self, vtable_offset: VOffsetT) -> VOffsetT {
+        let idx = vtable_offset as usize;
         read_scalar::<VOffsetT>(&self.buf[idx..idx + SIZE_VOFFSET])
     }
 
+    /// Writes an object field offset into the vtable.
+    ///
+    /// Note that this expects field offsets (which are like pointers), not
+    /// field ids (which are like array indices).
     #[inline]
-    pub fn write_field_offset(&mut self, vtable_off: VOffsetT, n: VOffsetT) {
-        let idx = vtable_off as usize;
-        emplace_scalar::<VOffsetT>(&mut self.buf[idx..idx + SIZE_VOFFSET], n);
+    pub fn write_field_offset(&mut self, vtable_offset: VOffsetT, object_data_offset: VOffsetT) {
+        let idx = vtable_offset as usize;
+        emplace_scalar::<VOffsetT>(&mut self.buf[idx..idx + SIZE_VOFFSET], object_data_offset);
     }
 
+    /// Clears all data in this VTableWriter. Used to cleanly undo a
+    /// vtable write.
     #[inline]
     pub fn clear(&mut self) {
+        // This is the closest thing to memset in Rust right now.
         let len = self.buf.len();
         let p = self.buf.as_mut_ptr() as *mut u8;
         unsafe {
@@ -772,6 +797,17 @@ impl<'a> VTableForWriting<'a> {
 }
 
 
+/// Follow is a trait that allows us to access FlatBuffers in a declarative,
+/// type safe, and fast way. They compile down to almost no code (after
+/// optimizations). Conceptually, Follow lifts the offset-based access
+/// patterns of FlatBuffers data into the type system. This trait is used
+/// pervasively at read time, to access tables, vtables, vectors, strings, and
+/// all other data. At this time, Follow is not utilized much on the write
+/// path.
+///
+/// Writing a new Follow implementation primarily involves deciding whether
+/// you want to return data (of the type Self::Inner) or do you want to
+/// continue traversing the FlatBuffer.
 pub trait Follow<'a> {
     type Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner;
@@ -794,29 +830,58 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsVOffset<T> {
         T::follow(buf, loc + off)
     }
 }
+
 impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let slice = &buf[loc..loc + SIZE_SOFFSET];
-        let off = read_scalar::<i32>(slice);
-        T::follow(buf, (loc as i32 - off) as usize)
+        let off = read_scalar::<SOffsetT>(slice);
+        T::follow(buf, (loc as SOffsetT - off) as usize)
     }
 }
 impl<'a> Follow<'a> for &'a str {
     type Inner = &'a str;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        //println!("entering follow for &'a str with {:?}", &buf[loc..]);
-        let len = read_scalar::<u32>(&buf[loc..loc + 4]) as usize;
-        let slice = &buf[loc + 4..loc + 4 + len];
+        let len = read_scalar::<u32>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let slice = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len];
         let s = unsafe { std::str::from_utf8_unchecked(slice) };
         s
     }
 }
 
-impl<'a, T: Sized> Follow<'a> for &'a [T] {
+///// Implement direct slice access for byte slices.
+//impl<'a> Follow<'a> for &'a [u8] {
+//    type Inner = &'a [u8];
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+//        let data_buf = &buf[loc + SIZE_UOFFSET .. loc + SIZE_UOFFSET + len];
+//        let ptr = data_buf.as_ptr() as *const u8;
+//        let s: &'a [u8] = unsafe { std::slice::from_raw_parts(ptr, len) };
+//        s
+//    }
+//}
+//
+///// Implement direct slice access for GeneratedStruct, which is endian-safe
+///// because the structs have accessor functions.
+//#[cfg(target_endian="little")]
+//impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
+//    type Inner = &'a [T];
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let sz = std::mem::size_of::<T>();
+//        assert!(sz > 0);
+//        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+//        let data_buf = &buf[loc + SIZE_UOFFSET .. loc + SIZE_UOFFSET + len * sz];
+//        let ptr = data_buf.as_ptr() as *const T;
+//        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
+//        s
+//    }
+//}
+
+/// Implement direct slice access iff the host is little-endian.
+#[cfg(target_endian="little")]
+impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        //println!("entering follow for &'a [T] with {:?}", &buf[loc..]);
         let sz = std::mem::size_of::<T>();
         assert!(sz > 0);
         let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
@@ -827,29 +892,23 @@ impl<'a, T: Sized> Follow<'a> for &'a [T] {
     }
 }
 
+/// Implement Follow for all possible Vectors that have Follow-able elements.
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Vector<'a, T> {
     type Inner = Vector<'a, T>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        //println!("entering follow for Vector<T> with {:?}", &buf[loc..]);
-        Vector::new(buf, loc)
+        Vector{0: buf, 1: loc, 2: PhantomData}
     }
 }
 
-impl<'a, T: Follow<'a>> Vector<'a, T> {
+impl<'a, T: 'a> Vector<'a, T> {
     pub fn new(buf: &'a [u8], loc: usize) -> Self {
         Vector{0: buf, 1: loc, 2: PhantomData}
     }
     pub fn len(&self) -> usize {
         read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
     }
-    pub fn get(&self, idx: usize) -> T::Inner {
-        debug_assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
-        //println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
-        let sz = std::mem::size_of::<T>();
-        debug_assert!(sz > 0);
-        T::follow(self.0, self.1 as usize + 4 + sz * idx)
-    }
 
+    #[cfg(target_endian="little")]
     pub fn as_slice_unfollowed(&'a self) -> &'a [T] {
         let sz = std::mem::size_of::<T>();
         debug_assert!(sz > 0);
@@ -859,6 +918,8 @@ impl<'a, T: Follow<'a>> Vector<'a, T> {
         let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
         s
     }
+
+    #[cfg(target_endian="little")]
     pub fn into_slice_unfollowed(self) -> &'a [T] {
         let sz = std::mem::size_of::<T>();
         debug_assert!(sz > 0);
@@ -869,7 +930,23 @@ impl<'a, T: Follow<'a>> Vector<'a, T> {
         s
     }
 }
+impl<'a, T: Follow<'a>> Vector<'a, T> {
+    pub fn get(&self, idx: usize) -> T::Inner {
+        debug_assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
+        //println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
+        let sz = std::mem::size_of::<T>();
+        debug_assert!(sz > 0);
+        T::follow(self.0, self.1 as usize + SIZE_UOFFSET + sz * idx)
+    }
+}
 
+impl<'a> Vector<'a, u8> {
+    pub fn as_bytes(&'a self) -> &'a [u8] {
+        unimplemented!(); //read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
+    }
+}
+
+// TODO(rw): endian safety
 impl<'a, T: Sized> Follow<'a> for &'a T {
     type Inner = &'a T;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {

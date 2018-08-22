@@ -79,7 +79,7 @@ pub struct StructInNestedNS {
   a_: i32,
   b_: i32,
 } // pub struct StructInNestedNS
-//impl flatbuffers::GeneratedStruct for StructInNestedNS {}
+impl flatbuffers::GeneratedStruct for StructInNestedNS {}
 
 impl StructInNestedNS {
   pub fn reset(&mut self) {

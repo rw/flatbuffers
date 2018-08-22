@@ -272,7 +272,7 @@ pub struct Test {
   b_: i8,
   padding0__: u8,
 } // pub struct Test
-//impl flatbuffers::GeneratedStruct for Test {}
+impl flatbuffers::GeneratedStruct for Test {}
 
 impl Test {
   pub fn reset(&mut self) {
@@ -314,7 +314,7 @@ pub struct Vec3 {
   test3_: Test/* foo */,
   padding2__: u16,
 } // pub struct Vec3
-//impl flatbuffers::GeneratedStruct for Vec3 {}
+impl flatbuffers::GeneratedStruct for Vec3 {}
 
 impl Vec3 {
   pub fn reset(&mut self) {
@@ -369,7 +369,7 @@ pub struct Ability {
   id_: u32,
   distance_: u32,
 } // pub struct Ability
-//impl flatbuffers::GeneratedStruct for Ability {}
+impl flatbuffers::GeneratedStruct for Ability {}
 
 impl Ability {
   pub fn reset(&mut self) {
