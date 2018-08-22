@@ -118,9 +118,8 @@ pub struct FlatBufferBuilder<'fbb> {
     pub owned_buf: Vec<u8>,
     pub cur_idx: usize,
 
-    vtable: Vec<UOffsetT>,
-    written_vtable_revpos: Vec<UOffsetT>,
     field_locs: Vec<FieldLoc>,
+    written_vtable_revpos: Vec<UOffsetT>,
 
     nested: bool,
     finished: bool,
@@ -155,7 +154,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
     pub fn reset(&mut self) {
         self.owned_buf.clear();
-        self.vtable.clear();
         self.written_vtable_revpos.clear();
 
         self.cur_idx = self.owned_buf.len();
@@ -181,8 +179,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.nested = true;
 
         self.field_locs.clear();
-        self.vtable.clear();
-        self.vtable.resize(num_fields as usize, 0);
 
         Offset::new(self.get_size() as UOffsetT)
     }
@@ -404,7 +400,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             for &fl in self.field_locs.iter() {
                 let pos: VOffsetT = (object_vtable_revloc - fl.off) as VOffsetT;
                 debug_assert_eq!(vtfw.get_field_offset(fl.id), 0,
-                "tried to write a vtable field multiple times");
+                                 "tried to write a vtable field multiple times");
                 vtfw.write_field_offset(fl.id, pos);
             }
         }
@@ -454,19 +450,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.finish_with_opts(root, None, false);
     }
     // with or without a size prefix changes how we load the data, so finish*
-    // function are split along those lines.
+    // functions are split along those lines.
     fn finish_with_opts<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>, size_prefixed: bool) {
         self.assert_not_finished();
         self.assert_not_nested();
         self.written_vtable_revpos.clear();
-        self.vtable.clear();
 
         let to_align = {
             // for the root offset:
             let a = SIZE_UOFFSET;
             // for the size prefix:
             let b = if size_prefixed { SIZE_UOFFSET } else { 0 };
-            // for the file identifier (a string but not zero-terminated):
+            // for the file identifier (a string that is not zero-terminated):
             let c = if file_identifier.is_some() {
                 FILE_IDENTIFIER_LENGTH
             } else {
@@ -475,8 +470,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             a + b + c
         };
 
-        let min_align = self.min_align;
-        self.pre_align(to_align, min_align);
+        self.pre_align(to_align, min_align.clone());
 
         if let Some(ident) = file_identifier {
             assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
@@ -494,9 +488,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         self.finished = true;
     }
-    //pub fn finish_with_identifier<'a, T>(&'a mut self, root: Offset<T>, name: &'static str) {
-    //    self.finish(root)
-    //}
 
     fn align(&mut self, elem_size: usize) {
         self.track_min_align(elem_size);
@@ -509,7 +500,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.get_size() as UOffsetT
     }
     pub fn place_element_scalar<T: EndianScalar>(&mut self, t: T) {
-        //let t = t.to_le(); // convert to little-endian
         self.cur_idx -= std::mem::size_of::<T>();
         let cur_idx = self.cur_idx;
         emplace_scalar(&mut self.owned_buf[cur_idx..], t);
@@ -604,7 +594,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
 #[derive(Debug, PartialEq)]
 pub struct Offset<T> (UOffsetT, PhantomData<T>);
-impl<T> Copy for Offset<T> { } // TODO: why does deriving Copy cause ownership errors?
+
+// TODO(rw): why do we need to reimplement (with a default impl) Copy to
+//           avoid ownership errors?
+impl<T> Copy for Offset<T> { }
 impl<T> Clone for Offset<T> {
     fn clone(&self) -> Offset<T> {
         Offset::new(self.0.clone())
