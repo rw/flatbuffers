@@ -1,4 +1,3 @@
-
 use std::marker::PhantomData;
 
 // enum causes compile error on type mismatch, whereas newtype () would not.
@@ -9,23 +8,98 @@ pub enum UnionOffset {}
 pub enum TableOffset {}
 pub struct UnionMarker;
 
-
-pub trait EndianScalar : Sized + PartialEq + Copy + Clone {
+pub trait EndianScalar: Sized + PartialEq + Copy + Clone {
     fn to_little_endian(self) -> Self;
     fn from_little_endian(self) -> Self;
 }
-impl EndianScalar for bool { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
-impl EndianScalar for u8 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
-impl EndianScalar for i8 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl EndianScalar for u16 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl EndianScalar for i16 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl EndianScalar for u32 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl EndianScalar for i32 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl EndianScalar for u64 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl EndianScalar for i64 { fn to_little_endian(self) -> Self { Self::to_le(self) } fn from_little_endian(self) -> Self { Self::from_le(self) } }
-impl EndianScalar for f32 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
-impl EndianScalar for f64 { fn to_little_endian(self) -> Self { self } fn from_little_endian(self) -> Self { self } }
-
+impl EndianScalar for bool {
+    fn to_little_endian(self) -> Self {
+        self
+    }
+    fn from_little_endian(self) -> Self {
+        self
+    }
+}
+impl EndianScalar for u8 {
+    fn to_little_endian(self) -> Self {
+        self
+    }
+    fn from_little_endian(self) -> Self {
+        self
+    }
+}
+impl EndianScalar for i8 {
+    fn to_little_endian(self) -> Self {
+        Self::to_le(self)
+    }
+    fn from_little_endian(self) -> Self {
+        Self::from_le(self)
+    }
+}
+impl EndianScalar for u16 {
+    fn to_little_endian(self) -> Self {
+        Self::to_le(self)
+    }
+    fn from_little_endian(self) -> Self {
+        Self::from_le(self)
+    }
+}
+impl EndianScalar for i16 {
+    fn to_little_endian(self) -> Self {
+        Self::to_le(self)
+    }
+    fn from_little_endian(self) -> Self {
+        Self::from_le(self)
+    }
+}
+impl EndianScalar for u32 {
+    fn to_little_endian(self) -> Self {
+        Self::to_le(self)
+    }
+    fn from_little_endian(self) -> Self {
+        Self::from_le(self)
+    }
+}
+impl EndianScalar for i32 {
+    fn to_little_endian(self) -> Self {
+        Self::to_le(self)
+    }
+    fn from_little_endian(self) -> Self {
+        Self::from_le(self)
+    }
+}
+impl EndianScalar for u64 {
+    fn to_little_endian(self) -> Self {
+        Self::to_le(self)
+    }
+    fn from_little_endian(self) -> Self {
+        Self::from_le(self)
+    }
+}
+impl EndianScalar for i64 {
+    fn to_little_endian(self) -> Self {
+        Self::to_le(self)
+    }
+    fn from_little_endian(self) -> Self {
+        Self::from_le(self)
+    }
+}
+impl EndianScalar for f32 {
+    fn to_little_endian(self) -> Self {
+        self
+    }
+    fn from_little_endian(self) -> Self {
+        self
+    }
+}
+impl EndianScalar for f64 {
+    fn to_little_endian(self) -> Self {
+        self
+    }
+    fn from_little_endian(self) -> Self {
+        self
+    }
+}
 
 pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
 
@@ -69,24 +143,22 @@ struct FieldLoc {
 
 #[inline]
 pub fn padding_bytes(buf_size: usize, scalar_size: usize) -> usize {
-  // ((!buf_size) + 1) & (scalar_size - 1)
-  (!buf_size).wrapping_add(1) & (scalar_size.wrapping_sub(1))
+    // ((!buf_size) + 1) & (scalar_size - 1)
+    (!buf_size).wrapping_add(1) & (scalar_size.wrapping_sub(1))
 }
 pub fn field_index_to_field_offset(field_id: VOffsetT) -> VOffsetT {
     // Should correspond to what end_table() below builds up.
-    let fixed_fields = 2;  // Vtable size and Object Size.
+    let fixed_fields = 2; // Vtable size and Object Size.
     ((field_id + fixed_fields) * (SIZE_VOFFSET as VOffsetT)) as VOffsetT
 }
 pub fn field_offset_to_field_index(field_o: VOffsetT) -> VOffsetT {
     debug_assert!(field_o >= 2);
-    let fixed_fields = 2;  // VTable size and Object Size.
+    let fixed_fields = 2; // VTable size and Object Size.
     (field_o / (SIZE_VOFFSET as VOffsetT)) - fixed_fields
 }
 pub fn to_bytes<'a, T: 'a + Sized>(t: &'a T) -> &'a [u8] {
     let sz = std::mem::size_of::<T>();
-    unsafe {
-        std::slice::from_raw_parts((t as *const T) as *const u8, sz)
-    }
+    unsafe { std::slice::from_raw_parts((t as *const T) as *const u8, sz) }
 }
 pub fn emplace_scalar<T: EndianScalar>(s: &mut [u8], x: T) {
     let sz = std::mem::size_of::<T>();
@@ -99,7 +171,7 @@ pub fn emplace_scalar<T: EndianScalar>(s: &mut [u8], x: T) {
     }
 }
 pub fn read_scalar_at<T: EndianScalar>(s: &[u8], loc: usize) -> T {
-    let buf = &s[loc..loc+std::mem::size_of::<T>()];
+    let buf = &s[loc..loc + std::mem::size_of::<T>()];
     read_scalar(buf)
 }
 pub fn read_scalar<T: EndianScalar>(s: &[u8]) -> T {
@@ -107,9 +179,7 @@ pub fn read_scalar<T: EndianScalar>(s: &[u8]) -> T {
     debug_assert!(s.len() >= sz);
 
     let p = s.as_ptr() as *const T;
-    let x = unsafe {
-        *p
-    };
+    let x = unsafe { *p };
 
     // TODO(rw): is this clone necessary?
     let x = x.clone();
@@ -137,7 +207,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         Self::new_with_capacity(0)
     }
     pub fn new_with_capacity(size: usize) -> Self {
-        FlatBufferBuilder{
+        FlatBufferBuilder {
             owned_buf: vec![0u8; size],
             cur_idx: size,
 
@@ -172,7 +242,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     fn track_field(&mut self, slot_off: VOffsetT, off: UOffsetT) {
-        let fl = FieldLoc{id: slot_off, off: off};
+        let fl = FieldLoc {
+            id: slot_off,
+            off: off,
+        };
         self.field_locs.push(fl);
         self.max_voffset = std::cmp::max(self.max_voffset, slot_off);
     }
@@ -193,8 +266,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let old_len = self.owned_buf.len();
         let new_len = std::cmp::max(1, old_len * 2);
 
-        assert!(new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
-                "cannot grow buffer beyond 2 gigabytes");
+        assert!(
+            new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
+            "cannot grow buffer beyond 2 gigabytes"
+        );
 
         let diff = new_len - old_len;
         self.owned_buf.resize(new_len, 0);
@@ -250,11 +325,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
     pub fn end_vector<T: 'fbb>(&mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
-      self.assert_nested("end_vector must be called after a call to start_vector");
-      self.nested = false;
-      let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
-      Offset::new(off)
-  }
+        self.assert_nested("end_vector must be called after a call to start_vector");
+        self.nested = false;
+        let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
+        Offset::new(off)
+    }
     fn pre_align(&mut self, len: usize, alignment: usize) {
         self.track_min_align(alignment);
         let s = self.get_size() as usize;
@@ -278,7 +353,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<&'fbb [u8]> {
         self.assert_not_nested();
-        self.pre_align(data.len() + 1, SIZE_UOFFSET);  // Always 0-terminated.
+        self.pre_align(data.len() + 1, SIZE_UOFFSET); // Always 0-terminated.
         self.fill(1);
         self.push_bytes(data);
         self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
@@ -291,21 +366,38 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
     }
-    pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
+    pub fn create_vector_of_strings<'a, 'b>(
+        &'a mut self,
+        xs: &'b [&'b str],
+    ) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
         // TODO(rw): write these in-place, then swap their order, to avoid a
         // heap allocation.
-        let offsets: Vec<Offset<&str>> = xs.iter().rev().map(|s| self.create_string(s)).rev().collect();
+        let offsets: Vec<Offset<&str>> = xs
+            .iter()
+            .rev()
+            .map(|s| self.create_string(s))
+            .rev()
+            .collect();
         self.create_vector_of_reverse_offsets(&offsets[..])
     }
-    pub fn create_vector_of_reverse_offsets<'a, 'b, 'c, T: 'fbb>(&'a mut self, items: &'b [Offset<T>]) -> Offset<Vector<'fbb, ForwardsUOffset<T>>> {
+    pub fn create_vector_of_reverse_offsets<'a, 'b, 'c, T: 'fbb>(
+        &'a mut self,
+        items: &'b [Offset<T>],
+    ) -> Offset<Vector<'fbb, ForwardsUOffset<T>>> {
         let elemsize = std::mem::size_of::<Offset<T>>();
         self.start_vector(elemsize, items.len());
         for o in items.iter().rev() {
             self.push_element_scalar_indirect_uoffset(o.value());
         }
-        Offset::new(self.end_vector::<Offset<Vector<'fbb, ForwardsUOffset<T>>>>(items.len()).value())
+        Offset::new(
+            self.end_vector::<Offset<Vector<'fbb, ForwardsUOffset<T>>>>(items.len())
+                .value(),
+        )
     }
-    pub fn create_vector_of_scalars<T: EndianScalar + 'fbb>(&mut self, items: &[T]) -> Offset<Vector<'fbb, T>> {
+    pub fn create_vector_of_scalars<T: EndianScalar + 'fbb>(
+        &mut self,
+        items: &[T],
+    ) -> Offset<Vector<'fbb, T>> {
         // TODO(rw): if host is little-endian, just do a memcpy
         let elemsize = std::mem::size_of::<T>();
         self.start_vector(elemsize, items.len());
@@ -339,7 +431,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // Write the vtable offset, which is the start of any Table.
         // We fill its value later.
         //let object_vtable_revloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0x99999999 as SOffsetT);
-        let object_vtable_revloc: UOffsetT = self.push_element_scalar::<UOffsetT>(0xF0F0F0F0 as UOffsetT);
+        let object_vtable_revloc: UOffsetT =
+            self.push_element_scalar::<UOffsetT>(0xF0F0F0F0 as UOffsetT);
         //println!("just wrote filler: {:?}", self.get_active_buf_slice());
 
         // Layout of the data this function will create when a new vtable is
@@ -381,17 +474,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // table starts here: aka "table_start"
         // --------------------------------------------------------------------
 
-
         // Write a vtable, which consists entirely of voffset_t elements.
         // It starts with the number of offsets, followed by a type id, followed
         // by the offsets themselves. In reverse:
         // Include space for the last offset and ensure empty tables have a
         // minimum size.
-        let vtable_len = std::cmp::max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
-                                       field_index_to_field_offset(0)) as usize;
+        let vtable_len = std::cmp::max(
+            self.max_voffset + SIZE_VOFFSET as VOffsetT,
+            field_index_to_field_offset(0),
+        ) as usize;
         self.fill_big(vtable_len);
         let table_object_size = object_vtable_revloc - table_tail_revloc;
-        debug_assert!(table_object_size < 0x10000);  // Vtable use 16bit offsets.
+        debug_assert!(table_object_size < 0x10000); // Vtable use 16bit offsets.
 
         let vt_start_pos = self.cur_idx;
         let vt_end_pos = self.cur_idx + vtable_len;
@@ -401,8 +495,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             vtfw.write_object_inline_size(table_object_size as VOffsetT);
             for &fl in self.field_locs.iter() {
                 let pos: VOffsetT = (object_vtable_revloc - fl.off) as VOffsetT;
-                debug_assert_eq!(vtfw.get_field_offset(fl.id), 0,
-                                 "tried to write a vtable field multiple times");
+                debug_assert_eq!(
+                    vtfw.get_field_offset(fl.id),
+                    0,
+                    "tried to write a vtable field multiple times"
+                );
                 vtfw.write_field_offset(fl.id, pos);
             }
         }
@@ -412,8 +509,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             // LIFO order
             for &vt_rev_pos in self.written_vtable_revpos.iter().rev() {
                 let eq = {
-                    let this_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx };
-                    let other_vt = VTable { buf: &self.owned_buf[..], loc: self.cur_idx + self.get_size() - vt_rev_pos as usize };
+                    let this_vt = VTable {
+                        buf: &self.owned_buf[..],
+                        loc: self.cur_idx,
+                    };
+                    let other_vt = VTable {
+                        buf: &self.owned_buf[..],
+                        loc: self.cur_idx + self.get_size() - vt_rev_pos as usize,
+                    };
                     other_vt == this_vt
                 };
                 if eq {
@@ -426,15 +529,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             ret
         };
         if vt_use == self.get_size() {
-            let n = self.rev_cur_idx(); self.written_vtable_revpos.push(n);
+            let n = self.rev_cur_idx();
+            self.written_vtable_revpos.push(n);
         }
 
         {
             let n = self.cur_idx + self.get_size() - object_vtable_revloc as usize;
             let saw = read_scalar::<UOffsetT>(&self.owned_buf[n..n + SIZE_SOFFSET]);
             debug_assert_eq!(saw, 0xF0F0F0F0);
-            emplace_scalar::<SOffsetT>(&mut self.owned_buf[n..n + SIZE_SOFFSET],
-                                       vt_use as SOffsetT - object_vtable_revloc as SOffsetT);
+            emplace_scalar::<SOffsetT>(
+                &mut self.owned_buf[n..n + SIZE_SOFFSET],
+                vt_use as SOffsetT - object_vtable_revloc as SOffsetT,
+            );
         }
 
         self.field_locs.clear();
@@ -453,7 +559,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     // with or without a size prefix changes how we load the data, so finish*
     // functions are split along those lines.
-    fn finish_with_opts<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>, size_prefixed: bool) {
+    fn finish_with_opts<T>(
+        &mut self,
+        root: Offset<T>,
+        file_identifier: Option<&str>,
+        size_prefixed: bool,
+    ) {
         self.assert_not_finished();
         self.assert_not_nested();
         self.written_vtable_revpos.clear();
@@ -472,7 +583,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             a + b + c
         };
 
-        { let ma = self.min_align; self.pre_align(to_align, ma); }
+        {
+            let ma = self.min_align;
+            self.pre_align(to_align, ma);
+        }
 
         if let Some(ident) = file_identifier {
             assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
@@ -506,7 +620,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let cur_idx = self.cur_idx;
         emplace_scalar(&mut self.owned_buf[cur_idx..], t);
         self.get_size() as UOffsetT
-
     }
     fn push_small<T: EndianScalar>(&mut self, x: T) {
         self.make_space(std::mem::size_of::<T>());
@@ -514,11 +627,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
         let n = self.make_space(x.len());
-        &mut self.owned_buf[n..n+x.len()].copy_from_slice(x);
+        &mut self.owned_buf[n..n + x.len()].copy_from_slice(x);
 
         n as UOffsetT
     }
-    pub fn push_slot_scalar_indirect_uoffset(&mut self, slotoff: VOffsetT, x: UOffsetT, default: UOffsetT) {
+    pub fn push_slot_scalar_indirect_uoffset(
+        &mut self,
+        slotoff: VOffsetT,
+        x: UOffsetT,
+        default: UOffsetT,
+    ) {
         if x != default {
             let off = self.push_element_scalar_indirect_uoffset(x);
             self.track_field(slotoff, off);
@@ -529,7 +647,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         return self.push_element_scalar(x);
     }
     pub fn push_slot_struct<T: Sized>(&mut self, slotoff: VOffsetT, x: &T) {
-	// using to_bytes as a trait makes it easier to mix references into T
+        // using to_bytes as a trait makes it easier to mix references into T
         self.assert_nested("");
         let bytes = to_bytes(x);
         self.align(bytes.len());
@@ -559,7 +677,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.track_field(slotoff, off);
         //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
-    pub fn push_slot_scalar<T: EndianScalar + std::fmt::Display>(&mut self, slotoff: VOffsetT, x: T, default: T) {
+    pub fn push_slot_scalar<T: EndianScalar + std::fmt::Display>(
+        &mut self,
+        slotoff: VOffsetT,
+        x: T,
+        default: T,
+    ) {
         if x != default {
             let off = self.push_element_scalar(x);
             self.track_field(slotoff, off);
@@ -572,8 +695,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.cur_idx
     }
     pub fn ensure_space(&mut self, want: usize) -> usize {
-        assert!(want <= FLATBUFFERS_MAX_BUFFER_SIZE,
-		        "cannot grow buffer beyond 2 gigabytes");
+        assert!(
+            want <= FLATBUFFERS_MAX_BUFFER_SIZE,
+            "cannot grow buffer beyond 2 gigabytes"
+        );
         while self.unused_ready_space() < want {
             self.grow_owned_buf();
         }
@@ -587,20 +712,27 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_finished();
         &self.owned_buf[self.cur_idx..]
     }
-    pub fn required(&self, tab_revloc: Offset<TableOffset>, slot_byte_loc: VOffsetT, assert_msg_name: &'static str) {
-        let tab = Table::new(&self.owned_buf[..], self.cur_idx + (self.get_size() - tab_revloc.0 as usize));
+    pub fn required(
+        &self,
+        tab_revloc: Offset<TableOffset>,
+        slot_byte_loc: VOffsetT,
+        assert_msg_name: &'static str,
+    ) {
+        let tab = Table::new(
+            &self.owned_buf[..],
+            self.cur_idx + (self.get_size() - tab_revloc.0 as usize),
+        );
         let o = tab.vtable().get(slot_byte_loc) as usize;
         assert!(o != 0, "missing required field {}", assert_msg_name);
     }
-
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Offset<T> (UOffsetT, PhantomData<T>);
+pub struct Offset<T>(UOffsetT, PhantomData<T>);
 
 // TODO(rw): why do we need to reimplement (with a default impl) Copy to
 //           avoid ownership errors?
-impl<T> Copy for Offset<T> { }
+impl<T> Copy for Offset<T> {}
 impl<T> Clone for Offset<T> {
     fn clone(&self) -> Offset<T> {
         Offset::new(self.0.clone())
@@ -615,7 +747,10 @@ impl<T> std::ops::Deref for Offset<T> {
 }
 impl<'a, T: 'a> Offset<T> {
     pub fn new(o: UOffsetT) -> Offset<T> {
-        Offset { 0: o, 1: PhantomData}
+        Offset {
+            0: o,
+            1: PhantomData,
+        }
     }
     pub fn as_union_value(&self) -> Offset<UnionMarker> {
         Offset::new(self.0)
@@ -672,7 +807,11 @@ impl<'a> Table<'a> {
     pub fn vtable(&'a self) -> VTable<'a> {
         <BackwardsSOffset<VTable<'a>>>::follow(self.buf, self.loc)
     }
-    pub fn get<T: Follow<'a> + 'a>(&'a self, slot_byte_loc: VOffsetT, default: Option<T::Inner>) -> Option<T::Inner> {
+    pub fn get<T: Follow<'a> + 'a>(
+        &'a self,
+        slot_byte_loc: VOffsetT,
+        default: Option<T::Inner>,
+    ) -> Option<T::Inner> {
         let o = self.vtable().get(slot_byte_loc) as usize;
         if o == 0 {
             return default;
@@ -690,7 +829,7 @@ pub struct VTable<'a> {
 impl<'a> Follow<'a> for VTable<'a> {
     type Inner = VTable<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        VTable{buf: buf, loc: loc}
+        VTable { buf: buf, loc: loc }
     }
 }
 
@@ -716,7 +855,10 @@ impl<'a> VTable<'a> {
         if idx > self.num_fields() {
             return 0;
         }
-        read_scalar_at::<VOffsetT>(self.buf, self.loc + SIZE_VOFFSET + SIZE_VOFFSET + SIZE_VOFFSET * idx)
+        read_scalar_at::<VOffsetT>(
+            self.buf,
+            self.loc + SIZE_VOFFSET + SIZE_VOFFSET + SIZE_VOFFSET * idx,
+        )
     }
     pub fn get(&self, byte_loc: VOffsetT) -> VOffsetT {
         // TODO(rw): distinguish between None and 0?
@@ -739,9 +881,7 @@ pub struct VTableWriter<'a> {
 
 impl<'a> VTableWriter<'a> {
     pub fn init(buf: &'a mut [u8]) -> Self {
-        VTableWriter {
-            buf: buf,
-        }
+        VTableWriter { buf: buf }
     }
 
     /// Writes the vtable length (in bytes) into the vtable.
@@ -760,7 +900,7 @@ impl<'a> VTableWriter<'a> {
     /// Writes an object length (in bytes) into the vtable.
     #[inline]
     pub fn write_object_inline_size(&mut self, n: VOffsetT) {
-        emplace_scalar::<VOffsetT>(&mut self.buf[SIZE_VOFFSET..2*SIZE_VOFFSET], n);
+        emplace_scalar::<VOffsetT>(&mut self.buf[SIZE_VOFFSET..2 * SIZE_VOFFSET], n);
     }
 
     /// Gets an object field offset from the vtable. Only used for debugging.
@@ -795,7 +935,6 @@ impl<'a> VTableWriter<'a> {
         }
     }
 }
-
 
 /// Follow is a trait that allows us to access FlatBuffers in a declarative,
 /// type safe, and fast way. They compile down to almost no code (after
@@ -878,14 +1017,14 @@ impl<'a> Follow<'a> for &'a str {
 //}
 
 /// Implement direct slice access iff the host is little-endian.
-#[cfg(target_endian="little")]
+#[cfg(target_endian = "little")]
 impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let sz = std::mem::size_of::<T>();
         assert!(sz > 0);
         let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
-        let data_buf = &buf[loc + SIZE_UOFFSET .. loc + SIZE_UOFFSET + len * sz];
+        let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
         let ptr = data_buf.as_ptr() as *const T;
         let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
         s
@@ -896,35 +1035,43 @@ impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Vector<'a, T> {
     type Inner = Vector<'a, T>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Vector{0: buf, 1: loc, 2: PhantomData}
+        Vector {
+            0: buf,
+            1: loc,
+            2: PhantomData,
+        }
     }
 }
 
 impl<'a, T: 'a> Vector<'a, T> {
     pub fn new(buf: &'a [u8], loc: usize) -> Self {
-        Vector{0: buf, 1: loc, 2: PhantomData}
+        Vector {
+            0: buf,
+            1: loc,
+            2: PhantomData,
+        }
     }
     pub fn len(&self) -> usize {
         read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
     }
 
-    #[cfg(target_endian="little")]
+    #[cfg(target_endian = "little")]
     pub fn as_slice_unfollowed(&'a self) -> &'a [T] {
         let sz = std::mem::size_of::<T>();
         debug_assert!(sz > 0);
         let len = self.len();
-        let data_buf = &self.0[self.1 + SIZE_UOFFSET .. self.1 + SIZE_UOFFSET + len * sz];
+        let data_buf = &self.0[self.1 + SIZE_UOFFSET..self.1 + SIZE_UOFFSET + len * sz];
         let ptr = data_buf.as_ptr() as *const T;
         let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
         s
     }
 
-    #[cfg(target_endian="little")]
+    #[cfg(target_endian = "little")]
     pub fn into_slice_unfollowed(self) -> &'a [T] {
         let sz = std::mem::size_of::<T>();
         debug_assert!(sz > 0);
         let len = self.len();
-        let data_buf = &self.0[self.1 + SIZE_UOFFSET .. self.1 + SIZE_UOFFSET + len * sz];
+        let data_buf = &self.0[self.1 + SIZE_UOFFSET..self.1 + SIZE_UOFFSET + len * sz];
         let ptr = data_buf.as_ptr() as *const T;
         let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
         s
@@ -982,7 +1129,6 @@ impl<'a> Follow<'a> for FileIdentifier {
     }
 }
 
-
 pub struct SkipFileIdentifier<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
     type Inner = T::Inner;
@@ -991,20 +1137,74 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
     }
 }
 
-
 // Implementing Follow using trait bounds (EndianScalar) causes them to
 // conflict with the Sized impl. So, they are implemented here on concrete types.
-impl<'a> Follow<'a> for bool { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for u8   { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for u16  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for u32  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for u64  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i8   { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i16  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i32  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for i64  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for f32  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
-impl<'a> Follow<'a> for f64  { type Inner = Self; fn follow(buf: &'a [u8], loc: usize) -> Self::Inner { read_scalar_at::<Self>(buf, loc) } }
+impl<'a> Follow<'a> for bool {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u8 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u16 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u32 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u64 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i8 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i16 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i32 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i64 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for f32 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for f64 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
 
 #[derive(Debug)]
 pub struct Vector<'a, T: Sized + 'a>(&'a [u8], usize, PhantomData<T>);
