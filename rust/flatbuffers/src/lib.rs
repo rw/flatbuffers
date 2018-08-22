@@ -136,7 +136,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn new_with_capacity(size: usize) -> Self {
         FlatBufferBuilder{
             owned_buf: vec![0u8; size],
-            vtable: Vec::new(),
+
             written_vtable_revpos: Vec::new(),
             field_locs: Vec::new(),
 
@@ -470,7 +470,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             a + b + c
         };
 
-        self.pre_align(to_align, min_align.clone());
+        { let ma = self.min_align; self.pre_align(to_align, ma); }
 
         if let Some(ident) = file_identifier {
             assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);

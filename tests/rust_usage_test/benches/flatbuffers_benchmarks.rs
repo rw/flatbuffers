@@ -89,7 +89,8 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
 
 #[inline(always)]
 fn maybe_blackbox<T>(t: T) -> T {
-    t
+    bencher::black_box(t)
+    //t
 }
 
 #[inline(always)]
