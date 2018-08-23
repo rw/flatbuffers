@@ -1038,18 +1038,22 @@ impl<'a, T: GeneratedStruct + 'a> Follow<'a> for SliceOfGeneratedStruct<T> {
     }
 }
 
+fn follow_slice_helper<T>(buf: &[u8], loc: usize) -> &[T] {
+    let sz = std::mem::size_of::<T>();
+    debug_assert!(sz > 0);
+    let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+    let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
+    let ptr = data_buf.as_ptr() as *const T;
+    let s: &[T] = unsafe { std::slice::from_raw_parts(ptr, len) };
+    s
+}
+
 /// Implement direct slice access iff the host is little-endian.
 #[cfg(target_endian = "little")]
 impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let sz = std::mem::size_of::<T>();
-        assert!(sz > 0);
-        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
-        let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
-        let ptr = data_buf.as_ptr() as *const T;
-        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
-        s
+        follow_slice_helper::<T>(buf, loc)
     }
 }
 
@@ -1076,28 +1080,6 @@ impl<'a, T: 'a> Vector<'a, T> {
     pub fn len(&self) -> usize {
         read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
     }
-
-    #[cfg(target_endian = "little")]
-    pub fn as_slice_unfollowed(&'a self) -> &'a [T] {
-        let sz = std::mem::size_of::<T>();
-        debug_assert!(sz > 0);
-        let len = self.len();
-        let data_buf = &self.0[self.1 + SIZE_UOFFSET..self.1 + SIZE_UOFFSET + len * sz];
-        let ptr = data_buf.as_ptr() as *const T;
-        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
-        s
-    }
-
-    #[cfg(target_endian = "little")]
-    pub fn into_slice_unfollowed(self) -> &'a [T] {
-        let sz = std::mem::size_of::<T>();
-        debug_assert!(sz > 0);
-        let len = self.len();
-        let data_buf = &self.0[self.1 + SIZE_UOFFSET..self.1 + SIZE_UOFFSET + len * sz];
-        let ptr = data_buf.as_ptr() as *const T;
-        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
-        s
-    }
 }
 impl<'a, T: Follow<'a>> Vector<'a, T> {
     pub fn get(&self, idx: usize) -> T::Inner {
@@ -1111,12 +1093,12 @@ impl<'a, T: Follow<'a>> Vector<'a, T> {
 
 impl<'a> Vector<'a, u8> {
     pub fn as_bytes(&'a self) -> &'a [u8] {
-        unimplemented!(); //read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
+        <&[u8]>::follow(self.0, self.1)
     }
 }
 
 // TODO(rw): endian safety
-impl<'a, T: Sized> Follow<'a> for &'a T {
+impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
     type Inner = &'a T;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let sz = std::mem::size_of::<T>();

@@ -1177,8 +1177,8 @@ mod follow_impls {
     #[test]
     fn offset_to_ref_u8() {
         let vec: Vec<u8> = vec![255, 3];
-        let fs: flatbuffers::FollowStart<&u8> = flatbuffers::FollowStart::new();
-        assert_eq!(*fs.self_follow(&vec[..], 1), 3);
+        let fs: flatbuffers::FollowStart<u8> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&vec[..], 1), 3);
     }
 
     #[test]
@@ -1191,8 +1191,8 @@ mod follow_impls {
     #[test]
     fn offset_to_ref_u16() {
         let vec: Vec<u8> = vec![255, 255, 3, 4];
-        let fs: flatbuffers::FollowStart<&u16> = flatbuffers::FollowStart::new();
-        assert_eq!(*fs.self_follow(&vec[..], 2), 1027);
+        let fs: flatbuffers::FollowStart<u16> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&vec[..], 2), 1027);
     }
 
     #[test]
@@ -1205,8 +1205,8 @@ mod follow_impls {
     #[test]
     fn offset_to_f32() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, /* start of value */ 208, 15, 73, 64];
-        let fs: flatbuffers::FollowStart<&f32> = flatbuffers::FollowStart::new();
-        assert_eq!(fs.self_follow(&vec[..], 4), &3.14159);
+        let fs: flatbuffers::FollowStart<f32> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&vec[..], 4), 3.14159);
     }
 
     #[test]
@@ -1217,10 +1217,23 @@ mod follow_impls {
     }
 
     #[test]
+    fn offset_to_byte_vector() {
+        let vec: Vec<u8> = vec![255, 255, 255, 255, 4, 0, 0, 0, 1, 2, 3, 4];
+        let off: flatbuffers::FollowStart<&[u8]> = flatbuffers::FollowStart::new();
+        assert_eq!(off.self_follow(&vec[..], 4), &[1, 2, 3, 4][..]);
+    }
+    #[test]
+    fn foo() {
+        let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 0, 3, 0];
+        let off: flatbuffers::FollowStart<&[u16]> = flatbuffers::FollowStart::new();
+        assert_eq!(off.self_follow(&vec[..], 4), &[1, 3][..]);
+    }
+
+    #[test]
     fn offset_to_byte_string() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 3, 0, 0, 0, 1, 2, 3, 0];
         let off: flatbuffers::FollowStart<&[u8]> = flatbuffers::FollowStart::new();
-        assert_eq!(off.self_follow(&vec[..], 4), &vec![1, 2, 3][..]);
+        assert_eq!(off.self_follow(&vec[..], 4), &[1, 2, 3][..]);
     }
 
     #[test]
@@ -1384,8 +1397,11 @@ mod follow_impls {
         let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(&buf[..], 0);
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(0), None), Some("moo"));
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(0), None), Some(&vec![109, 111, 111][..]));
-        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), None);
-        assert_eq!(v.map(|x| x.into_slice_unfollowed()), Some(&vec![109, 111, 111][..]));
+        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), None).unwrap();
+        assert_eq!(v.len(), 3);
+        assert_eq!(v.get(0), 109);
+        assert_eq!(v.get(1), 111);
+        assert_eq!(v.get(2), 111);
     }
 
     #[test]
@@ -1405,8 +1421,11 @@ mod follow_impls {
 
         let default_vec_buf: Vec<u8> = vec![3, 0, 0, 0, 70, 71, 72, 0];
         let default_vec = flatbuffers::Vector::new(&default_vec_buf[..], 0);
-        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec));
-        assert_eq!(v.map(|x| x.into_slice_unfollowed()), Some(&vec![70, 71, 72][..]));
+        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec)).unwrap();
+        assert_eq!(v.len(), 3);
+        assert_eq!(v.get(0), 70);
+        assert_eq!(v.get(1), 71);
+        assert_eq!(v.get(2), 72);
     }
 
     #[test]
@@ -1427,9 +1446,11 @@ mod follow_impls {
 
         let default_vec_buf: Vec<u8> = vec![3, 0, 0, 0, 70, 71, 72, 0];
         let default_vec = flatbuffers::Vector::new(&default_vec_buf[..], 0);
-        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec));
-        assert!(v.is_some());
-        assert_eq!(v.unwrap().as_slice_unfollowed(), &vec![70, 71, 72][..]);
+        let v = tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<u8>>>(fi2fo(0), Some(default_vec)).unwrap();
+        assert_eq!(v.len(), 3);
+        assert_eq!(v.get(0), 70);
+        assert_eq!(v.get(1), 71);
+        assert_eq!(v.get(2), 72);
     }
 
 }
