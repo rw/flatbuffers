@@ -59,6 +59,9 @@ std::string MakeUpper(const std::string &in) {
   return s;
 }
 
+// Encapsulate all logcal field types in this enum. This allows us to write
+// field logic based on type switches, instead of branches on the properties
+// set on the Type.
 enum class FullElementType {
   Integer,
   Float,
@@ -77,6 +80,7 @@ enum class FullElementType {
   VectorOfTable, VectorOfString, VectorOfUnionValue,
 };
 
+// Convert a Type to a FullType (exhaustive).
 FullElementType GetFullElementType(const Type &type) {
   // order matters for some of these conditionals
   if (type.base_type == BASE_TYPE_STRING) {
@@ -89,19 +93,35 @@ FullElementType GetFullElementType(const Type &type) {
     }
   } else if (type.base_type == BASE_TYPE_VECTOR) {
     switch (GetFullElementType(type.VectorType())) {
-      case FullElementType::Integer: { return FullElementType::VectorOfInteger; }
-      case FullElementType::Float: { return FullElementType::VectorOfFloat; }
-      case FullElementType::Bool: { return FullElementType::VectorOfBool; }
-      case FullElementType::Struct: { return FullElementType::VectorOfStruct; }
-      case FullElementType::Table: { return FullElementType::VectorOfTable; }
-      case FullElementType::String: { return FullElementType::VectorOfString; }
-      case FullElementType::EnumKey: { return FullElementType::VectorOfEnumKey; }
+      case FullElementType::Integer: {
+        return FullElementType::VectorOfInteger;
+      }
+      case FullElementType::Float: {
+        return FullElementType::VectorOfFloat;
+      }
+      case FullElementType::Bool: {
+        return FullElementType::VectorOfBool;
+      }
+      case FullElementType::Struct: {
+        return FullElementType::VectorOfStruct;
+      }
+      case FullElementType::Table: {
+        return FullElementType::VectorOfTable;
+      }
+      case FullElementType::String: {
+        return FullElementType::VectorOfString;
+      }
+      case FullElementType::EnumKey: {
+        return FullElementType::VectorOfEnumKey;
+      }
       case FullElementType::UnionValue: {
         // vectors of unions are not supported yet
         FLATBUFFERS_ASSERT(false);
-        return FullElementType::VectorOfUnionValue;
       }
-      default: { FLATBUFFERS_ASSERT(false); }
+      default: {
+        // unreachable: pattern matching was not exhaustive.
+        FLATBUFFERS_ASSERT(false);
+      }
     }
   } else if (type.enum_def != nullptr) {
     if (type.enum_def->is_union) {
@@ -110,7 +130,8 @@ FullElementType GetFullElementType(const Type &type) {
       } else if (type.base_type == BASE_TYPE_UTYPE) {
         return FullElementType::UnionKey;
       } else {
-        assert(false);
+        // unreachable: pattern matching was not exhaustive.
+        FLATBUFFERS_ASSERT(false);
       }
     } else {
       return FullElementType::EnumKey;
@@ -123,15 +144,18 @@ FullElementType GetFullElementType(const Type &type) {
     } else if (IsFloat(type.base_type)) {
       return FullElementType::Float;
     } else {
-      assert(false);
+      // unreachable: pattern matching was not exhaustive.
+      FLATBUFFERS_ASSERT(false);
     }
   } else {
-    assert(false);
+    // unreachable: pattern matching was not exhaustive.
+    FLATBUFFERS_ASSERT(false);
   }
   assert(false);
   //TODO what is this? "or for an integral type derived from an enum."
 }
 
+// Determine if our Type needs a lifetime when used in Rust.
 bool TypeNeedsLifetime(const Type &type) {
   switch (GetFullElementType(type)) {
     case FullElementType::Integer:
@@ -426,18 +450,6 @@ class RustGenerator : public BaseGenerator {
 
   const Namespace *CurrentNameSpace() const { return cur_name_space_; }
 
-  // Translates a qualified name in flatbuffer text format to the same name in
-  // the equivalent C++ namespace.
-  static std::string TranslateNameSpace(const std::string &qualified_name) {
-    std::string cpp_qualified_name = qualified_name;
-    size_t start_pos = 0;
-    while ((start_pos = cpp_qualified_name.find(".", start_pos)) !=
-           std::string::npos) {
-      cpp_qualified_name.replace(start_pos, 1, "::");
-    }
-    return cpp_qualified_name;
-  }
-
   void GenComment(const std::vector<std::string> &dc, const char *prefix = "") {
     std::string text;
     ::flatbuffers::GenComment(dc, &text, nullptr, prefix);
@@ -498,7 +510,7 @@ class RustGenerator : public BaseGenerator {
         //s.append(lifetime);
         s.append(WrapInNameSpace(type.struct_def->defined_namespace,
                                  type.struct_def->name));
-        if (StructNeedsLifetime(*type.struct_def)) {
+        if (TypeNeedsLifetime(*type.struct_def)) {
           s.append("<" + lifetime + ">");
         } else {
           s.append("/* foo */");
@@ -1848,15 +1860,6 @@ class RustGenerator : public BaseGenerator {
 		code_ += "impl {{STRUCT_NAME}} {";
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
-    // Generate a default constructor.
-    code_ += "  pub fn reset(&mut self) {";
-    code_ += "    let ptr = self as *mut {{STRUCT_NAME}};";
-    code_ += "    let sz =  ::std::mem::size_of::<({{STRUCT_NAME}})>();";
-    code_ += "    unsafe {";
-    code_ += "        ::std::ptr::write_bytes(ptr, 0, sz);";
-    code_ += "    }";
-    code_ += "  }";
-
     // Generate a constructor that takes all fields as arguments.
     std::string arg_list;
     std::string init_list;
@@ -1879,7 +1882,6 @@ class RustGenerator : public BaseGenerator {
       if (IsScalar(field.value.type.base_type) &&
           !IsFloat(field.value.type.base_type)) {
         auto type = GenUnderlyingCast(field, false, arg_name);
-        //init_list += ": flatbuffers::endian_scalar(" + type + "),\n";
         init_list += ": " + arg_name + ".to_little_endian(),\n";
       } else {
         init_list += ": " + arg_name + ",\n";
@@ -2006,7 +2008,7 @@ class RustGenerator : public BaseGenerator {
   }
 };
 
-}  // namespace cpp
+}  // namespace rust
 
 bool GenerateRust(const Parser &parser, const std::string &path,
                   const std::string &file_name) {
