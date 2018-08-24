@@ -169,6 +169,22 @@ bool TypeNeedsLifetime(const Type &type) {
   }
 }
 
+// Determine if our Type needs a lifetime when used in Rust from a FlatBuffers
+// struct type.
+bool StructMemberAccessNeedsCopy(const Type &type) {
+  switch (GetFullElementType(type)) {
+    case FullElementType::Integer: { return true; } // requires endian swap
+    case FullElementType::Float: { return false; } // no endian swap
+    case FullElementType::Bool: { return false; } // no endian swap
+    case FullElementType::Struct: { return false; } // no endian swap
+    case FullElementType::EnumKey: { return true; } // requires endian swap
+    default: {
+      // logic error: no other types can be struct members.
+      FLATBUFFERS_ASSERT(false);
+    }
+  }
+}
+
 bool StructNeedsLifetime(const StructDef &struct_def) {
   return !struct_def.fixed;
 }
@@ -467,6 +483,7 @@ class RustGenerator : public BaseGenerator {
     #undef FLATBUFFERS_TD
       // clang-format on
     };
+
     if (user_facing_type) {
       if (type.enum_def) return WrapInNameSpace(*type.enum_def);
       if (type.base_type == BASE_TYPE_BOOL) return "bool";
@@ -1748,14 +1765,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
   }
 
-  std::string GenUnionUnpackVal(const FieldDef &afield,
-                                const char *vec_elem_access,
-                                const char *vec_type_access) {
-    return afield.value.type.enum_def->name + "Union::UnPack(" + "_e" +
-           vec_elem_access + ", " + Name(afield) + UnionTypeFieldSuffix() +
-           "()" + vec_type_access + ", _resolver)";
-  }
-
   static void GenPadding(
       const FieldDef &field, std::string *code_ptr, int *id,
       const std::function<void(int bits, std::string *code_ptr, int *id)> &f) {
@@ -1778,6 +1787,17 @@ class RustGenerator : public BaseGenerator {
     (void)bits;
     *code_ptr += "padding" + NumToString((*id)++) + "__: 0,";
   }
+
+  //std::string StructMemberDefinitionSignature(const Type &type) {
+  //  switch (GetFullElementType(type)) {
+  //    case FullElementType::Integer:
+  //    case FullElementType::Float:
+  //    case FullElementType::Bool:
+  //    case FullElementType::EnumKey:
+  //    case FullElementType::Struct: { return false; }
+  //    default: { return true; }
+  //  }
+  //}
 
   // Generate an accessor struct with constructor for a flatbuffers struct.
   void GenStruct(const StructDef &struct_def) {
@@ -1802,11 +1822,7 @@ class RustGenerator : public BaseGenerator {
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
-      const bool needs_lifetime = TypeNeedsLifetime(field.value.type);
-      const auto lifetime = needs_lifetime ? "<'a>" : "";
-      code_.SetValue("FIELD_TYPE",
-                     GenTypeGet(field.value.type, "", "", lifetime,
-                                true));
+      code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, "", "", "", true));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
