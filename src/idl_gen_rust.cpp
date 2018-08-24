@@ -182,10 +182,6 @@ bool StructMemberAccessNeedsCopy(const Type &type) {
   }
 }
 
-bool StructNeedsLifetime(const StructDef &struct_def) {
-  return !struct_def.fixed;
-}
-
 namespace rust {
 
 class RustGenerator : public BaseGenerator {
@@ -318,7 +314,6 @@ class RustGenerator : public BaseGenerator {
   // structs, and tables) and output them to a single file.
   bool generate() {
     code_.Clear();
-    code_ += "// " + std::string(FlatBuffersGeneratedWarning()) + "\n\n";
 
     if (parser_.opts.include_dependence_headers) { GenIncludeDependencies(); }
 
@@ -1811,7 +1806,7 @@ class RustGenerator : public BaseGenerator {
 
     // TODO: maybe only use lifetimes when needed by members, and skip
     //       PhantomData? use TypeNeedsLifetime.
-		code_ += "pub struct {{STRUCT_NAME}} {";
+    code_ += "pub struct {{STRUCT_NAME}} {";
 
     int padding_id = 0;
     for (auto it = struct_def.fields.vec.begin();
@@ -1830,37 +1825,12 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "} // pub struct {{STRUCT_NAME}}";
 
-    // Impl the dummy GeneratedStruct trait to help users write structs
-    // correctly:
-		code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
-    code_ += "//impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
-    code_ += "//    type Inner = &'a {{STRUCT_NAME}};";
-    code_ += "//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "//        let this_buf = &buf[loc..loc + ::std::mem::size_of::<{{STRUCT_NAME}}>()];";
-    code_ += "//        let ptr = this_buf.as_ptr() as *const {{STRUCT_NAME}};";
-    code_ += "//        unsafe { &*ptr }";
-    code_ += "//    }";
-    code_ += "//}";
-    code_ += "//impl<'a> flatbuffers::Follow<'a> for &'a [{{STRUCT_NAME}}] {";
-    code_ += "//    type Inner = Self;//&'a [{{STRUCT_NAME}}];";
-    code_ += "//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "//    //    let this_buf = &buf[loc..loc + ::std::mem::size_of::<{{STRUCT_NAME}}>()];";
-    code_ += "//    //    let ptr = this_buf.as_ptr() as *const {{STRUCT_NAME}};";
-    code_ += "//    //    unsafe { &*ptr }";
-    code_ += "//    //}";
-    code_ += "//        let sz = ::std::mem::size_of::<{{STRUCT_NAME}}>();";
-    code_ += "//        assert!(sz > 0);";
-    code_ += "//        let len = flatbuffers::read_scalar::<flatbuffers::UOffsetT>(&buf[loc..loc + flatbuffers::SIZE_UOFFSET]) as usize;";
-    code_ += "//        let data_buf = &buf[loc + flatbuffers::SIZE_UOFFSET..loc + flatbuffers::SIZE_UOFFSET + len * sz];";
-    code_ += "//        let ptr = data_buf.as_ptr() as *const {{STRUCT_NAME}};";
-    code_ += "//        let s: &'a [{{STRUCT_NAME}}] = unsafe { ::std::slice::from_raw_parts(ptr, len) };";
-    code_ += "//        s";
-    code_ += "//    }";
-    code_ += "//}";
+    // Impl the dummy GeneratedStruct trait to get a free impl of Follow:
+    code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
 
     // Generate GetFullyQualifiedName
     code_ += "";
-		code_ += "impl {{STRUCT_NAME}} {";
+    code_ += "impl {{STRUCT_NAME}} {";
     GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate a constructor that takes all fields as arguments.
