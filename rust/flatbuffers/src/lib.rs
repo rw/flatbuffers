@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::ops::Index;
 
 // enum causes compile error on type mismatch, whereas newtype () would not.
 pub enum VectorOffset {}
@@ -1091,11 +1092,24 @@ impl<'a, T: Follow<'a>> Vector<'a, T> {
     }
 }
 
-impl<'a> Vector<'a, u8> {
-    pub fn as_bytes(&'a self) -> &'a [u8] {
-        <&[u8]>::follow(self.0, self.1)
-    }
-}
+impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> { pub fn as_slice(&'a self) -> &'a [T] { <SliceOfGeneratedStruct<T>>::follow(self.0, self.1) } }
+impl<'a> Vector<'a, bool> { pub fn as_slice(&'a self) -> &'a [bool] { <&[bool]>::follow(self.0, self.1) } }
+impl<'a> Vector<'a, u8> { pub fn as_slice(&'a self) -> &'a [u8] { <&[u8]>::follow(self.0, self.1) } }
+impl<'a> Vector<'a, i8> { pub fn as_slice(&'a self) -> &'a [i8] { <&[i8]>::follow(self.0, self.1) } }
+impl<'a> Vector<'a, f32> { pub fn as_slice(&'a self) -> &'a [f32] { <&[f32]>::follow(self.0, self.1) } }
+impl<'a> Vector<'a, f64> { pub fn as_slice(&'a self) -> &'a [f64] { <&[f64]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, u16> { pub fn as_slice(&'a self) -> &'a [u16] { <&[u16]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, i16> { pub fn as_slice(&'a self) -> &'a [i16] { <&[i16]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, u32> { pub fn as_slice(&'a self) -> &'a [u32] { <&[u32]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, i32> { pub fn as_slice(&'a self) -> &'a [i32] { <&[i32]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, u64> { pub fn as_slice(&'a self) -> &'a [u64] { <&[u64]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, i64> { pub fn as_slice(&'a self) -> &'a [i64] { <&[i64]>::follow(self.0, self.1) } }
 
 // TODO(rw): endian safety
 impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
