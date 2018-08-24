@@ -510,7 +510,7 @@ class RustGenerator : public BaseGenerator {
         //s.append(lifetime);
         s.append(WrapInNameSpace(type.struct_def->defined_namespace,
                                  type.struct_def->name));
-        if (TypeNeedsLifetime(*type.struct_def)) {
+        if (TypeNeedsLifetime(type)) {
           s.append("<" + lifetime + ">");
         } else {
           s.append("/* foo */");
@@ -1456,19 +1456,24 @@ class RustGenerator : public BaseGenerator {
 
     code_.SetValue("STRUCT_NAME", Name(struct_def));
     code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
+    code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(Name(struct_def)));
+
     code_ += "pub enum {{OFFSET_TYPELABEL}} {}";
     code_ += "#[derive(Copy, Clone, Debug, PartialEq)]";
+    code_ += "";
     code_ += "pub struct {{STRUCT_NAME}}<'a> {";
     code_ += "  pub _tab: flatbuffers::Table<'a>,";
     code_ += "  _phantom: PhantomData<&'a ()>,";
     code_ += "}";
+    code_ += "";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
     code_ += "    type Inner = {{STRUCT_NAME}}<'a>;";
     code_ += "    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }";
     code_ += "    }";
     code_ += "}";
-    code_ += "impl<'a> {{STRUCT_NAME}}<'a> /* private flatbuffers::Table */ {";
+    code_ += "";
+    code_ += "impl<'a> {{STRUCT_NAME}}<'a> {";
     code_ += "    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {";
     code_ += "        {{STRUCT_NAME}} {";
     code_ += "            _tab: table,";
@@ -1476,8 +1481,8 @@ class RustGenerator : public BaseGenerator {
     code_ += "        }";
     code_ += "    }";
 
-    // Generate a convenient CreateX function that uses the above builder
-    // to create a table in one go.
+    // Generate a convenient create* function that uses the above builder
+    // to create a table in one function call.
     code_.SetValue("MAYBE_UNDERSCORE",
         struct_def.fields.vec.size() == 0 ? "_" : "");
     code_ += "    #[allow(unused_mut)]";
@@ -1517,8 +1522,6 @@ class RustGenerator : public BaseGenerator {
 
     // Generate field id constants.
     if (struct_def.fields.vec.size() > 0) {
-      //code_.SetValue("SEP", "");
-      //code_ += "  enum {";
       for (auto it = struct_def.fields.vec.begin();
            it != struct_def.fields.vec.end(); ++it) {
         const auto &field = **it;
@@ -1626,16 +1629,6 @@ class RustGenerator : public BaseGenerator {
       }
     }
 
-    GenBuilders(struct_def);
-  }
-
-  void GenBuilders(const StructDef &struct_def) {
-    code_.SetValue("STRUCT_NAME", Name(struct_def));
-    code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(Name(struct_def)));
-    code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
-    code_.SetValue("PARENT_LIFETIME",
-        StructNeedsLifetime(struct_def) ? "<'a>" : "");
-
     // Generate an args struct:
     code_ += "pub struct {{STRUCT_NAME}}Args<'a> {";
     //code_ += "  fbb_: &'a mut flatbuffers::FlatBufferBuilder,";
@@ -1683,7 +1676,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
 
     // Generate builder functions:
-    //code_ += "impl{{PARENT_LIFETIME}} {{STRUCT_NAME}}Builder{{PARENT_LIFETIME}} {";
     code_ += "impl<'a: 'b, 'b> {{STRUCT_NAME}}Builder<'a, 'b> {";
     bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();

@@ -17,17 +17,20 @@ pub mod my_game {
 
 pub enum InParentNamespaceOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct InParentNamespace<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
     type Inner = InParentNamespace<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> InParentNamespace<'a> /* private flatbuffers::Table */ {
+
+impl<'a> InParentNamespace<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         InParentNamespace {
             _tab: table,
@@ -86,17 +89,20 @@ pub mod example_2 {
 
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> Monster<'a> /* private flatbuffers::Table */ {
+
+impl<'a> Monster<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
             _tab: table,
@@ -299,13 +305,6 @@ impl flatbuffers::GeneratedStruct for Test {}
 //}
 
 impl Test {
-  pub fn reset(&mut self) {
-    let ptr = self as *mut Test;
-    let sz =  ::std::mem::size_of::<(Test)>();
-    unsafe {
-        ::std::ptr::write_bytes(ptr, 0, sz);
-    }
-  }
   pub fn new(_a: i16, _b: i8) -> Self {
     Test {
       a_: _a.to_little_endian(),
@@ -364,13 +363,6 @@ impl flatbuffers::GeneratedStruct for Vec3 {}
 //}
 
 impl Vec3 {
-  pub fn reset(&mut self) {
-    let ptr = self as *mut Vec3;
-    let sz =  ::std::mem::size_of::<(Vec3)>();
-    unsafe {
-        ::std::ptr::write_bytes(ptr, 0, sz);
-    }
-  }
   pub fn new(_x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: Test/* foo */) -> Self {
     Vec3 {
       x_: _x,
@@ -440,13 +432,6 @@ impl flatbuffers::GeneratedStruct for Ability {}
 //}
 
 impl Ability {
-  pub fn reset(&mut self) {
-    let ptr = self as *mut Ability;
-    let sz =  ::std::mem::size_of::<(Ability)>();
-    unsafe {
-        ::std::ptr::write_bytes(ptr, 0, sz);
-    }
-  }
   pub fn new(_id: u32, _distance: u32) -> Self {
     Ability {
       id_: _id.to_little_endian(),
@@ -472,17 +457,20 @@ impl Ability {
 
 pub enum TestSimpleTableWithEnumOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct TestSimpleTableWithEnum<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
     type Inner = TestSimpleTableWithEnum<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> TestSimpleTableWithEnum<'a> /* private flatbuffers::Table */ {
+
+impl<'a> TestSimpleTableWithEnum<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TestSimpleTableWithEnum {
             _tab: table,
@@ -542,17 +530,20 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
 
 pub enum StatOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct Stat<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
     type Inner = Stat<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> Stat<'a> /* private flatbuffers::Table */ {
+
+impl<'a> Stat<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Stat {
             _tab: table,
@@ -634,17 +625,20 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
 
 pub enum ReferrableOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct Referrable<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for Referrable<'a> {
     type Inner = Referrable<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> Referrable<'a> /* private flatbuffers::Table */ {
+
+impl<'a> Referrable<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Referrable {
             _tab: table,
@@ -705,17 +699,20 @@ impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
 /// an example documentation comment: monster object
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct Monster<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> Monster<'a> /* private flatbuffers::Table */ {
+
+impl<'a> Monster<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
             _tab: table,
@@ -1257,17 +1254,20 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
 
 pub enum TypeAliasesOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct TypeAliases<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
     type Inner = TypeAliases<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> TypeAliases<'a> /* private flatbuffers::Table */ {
+
+impl<'a> TypeAliases<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TypeAliases {
             _tab: table,

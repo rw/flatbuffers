@@ -106,13 +106,6 @@ impl flatbuffers::GeneratedStruct for StructInNestedNS {}
 //}
 
 impl StructInNestedNS {
-  pub fn reset(&mut self) {
-    let ptr = self as *mut StructInNestedNS;
-    let sz =  ::std::mem::size_of::<(StructInNestedNS)>();
-    unsafe {
-        ::std::ptr::write_bytes(ptr, 0, sz);
-    }
-  }
   pub fn new(_a: i32, _b: i32) -> Self {
     StructInNestedNS {
       a_: _a.to_little_endian(),
@@ -131,17 +124,20 @@ impl StructInNestedNS {
 
 pub enum TableInNestedNSOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct TableInNestedNS<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for TableInNestedNS<'a> {
     type Inner = TableInNestedNS<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> TableInNestedNS<'a> /* private flatbuffers::Table */ {
+
+impl<'a> TableInNestedNS<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TableInNestedNS {
             _tab: table,

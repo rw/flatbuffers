@@ -16,17 +16,20 @@ pub mod namespace_a {
 
 pub enum TableInFirstNSOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct TableInFirstNS<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for TableInFirstNS<'a> {
     type Inner = TableInFirstNS<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> TableInFirstNS<'a> /* private flatbuffers::Table */ {
+
+impl<'a> TableInFirstNS<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TableInFirstNS {
             _tab: table,
@@ -108,17 +111,20 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
 
 pub enum SecondTableInAOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct SecondTableInA<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for SecondTableInA<'a> {
     type Inner = SecondTableInA<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> SecondTableInA<'a> /* private flatbuffers::Table */ {
+
+impl<'a> SecondTableInA<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         SecondTableInA {
             _tab: table,
@@ -191,17 +197,20 @@ pub mod namespace_c {
 
 pub enum TableInCOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
+
 pub struct TableInC<'a> {
   pub _tab: flatbuffers::Table<'a>,
   _phantom: PhantomData<&'a ()>,
 }
+
 impl<'a> flatbuffers::Follow<'a> for TableInC<'a> {
     type Inner = TableInC<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
-impl<'a> TableInC<'a> /* private flatbuffers::Table */ {
+
+impl<'a> TableInC<'a> {
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TableInC {
             _tab: table,
