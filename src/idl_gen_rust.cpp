@@ -34,7 +34,7 @@ static std::string GeneratedFileName(const std::string &path,
 }
 
 // Convert a camelCaseIdentifier or CamelCaseIdentifier to an
-// underscore_based_indentifier.
+// snake_case_indentifier.
 std::string MakeSnakeCase(const std::string &in) {
   std::string s;
   for (size_t i = 0; i < in.length(); i++) {
@@ -59,24 +59,89 @@ std::string MakeUpper(const std::string &in) {
   return s;
 }
 
+enum class FullElementType {
+  Integer,
+  Float,
+  Bool,
+
+  Struct,
+  Table,
+
+  EnumKey,
+  UnionKey,
+
+  UnionValue,
+
+  String, // todo: bytestring
+  VectorOfInteger, VectorOfFloat, VectorOfBool, VectorOfEnumKey, VectorOfStruct,
+  VectorOfTable, VectorOfString, VectorOfUnionValue,
+};
+
+FullElementType GetFullElementType(const Type &type) {
+  // order matters for some of these conditionals
+  if (type.base_type == BASE_TYPE_STRING) {
+    return FullElementType::String;
+  } else if (type.base_type == BASE_TYPE_STRUCT) {
+    if (type.struct_def->fixed) {
+      return FullElementType::Struct;
+    } else {
+      return FullElementType::Table;
+    }
+  } else if (type.base_type == BASE_TYPE_VECTOR) {
+    switch (GetFullElementType(type.VectorType())) {
+      case FullElementType::Integer: { return FullElementType::VectorOfInteger; }
+      case FullElementType::Float: { return FullElementType::VectorOfFloat; }
+      case FullElementType::Bool: { return FullElementType::VectorOfBool; }
+      case FullElementType::Struct: { return FullElementType::VectorOfStruct; }
+      case FullElementType::Table: { return FullElementType::VectorOfTable; }
+      case FullElementType::String: { return FullElementType::VectorOfString; }
+      case FullElementType::EnumKey: { return FullElementType::VectorOfEnumKey; }
+      case FullElementType::UnionValue: {
+        // vectors of unions are not supported yet
+        FLATBUFFERS_ASSERT(false);
+        return FullElementType::VectorOfUnionValue;
+      }
+      default: { FLATBUFFERS_ASSERT(false); }
+    }
+  } else if (type.enum_def != nullptr) {
+    if (type.enum_def->is_union) {
+      if (type.base_type == BASE_TYPE_UNION) {
+        return FullElementType::UnionValue;
+      } else if (type.base_type == BASE_TYPE_UTYPE) {
+        return FullElementType::UnionKey;
+      } else {
+        assert(false);
+      }
+    } else {
+      return FullElementType::EnumKey;
+    }
+  } else if (IsScalar(type.base_type)) {
+    if (IsBool(type.base_type)) {
+      return FullElementType::Bool;
+    } else if (IsLong(type.base_type) || IsInteger(type.base_type)) {
+      return FullElementType::Integer;
+    } else if (IsFloat(type.base_type)) {
+      return FullElementType::Float;
+    } else {
+      assert(false);
+    }
+  } else {
+    assert(false);
+  }
+  assert(false);
+  //TODO what is this? "or for an integral type derived from an enum."
+}
 
 bool TypeNeedsLifetime(const Type &type) {
-  switch (type.base_type) {
-    case BASE_TYPE_STRING: {
-      return true;
-    }
-    case BASE_TYPE_VECTOR: {
-      return true;
-    }
-    case BASE_TYPE_STRUCT: {
-      return !(type.struct_def->fixed);
-    }
-    case BASE_TYPE_UNION: {
-      return true;
-    }
-    default: {
-      return false;
-    }
+  switch (GetFullElementType(type)) {
+    case FullElementType::Integer:
+    case FullElementType::Float:
+    case FullElementType::Bool:
+    case FullElementType::Table:
+    case FullElementType::EnumKey:
+    case FullElementType::UnionKey:
+    case FullElementType::Struct: { return false; }
+    default: { return true; }
   }
 }
 
@@ -523,78 +588,6 @@ class RustGenerator : public BaseGenerator {
     return ptr_type == "naked" ? "" : ".get()";
   }
 
-  enum class FullElementType {
-    Integer,
-    Float,
-    Bool,
-
-    Struct,
-    Table,
-
-    EnumKey,
-    UnionKey,
-
-    UnionValue,
-
-    String, // todo: bytestring
-    VectorOfInteger, VectorOfFloat, VectorOfBool, VectorOfEnumKey, VectorOfStruct,
-    VectorOfTable, VectorOfString, VectorOfUnionValue,
-  };
-
-  FullElementType GetFullElementType(const Type &type) const {
-    // order matters for some of these conditionals
-    if (type.base_type == BASE_TYPE_STRING) {
-      return FullElementType::String;
-    } else if (type.base_type == BASE_TYPE_STRUCT) {
-      if (type.struct_def->fixed) {
-        return FullElementType::Struct;
-      } else {
-        return FullElementType::Table;
-      }
-    } else if (type.base_type == BASE_TYPE_VECTOR) {
-      switch (GetFullElementType(type.VectorType())) {
-        case FullElementType::Integer: { return FullElementType::VectorOfInteger; }
-        case FullElementType::Float: { return FullElementType::VectorOfFloat; }
-        case FullElementType::Bool: { return FullElementType::VectorOfBool; }
-        case FullElementType::Struct: { return FullElementType::VectorOfStruct; }
-        case FullElementType::Table: { return FullElementType::VectorOfTable; }
-        case FullElementType::String: { return FullElementType::VectorOfString; }
-        case FullElementType::EnumKey: { return FullElementType::VectorOfEnumKey; }
-        case FullElementType::UnionValue: {
-          // vectors of unions are not supported yet
-          FLATBUFFERS_ASSERT(false);
-          return FullElementType::VectorOfUnionValue;
-        }
-        default: { FLATBUFFERS_ASSERT(false); }
-      }
-    } else if (type.enum_def != nullptr) {
-      if (type.enum_def->is_union) {
-        if (type.base_type == BASE_TYPE_UNION) {
-          return FullElementType::UnionValue;
-        } else if (type.base_type == BASE_TYPE_UTYPE) {
-          return FullElementType::UnionKey;
-        } else {
-          assert(false);
-        }
-      } else {
-        return FullElementType::EnumKey;
-      }
-    } else if (IsScalar(type.base_type)) {
-      if (IsBool(type.base_type)) {
-        return FullElementType::Bool;
-      } else if (IsLong(type.base_type) || IsInteger(type.base_type)) {
-        return FullElementType::Integer;
-      } else if (IsFloat(type.base_type)) {
-        return FullElementType::Float;
-      } else {
-        assert(false);
-      }
-    } else {
-      assert(false);
-    }
-    assert(false);
-    //TODO what is this? "or for an integral type derived from an enum."
-  }
 
   enum class ContainerType { None, Vector, Enum, Union };
   ContainerType GetContainerType(const Type &type) const {
