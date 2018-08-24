@@ -540,19 +540,6 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  // Return a C++ type for any type (scalar/pointer) that reflects its
-  // serialized size.
-  std::string GenTypeSize(const Type &type) const {
-    // TODO(rw): convert this to enum switch
-    if (IsScalar(type.base_type)) {
-      return GenTypeBasic(type, false);
-    } else if (IsStruct(type)) {
-      return GenTypePointer(type, "");
-    } else {
-      return "flatbuffers::UOffsetT";
-    }
-  }
-
   static std::string NativeName(const std::string &name, const StructDef *sd,
                                 const IDLOptions &opts) {
     return sd && !sd->fixed ? opts.object_prefix + name + opts.object_suffix
@@ -1461,90 +1448,6 @@ class RustGenerator : public BaseGenerator {
       code_ += "  }";
     }
   }
-
-  //TODO void GenNativeTable(const StructDef &struct_def) {
-  //TODO   assert(false);
-  //TODO   const auto native_name =
-  //TODO       NativeName(Name(struct_def), &struct_def, parser_.opts);
-  //TODO   code_.SetValue("STRUCT_NAME", Name(struct_def));
-  //TODO   code_.SetValue("NATIVE_NAME", native_name);
-
-  //TODO   // Generate a C++ object that can hold an unpacked version of this table.
-  //TODO   code_ += "pub struct {{NATIVE_NAME}} : public flatbuffers::NativeTable {";
-  //TODO   code_ += "  typedef {{STRUCT_NAME}} TableType;";
-  //TODO   GenFullyQualifiedNameGetter(struct_def, native_name);
-  //TODO   for (auto it = struct_def.fields.vec.begin();
-  //TODO        it != struct_def.fields.vec.end(); ++it) {
-  //TODO     GenMember(**it);
-  //TODO   }
-  //TODO   GenOperatorNewDelete(struct_def);
-  //TODO   GenDefaultConstructor(struct_def);
-  //TODO   code_ += "};";
-  //TODO   code_ += "";
-  //TODO }
-
-  //TODO // Generate the code to call the appropriate Verify function(s) for a field.
-  //TODO void GenVerifyCall(const FieldDef &field, const char *prefix) {
-  //TODO   code_.SetValue("PRE", prefix);
-  //TODO   code_.SetValue("NAME", "self." + Name(field));
-  //TODO   code_.SetValue("REQUIRED", field.required ? "_required" : "");
-  //TODO   code_.SetValue("SIZE", GenTypeSize(field.value.type));
-  //TODO   code_.SetValue("OFFSET", GenFieldOffsetName(field));
-  //TODO   if (IsScalar(field.value.type.base_type) || IsStruct(field.value.type)) {
-  //TODO     code_ += "{{PRE}}flatbuffers::verify_field{{REQUIRED}}::<{{SIZE}}>"
-  //TODO              "(verifier, {{STRUCT_NAME}}::{{OFFSET}})\\";
-  //TODO   } else {
-  //TODO     code_ += "{{PRE}}flatbuffers::verify_offset{{REQUIRED}}"
-  //TODO              "(verifier, {{STRUCT_NAME}}::{{OFFSET}})\\";
-  //TODO   }
-
-  //TODO   switch (field.value.type.base_type) {
-  //TODO     case BASE_TYPE_UNION: {
-  //TODO       code_.SetValue("ENUM_NAME", field.value.type.enum_def->name);
-  //TODO       code_.SetValue("SUFFIX", UnionTypeFieldSuffix());
-  //TODO       code_ +=
-  //TODO           "{{PRE}}Verify{{ENUM_NAME}}(verifier, {{NAME}}(), "
-  //TODO           "{{NAME}}{{SUFFIX}}())\\";
-  //TODO       break;
-  //TODO     }
-  //TODO     case BASE_TYPE_STRUCT: {
-  //TODO       if (!field.value.type.struct_def->fixed) {
-  //TODO         code_ += "{{PRE}}verifier.verify_table({{NAME}}())\\";
-  //TODO       }
-  //TODO       break;
-  //TODO     }
-  //TODO     case BASE_TYPE_STRING: {
-  //TODO       code_ += "{{PRE}}verifier.verify({{NAME}}())\\";
-  //TODO       break;
-  //TODO     }
-  //TODO     case BASE_TYPE_VECTOR: {
-  //TODO       code_ += "{{PRE}}verifier.verify({{NAME}}())\\";
-
-  //TODO       switch (field.value.type.element) {
-  //TODO         case BASE_TYPE_STRING: {
-  //TODO           code_ += "{{PRE}}verifier.verify_vector_of_strings({{NAME}}())\\";
-  //TODO           break;
-  //TODO         }
-  //TODO         case BASE_TYPE_STRUCT: {
-  //TODO           if (!field.value.type.struct_def->fixed) {
-  //TODO             code_ += "{{PRE}}verifier.verify_vector_of_tables({{NAME}}())\\";
-  //TODO           }
-  //TODO           break;
-  //TODO         }
-  //TODO         case BASE_TYPE_UNION: {
-  //TODO           code_.SetValue("ENUM_NAME", field.value.type.enum_def->name);
-  //TODO           code_ +=
-  //TODO               "{{PRE}}Verify{{ENUM_NAME}}Vector(verifier, {{NAME}}(), "
-  //TODO               "{{NAME}}_type())\\";
-  //TODO           break;
-  //TODO         }
-  //TODO         default: break;
-  //TODO       }
-  //TODO       break;
-  //TODO     }
-  //TODO     default: { break; }
-  //TODO   }
-  //TODO }
 
   // Generate an accessor struct, builder structs & function for a table.
   void GenTable(const StructDef &struct_def) {
