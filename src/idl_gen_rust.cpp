@@ -885,7 +885,8 @@ class RustGenerator : public BaseGenerator {
       // TODO(rw): handle enums in other namespaces
       if (from) {
         //return "EnumValues" + GenTypeBasic(field.value.type, from) + "[" + val + " as usize]";
-        return "unsafe { ::std::mem::transmute(" + val + ") }";
+        //return "unsafe { ::std::mem::transmute(" + val + ") }";
+        return val;
       } else {
         return val + " as " + GenTypeBasic(field.value.type, from);
       }
@@ -1890,7 +1891,7 @@ class RustGenerator : public BaseGenerator {
 
   static void PaddingInitializer(int bits, std::string *code_ptr, int *id) {
     (void)bits;
-    *code_ptr += "\n        padding" + NumToString((*id)++) + "__: 0,";
+    *code_ptr += "padding" + NumToString((*id)++) + "__: 0,";
   }
 
   // Generate an accessor struct with constructor for a flatbuffers struct.
@@ -2019,7 +2020,7 @@ class RustGenerator : public BaseGenerator {
       if (field.padding) {
         std::string padding;
         GenPadding(field, &padding, &padding_id, PaddingInitializer);
-        code_ += padding;
+        code_ += "      " + padding;
       }
     }
     code_ += "    }";
@@ -2032,7 +2033,7 @@ class RustGenerator : public BaseGenerator {
       const auto &field = **it;
 
       //auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
-      auto field_type = GenBuilderArgsAddFuncType(field, "");
+      auto field_type = GenBuilderArgsAddFuncType(field, "'a");
       auto is_scalar = IsScalar(field.value.type.base_type) &&
                        !IsFloat(field.value.type.base_type);
       auto member = "self." + Name(field) + "_";
@@ -2045,7 +2046,7 @@ class RustGenerator : public BaseGenerator {
       code_.SetValue("REF", IsStruct(field.value.type) ? "&" : "");
 
       GenComment(field.doc_comment, "  ");
-      code_ += "  pub fn {{FIELD_NAME}}(&self) -> {{FIELD_TYPE}} {";
+      code_ += "  pub fn {{FIELD_NAME}}<'a>(&'a self) -> {{FIELD_TYPE}} {";
       code_ += "    {{REF}}{{FIELD_VALUE}}";
       code_ += "  }";
 

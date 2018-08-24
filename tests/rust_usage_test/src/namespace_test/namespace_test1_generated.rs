@@ -120,10 +120,10 @@ impl StructInNestedNS {
 
     }
   }
-  pub fn a(&self) -> i32 {
+  pub fn a<'a>(&'a self) -> i32 {
     self.a_.from_little_endian()
   }
-  pub fn b(&self) -> i32 {
+  pub fn b<'a>(&'a self) -> i32 {
     self.b_.from_little_endian()
   }
 }

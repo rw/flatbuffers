@@ -311,14 +311,13 @@ impl Test {
       a_: _a.to_little_endian(),
       b_: _b.to_little_endian(),
 
-
-        padding0__: 0,
+      padding0__: 0,
     }
   }
-  pub fn a(&self) -> i16 {
+  pub fn a<'a>(&'a self) -> i16 {
     self.a_.from_little_endian()
   }
-  pub fn b(&self) -> i8 {
+  pub fn b<'a>(&'a self) -> i8 {
     self.b_.from_little_endian()
   }
 }
@@ -381,30 +380,27 @@ impl Vec3 {
       test2_: _test2.to_little_endian(),
       test3_: _test3,
 
-
-        padding0__: 0,
-
-        padding1__: 0,
-
-        padding2__: 0,
+      padding0__: 0,
+      padding1__: 0,
+      padding2__: 0,
     }
   }
-  pub fn x(&self) -> f32 {
+  pub fn x<'a>(&'a self) -> f32 {
     self.x_
   }
-  pub fn y(&self) -> f32 {
+  pub fn y<'a>(&'a self) -> f32 {
     self.y_
   }
-  pub fn z(&self) -> f32 {
+  pub fn z<'a>(&'a self) -> f32 {
     self.z_
   }
-  pub fn test1(&self) -> f64 {
+  pub fn test1<'a>(&'a self) -> f64 {
     self.test1_
   }
-  pub fn test2(&self) -> Color {
-    unsafe { ::std::mem::transmute(self.test2_.from_little_endian()) }
+  pub fn test2<'a>(&'a self) -> Color {
+    self.test2_.from_little_endian()
   }
-  pub fn test3(&self) -> & Test {
+  pub fn test3<'a>(&'a self) -> &'a Test {
     &self.test3_
   }
 }
@@ -458,7 +454,7 @@ impl Ability {
 
     }
   }
-  pub fn id(&self) -> u32 {
+  pub fn id<'a>(&'a self) -> u32 {
     self.id_.from_little_endian()
   }
   fn key_compare_less_than(&self, o: &Ability) -> bool {
@@ -468,7 +464,7 @@ impl Ability {
     let key = self.id();
     (key > val) as isize - (key < val) as isize
   }
-  pub fn distance(&self) -> u32 {
+  pub fn distance<'a>(&'a self) -> u32 {
     self.distance_.from_little_endian()
   }
 }
