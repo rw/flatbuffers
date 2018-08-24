@@ -1225,8 +1225,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        //return "Option<&" + lifetime + " [" + typname + "]>";
-        return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
+        return "Option<&" + lifetime + " [" + typname + "]>";
+        //return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
@@ -1295,8 +1295,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullElementType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        //return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<" + typname + ">>>(" + offset_name + ", None)";
-        return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<" + typname + ">>>(" + offset_name + ", None)";
+        //return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None)";
       }
       case FullElementType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
@@ -1679,7 +1679,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "         None => { None }";
         code_ += "         Some(data) => {";
         code_ += "             use self::flatbuffers::Follow;";
-        code_ += "             Some(<flatbuffers::ForwardsUOffset<{{STRUCT_NAME}}<'a>>>::follow(data, 0))";
+        code_ += "             Some(<flatbuffers::ForwardsUOffset<{{STRUCT_NAME}}<'a>>>::follow(data.as_slice(), 0))";
         code_ += "         },";
         code_ += "     }";
         code_ += "  }";

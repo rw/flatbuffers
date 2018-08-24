@@ -852,8 +852,8 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Table<'a>>>(Monster::VT_TEST, None)
   }
   #[inline]
-  pub fn test4(&'a self) -> Option<flatbuffers::Vector<'a, Test>> {
-    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, Test>>>(Monster::VT_TEST4, None)
+  pub fn test4(&'a self) -> Option<&'a [Test]> {
+    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<Test>>>(Monster::VT_TEST4, None)
   }
   #[inline]
   pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<flatbuffers::ForwardsUOffset<&'a str>>> {
@@ -878,7 +878,7 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
          None => { None }
          Some(data) => {
              use self::flatbuffers::Follow;
-             Some(<flatbuffers::ForwardsUOffset<Monster<'a>>>::follow(data, 0))
+             Some(<flatbuffers::ForwardsUOffset<Monster<'a>>>::follow(data.as_slice(), 0))
          },
      }
   }
@@ -943,16 +943,16 @@ impl<'a> Monster<'a> /* private flatbuffers::Table */ {
     self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<flatbuffers::ForwardsUOffset<&'a str>>>>(Monster::VT_TESTARRAYOFSTRING2, None)
   }
   #[inline]
-  pub fn testarrayofsortedstruct(&'a self) -> Option<flatbuffers::Vector<'a, Ability>> {
-    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, Ability>>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
+  pub fn testarrayofsortedstruct(&'a self) -> Option<&'a [Ability]> {
+    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<Ability>>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
   }
   #[inline]
   pub fn flex(&'a self) -> Option<flatbuffers::Vector<'a, u8>> {
     self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, u8>>>(Monster::VT_FLEX, None)
   }
   #[inline]
-  pub fn test5(&'a self) -> Option<flatbuffers::Vector<'a, Test>> {
-    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, Test>>>(Monster::VT_TEST5, None)
+  pub fn test5(&'a self) -> Option<&'a [Test]> {
+    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<Test>>>(Monster::VT_TEST5, None)
   }
   #[inline]
   pub fn vector_of_longs(&'a self) -> Option<flatbuffers::Vector<'a, i64>> {
