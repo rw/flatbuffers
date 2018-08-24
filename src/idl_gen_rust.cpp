@@ -1434,21 +1434,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
   }
 
-  void GenOperatorNewDelete(const StructDef &struct_def) {
-    if (auto native_custom_alloc =
-            struct_def.attributes.Lookup("native_custom_alloc")) {
-      code_ += "  inline void *operator new (std::size_t count) {";
-      code_ += "    return " + native_custom_alloc->constant +
-               "<{{NATIVE_NAME}}>().allocate(count / sizeof({{NATIVE_NAME}}));";
-      code_ += "  }";
-      code_ += "  inline void operator delete (void *ptr) {";
-      code_ += "    return " + native_custom_alloc->constant +
-               "<{{NATIVE_NAME}}>().deallocate(static_cast<{{NATIVE_NAME}}*>("
-               "ptr),1);";
-      code_ += "  }";
-    }
-  }
-
   // Generate an accessor struct, builder structs & function for a table.
   void GenTable(const StructDef &struct_def) {
     //if (parser_.opts.generate_object_based_api) { GenNativeTable(struct_def); }
@@ -1965,7 +1950,6 @@ class RustGenerator : public BaseGenerator {
       }
     }
     code_.SetValue("NATIVE_NAME", Name(struct_def));
-    GenOperatorNewDelete(struct_def);
     code_ += "}";
 
     code_.SetValue("STRUCT_BYTE_SIZE", NumToString(struct_def.bytesize));
