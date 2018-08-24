@@ -1222,12 +1222,6 @@ mod follow_impls {
         let off: flatbuffers::FollowStart<&[u8]> = flatbuffers::FollowStart::new();
         assert_eq!(off.self_follow(&vec[..], 4), &[1, 2, 3, 4][..]);
     }
-    #[test]
-    fn foo() {
-        let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 0, 3, 0];
-        let off: flatbuffers::FollowStart<&[u16]> = flatbuffers::FollowStart::new();
-        assert_eq!(off.self_follow(&vec[..], 4), &[1, 3][..]);
-    }
 
     #[test]
     fn offset_to_byte_string() {
@@ -1236,6 +1230,7 @@ mod follow_impls {
         assert_eq!(off.self_follow(&vec[..], 4), &[1, 2, 3][..]);
     }
 
+    #[cfg(target_endian = "little")]
     #[test]
     fn offset_to_slice_of_u16() {
         let vec: Vec<u8> = vec![255, 255, 255, 255, 2, 0, 0, 0, 1, 2, 3, 4];

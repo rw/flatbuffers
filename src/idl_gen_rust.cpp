@@ -1928,14 +1928,14 @@ class RustGenerator : public BaseGenerator {
     // Impl the dummy GeneratedStruct trait to help users write structs
     // correctly:
 		code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
-    code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
-    code_ += "    type Inner = &'a {{STRUCT_NAME}};";
-    code_ += "    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "        let this_buf = &buf[loc..loc + ::std::mem::size_of::<{{STRUCT_NAME}}>()];";
-    code_ += "        let ptr = this_buf.as_ptr() as *const {{STRUCT_NAME}};";
-    code_ += "        unsafe { &*ptr }";
-    code_ += "    }";
-    code_ += "}";
+    code_ += "//impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
+    code_ += "//    type Inner = &'a {{STRUCT_NAME}};";
+    code_ += "//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "//        let this_buf = &buf[loc..loc + ::std::mem::size_of::<{{STRUCT_NAME}}>()];";
+    code_ += "//        let ptr = this_buf.as_ptr() as *const {{STRUCT_NAME}};";
+    code_ += "//        unsafe { &*ptr }";
+    code_ += "//    }";
+    code_ += "//}";
     code_ += "//impl<'a> flatbuffers::Follow<'a> for &'a [{{STRUCT_NAME}}] {";
     code_ += "//    type Inner = Self;//&'a [{{STRUCT_NAME}}];";
     code_ += "//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";

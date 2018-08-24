@@ -80,14 +80,14 @@ pub struct StructInNestedNS {
   b_: i32,
 } // pub struct StructInNestedNS
 impl flatbuffers::GeneratedStruct for StructInNestedNS {}
-impl<'a> flatbuffers::Follow<'a> for StructInNestedNS {
-    type Inner = &'a StructInNestedNS;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let this_buf = &buf[loc..loc + ::std::mem::size_of::<StructInNestedNS>()];
-        let ptr = this_buf.as_ptr() as *const StructInNestedNS;
-        unsafe { &*ptr }
-    }
-}
+//impl<'a> flatbuffers::Follow<'a> for StructInNestedNS {
+//    type Inner = &'a StructInNestedNS;
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let this_buf = &buf[loc..loc + ::std::mem::size_of::<StructInNestedNS>()];
+//        let ptr = this_buf.as_ptr() as *const StructInNestedNS;
+//        unsafe { &*ptr }
+//    }
+//}
 //impl<'a> flatbuffers::Follow<'a> for &'a [StructInNestedNS] {
 //    type Inner = Self;//&'a [StructInNestedNS];
 //    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {

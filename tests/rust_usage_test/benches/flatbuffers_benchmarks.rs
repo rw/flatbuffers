@@ -1,12 +1,11 @@
+#[macro_use]
+extern crate bencher;
+use bencher::Bencher;
+
 extern crate flatbuffers;
 
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::my_game;
-
-#[macro_use]
-extern crate bencher;
-
-use bencher::Bencher;
 
 fn read_canonical_buffer(bench: &mut Bencher) {
     let owned_data = {
@@ -84,44 +83,44 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
     my_game::example::finish_monster_buffer(builder, mon);
 
     // make it do some work
-    //if builder.finished_bytes().len() == 0 { panic!("bad benchmark"); }
+    // if builder.finished_bytes().len() == 0 { panic!("bad benchmark"); }
 }
 
 #[inline(always)]
-fn maybe_blackbox<T>(t: T) -> T {
+fn blackbox<T>(t: T) -> T {
+    // encapsulate this in case we need to turn it into a noop
     bencher::black_box(t)
-    //t
 }
 
 #[inline(always)]
 fn read_serialized_example_with_generated_code(bytes: &[u8]) {
     let m = my_game::example::get_root_as_monster(bytes);
-    maybe_blackbox(m.hp());
-    maybe_blackbox(m.mana());
-    maybe_blackbox(m.name());
+    blackbox(m.hp());
+    blackbox(m.mana());
+    blackbox(m.name());
     let pos = m.pos().unwrap();
-    maybe_blackbox(pos.x());
-    maybe_blackbox(pos.y());
-    maybe_blackbox(pos.z());
-    maybe_blackbox(pos.test1());
-    maybe_blackbox(pos.test2());
+    blackbox(pos.x());
+    blackbox(pos.y());
+    blackbox(pos.z());
+    blackbox(pos.test1());
+    blackbox(pos.test2());
     let pos_test3 = pos.test3();
-    maybe_blackbox(pos_test3.a());
-    maybe_blackbox(pos_test3.b());
-    maybe_blackbox(m.test_type());
+    blackbox(pos_test3.a());
+    blackbox(pos_test3.b());
+    blackbox(m.test_type());
     let table2 = m.test().unwrap();
     let monster2 = my_game::example::Monster::init_from_table(table2);
-    maybe_blackbox(monster2.name());
-    maybe_blackbox(m.inventory());
-    maybe_blackbox(m.test4());
+    blackbox(monster2.name());
+    blackbox(m.inventory());
+    blackbox(m.test4());
     let testarrayoftables = m.testarrayoftables().unwrap();
-    maybe_blackbox(testarrayoftables.get(0).hp());
-    maybe_blackbox(testarrayoftables.get(0).name());
-    maybe_blackbox(testarrayoftables.get(1).name());
-    maybe_blackbox(testarrayoftables.get(2).name());
+    blackbox(testarrayoftables.get(0).hp());
+    blackbox(testarrayoftables.get(0).name());
+    blackbox(testarrayoftables.get(1).name());
+    blackbox(testarrayoftables.get(2).name());
     let testarrayofstring = m.testarrayofstring().unwrap();
-    maybe_blackbox(testarrayofstring.get(0));
-    maybe_blackbox(testarrayofstring.get(1));
+    blackbox(testarrayofstring.get(0));
+    blackbox(testarrayofstring.get(1));
 }
 
 benchmark_group!(benches, read_canonical_buffer, create_canonical_buffer);

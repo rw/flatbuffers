@@ -273,14 +273,14 @@ pub struct Test {
   padding0__: u8,
 } // pub struct Test
 impl flatbuffers::GeneratedStruct for Test {}
-impl<'a> flatbuffers::Follow<'a> for Test {
-    type Inner = &'a Test;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let this_buf = &buf[loc..loc + ::std::mem::size_of::<Test>()];
-        let ptr = this_buf.as_ptr() as *const Test;
-        unsafe { &*ptr }
-    }
-}
+//impl<'a> flatbuffers::Follow<'a> for Test {
+//    type Inner = &'a Test;
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let this_buf = &buf[loc..loc + ::std::mem::size_of::<Test>()];
+//        let ptr = this_buf.as_ptr() as *const Test;
+//        unsafe { &*ptr }
+//    }
+//}
 //impl<'a> flatbuffers::Follow<'a> for &'a [Test] {
 //    type Inner = Self;//&'a [Test];
 //    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
@@ -339,14 +339,14 @@ pub struct Vec3 {
   padding2__: u16,
 } // pub struct Vec3
 impl flatbuffers::GeneratedStruct for Vec3 {}
-impl<'a> flatbuffers::Follow<'a> for Vec3 {
-    type Inner = &'a Vec3;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let this_buf = &buf[loc..loc + ::std::mem::size_of::<Vec3>()];
-        let ptr = this_buf.as_ptr() as *const Vec3;
-        unsafe { &*ptr }
-    }
-}
+//impl<'a> flatbuffers::Follow<'a> for Vec3 {
+//    type Inner = &'a Vec3;
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let this_buf = &buf[loc..loc + ::std::mem::size_of::<Vec3>()];
+//        let ptr = this_buf.as_ptr() as *const Vec3;
+//        unsafe { &*ptr }
+//    }
+//}
 //impl<'a> flatbuffers::Follow<'a> for &'a [Vec3] {
 //    type Inner = Self;//&'a [Vec3];
 //    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
@@ -418,14 +418,14 @@ pub struct Ability {
   distance_: u32,
 } // pub struct Ability
 impl flatbuffers::GeneratedStruct for Ability {}
-impl<'a> flatbuffers::Follow<'a> for Ability {
-    type Inner = &'a Ability;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let this_buf = &buf[loc..loc + ::std::mem::size_of::<Ability>()];
-        let ptr = this_buf.as_ptr() as *const Ability;
-        unsafe { &*ptr }
-    }
-}
+//impl<'a> flatbuffers::Follow<'a> for Ability {
+//    type Inner = &'a Ability;
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        let this_buf = &buf[loc..loc + ::std::mem::size_of::<Ability>()];
+//        let ptr = this_buf.as_ptr() as *const Ability;
+//        unsafe { &*ptr }
+//    }
+//}
 //impl<'a> flatbuffers::Follow<'a> for &'a [Ability] {
 //    type Inner = Self;//&'a [Ability];
 //    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
