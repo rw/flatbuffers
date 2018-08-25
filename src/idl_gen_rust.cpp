@@ -112,8 +112,9 @@ FullType GetFullType(const Type &type) {
       case FullType::EnumKey: {
         return FullType::VectorOfEnumKey;
       }
+      case FullType::UnionKey:
       case FullType::UnionValue: {
-        // vectors of unions are not supported yet
+        // unreachable: vectors of unions are unsupported.
         FLATBUFFERS_ASSERT(false);
       }
       default: {
@@ -146,9 +147,12 @@ FullType GetFullType(const Type &type) {
       FLATBUFFERS_ASSERT(false);
     }
   }
+
   // unreachable: completely unknown type.
   FLATBUFFERS_ASSERT(false);
-  return FullType::Bool; // only to satisfy compiler's return analysis
+
+  // this is to satisfy the compiler's return analysis.
+  return FullType::Bool;
 }
 
 // Determine if our Type needs a lifetime when used in Rust.
@@ -165,19 +169,21 @@ bool TypeNeedsLifetime(const Type &type) {
   }
 }
 
+// Determine if our Type needs to be copied (for endian safety) when used in
+// a Struct.
 bool StructMemberAccessNeedsCopy(const Type &type) {
   switch (GetFullType(type)) {
-    case FullType::Integer: { return true; } // requires endian swap
-    case FullType::Float: { return true; } // requires endian swap
-    case FullType::Bool: { return true; } // no endian-swap, but copy for consistency
-    case FullType::Struct: { return false; } // no endian swap
+    case FullType::Integer:  // requires endian swap
+    case FullType::Float: // requires endian swap
+    case FullType::Bool: // no endian-swap, but copy for consistency
     case FullType::EnumKey: { return true; } // requires endian swap
+    case FullType::Struct: { return false; } // no endian swap
     default: {
+      // logic error: no other types can be struct members.
+      FLATBUFFERS_ASSERT(false);
+      return false; // only to satisfy compiler's return analysis
     }
   }
-  // logic error: no other types can be struct members.
-  FLATBUFFERS_ASSERT(false);
-  return false; // only to satisfy compiler's return analysis
 }
 
 namespace rust {
@@ -355,85 +361,8 @@ class RustGenerator : public BaseGenerator {
         auto &struct_def = *parser_.root_struct_def_;
         if (struct_def.defined_namespace != ns) { continue; }
         SetNameSpace(struct_def.defined_namespace);
-        auto name = Name(struct_def);
-        //auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
-
-        code_.SetValue("STRUCT_NAME", name);
-        code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(name));
-        code_.SetValue("STRUCT_NAME_CAPS", MakeUpper(MakeSnakeCase(name)));
-
-        // The root datatype accessors:
-        code_ += "#[inline]";
-        code_ +=
-            "pub fn get_root_as_{{STRUCT_NAME_SNAKECASE}}<'a>(buf: &'a [u8])"
-            " -> {{STRUCT_NAME}}<'a> {";
-        code_ += "  flatbuffers::get_root::<{{STRUCT_NAME}}<'a>>(buf)";
-        code_ += "}";
-        code_ += "";
-
-        code_ += "#[inline]";
-        code_ +=
-            "pub fn get_size_prefixed_root_as_{{STRUCT_NAME_SNAKECASE}}<'a>(buf: &'a [u8])"
-            " -> {{STRUCT_NAME}}<'a> {";
-        code_ += "  flatbuffers::get_size_prefixed_root::<{{STRUCT_NAME}}<'a>>(buf)";
-        code_ += "}";
-        code_ += "";
-
-        if (parser_.file_identifier_.length()) {
-          // Declare the identifier
-          code_ += "pub const {{STRUCT_NAME_CAPS}}_IDENTIFIER: &'static str\\";
-          code_ += " = \"" + parser_.file_identifier_ + "\";";
-          code_ += "";
-
-          // Check if a buffer has the identifier.
-          code_ += "#[inline]";
-          code_ += "pub fn {{STRUCT_NAME_SNAKECASE}}_buffer_has_identifier(buf: &[u8])"
-                   " -> bool {";
-          code_ += "  return flatbuffers::buffer_has_identifier(";
-          code_ += "      buf, {{STRUCT_NAME_CAPS}}_IDENTIFIER, false);";
-          code_ += "}";
-          code_ += "";
-          code_ += "#[inline]";
-          code_ += "pub fn {{STRUCT_NAME_SNAKECASE}}_size_prefixed_buffer_has_identifier(buf: &[u8])"
-                   " -> bool {";
-          code_ += "  return flatbuffers::buffer_has_identifier(";
-          code_ += "      buf, {{STRUCT_NAME_CAPS}}_IDENTIFIER, true);";
-          code_ += "}";
-          code_ += "";
-        }
-
-        if (parser_.file_extension_.length()) {
-          // Return the extension
-          code_ += "pub const {{STRUCT_NAME_CAPS}}_EXTENSION: &'static str =\\";
-          code_ += " \"" + parser_.file_extension_ + "\";";
-          code_ += "";
-        }
-
-        // Finish a buffer with a given root object:
-        code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
-        code_ += "#[inline]";
-        code_ += "pub fn finish_{{STRUCT_NAME_SNAKECASE}}_buffer<'a, 'b>(";
-        code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-        code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
-        if (parser_.file_identifier_.length()) {
-          code_ += "  fbb.finish(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
-        } else {
-          code_ += "  fbb.finish(root, None);";
-        }
-        code_ += "}";
-        code_ += "";
-        code_ += "#[inline]";
-        code_ += "pub fn finish_size_prefixed_{{STRUCT_NAME_SNAKECASE}}_buffer<'a, 'b>(";
-        code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-        code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
-        if (parser_.file_identifier_.length()) {
-          code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
-        } else {
-          code_ += "  fbb.finish_size_prefixed(root, None);";
-        }
-        code_ += "}";
+        GenRootTableFuncs(struct_def);
       }
-
     }
     if (cur_name_space_) SetNameSpace(nullptr);
 
@@ -1474,6 +1403,87 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
   }
 
+  void GenRootTableFuncs(const StructDef &struct_def) {
+    FLATBUFFERS_ASSERT(GetFullType(struct_def) == FullType::Table);
+    auto name = Name(struct_def);
+    //auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
+
+    code_.SetValue("STRUCT_NAME", name);
+    code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(name));
+    code_.SetValue("STRUCT_NAME_CAPS", MakeUpper(MakeSnakeCase(name)));
+
+    // The root datatype accessors:
+    code_ += "#[inline]";
+    code_ +=
+        "pub fn get_root_as_{{STRUCT_NAME_SNAKECASE}}<'a>(buf: &'a [u8])"
+        " -> {{STRUCT_NAME}}<'a> {";
+    code_ += "  flatbuffers::get_root::<{{STRUCT_NAME}}<'a>>(buf)";
+    code_ += "}";
+    code_ += "";
+
+    code_ += "#[inline]";
+    code_ += "pub fn get_size_prefixed_root_as_{{STRUCT_NAME_SNAKECASE}}\\";
+    code_ += "<'a>(buf: &'a [u8]) -> {{STRUCT_NAME}}<'a> {";
+    code_ += "  flatbuffers::get_size_prefixed_root::<{{STRUCT_NAME}}<'a>>(buf)";
+    code_ += "}";
+    code_ += "";
+
+    if (parser_.file_identifier_.length()) {
+      // Declare the identifier
+      code_ += "pub const {{STRUCT_NAME_CAPS}}_IDENTIFIER: &'static str\\";
+      code_ += " = \"" + parser_.file_identifier_ + "\";";
+      code_ += "";
+
+      // Check if a buffer has the identifier.
+      code_ += "#[inline]";
+      code_ += "pub fn {{STRUCT_NAME_SNAKECASE}}_buffer_has_identifier\\";
+      code_ += "(buf: &[u8]) -> bool {";
+      code_ += "  return flatbuffers::buffer_has_identifier(buf, \\";
+      code_ += "{{STRUCT_NAME_CAPS}}_IDENTIFIER, false);";
+      code_ += "}";
+      code_ += "";
+      code_ += "#[inline]";
+      code_ += "pub fn {{STRUCT_NAME_SNAKECASE}}_size_prefixed\\";
+      code_ += "_buffer_has_identifier(buf: &[u8]) -> bool {";
+      code_ += "  return flatbuffers::buffer_has_identifier(buf, \\";
+      code_ += "{{STRUCT_NAME_CAPS}}_IDENTIFIER, true);";
+      code_ += "}";
+      code_ += "";
+    }
+
+    if (parser_.file_extension_.length()) {
+      // Return the extension
+      code_ += "pub const {{STRUCT_NAME_CAPS}}_EXTENSION: &'static str = \\";
+      code_ += "\"" + parser_.file_extension_ + "\";";
+      code_ += "";
+    }
+
+    // Finish a buffer with a given root object:
+    code_.SetValue("OFFSET_TYPELABEL", Name(struct_def) + "Offset");
+    code_ += "#[inline]";
+    code_ += "pub fn finish_{{STRUCT_NAME_SNAKECASE}}_buffer<'a, 'b>(";
+    code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
+    code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
+    if (parser_.file_identifier_.length()) {
+      code_ += "  fbb.finish(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
+    } else {
+      code_ += "  fbb.finish(root, None);";
+    }
+    code_ += "}";
+    code_ += "";
+    code_ += "#[inline]";
+    code_ += "pub fn finish_size_prefixed_{{STRUCT_NAME_SNAKECASE}}_buffer\\";
+    code_ += "<'a, 'b>(\\";
+    code_ += "fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,\\";
+    code_ += "root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
+    if (parser_.file_identifier_.length()) {
+      code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
+    } else {
+      code_ += "  fbb.finish_size_prefixed(root, None);";
+    }
+    code_ += "}";
+  }
+
   static void GenPadding(
       const FieldDef &field, std::string *code_ptr, int *id,
       const std::function<void(int bits, std::string *code_ptr, int *id)> &f) {
@@ -1497,17 +1507,6 @@ class RustGenerator : public BaseGenerator {
     *code_ptr += "padding" + NumToString((*id)++) + "__: 0,";
   }
 
-  //std::string StructMemberDefinitionSignature(const Type &type) {
-  //  switch (GetFullType(type)) {
-  //    case FullType::Integer:
-  //    case FullType::Float:
-  //    case FullType::Bool:
-  //    case FullType::EnumKey:
-  //    case FullType::Struct: { return false; }
-  //    default: { return true; }
-  //  }
-  //}
-
   // Generate an accessor struct with constructor for a flatbuffers struct.
   void GenStruct(const StructDef &struct_def) {
     // Generate an accessor struct, with private variables of the form:
@@ -1519,12 +1518,10 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("ALIGN", NumToString(struct_def.minalign));
     code_.SetValue("STRUCT_NAME", Name(struct_def));
 
-    code_ += "// MANUALLY_ALIGNED_STRUCT({{ALIGN}})";
-    code_ += "#[repr(C, packed)]";
-    code_ += "#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]";
-
-    // TODO: maybe only use lifetimes when needed by members, and skip
-    //       PhantomData? use TypeNeedsLifetime.
+    code_ += "#[repr(C, packed)] // Manually aligned to {{ALIGN}}";
+    // PartialEq is useful to derive because we can correctly compare structs
+    // by just using their inline data.
+    code_ += "#[derive(Clone, Copy, Debug, PartialEq)]";
     code_ += "pub struct {{STRUCT_NAME}} {";
 
     int padding_id = 0;

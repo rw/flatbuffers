@@ -318,9 +318,8 @@ pub fn enum_name_any(e: Any) -> &'static str {
 }
 
 pub struct AnyUnionTableOffset {}
-// MANUALLY_ALIGNED_STRUCT(2)
-#[repr(C, packed)]
-#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
+#[repr(C, packed)] // Manually aligned to 2
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Test {
   a_: i16,
   b_: i8,
@@ -346,9 +345,8 @@ impl Test {
 }
 // STRUCT_END(Test, 4);
 
-// MANUALLY_ALIGNED_STRUCT(16)
-#[repr(C, packed)]
-#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
+#[repr(C, packed)] // Manually aligned to 16
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {
   x_: f32,
   y_: f32,
@@ -398,9 +396,8 @@ impl Vec3 {
 }
 // STRUCT_END(Vec3, 32);
 
-// MANUALLY_ALIGNED_STRUCT(4)
-#[repr(C, packed)]
-#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
+#[repr(C, packed)] // Manually aligned to 4
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Ability {
   id_: u32,
   distance_: u32,
@@ -1436,14 +1433,12 @@ pub const MONSTER_IDENTIFIER: &'static str = "MONS";
 
 #[inline]
 pub fn monster_buffer_has_identifier(buf: &[u8]) -> bool {
-  return flatbuffers::buffer_has_identifier(
-      buf, MONSTER_IDENTIFIER, false);
+  return flatbuffers::buffer_has_identifier(buf, MONSTER_IDENTIFIER, false);
 }
 
 #[inline]
 pub fn monster_size_prefixed_buffer_has_identifier(buf: &[u8]) -> bool {
-  return flatbuffers::buffer_has_identifier(
-      buf, MONSTER_IDENTIFIER, true);
+  return flatbuffers::buffer_has_identifier(buf, MONSTER_IDENTIFIER, true);
 }
 
 pub const MONSTER_EXTENSION: &'static str = "mon";
@@ -1456,9 +1451,7 @@ pub fn finish_monster_buffer<'a, 'b>(
 }
 
 #[inline]
-pub fn finish_size_prefixed_monster_buffer<'a, 'b>(
-    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-    root: flatbuffers::Offset<Monster<'a>>) {
+pub fn finish_size_prefixed_monster_buffer<'a, 'b>(fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,root: flatbuffers::Offset<Monster<'a>>) {
   fbb.finish_size_prefixed(root, Some(MONSTER_IDENTIFIER));
 }
 }  // pub mod Example

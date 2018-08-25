@@ -69,9 +69,8 @@ pub fn enum_name_enum_in_nested_n_s(e: EnumInNestedNS) -> &'static str {
   ENUM_NAMES_ENUM_IN_NESTED_N_S[index]
 }
 
-// MANUALLY_ALIGNED_STRUCT(4)
-#[repr(C, packed)]
-#[derive(Clone, Copy, /* Default, */ Debug, PartialEq)]
+#[repr(C, packed)] // Manually aligned to 4
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct StructInNestedNS {
   a_: i32,
   b_: i32,
