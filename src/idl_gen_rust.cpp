@@ -79,7 +79,8 @@ enum class FullType {
 
 // Convert a Type to a FullType (exhaustive).
 FullType GetFullType(const Type &type) {
-  // order matters for some of these conditionals
+  // N.B. The order of these conditionals matters for some types.
+
   if (type.base_type == BASE_TYPE_STRING) {
     return FullType::String;
   } else if (type.base_type == BASE_TYPE_STRUCT) {
@@ -116,7 +117,7 @@ FullType GetFullType(const Type &type) {
         FLATBUFFERS_ASSERT(false);
       }
       default: {
-        // unreachable: pattern matching was not exhaustive.
+        // unreachable: vectors of vectors are unsupported.
         FLATBUFFERS_ASSERT(false);
       }
     }
@@ -127,7 +128,7 @@ FullType GetFullType(const Type &type) {
       } else if (type.base_type == BASE_TYPE_UTYPE) {
         return FullType::UnionKey;
       } else {
-        // unreachable: pattern matching was not exhaustive.
+        // unreachable: pattern matching was not exhaustive because
         FLATBUFFERS_ASSERT(false);
       }
     } else {
@@ -496,6 +497,7 @@ class RustGenerator : public BaseGenerator {
     #undef FLATBUFFERS_TD
       // clang-format on
     };
+    //if (type.base_type == BASE_TYPE_BOOL) return "u8";
     return ctypename[type.base_type];
   }
 
@@ -574,11 +576,6 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  std::string GenEnumValDecl(const EnumDef &enum_def,
-                             const std::string &enum_val) const {
-    return enum_val;
-  }
-
   std::string GetEnumValUse(const EnumDef &enum_def,
                             const EnumVal &enum_val) const {
     return Name(enum_def) + "::" + Name(enum_val);
@@ -635,7 +632,7 @@ class RustGenerator : public BaseGenerator {
       const auto &ev = **it;
 
       GenComment(ev.doc_comment, "  ");
-      code_.SetValue("KEY", GenEnumValDecl(enum_def, Name(ev)));
+      code_.SetValue("KEY", Name(ev));
       code_.SetValue("VALUE", NumToString(ev.value));
       code_ += "{{SEP}}  {{KEY}} = {{VALUE}}\\";
       code_.SetValue("SEP", ",\n");
@@ -847,14 +844,17 @@ class RustGenerator : public BaseGenerator {
       case FullType::Integer:
       case FullType::Float:
       case FullType::Bool: {
+        std::cout << "hey 0" << std::endl;
         const auto typname = GenTypeBasic(type, false);
         return typname;
       }
       case FullType::Struct: {
+        std::cout << "hey 1" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "Option<&" + lifetime + " " + typname + ">";
       }
       case FullType::Table: {
+        std::cout << "hey 2" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "Option<flatbuffers::Offset<" + typname + "<" + lifetime + ">>>";
       }
@@ -863,6 +863,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::EnumKey:
       case FullType::UnionKey: {
+        std::cout << "hey 3" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return typname;
       }
