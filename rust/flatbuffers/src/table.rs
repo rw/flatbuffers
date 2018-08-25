@@ -1,5 +1,6 @@
-
-pub trait GeneratedStruct {}
+use primitives::*;
+use follow::Follow;
+use vtable::VTable;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Table<'a> {

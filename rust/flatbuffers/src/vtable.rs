@@ -1,3 +1,5 @@
+use primitives::*;
+use endian_scalar::read_scalar_at;
 
 #[derive(Debug)]
 pub struct VTable<'a> {

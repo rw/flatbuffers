@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 /// Follow is a trait that allows us to access FlatBuffers in a declarative,
 /// type safe, and fast way. They compile down to almost no code (after
 /// optimizations). Conceptually, Follow lifts the offset-based access
@@ -34,4 +36,3 @@ impl<'a, T: Follow<'a>> Follow<'a> for FollowStart<T> {
         T::follow(buf, loc)
     }
 }
-

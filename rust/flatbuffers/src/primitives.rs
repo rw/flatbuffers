@@ -42,6 +42,9 @@ pub enum UnionOffset {}
 pub enum TableOffset {}
 pub struct UnionMarker;
 
+pub struct SliceOfGeneratedStruct<T: GeneratedStruct>(T);
+
+pub trait GeneratedStruct {}
 
 
 #[derive(Debug, PartialEq)]
@@ -76,4 +79,13 @@ impl<'a, T: 'a> Offset<T> {
         self.0
     }
 }
+
+#[derive(Debug)]
+pub struct ForwardsUOffset<T>(UOffsetT, PhantomData<T>); // data unused
+
+#[derive(Debug)]
+pub struct ForwardsVOffset<T>(VOffsetT, PhantomData<T>); // data unused
+
+#[derive(Debug)]
+pub struct BackwardsSOffset<T>(SOffsetT, PhantomData<T>); // data unused
 

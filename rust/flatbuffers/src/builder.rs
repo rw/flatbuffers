@@ -1,5 +1,8 @@
+use std::marker::PhantomData;
+
 use primitives::*;
 pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
+pub use primitives::*;
 pub use vtable::*;
 pub use vector::*;
 
