@@ -1518,7 +1518,8 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("ALIGN", NumToString(struct_def.minalign));
     code_.SetValue("STRUCT_NAME", Name(struct_def));
 
-    code_ += "#[repr(C, packed)] // Manually aligned to {{ALIGN}}";
+    code_ += "// Size {{STRUCT_BYTE_SIZE}}, aligned to {{ALIGN}}";
+    code_ += "#[repr(C, packed)]";
     // PartialEq is useful to derive because we can correctly compare structs
     // by just using their inline data.
     code_ += "#[derive(Clone, Copy, Debug, PartialEq)]";
@@ -1639,7 +1640,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
 
     code_.SetValue("STRUCT_BYTE_SIZE", NumToString(struct_def.bytesize));
-    code_ += "// STRUCT_END({{STRUCT_NAME}}, {{STRUCT_BYTE_SIZE}});";
     code_ += "";
   }
 

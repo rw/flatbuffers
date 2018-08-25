@@ -318,7 +318,8 @@ pub fn enum_name_any(e: Any) -> &'static str {
 }
 
 pub struct AnyUnionTableOffset {}
-#[repr(C, packed)] // Manually aligned to 2
+// Size STRUCT_BYTE_SIZE, aligned to 2
+#[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Test {
   a_: i16,
@@ -343,9 +344,9 @@ impl Test {
     self.b_.from_little_endian()
   }
 }
-// STRUCT_END(Test, 4);
 
-#[repr(C, packed)] // Manually aligned to 16
+// Size 4, aligned to 16
+#[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {
   x_: f32,
@@ -394,9 +395,9 @@ impl Vec3 {
     &self.test3_
   }
 }
-// STRUCT_END(Vec3, 32);
 
-#[repr(C, packed)] // Manually aligned to 4
+// Size 32, aligned to 4
+#[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Ability {
   id_: u32,
@@ -426,7 +427,6 @@ impl Ability {
     self.distance_.from_little_endian()
   }
 }
-// STRUCT_END(Ability, 8);
 
 pub enum TestSimpleTableWithEnumOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
