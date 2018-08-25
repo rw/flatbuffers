@@ -570,25 +570,6 @@ class RustGenerator : public BaseGenerator {
     return attr ? attr->constant : parser_.opts.cpp_object_api_pointer_type;
   }
 
-  const std::string NativeString(const FieldDef *field) {
-    auto attr = field ? field->attributes.Lookup("cpp_str_type") : nullptr;
-    auto &ret = attr ? attr->constant : parser_.opts.cpp_object_api_string_type;
-    if (ret.empty()) { return "std::string"; }
-    return ret;
-  }
-
-  std::string GenTypeNativePtr(const std::string &type, const FieldDef *field,
-                               bool is_constructor) {
-    auto &ptr_type = PtrType(field);
-    if (ptr_type != "naked") {
-      return ptr_type + "<" + type + ">";
-    } else if (is_constructor) {
-      return "";
-    } else {
-      return type + " *";
-    }
-  }
-
   enum class ContainerType { None, Vector, Enum, Union };
   ContainerType GetContainerType(const Type &type) const {
     if (type.base_type == BASE_TYPE_VECTOR) {
@@ -633,47 +614,6 @@ class RustGenerator : public BaseGenerator {
       return ElementType::Number;
     } else {
       assert(false);
-    }
-  }
-
-  std::string GenTypeNative(const Type &type, bool invector,
-                            const FieldDef &field) {
-    // TODO(rw): convert this to enum switch
-    switch (type.base_type) {
-      case BASE_TYPE_STRING: {
-        return NativeString(&field);
-      }
-      case BASE_TYPE_VECTOR: {
-        const auto type_name = GenTypeNative(type.VectorType(), true, field);
-        if (type.struct_def &&
-            type.struct_def->attributes.Lookup("native_custom_alloc")) {
-          auto native_custom_alloc =
-              type.struct_def->attributes.Lookup("native_custom_alloc");
-          return "&[" + type_name + "," +
-                 native_custom_alloc->constant + "<" + type_name + ">]";
-        } else
-          return "&[" + type_name + "]";
-      }
-      case BASE_TYPE_STRUCT: {
-        auto type_name = WrapInNameSpace(*type.struct_def);
-        if (IsStruct(type)) {
-          auto native_type = type.struct_def->attributes.Lookup("native_type");
-          if (native_type) { type_name = native_type->constant; }
-          if (invector || field.native_inline) {
-            return type_name;
-          } else {
-            return GenTypeNativePtr(type_name, &field, false);
-          }
-        } else {
-          return GenTypeNativePtr(
-              NativeName(type_name, type.struct_def, parser_.opts), &field,
-              false);
-        }
-      }
-      case BASE_TYPE_UNION: {
-        return type.enum_def->name + "Union";
-      }
-      default: { return GenTypeBasic(type, true); }
     }
   }
 
