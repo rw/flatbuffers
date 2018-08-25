@@ -514,6 +514,13 @@ class RustGenerator : public BaseGenerator {
       return GetTypePointer(type, "'a");
     }
   }
+  std::string StructDefnFieldType(const Type &type) const {
+    if (IsScalar(type.base_type)) {
+      return GetTypeBasic(type, true);
+    } else {
+      return GetTypePointer(type, "'a");
+    }
+  }
 
   std::string GetEnumValUse(const EnumDef &enum_def,
                             const EnumVal &enum_val) const {
@@ -686,14 +693,10 @@ class RustGenerator : public BaseGenerator {
   // underlying type to the interface type.
   std::string GenUnderlyingCast(const FieldDef &field, bool from,
                                 const std::string &val) {
-    //switch (GetFullType(field.value.type)) {
-    //  case FullType::Integer: { return GetDefaultConstant(field); }
-    //  case FullType::Float: { return GetDefaultConstant(field); }
-    //  case FullType::Bool: { return field.value.constant == "0" ? "false" : "true"; }
-    //  case FullType::UnionKey:
-    //  case FullType::EnumKey: {}
-    //  case default: {
-    //}
+    switch (GetFullType(field.value.type)) {
+      case FullType::EnumKey: { return val; }
+      default: {}
+    }
     if (from && field.value.type.base_type == BASE_TYPE_BOOL) {
       return val + " != 0";
     } else if ((field.value.type.enum_def &&
@@ -768,8 +771,7 @@ class RustGenerator : public BaseGenerator {
         return typname;
       }
       case FullType::Struct: {
-        //const auto typname = WrapInNameSpace(field);
-        const auto typname = GetTypeWire(type, "", "", false);
+        const auto typname = WrapInNameSpace(*type.struct_def);
         return "Option<&" + lifetime + " " + typname + ">";
       }
       case FullType::Table: {
@@ -1519,7 +1521,7 @@ class RustGenerator : public BaseGenerator {
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
-      code_.SetValue("FIELD_TYPE", GetTypeGet(field.value.type));
+      code_.SetValue("FIELD_TYPE", StructDefnFieldType(field.value.type));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
@@ -1547,13 +1549,13 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       const auto member_name = Name(field) + "_";
-      const auto reference = StructMemberAccessNeedsCopy(field.value.type) ? "" : "&'a ";
+      const auto reference = StructMemberAccessNeedsCopy(field.value.type)
+                             ? "" : "&'a ";
       const auto arg_name = "_" + Name(field);
       const auto arg_type = reference + GetTypeGet(field.value.type);
 
       if (it != struct_def.fields.vec.begin()) {
         arg_list += ", ";
-        //init_list += ";\n      ";
       }
       arg_list += arg_name + ": ";
       arg_list += arg_type;
