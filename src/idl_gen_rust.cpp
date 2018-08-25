@@ -300,12 +300,17 @@ class RustGenerator : public BaseGenerator {
   std::string Name(const EnumVal &ev) const { return EscapeKeyword(ev.name); }
 
   std::string WrapInNameSpace(const Definition &def) const {
-    return WrapInNameSpace(def.defined_namespace, Name(def));
+    auto a = Name(def);
+    std::cout << "yo 1b " << a << std::endl;
+    return WrapInNameSpace(def.defined_namespace, a);
   }
   std::string WrapInNameSpace(const Namespace *ns,
                               const std::string &name) const {
+    std::cout << "yo 1c" << std::endl;
     if (CurrentNameSpace() == ns) return name;
+    std::cout << "yo 1d " << name << std::endl;
     std::string prefix = GetRelativeNamespaceTraversal(CurrentNameSpace(), ns);
+    std::cout << "yo 1e" << std::endl;
     return prefix + name;
   }
 
@@ -476,6 +481,7 @@ class RustGenerator : public BaseGenerator {
     };
 
     if (user_facing_type) {
+      std::cout << "hey 99" << std::endl;
       if (type.enum_def) return WrapInNameSpace(*type.enum_def);
       if (type.base_type == BASE_TYPE_BOOL) return "bool";
     }
@@ -520,6 +526,7 @@ class RustGenerator : public BaseGenerator {
         //return WrapInNameSpace(*type.struct_def);
         std::string s;
         //s.append(lifetime);
+        std::cout << "hey 80" << std::endl;
         s.append(WrapInNameSpace(type.struct_def->defined_namespace,
                                  type.struct_def->name));
         if (TypeNeedsLifetime(type)) {
@@ -598,6 +605,7 @@ class RustGenerator : public BaseGenerator {
                               bool native_type = false) {
     if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
       auto name = actual_type ? ev.union_type.struct_def->name : Name(ev);
+        std::cout << "hey 70" << std::endl;
       return wrap ? WrapInNameSpace(
           ev.union_type.struct_def->defined_namespace, name)
                   : name;
@@ -826,6 +834,7 @@ class RustGenerator : public BaseGenerator {
         auto ev = field.value.type.enum_def->ReverseLookup(
             StringToInt(field.value.constant.c_str()), false);
         assert(ev);
+        std::cout << "hey 60" << std::endl;
         return WrapInNameSpace(field.value.type.enum_def->defined_namespace,
                                GetEnumValUse(*field.value.type.enum_def, *ev));
       }
@@ -845,12 +854,14 @@ class RustGenerator : public BaseGenerator {
       case FullType::Float:
       case FullType::Bool: {
         std::cout << "hey 0" << std::endl;
-        const auto typname = GenTypeBasic(type, false);
+        const auto typname = GenTypeWire(type, "", "", false);
+        std::cout << "hey 0z" << std::endl;
         return typname;
       }
       case FullType::Struct: {
         std::cout << "hey 1" << std::endl;
-        const auto typname = WrapInNameSpace(*type.struct_def);
+        //const auto typname = WrapInNameSpace(*type.struct_def);
+        const auto typname = GenTypeWire(type, "", "", false);
         return "Option<&" + lifetime + " " + typname + ">";
       }
       case FullType::Table: {
@@ -868,6 +879,7 @@ class RustGenerator : public BaseGenerator {
         return typname;
       }
       case FullType::UnionValue: {
+        std::cout << "hey 4" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return "Option<flatbuffers::Offset<flatbuffers::UnionMarker>>";
       }
@@ -882,14 +894,17 @@ class RustGenerator : public BaseGenerator {
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>>";
       }
       case FullType::VectorOfEnumKey: {
+        std::cout << "hey 4" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>";
       }
       case FullType::VectorOfStruct: {
+        std::cout << "hey 5" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>";
       }
       case FullType::VectorOfTable: {
+        std::cout << "hey 6" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsUOffset<" + typname + "<" + lifetime + ">>>>>";
       }
@@ -897,6 +912,7 @@ class RustGenerator : public BaseGenerator {
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsUOffset<&" + lifetime + " str>>>>";
       }
       case FullType::VectorOfUnionValue: {
+        std::cout << "hey 7" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def) + "UnionTableOffset";
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsUOffset<flatbuffers::Table<" + lifetime + ">>>>";
       }
@@ -923,10 +939,12 @@ class RustGenerator : public BaseGenerator {
 
     switch (GetFullType(field.value.type)) {
       case FullType::VectorOfStruct: {
+        std::cout << "hey 10" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullType::VectorOfTable: {
+        std::cout << "hey 11" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsUOffset<" + typname + "<" + lifetime + ">>>>";
       }
@@ -942,22 +960,28 @@ class RustGenerator : public BaseGenerator {
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsUOffset<&" + lifetime + " str>>>";
       }
       case FullType::VectorOfEnumKey: {
+        std::cout << "hey 12" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullType::VectorOfUnionValue: {
+        std::cout << "hey 13" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", flatbuffers::ForwardsUOffset<flatbuffers::Table<" + lifetime + ">>>";
       }
       case FullType::EnumKey: {
+        std::cout << "hey 14" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return typname;
       }
       case FullType::Struct: {
+        std::cout << "hey 15" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
+        std::cout << "hey 15z" << std::endl;
         return "&" + lifetime + " " + typname + "";
       }
       case FullType::Table: {
+        std::cout << "hey 16" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "flatbuffers::Offset<" + typname + "<" + lifetime + ">>";
       }
@@ -973,10 +997,12 @@ class RustGenerator : public BaseGenerator {
         return "flatbuffers::Offset<&" + lifetime + " str>";
       }
       case FullType::UnionKey: {
+        std::cout << "hey 17" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return typname;
       }
       case FullType::UnionValue: {
+        std::cout << "hey 18" << std::endl;
         const auto typname = WrapInNameSpace(*type.enum_def);
         return "flatbuffers::Offset<flatbuffers::UnionMarker>";
       }
@@ -989,7 +1015,8 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GenTypeBasic(field.value.type, false);
+        std::cout << "yo 0" << std::endl;
+        const auto typname = GenTypeWire(field.value.type, "", "", false);
         return "self.fbb_.push_slot_scalar::<" + typname + ">";
       }
       case FullType::Bool: {
@@ -997,16 +1024,20 @@ class RustGenerator : public BaseGenerator {
       }
 
       case FullType::Struct: {
+        std::cout << "yo 1" << std::endl;
         const std::string typname = WrapInNameSpace(field);
+        std::cout << "yo 1z" << std::endl;
         return "self.fbb_.push_slot_struct::<" + typname + ">";
       }
       case FullType::Table: {
+        std::cout << "yo 2" << std::endl;
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "self.fbb_.push_slot_offset_relative::<" + typname + ">";
       }
 
       case FullType::EnumKey:
       case FullType::UnionKey: {
+        std::cout << "yo 3" << std::endl;
         const auto underlying_typname = GenTypeBasic(type, true);
         return "self.fbb_.push_slot_scalar::<" + underlying_typname + ">";
       }
@@ -1373,7 +1404,6 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated) {
-        // TODO: required-ness
         code_.SetValue("PARAM_NAME", Name(field));
         code_.SetValue("PARAM_TYPE", TableBuilderArgsDefnType(field, "'a "));
         code_ += "    pub {{PARAM_NAME}}: {{PARAM_TYPE}},";
