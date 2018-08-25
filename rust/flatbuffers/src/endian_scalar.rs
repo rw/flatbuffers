@@ -80,35 +80,51 @@ impl EndianScalar for i64 {
 impl EndianScalar for f32 {
     fn to_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
-        { self }
+        {
+            self
+        }
         #[cfg(not(target_endian = "little"))]
-        { byte_swap_f32(&self) }
+        {
+            byte_swap_f32(&self)
+        }
     }
     fn from_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
-        { self }
+        {
+            self
+        }
         #[cfg(not(target_endian = "little"))]
-        { byte_swap_f32(&self) }
+        {
+            byte_swap_f32(&self)
+        }
     }
 }
 impl EndianScalar for f64 {
     fn to_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
-        { self }
+        {
+            self
+        }
         #[cfg(not(target_endian = "little"))]
-        { byte_swap_f64(&self) }
+        {
+            byte_swap_f64(&self)
+        }
     }
     fn from_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
-        { self }
+        {
+            self
+        }
         #[cfg(not(target_endian = "little"))]
-        { byte_swap_f64(&self) }
+        {
+            byte_swap_f64(&self)
+        }
     }
 }
 
 #[allow(dead_code)]
-pub fn byte_swap_f32(x: &f32) -> f32 {
-    let mut ret = (*x).clone();
+pub fn byte_swap_f32(x: f32) -> f32 {
+    let mut ret = x;
 
     let ptr = &mut ret as *mut f32 as *mut u32;
     unsafe { *ptr }.swap_bytes();
@@ -117,8 +133,8 @@ pub fn byte_swap_f32(x: &f32) -> f32 {
 }
 
 #[allow(dead_code)]
-pub fn byte_swap_f64(x: &f64) -> f64 {
-    let mut ret = (*x).clone();
+pub fn byte_swap_f64(x: f64) -> f64 {
+    let mut ret = x;
 
     let ptr = &mut ret as *mut f64 as *mut u64;
     unsafe { *ptr }.swap_bytes();
@@ -147,8 +163,7 @@ pub fn read_scalar<T: EndianScalar>(s: &[u8]) -> T {
     let p = s.as_ptr() as *const T;
     let x = unsafe { *p };
 
-    // TODO(rw): is this clone necessary?
-    let x = x.clone();
-
     x.from_little_endian()
 }
+
+fn main() {}
