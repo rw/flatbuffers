@@ -125,10 +125,10 @@ FullType GetFullType(const Type &type) {
     if (type.enum_def->is_union) {
       if (type.base_type == BASE_TYPE_UNION) {
         return FullType::UnionValue;
-      } else if (type.base_type == BASE_TYPE_UTYPE) {
+      } else if (IsInteger(type.base_type)) {
         return FullType::UnionKey;
       } else {
-        // unreachable: pattern matching was not exhaustive because
+        // unreachable: unknown union field.
         FLATBUFFERS_ASSERT(false);
       }
     } else {
@@ -137,21 +137,18 @@ FullType GetFullType(const Type &type) {
   } else if (IsScalar(type.base_type)) {
     if (IsBool(type.base_type)) {
       return FullType::Bool;
-    } else if (IsLong(type.base_type) || IsInteger(type.base_type)) {
+    } else if (IsInteger(type.base_type)) {
       return FullType::Integer;
     } else if (IsFloat(type.base_type)) {
       return FullType::Float;
     } else {
-      // unreachable: pattern matching was not exhaustive.
+      // unreachable: unknown number type.
       FLATBUFFERS_ASSERT(false);
     }
-  } else {
-    // unreachable: pattern matching was not exhaustive.
-    FLATBUFFERS_ASSERT(false);
   }
-  assert(false);
-  return FullType::Bool;
-  //TODO what is this? "or for an integral type derived from an enum."
+  // unreachable: completely unknown type.
+  FLATBUFFERS_ASSERT(false);
+  return FullType::Bool; // only to satisfy compiler's return analysis
 }
 
 // Determine if our Type needs a lifetime when used in Rust.
@@ -176,11 +173,11 @@ bool StructMemberAccessNeedsCopy(const Type &type) {
     case FullType::Struct: { return false; } // no endian swap
     case FullType::EnumKey: { return true; } // requires endian swap
     default: {
-      // logic error: no other types can be struct members.
-      FLATBUFFERS_ASSERT(false);
-      return false;
     }
   }
+  // logic error: no other types can be struct members.
+  FLATBUFFERS_ASSERT(false);
+  return false; // only to satisfy compiler's return analysis
 }
 
 namespace rust {
