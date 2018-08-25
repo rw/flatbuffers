@@ -502,7 +502,6 @@ class RustGenerator : public BaseGenerator {
   // Return a C++ pointer type, specialized to the actual struct/table types,
   // and vector element types.
   std::string GenTypePointer(const Type &type, const std::string &lifetime) const {
-    // TODO(rw): convert this to enum switch
     switch (type.base_type) {
       case BASE_TYPE_STRING: {
         //return "&str";
@@ -1041,43 +1040,43 @@ class RustGenerator : public BaseGenerator {
     const Type& type = field.value.type;
 
     switch (GetFullType(field.value.type)) {
-          case FullType::Integer:
-          case FullType::Float: {
-            const auto typname = GenTypeWire(field.value.type, "", "", false);
-            return "self.fbb_.push_slot_scalar::<" + typname + ">";
-          }
-          case FullType::Bool: {
-            return "self.fbb_.push_slot_scalar::<bool>";
-          }
+      case FullType::Integer:
+      case FullType::Float: {
+        const auto typname = GenTypeBasic(field.value.type, false);
+        return "self.fbb_.push_slot_scalar::<" + typname + ">";
+      }
+      case FullType::Bool: {
+        return "self.fbb_.push_slot_scalar::<bool>";
+      }
 
-          case FullType::Struct: {
-            const auto typname = GenTypeWire(field.value.type, "", "", false);
-            return "self.fbb_.push_slot_struct::<" + typname + ">";
-          }
-          case FullType::Table: {
-            const auto typname = WrapInNameSpace(*type.struct_def);
-            return "self.fbb_.push_slot_offset_relative::<" + typname + ">";
-          }
+      case FullType::Struct: {
+        const std::string typname = WrapInNameSpace(field);
+        return "self.fbb_.push_slot_struct::<" + typname + ">";
+      }
+      case FullType::Table: {
+        const auto typname = WrapInNameSpace(*type.struct_def);
+        return "self.fbb_.push_slot_offset_relative::<" + typname + ">";
+      }
 
-          case FullType::EnumKey:
-          case FullType::UnionKey: {
-            const auto underlying_typname = GenTypeBasic(type, true);
-            return "self.fbb_.push_slot_scalar::<" + underlying_typname + ">";
-          }
+      case FullType::EnumKey:
+      case FullType::UnionKey: {
+        const auto underlying_typname = GenTypeBasic(type, true);
+        return "self.fbb_.push_slot_scalar::<" + underlying_typname + ">";
+      }
 
-          case FullType::UnionValue:
-          case FullType::String:
-          case FullType::VectorOfInteger:
-          case FullType::VectorOfFloat:
-          case FullType::VectorOfBool:
-          case FullType::VectorOfEnumKey:
-          case FullType::VectorOfStruct:
-          case FullType::VectorOfTable:
-          case FullType::VectorOfString:
-          case FullType::VectorOfUnionValue: {
-            return "self.fbb_.push_slot_offset_relative";
-          }
-        }
+      case FullType::UnionValue:
+      case FullType::String:
+      case FullType::VectorOfInteger:
+      case FullType::VectorOfFloat:
+      case FullType::VectorOfBool:
+      case FullType::VectorOfEnumKey:
+      case FullType::VectorOfStruct:
+      case FullType::VectorOfTable:
+      case FullType::VectorOfString:
+      case FullType::VectorOfUnionValue: {
+        return "self.fbb_.push_slot_offset_relative";
+      }
+    }
   }
 
   std::string GenBuilderArgsAddFuncFieldCast(const FieldDef &field) {
