@@ -393,7 +393,6 @@ class RustGenerator : public BaseGenerator {
     return stream.str();
   }
 
-
   // Generate a comment from the schema.
   void GenComment(const std::vector<std::string> &dc, const char *prefix = "") {
     std::string text;
@@ -401,8 +400,8 @@ class RustGenerator : public BaseGenerator {
     code_ += text + "\\";
   }
 
-  // Return a Rust type from the table in idl.h
-  std::string GenTypeBasic(const Type &type, bool user_facing_type) const {
+  // Return a Rust type from the table in idl.h.
+  std::string GetTypeBasic(const Type &type, bool user_facing_type) const {
     static const char *ctypename[] = {
     // clang-format off
     #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE, \
@@ -493,7 +492,7 @@ class RustGenerator : public BaseGenerator {
                           bool user_facing_type) const {
     // TODO(rw): convert this to enum switch
     if (IsScalar(type.base_type)) {
-      return GenTypeBasic(type, user_facing_type) + postfix;
+      return GetTypeBasic(type, user_facing_type) + postfix;
     } else if (IsStruct(type)) {
       // TODO distinguish between struct and table
       return GetTypePointer(type, lifetime);
@@ -504,15 +503,13 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  // Return a C++ type for any type (scalar/pointer) specifically for
-  // using a flatbuffer.
-  std::string GetTypeGet(const Type &type, const char *afterbasic,
-                         const char *beforeptr, const char *afterptr,
-                         bool user_facing_type) {
+  // Return a Rust type for any type (scalar/pointer) specifically for using a
+  // flatbuffer.
+  std::string GetTypeGet(const Type &type) const {
     if (IsScalar(type.base_type)) {
-      return GenTypeBasic(type, user_facing_type) + afterbasic;
+      return GetTypeBasic(type, true);
     } else {
-      return beforeptr + GetTypePointer(type, "'a") + afterptr;
+      return GetTypePointer(type, "'a");
     }
   }
 
@@ -702,11 +699,11 @@ class RustGenerator : public BaseGenerator {
                field.value.type.base_type == BASE_TYPE_BOOL) {
       // TODO(rw): handle enums in other namespaces
       if (from) {
-        //return "EnumValues" + GenTypeBasic(field.value.type, from) + "[" + val + " as usize]";
+        //return "EnumValues" + GetTypeBasic(field.value.type, from) + "[" + val + " as usize]";
         //return "unsafe { ::std::mem::transmute(" + val + ") }";
         return val;
       } else {
-        return val + " as " + GenTypeBasic(field.value.type, from);
+        return val + " as " + GetTypeBasic(field.value.type, from);
       }
     } else {
       return val;
@@ -792,11 +789,11 @@ class RustGenerator : public BaseGenerator {
 
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType(), false);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ",  " + typname + ">>>";
       }
       case FullType::VectorOfBool: {
-        const auto typname = GenTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type, false);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>>";
       }
       case FullType::VectorOfEnumKey: {
@@ -828,7 +825,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::UnionKey:
       case FullType::EnumKey: {
-        const std::string basetype = GenTypeBasic(field.value.type, false);
+        const std::string basetype = GetTypeBasic(field.value.type, false);
         return GetDefaultScalarValue(field);
       }
 
@@ -850,7 +847,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType(), false);
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullType::VectorOfBool: {
@@ -881,7 +878,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GenTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type, false);
         return typname;
       }
       case FullType::Bool: {
@@ -926,7 +923,7 @@ class RustGenerator : public BaseGenerator {
 
       case FullType::EnumKey:
       case FullType::UnionKey: {
-        const auto underlying_typname = GenTypeBasic(type, true);
+        const auto underlying_typname = GetTypeBasic(type, true);
         return "self.fbb_.push_slot_scalar::<" + underlying_typname + ">";
       }
 
@@ -951,10 +948,10 @@ class RustGenerator : public BaseGenerator {
     const auto ft = GetFullType(type);
 
     if (ft == FullType::UnionValue) {
-      return " as " + GenTypeBasic(type, false);
+      return " as " + GetTypeBasic(type, false);
     }
     if (ft == FullType::EnumKey) {
-      return " as " + GenTypeBasic(type, false);
+      return " as " + GetTypeBasic(type, false);
     }
     return "";
   }
@@ -966,7 +963,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GenTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type, false);
         return typname;
       }
       case FullType::Bool: {
@@ -994,7 +991,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType(), false);
         //return "Option<&" + lifetime + " [" + typname + "]>";
         return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
@@ -1036,7 +1033,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::Integer:
       case FullType::Float:
       case FullType::Bool: {
-        const auto typname = GenTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type, false);
         const std::string default_value = GetDefaultScalarValue(field);
         return "self._tab.get::<" + typname + ">(" + offset_name + ", Some(" + default_value + ")).unwrap()";
       }
@@ -1053,7 +1050,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::UnionKey:
       case FullType::EnumKey: {
-        const std::string underlying_typname = GenTypeBasic(type, false);
+        const std::string underlying_typname = GetTypeBasic(type, false);
         const std::string typname = WrapInNameSpace(*type.enum_def);
         const std::string default_value = GetDefaultScalarValue(field);
         return "self._tab.get::<" + typname + ">(" + offset_name + ", Some(" + default_value + ")).unwrap()";
@@ -1064,7 +1061,7 @@ class RustGenerator : public BaseGenerator {
 
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GenTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType(), false);
         //return "self._tab.get::<flatbuffers::ForwardsUOffset<&[" + typname + "]>>(" + offset_name + ", None)";
         return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None)";
       }
@@ -1520,7 +1517,7 @@ class RustGenerator : public BaseGenerator {
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
-      code_.SetValue("FIELD_TYPE", GetTypeGet(field.value.type, "", "", "", true));
+      code_.SetValue("FIELD_TYPE", GetTypeGet(field.value.type, true));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
@@ -1550,8 +1547,7 @@ class RustGenerator : public BaseGenerator {
       const auto member_name = Name(field) + "_";
       const auto reference = StructMemberAccessNeedsCopy(field.value.type) ? "" : "&'a ";
       const auto arg_name = "_" + Name(field);
-      const auto arg_type = reference + 
-          GetTypeGet(field.value.type, "", "", "", true);
+      const auto arg_type = reference + GetTypeGet(field.value.type);
 
       if (it != struct_def.fields.vec.begin()) {
         arg_list += ", ";
@@ -1605,23 +1601,23 @@ class RustGenerator : public BaseGenerator {
       code_ += "    {{REF}}{{FIELD_VALUE}}";
       code_ += "  }";
 
-      // Generate a comparison function for this field if it is a key.
-      if (field.key) {
-        code_ += "  fn key_compare_less_than(&self, o: &{{STRUCT_NAME}}) -> bool {";
-        code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
-        code_ += "  }";
-        auto type = GenTypeBasic(field.value.type, false);
-        if (parser_.opts.scoped_enums && field.value.type.enum_def &&
-            IsScalar(field.value.type.base_type)) {
-          type = GetTypeGet(field.value.type, " ", "const ", " *", true);
-        }
+      //TODO(rw) // Generate a comparison function for this field if it is a key.
+      //TODO(rw) if (field.key) {
+      //TODO(rw)   code_ += "  fn key_compare_less_than(&self, o: &{{STRUCT_NAME}}) -> bool {";
+      //TODO(rw)   code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
+      //TODO(rw)   code_ += "  }";
+      //TODO(rw)   auto type = GetTypeBasic(field.value.type, false);
+      //TODO(rw)   if (parser_.opts.scoped_enums && field.value.type.enum_def &&
+      //TODO(rw)       IsScalar(field.value.type.base_type)) {
+      //TODO(rw)     type = GetTypeGet(field.value.type, " ", "const ", " *", true);
+      //TODO(rw)   }
 
-        code_.SetValue("KEY_TYPE", type);
-        code_ += "  fn key_compare_with_value(&self, val: {{KEY_TYPE}}) -> isize {";
-        code_ += "    let key = self.{{FIELD_NAME}}();";
-        code_ += "    (key > val) as isize - (key < val) as isize";
-        code_ += "  }";
-      }
+      //TODO(rw)   code_.SetValue("KEY_TYPE", type);
+      //TODO(rw)   code_ += "  fn key_compare_with_value(&self, val: {{KEY_TYPE}}) -> isize {";
+      //TODO(rw)   code_ += "    let key = self.{{FIELD_NAME}}();";
+      //TODO(rw)   code_ += "    (key > val) as isize - (key < val) as isize";
+      //TODO(rw)   code_ += "  }";
+      //TODO(rw) }
     }
     code_ += "}";
     code_ += "";
