@@ -80,54 +80,6 @@ pub mod example_2 {
   extern crate flatbuffers;
   use self::flatbuffers::EndianScalar;
 
-#[allow(non_camel_case_types)]
-#[repr(u8)]
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub enum ColorBig {
-  Red = 0,
-  Green = 1
-}
-
-const ENUM_MIN_COLOR_BIG: u8 = 0;
-const ENUM_MAX_COLOR_BIG: u8 = 1;
-
-impl<'a> flatbuffers::Follow<'a> for ColorBig {
-  type Inner = Self;
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::read_scalar_at::<Self>(buf, loc)
-  }
-}
-
-impl flatbuffers::EndianScalar for ColorBig {
-  fn to_little_endian(self) -> Self {
-    let n = u8::to_le(self as u8);
-    let p = &n as *const u8 as *const ColorBig;
-    unsafe { *p }
-  }
-  fn from_little_endian(self) -> Self {
-    let n = u8::from_le(self as u8);
-    let p = &n as *const u8 as *const ColorBig;
-    unsafe { *p }
-  }
-}
-
-#[allow(non_camel_case_types)]
-const ENUM_VALUES_COLOR_BIG:[ColorBig; 2] = [
-  ColorBig::Red,
-  ColorBig::Green
-];
-
-#[allow(non_camel_case_types)]
-const ENUM_NAMES_COLOR_BIG:[&'static str; 2] = [
-    "Red",
-    "Green"
-];
-
-pub fn enum_name_color_big(e: ColorBig) -> &'static str {
-  let index: usize = e as usize;
-  ENUM_NAMES_COLOR_BIG[index]
-}
-
 pub enum MonsterOffset {}
 #[derive(Copy, Clone, Debug, PartialEq)]
 
@@ -396,19 +348,15 @@ impl Vec3 {
 pub struct Ability {
   id_: u32,
   distance_: u32,
-  foo_: super::example_2::ColorBig,
-  padding0__: u8,  padding1__: u16,
 } // pub struct Ability
 impl flatbuffers::GeneratedStruct for Ability {}
 
 impl Ability {
-  pub fn new<'a>(_id: u32, _distance: u32, _foo: super::example_2::ColorBig) -> Self {
+  pub fn new<'a>(_id: u32, _distance: u32) -> Self {
     Ability {
       id_: _id.to_little_endian(),
       distance_: _distance.to_little_endian(),
-      foo_: _foo.to_little_endian(),
 
-      padding0__: 0,padding1__: 0,
     }
   }
   pub fn id<'a>(&'a self) -> u32 {
@@ -416,9 +364,6 @@ impl Ability {
   }
   pub fn distance<'a>(&'a self) -> u32 {
     self.distance_.from_little_endian()
-  }
-  pub fn foo<'a>(&'a self) -> super::example_2::ColorBig {
-    self.foo_.from_little_endian()
   }
 }
 
