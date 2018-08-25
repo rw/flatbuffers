@@ -268,7 +268,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.field_locs.push(fl);
         self.max_voffset = std::cmp::max(self.max_voffset, slot_off);
     }
-    pub fn start_table(&mut self, num_fields: VOffsetT) -> Offset<TableOffset> {
+    pub fn start_table(&mut self) -> Offset<TableOffset> {
         self.assert_not_nested();
         self.nested = true;
 

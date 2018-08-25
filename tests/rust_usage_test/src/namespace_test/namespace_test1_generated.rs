@@ -155,7 +155,7 @@ impl<'a: 'b, 'b> TableInNestedNSBuilder<'a, 'b> {
     self.fbb_.push_slot_scalar::<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TableInNestedNSBuilder<'a, 'b> {
-    let start = _fbb.start_table(1);
+    let start = _fbb.start_table();
     TableInNestedNSBuilder {
       fbb_: _fbb,
       start_: start,

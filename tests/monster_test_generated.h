@@ -110,16 +110,14 @@ inline const char *EnumNameColor(Color e) {
 enum ColorBig {
   ColorBig_Red = 0,
   ColorBig_Green = 1,
-  ColorBig_Blue = 3,
   ColorBig_MIN = ColorBig_Red,
-  ColorBig_MAX = ColorBig_Blue
+  ColorBig_MAX = ColorBig_Green
 };
 
-inline const ColorBig (&EnumValuesColorBig())[3] {
+inline const ColorBig (&EnumValuesColorBig())[2] {
   static const ColorBig values[] = {
     ColorBig_Red,
-    ColorBig_Green,
-    ColorBig_Blue
+    ColorBig_Green
   };
   return values;
 }
@@ -128,8 +126,6 @@ inline const char * const *EnumNamesColorBig() {
   static const char * const names[] = {
     "Red",
     "Green",
-    "",
-    "Blue",
     nullptr
   };
   return names;
@@ -2254,21 +2250,18 @@ inline const flatbuffers::TypeTable *ColorTypeTable() {
 
 inline const flatbuffers::TypeTable *ColorBigTypeTable() {
   static const flatbuffers::TypeCode type_codes[] = {
-    { flatbuffers::ET_LONG, 0, 0 },
-    { flatbuffers::ET_LONG, 0, 0 },
-    { flatbuffers::ET_LONG, 0, 0 }
+    { flatbuffers::ET_BOOL, 0, 0 },
+    { flatbuffers::ET_BOOL, 0, 0 }
   };
   static const flatbuffers::TypeFunction type_refs[] = {
     ColorBigTypeTable
   };
-  static const int32_t values[] = { 0, 1, 3 };
   static const char * const names[] = {
     "Red",
-    "Green",
-    "Blue"
+    "Green"
   };
   static const flatbuffers::TypeTable tt = {
-    flatbuffers::ST_ENUM, 3, type_codes, type_refs, values, names
+    flatbuffers::ST_ENUM, 2, type_codes, type_refs, nullptr, names
   };
   return &tt;
 }

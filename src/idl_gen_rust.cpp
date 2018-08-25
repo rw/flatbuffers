@@ -358,6 +358,7 @@ class RustGenerator : public BaseGenerator {
 
   const Namespace *CurrentNameSpace() const { return cur_name_space_; }
 
+  // Generate a comment from the schema.
   void GenComment(const std::vector<std::string> &dc, const char *prefix = "") {
     std::string text;
     ::flatbuffers::GenComment(dc, &text, nullptr, prefix);
@@ -385,9 +386,11 @@ class RustGenerator : public BaseGenerator {
 
   // Look up the native type for an enum. This will always be an integer like
   // u8, i32, etc.
-  std::string GenEnumTypeForDecl(const Type &type) {
-    //const auto ft = GetFullType(type);
-    //FLATBUFFERS_ASSERT(ft == FullType::EnumKey || ft == FullType::UnionKey);
+  std::string GetEnumTypeForDecl(const Type &type) {
+    const auto ft = GetFullType(type);
+    if (!(ft == FullType::EnumKey || ft == FullType::UnionKey)) {
+      FLATBUFFERS_ASSERT(false);
+    }
 
     static const char *ctypename[] = {
     // clang-format off
@@ -398,13 +401,15 @@ class RustGenerator : public BaseGenerator {
     #undef FLATBUFFERS_TD
       // clang-format on
     };
+
+    // Enums can be bools, but their Rust representation must be a u8:
     if (type.base_type == BASE_TYPE_BOOL) return "u8";
     return ctypename[type.base_type];
   }
 
   // Return a C++ pointer type, specialized to the actual struct/table types,
   // and vector element types.
-  std::string GenTypePointer(const Type &type, const std::string &lifetime) const {
+  std::string GetTypePointer(const Type &type, const std::string &lifetime) const {
     switch (type.base_type) {
       case BASE_TYPE_STRING: {
         //return "&str";
@@ -412,7 +417,7 @@ class RustGenerator : public BaseGenerator {
         //return "flatbuffers::String<" + lifetime + ">";
       }
       case BASE_TYPE_VECTOR: {
-        const auto type_name = GenTypeWire(type.VectorType(), "", lifetime, false);
+        const auto type_name = GetTypeWire(type.VectorType(), "", lifetime, false);
         //return "flatbuffers::Vector<" + type_name + ">";
         return "&" + lifetime + "[" + type_name + "]";
         //return "flatbuffers::LabeledVectorUOffsetT<" + type_name + ">";
@@ -447,7 +452,7 @@ class RustGenerator : public BaseGenerator {
 
   // Return a C++ type for any type (scalar/pointer) specifically for
   // building a flatbuffer.
-  std::string GenTypeWire(const Type &type, const char *postfix,
+  std::string GetTypeWire(const Type &type, const char *postfix,
                           const std::string &lifetime,
                           bool user_facing_type) const {
     // TODO(rw): convert this to enum switch
@@ -455,11 +460,11 @@ class RustGenerator : public BaseGenerator {
       return GenTypeBasic(type, user_facing_type) + postfix;
     } else if (IsStruct(type)) {
       // TODO distinguish between struct and table
-      return GenTypePointer(type, lifetime);
+      return GetTypePointer(type, lifetime);
     } else if (type.base_type == BASE_TYPE_UNION) {
-      return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
+      return "flatbuffers::Offset<" + GetTypePointer(type, lifetime) + ">" + postfix;
     } else {
-      return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
+      return "flatbuffers::Offset<" + GetTypePointer(type, lifetime) + ">" + postfix;
     }
   }
 
@@ -471,7 +476,7 @@ class RustGenerator : public BaseGenerator {
     if (IsScalar(type.base_type)) {
       return GenTypeBasic(type, user_facing_type) + afterbasic;
     } else {
-      return beforeptr + GenTypePointer(type, "'a") + afterptr;
+      return beforeptr + GetTypePointer(type, "'a") + afterptr;
     }
   }
 
@@ -515,7 +520,7 @@ class RustGenerator : public BaseGenerator {
   // and an enum array of values
   void GenEnum(const EnumDef &enum_def) {
     code_.SetValue("ENUM_NAME", Name(enum_def));
-    code_.SetValue("BASE_TYPE", GenEnumTypeForDecl(enum_def.underlying_type));
+    code_.SetValue("BASE_TYPE", GetEnumTypeForDecl(enum_def.underlying_type));
     code_.SetValue("SEP", "");
 
     GenComment(enum_def.doc_comment);
@@ -647,8 +652,8 @@ class RustGenerator : public BaseGenerator {
   std::string GenUnderlyingCast(const FieldDef &field, bool from,
                                 const std::string &val) {
     //switch (GetFullType(field.value.type)) {
-    //  case FullType::Integer: { return GenDefaultConstant(field); }
-    //  case FullType::Float: { return GenDefaultConstant(field); }
+    //  case FullType::Integer: { return GetDefaultConstant(field); }
+    //  case FullType::Float: { return GetDefaultConstant(field); }
     //  case FullType::Bool: { return field.value.constant == "0" ? "false" : "true"; }
     //  case FullType::UnionKey:
     //  case FullType::EnumKey: {}
@@ -711,7 +716,7 @@ class RustGenerator : public BaseGenerator {
     return stream.str();
   }
 
-  std::string GenDefaultConstant(const FieldDef &field) {
+  std::string GetDefaultConstant(const FieldDef &field) {
     //assert(false);
     return field.value.type.base_type == BASE_TYPE_FLOAT
                ? field.value.constant + ""
@@ -720,9 +725,11 @@ class RustGenerator : public BaseGenerator {
 
   std::string GetDefaultScalarValue(const FieldDef &field) {
     switch (GetFullType(field.value.type)) {
-      case FullType::Integer: { return GenDefaultConstant(field); }
-      case FullType::Float: { return GenDefaultConstant(field); }
-      case FullType::Bool: { return field.value.constant == "0" ? "false" : "true"; }
+      case FullType::Integer: { return GetDefaultConstant(field); }
+      case FullType::Float: { return GetDefaultConstant(field); }
+      case FullType::Bool: {
+        return field.value.constant == "0" ? "false" : "true";
+      }
       case FullType::UnionKey:
       case FullType::EnumKey: {
         auto ev = field.value.type.enum_def->ReverseLookup(
@@ -732,26 +739,37 @@ class RustGenerator : public BaseGenerator {
                                GetEnumValUse(*field.value.type.enum_def, *ev));
       }
 
+      // All pointer-ish types have a default value of None, because they are
+      // wrapped in Option..
       default: { return "None"; }
     }
   }
 
-  // Note: we could make all inputs be an Option, as well as all outputs.
-  // But the UX of Flatbuffers is that the user doesn't get to know if the value is default or not.
-  std::string TableBuilderArgsDefnType(const FieldDef &field, const std::string lifetime) {
-    //assert(false, "note to self: use real lifetimes for written objects--just give the returned offsets a lifetime compatible with the builder, not the original thing. then the offset can be dereferenced to read (or mutate?) the original object.");
+  // Create the return type for fields in the *BuilderArgs structs that are
+  // used to create Tables.
+  //
+  // Note: we could make all inputs to the BuilderArgs be an Option, as well
+  // as all outputs. But, the UX of Flatbuffers is that the user doesn't get to
+  // know if the value is default or not, because there are three ways to
+  // return a default value:
+  // 1) return a stored value that happens to be the default,
+  // 2) return a hardcoded value because the relevant vtable field is not in
+  //    the vtable, or
+  // 3) return a hardcoded value because the vtable field value is set to zero.
+  std::string TableBuilderArgsDefnType(const FieldDef &field,
+                                       const std::string lifetime) {
     const Type& type = field.value.type;
 
-    switch (GetFullType(field.value.type)) {
+    switch (GetFullType(type)) {
       case FullType::Integer:
       case FullType::Float:
       case FullType::Bool: {
-        const auto typname = GenTypeWire(type, "", "", false);
+        const auto typname = GetTypeWire(type, "", "", false);
         return typname;
       }
       case FullType::Struct: {
         //const auto typname = WrapInNameSpace(*type.struct_def);
-        const auto typname = GenTypeWire(type, "", "", false);
+        const auto typname = GetTypeWire(type, "", "", false);
         return "Option<&" + lifetime + " " + typname + ">";
       }
       case FullType::Table: {
@@ -803,14 +821,14 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string TableBuilderArgsDefaultValue(const FieldDef &field) {
-      return GetDefaultScalarValue(field);
+    return GetDefaultScalarValue(field);
   }
   std::string TableBuilderAddFuncDefaultValue(const FieldDef &field) {
     switch (GetFullType(field.value.type)) {
       case FullType::UnionKey:
       case FullType::EnumKey: {
         const std::string basetype = GenTypeBasic(field.value.type, false);
-        return GetDefaultScalarValue(field);// + " as " + basetype;
+        return GetDefaultScalarValue(field);
       }
 
       default: { return GetDefaultScalarValue(field); }
@@ -888,7 +906,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GenTypeWire(field.value.type, "", "", false);
+        const auto typname = GetTypeWire(field.value.type, "", "", false);
         return "self.fbb_.push_slot_scalar::<" + typname + ">";
       }
       case FullType::Bool: {
@@ -896,7 +914,7 @@ class RustGenerator : public BaseGenerator {
       }
 
       case FullType::Struct: {
-        const std::string typname = GenTypeWire(field.value.type, "", "", false);
+        const std::string typname = GetTypeWire(field.value.type, "", "", false);
         //const std::string typname = WrapInNameSpace(field);
         return "self.fbb_.push_slot_struct::<" + typname + ">";
       }
@@ -1312,19 +1330,15 @@ class RustGenerator : public BaseGenerator {
 
     // Generate builder functions:
     code_ += "impl<'a: 'b, 'b> {{STRUCT_NAME}}Builder<'a, 'b> {";
-    bool has_string_or_vector_fields = false;
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated) {
         const bool is_scalar = IsScalar(field.value.type.base_type);
-        const bool is_string = field.value.type.base_type == BASE_TYPE_STRING;
-        const bool is_vector = field.value.type.base_type == BASE_TYPE_VECTOR;
-        if (is_string || is_vector) { has_string_or_vector_fields = true; }
 
         std::string offset = GenFieldOffsetName(field);
         std::string name = GenUnderlyingCast(field, false, Name(field));
-        std::string value = is_scalar ? GenDefaultConstant(field) : "";
+        std::string value = GetDefaultScalarValue(field);
 
         // Generate accessor functions of the form:
         // fn add_name(type name) {
@@ -1348,11 +1362,10 @@ class RustGenerator : public BaseGenerator {
 
     // Builder constructor
     code_ +=
-        "  pub fn new"
-        "(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> "
+        "  pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> "
         "{{STRUCT_NAME}}Builder<'a, 'b> {";
     code_.SetValue("NUM_FIELDS", NumToString(struct_def.fields.vec.size()));
-    code_ += "    let start = _fbb.start_table({{NUM_FIELDS}});";
+    code_ += "    let start = _fbb.start_table();";
     code_ += "    {{STRUCT_NAME}}Builder {";
     code_ += "      fbb_: _fbb,";
     code_ += "      start_: start,";

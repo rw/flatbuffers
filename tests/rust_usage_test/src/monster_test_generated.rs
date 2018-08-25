@@ -1,6 +1,3 @@
-// #include "include_test1_generated.rs"
-// #include "include_test2_generated.rs"
-
 pub mod my_game {
   #![allow(dead_code)]
   #![allow(unused_imports)]
@@ -60,7 +57,7 @@ pub struct InParentNamespaceBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> InParentNamespaceBuilder<'a, 'b> {
-    let start = _fbb.start_table(0);
+    let start = _fbb.start_table();
     InParentNamespaceBuilder {
       fbb_: _fbb,
       start_: start,
@@ -132,7 +129,7 @@ pub struct MonsterBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table(0);
+    let start = _fbb.start_table();
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -215,16 +212,15 @@ pub fn enum_name_color(e: Color) -> &'static str {
 }
 
 #[allow(non_camel_case_types)]
-#[repr(i64)]
+#[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum ColorBig {
   Red = 0,
-  Green = 1,
-  Blue = 3
+  Green = 1
 }
 
-const ENUM_MIN_COLOR_BIG: i64 = 0;
-const ENUM_MAX_COLOR_BIG: i64 = 3;
+const ENUM_MIN_COLOR_BIG: u8 = 0;
+const ENUM_MAX_COLOR_BIG: u8 = 1;
 
 impl<'a> flatbuffers::Follow<'a> for ColorBig {
   type Inner = Self;
@@ -235,30 +231,27 @@ impl<'a> flatbuffers::Follow<'a> for ColorBig {
 
 impl flatbuffers::EndianScalar for ColorBig {
   fn to_little_endian(self) -> Self {
-    let n = i64::to_le(self as i64);
-    let p = &n as *const i64 as *const ColorBig;
+    let n = u8::to_le(self as u8);
+    let p = &n as *const u8 as *const ColorBig;
     unsafe { *p }
   }
   fn from_little_endian(self) -> Self {
-    let n = i64::from_le(self as i64);
-    let p = &n as *const i64 as *const ColorBig;
+    let n = u8::from_le(self as u8);
+    let p = &n as *const u8 as *const ColorBig;
     unsafe { *p }
   }
 }
 
 #[allow(non_camel_case_types)]
-const ENUM_VALUES_COLOR_BIG:[ColorBig; 3] = [
+const ENUM_VALUES_COLOR_BIG:[ColorBig; 2] = [
   ColorBig::Red,
-  ColorBig::Green,
-  ColorBig::Blue
+  ColorBig::Green
 ];
 
 #[allow(non_camel_case_types)]
-const ENUM_NAMES_COLOR_BIG:[&'static str; 4] = [
+const ENUM_NAMES_COLOR_BIG:[&'static str; 2] = [
     "Red",
-    "Green",
-    "",
-    "Blue"
+    "Green"
 ];
 
 pub fn enum_name_color_big(e: ColorBig) -> &'static str {
@@ -491,7 +484,7 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
     self.fbb_.push_slot_scalar::<Color>(TestSimpleTableWithEnum::VT_COLOR, color, Color::Green);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TestSimpleTableWithEnumBuilder<'a, 'b> {
-    let start = _fbb.start_table(1);
+    let start = _fbb.start_table();
     TestSimpleTableWithEnumBuilder {
       fbb_: _fbb,
       start_: start,
@@ -586,7 +579,7 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
     self.fbb_.push_slot_scalar::<u16>(Stat::VT_COUNT, count, 0);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> StatBuilder<'a, 'b> {
-    let start = _fbb.start_table(3);
+    let start = _fbb.start_table();
     StatBuilder {
       fbb_: _fbb,
       start_: start,
@@ -659,7 +652,7 @@ impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
     self.fbb_.push_slot_scalar::<u64>(Referrable::VT_ID, id, 0);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> ReferrableBuilder<'a, 'b> {
-    let start = _fbb.start_table(1);
+    let start = _fbb.start_table();
     ReferrableBuilder {
       fbb_: _fbb,
       start_: start,
@@ -1214,7 +1207,7 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
     self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, vector_of_non_owning_references);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
-    let start = _fbb.start_table(43);
+    let start = _fbb.start_table();
     MonsterBuilder {
       fbb_: _fbb,
       start_: start,
@@ -1409,7 +1402,7 @@ impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
     self.fbb_.push_slot_offset_relative(TypeAliases::VT_VF64, vf64);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TypeAliasesBuilder<'a, 'b> {
-    let start = _fbb.start_table(12);
+    let start = _fbb.start_table();
     TypeAliasesBuilder {
       fbb_: _fbb,
       start_: start,

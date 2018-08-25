@@ -1,5 +1,3 @@
-// #include "namespace_test1_generated.rs"
-
 pub mod namespace_a {
   #![allow(dead_code)]
   #![allow(unused_imports)]
@@ -93,7 +91,7 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
     self.fbb_.push_slot_struct::<namespace_b::StructInNestedNS/* foo */>(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TableInFirstNSBuilder<'a, 'b> {
-    let start = _fbb.start_table(3);
+    let start = _fbb.start_table();
     TableInFirstNSBuilder {
       fbb_: _fbb,
       start_: start,
@@ -166,7 +164,7 @@ impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
     self.fbb_.push_slot_offset_relative::<super::namespace_c::TableInC>(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> SecondTableInABuilder<'a, 'b> {
-    let start = _fbb.start_table(1);
+    let start = _fbb.start_table();
     SecondTableInABuilder {
       fbb_: _fbb,
       start_: start,
@@ -263,7 +261,7 @@ impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
     self.fbb_.push_slot_offset_relative::<super::namespace_a::SecondTableInA>(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TableInCBuilder<'a, 'b> {
-    let start = _fbb.start_table(2);
+    let start = _fbb.start_table();
     TableInCBuilder {
       fbb_: _fbb,
       start_: start,
