@@ -327,16 +327,16 @@ impl Vec3 {
     }
   }
   pub fn x<'a>(&'a self) -> f32 {
-    self.x_
+    self.x_.from_little_endian()
   }
   pub fn y<'a>(&'a self) -> f32 {
-    self.y_
+    self.y_.from_little_endian()
   }
   pub fn z<'a>(&'a self) -> f32 {
-    self.z_
+    self.z_.from_little_endian()
   }
   pub fn test1<'a>(&'a self) -> f64 {
-    self.test1_
+    self.test1_.from_little_endian()
   }
   pub fn test2<'a>(&'a self) -> Color {
     self.test2_.from_little_endian()

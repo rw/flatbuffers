@@ -1849,16 +1849,6 @@ class RustGenerator : public BaseGenerator {
       } else {
         init_list += ": *" + arg_name + ",\n";
       }
-      //if (IsScalar(field.value.type.base_type) &&
-      //    !IsFloat(field.value.type.base_type)) {
-      //  auto type = GenUnderlyingCast(field, false, arg_name);
-      //  init_list += ": " + arg_name + ".to_little_endian(),\n";
-      //} else {
-      //  init_list += ": *" + arg_name + ",\n";
-      //}
-      //if (field.padding) {
-      //  GenPadding(field, &init_list, &padding_id, PaddingInitializer);
-      //}
     }
 
     code_.SetValue("ARG_LIST", arg_list);
@@ -1887,11 +1877,11 @@ class RustGenerator : public BaseGenerator {
 
       //auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
       auto field_type = GenBuilderArgsAddFuncType(field, "'a");
-      auto is_scalar = IsScalar(field.value.type.base_type) &&
-                       !IsFloat(field.value.type.base_type);
+      //auto is_scalar = IsScalar(field.value.type.base_type) &&
+      //                 !IsFloat(field.value.type.base_type);
       auto member = "self." + Name(field) + "_";
-      auto value =
-          is_scalar ? member + ".from_little_endian()" : member;
+      auto value = StructMemberAccessNeedsCopy(field.value.type) ?
+        member + ".from_little_endian()" : member;
 
       code_.SetValue("FIELD_NAME", Name(field));
       code_.SetValue("FIELD_TYPE", field_type);
