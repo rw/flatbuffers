@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 use std::mem::size_of;
+use std::str::from_utf8_unchecked;
 
 use follow::Follow;
 use endian_scalar::*;
@@ -59,3 +60,13 @@ impl<'a> Vector<'a, i64> { pub fn as_slice(self) -> &'a [i64] { <&'a [i64]>::fol
 impl<'a> Vector<'a, f32> { pub fn as_slice(self) -> &'a [f32] { <&'a [f32]>::follow(self.0, self.1) } }
 #[cfg(target_endian = "little")]
 impl<'a> Vector<'a, f64> { pub fn as_slice(self) -> &'a [f64] { <&'a [f64]>::follow(self.0, self.1) } }
+
+impl<'a> Follow<'a> for &'a str {
+    type Inner = &'a str;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let slice = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len];
+        let s = unsafe { from_utf8_unchecked(slice) };
+        s
+    }
+}
