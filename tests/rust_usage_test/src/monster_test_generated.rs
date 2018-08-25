@@ -214,6 +214,57 @@ pub fn enum_name_color(e: Color) -> &'static str {
 }
 
 #[allow(non_camel_case_types)]
+#[repr(i64)]
+#[derive(Clone, Copy, PartialEq, Debug)]
+pub enum ColorBig {
+  Red = 0,
+  Green = 1,
+  Blue = 3
+}
+
+const ENUM_MIN_COLOR_BIG:i64 = 0;
+const ENUM_MAX_COLOR_BIG:i64 = 3;
+
+impl<'a> flatbuffers::Follow<'a> for ColorBig {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        flatbuffers::read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl flatbuffers::EndianScalar for ColorBig {
+    fn to_little_endian(self) -> Self {
+        let n = i64::to_le(self as i64);
+        let ptr = (&n) as *const i64 as *const ColorBig;
+        unsafe { *ptr }
+    }
+    fn from_little_endian(self) -> Self {
+        let n = i64::from_le(self as i64);
+        let ptr = (&n) as *const i64 as *const ColorBig;
+        unsafe { *ptr }
+    }
+}
+
+#[allow(non_camel_case_types)]
+const ENUM_VALUES_COLOR_BIG:[ColorBig; 3] = [
+  ColorBig::Red,
+  ColorBig::Green,
+  ColorBig::Blue
+];
+
+#[allow(non_camel_case_types)]
+const ENUM_NAMES_COLOR_BIG:[&'static str; 4] = [
+    "Red",
+    "Green",
+    "",
+    "Blue"
+];
+
+pub fn enum_name_color_big(e: ColorBig) -> &'static str {
+  let index: usize = e as usize;
+  ENUM_NAMES_COLOR_BIG[index]
+}
+
+#[allow(non_camel_case_types)]
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum Any {
@@ -937,7 +988,7 @@ impl<'a> Monster<'a> {
 //}
 //
 pub struct MonsterArgs<'a> {
-    pub pos: Option<&'a  Vec3>,
+    pub pos: Option<&'a  Vec3/* foo */>,
     pub mana: i16,
     pub hp: i16,
     pub name: Option<flatbuffers::Offset<&'a  str>>,

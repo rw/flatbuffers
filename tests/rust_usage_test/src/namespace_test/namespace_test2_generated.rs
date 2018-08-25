@@ -65,7 +65,7 @@ impl<'a> TableInFirstNS<'a> {
 pub struct TableInFirstNSArgs<'a> {
     pub foo_table: Option<flatbuffers::Offset<namespace_b::TableInNestedNS<'a >>>,
     pub foo_enum: namespace_b::EnumInNestedNS,
-    pub foo_struct: Option<&'a  namespace_b::StructInNestedNS>,
+    pub foo_struct: Option<&'a  namespace_b::StructInNestedNS/* foo */>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for TableInFirstNSArgs<'a> {

@@ -1025,7 +1025,8 @@ class RustGenerator : public BaseGenerator {
 
       case FullType::Struct: {
         std::cout << "yo 1" << std::endl;
-        const std::string typname = WrapInNameSpace(field);
+        const std::string typname = GenTypeWire(field.value.type, "", "", false);
+        //const std::string typname = WrapInNameSpace(field);
         std::cout << "yo 1z" << std::endl;
         return "self.fbb_.push_slot_struct::<" + typname + ">";
       }
