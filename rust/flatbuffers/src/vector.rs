@@ -1,4 +1,6 @@
 use std::marker::PhantomData;
+use std::mem::size_of;
+
 use follow::Follow;
 use endian_scalar::*;
 use primitives::*;
@@ -24,7 +26,7 @@ impl<'a, T: 'a> Vector<'a, T> {
 impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     pub fn get(&self, idx: usize) -> T::Inner {
         debug_assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
-        let sz = std::mem::size_of::<T>();
+        let sz = size_of::<T>();
         debug_assert!(sz > 0);
         T::follow(self.0, self.1 as usize + SIZE_UOFFSET + sz * idx)
     }

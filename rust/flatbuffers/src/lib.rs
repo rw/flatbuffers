@@ -21,6 +21,8 @@ pub use vector::*;
 pub mod vtable;
 pub use vtable::*;
 
+pub mod vtable_writer;
+
 
 impl<'a> Follow<'a> for Table<'a> {
     type Inner = Table<'a>;
@@ -32,70 +34,7 @@ impl<'a> Follow<'a> for Table<'a> {
 impl<'a> Follow<'a> for VTable<'a> {
     type Inner = VTable<'a>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        VTable { buf: buf, loc: loc }
-    }
-}
-
-/// VTableWriter compartmentalizes actions needed to create a vtable.
-#[derive(Debug)]
-pub struct VTableWriter<'a> {
-    buf: &'a mut [u8],
-}
-
-impl<'a> VTableWriter<'a> {
-    pub fn init(buf: &'a mut [u8]) -> Self {
-        VTableWriter { buf: buf }
-    }
-
-    /// Writes the vtable length (in bytes) into the vtable.
-    ///
-    /// Note that callers already need to have computed this to initialize
-    /// a VTableWriter.
-    ///
-    /// In debug mode, asserts that the length of the underlying data is equal
-    /// to the provided value.
-    #[inline]
-    pub fn write_vtable_byte_length(&mut self, n: VOffsetT) {
-        emplace_scalar::<VOffsetT>(&mut self.buf[..SIZE_VOFFSET], n);
-        debug_assert_eq!(n as usize, self.buf.len());
-    }
-
-    /// Writes an object length (in bytes) into the vtable.
-    #[inline]
-    pub fn write_object_inline_size(&mut self, n: VOffsetT) {
-        emplace_scalar::<VOffsetT>(&mut self.buf[SIZE_VOFFSET..2 * SIZE_VOFFSET], n);
-    }
-
-    /// Gets an object field offset from the vtable. Only used for debugging.
-    ///
-    /// Note that this expects field offsets (which are like pointers), not
-    /// field ids (which are like array indices).
-    #[inline]
-    pub fn get_field_offset(&self, vtable_offset: VOffsetT) -> VOffsetT {
-        let idx = vtable_offset as usize;
-        read_scalar::<VOffsetT>(&self.buf[idx..idx + SIZE_VOFFSET])
-    }
-
-    /// Writes an object field offset into the vtable.
-    ///
-    /// Note that this expects field offsets (which are like pointers), not
-    /// field ids (which are like array indices).
-    #[inline]
-    pub fn write_field_offset(&mut self, vtable_offset: VOffsetT, object_data_offset: VOffsetT) {
-        let idx = vtable_offset as usize;
-        emplace_scalar::<VOffsetT>(&mut self.buf[idx..idx + SIZE_VOFFSET], object_data_offset);
-    }
-
-    /// Clears all data in this VTableWriter. Used to cleanly undo a
-    /// vtable write.
-    #[inline]
-    pub fn clear(&mut self) {
-        // This is the closest thing to memset in Rust right now.
-        let len = self.buf.len();
-        let p = self.buf.as_mut_ptr() as *mut u8;
-        unsafe {
-            std::ptr::write_bytes(p, 0, len);
-        }
+        VTable::init(buf, loc)
     }
 }
 

@@ -1,4 +1,7 @@
 use std::marker::PhantomData;
+use std::ops::Deref;
+
+use endian_scalar::*;
 
 pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = (2u64 << 31) as usize;
 
@@ -59,7 +62,7 @@ impl<T> Clone for Offset<T> {
     }
 }
 
-impl<T> std::ops::Deref for Offset<T> {
+impl<T> Deref for Offset<T> {
     type Target = UOffsetT;
     fn deref(&self) -> &UOffsetT {
         &self.0
@@ -95,7 +98,7 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsVOffset<T> {
     type Inner = T::Inner;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let slice = &buf[loc..loc + SIZE_VOFFSET];
-        let off = read_scalar::<u16>(slice) as usize;
+        let off = read_scalar::<VOffsetT>(slice) as usize;
         T::follow(buf, loc + off)
     }
 }

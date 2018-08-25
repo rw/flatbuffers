@@ -1,3 +1,5 @@
+use std::mem::size_of;
+
 pub trait EndianScalar: Sized + PartialEq + Copy + Clone {
     fn to_little_endian(self) -> Self;
     fn from_little_endian(self) -> Self;
@@ -125,7 +127,7 @@ pub fn byte_swap_f64(x: &f64) -> f64 {
 }
 
 pub fn emplace_scalar<T: EndianScalar>(s: &mut [u8], x: T) {
-    let sz = std::mem::size_of::<T>();
+    let sz = size_of::<T>();
     debug_assert!(s.len() >= sz);
 
     let mut_ptr = s.as_mut_ptr() as *mut T;
@@ -135,11 +137,11 @@ pub fn emplace_scalar<T: EndianScalar>(s: &mut [u8], x: T) {
     }
 }
 pub fn read_scalar_at<T: EndianScalar>(s: &[u8], loc: usize) -> T {
-    let buf = &s[loc..loc + std::mem::size_of::<T>()];
+    let buf = &s[loc..loc + size_of::<T>()];
     read_scalar(buf)
 }
 pub fn read_scalar<T: EndianScalar>(s: &[u8]) -> T {
-    let sz = std::mem::size_of::<T>();
+    let sz = size_of::<T>();
     debug_assert!(s.len() >= sz);
 
     let p = s.as_ptr() as *const T;

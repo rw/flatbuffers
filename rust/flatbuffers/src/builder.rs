@@ -1,9 +1,14 @@
+use std::cmp::max;
 use std::marker::PhantomData;
+use std::mem::size_of;
+use std::slice::from_raw_parts;
 
 use primitives::*;
 pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
 pub use primitives::*;
+pub use table::*;
 pub use vtable::*;
+use vtable_writer::*;
 pub use vector::*;
 
 #[derive(Clone, Copy, Debug)]
@@ -75,7 +80,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             off: off,
         };
         self.field_locs.push(fl);
-        self.max_voffset = std::cmp::max(self.max_voffset, slot_off);
+        self.max_voffset = max(self.max_voffset, slot_off);
     }
     pub fn start_table(&mut self) -> Offset<TableOffset> {
         self.assert_not_nested();
@@ -92,7 +97,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let starting_active_size = self.get_size();
 
         let old_len = self.owned_buf.len();
-        let new_len = std::cmp::max(1, old_len * 2);
+        let new_len = max(1, old_len * 2);
 
         assert!(
             new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
@@ -173,7 +178,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.make_space(zero_pad_bytes);
     }
     fn track_min_align(&mut self, alignment: usize) {
-        self.min_align = std::cmp::max(self.min_align, alignment);
+        self.min_align = max(self.min_align, alignment);
     }
     // utf-8 string creation
     pub fn create_string(&mut self, s: &str) -> Offset<&'fbb str> {
@@ -212,7 +217,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         &'a mut self,
         items: &'b [Offset<T>],
     ) -> Offset<Vector<'fbb, ForwardsUOffset<T>>> {
-        let elemsize = std::mem::size_of::<Offset<T>>();
+        let elemsize = size_of::<Offset<T>>();
         self.start_vector(elemsize, items.len());
         for o in items.iter().rev() {
             self.push_element_scalar_indirect_uoffset(o.value());
@@ -227,7 +232,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         items: &[T],
     ) -> Offset<Vector<'fbb, T>> {
         // TODO(rw): if host is little-endian, just do a memcpy
-        let elemsize = std::mem::size_of::<T>();
+        let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
         for x in items.iter().rev() {
             self.push_element_scalar(*x);
@@ -236,7 +241,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn create_vector_of_structs<T>(&mut self, items: &[T]) -> Offset<Vector<'fbb, T>> {
         // TODO(rw): just do a memcpy
-        let elemsize = std::mem::size_of::<T>();
+        let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
         for i in (0..items.len()).rev() {
             self.push_bytes(to_bytes(&items[i]));
@@ -307,7 +312,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // by the offsets themselves. In reverse:
         // Include space for the last offset and ensure empty tables have a
         // minimum size.
-        let vtable_len = std::cmp::max(
+        let vtable_len = max(
             self.max_voffset + SIZE_VOFFSET as VOffsetT,
             field_index_to_field_offset(0),
         ) as usize;
@@ -337,14 +342,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             // LIFO order
             for &vt_rev_pos in self.written_vtable_revpos.iter().rev() {
                 let eq = {
-                    let this_vt = VTable {
-                        buf: &self.owned_buf[..],
-                        loc: self.cur_idx,
-                    };
-                    let other_vt = VTable {
-                        buf: &self.owned_buf[..],
-                        loc: self.cur_idx + self.get_size() - vt_rev_pos as usize,
-                    };
+                    let this_vt = VTable::init(&self.owned_buf[..], self.cur_idx);
+                    let other_vt = VTable::init(&self.owned_buf[..], self.cur_idx + self.get_size() - vt_rev_pos as usize);
                     other_vt == this_vt
                 };
                 if eq {
@@ -439,18 +438,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.fill(padding_bytes(s, elem_size));
     }
     pub fn push_element_scalar<T: EndianScalar>(&mut self, t: T) -> UOffsetT {
-        self.align(std::mem::size_of::<T>());
+        self.align(size_of::<T>());
         self.push_small(t);
         self.get_size() as UOffsetT
     }
     pub fn place_element_scalar<T: EndianScalar>(&mut self, t: T) -> UOffsetT {
-        self.cur_idx -= std::mem::size_of::<T>();
+        self.cur_idx -= size_of::<T>();
         let cur_idx = self.cur_idx;
         emplace_scalar(&mut self.owned_buf[cur_idx..], t);
         self.get_size() as UOffsetT
     }
     fn push_small<T: EndianScalar>(&mut self, x: T) {
-        self.make_space(std::mem::size_of::<T>());
+        self.make_space(size_of::<T>());
         emplace_scalar(&mut self.owned_buf[self.cur_idx..], x);
     }
     pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
@@ -543,7 +542,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     ) {
         let tab = Table::new(
             &self.owned_buf[..],
-            self.cur_idx + (self.get_size() - tab_revloc.0 as usize),
+            self.cur_idx + (self.get_size() - tab_revloc.value() as usize),
         );
         let o = tab.vtable().get(slot_byte_loc) as usize;
         assert!(o != 0, "missing required field {}", assert_msg_name);
@@ -551,8 +550,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 }
 
 pub fn to_bytes<'a, T: 'a + Sized>(t: &'a T) -> &'a [u8] {
-    let sz = std::mem::size_of::<T>();
-    unsafe { std::slice::from_raw_parts((t as *const T) as *const u8, sz) }
+    let sz = size_of::<T>();
+    unsafe { from_raw_parts((t as *const T) as *const u8, sz) }
 }
 
 #[inline]
