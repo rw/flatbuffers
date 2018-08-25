@@ -481,7 +481,12 @@ class RustGenerator : public BaseGenerator {
     return ctypename[type.base_type];
   }
 
-  std::string GenEnumTypeForDecl(const Type &type) const {
+  // Look up the native type for an enum. This will always be an integer like
+  // u8, i32, etc.
+  std::string GenEnumTypeForDecl(const Type &type) {
+    const auto ft = GetFullType(type);
+    FLATBUFFERS_ASSERT(ft == FullType::EnumKey || ft == FullType::UnionKey);
+
     static const char *ctypename[] = {
     // clang-format off
     #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE, \
@@ -491,7 +496,6 @@ class RustGenerator : public BaseGenerator {
     #undef FLATBUFFERS_TD
       // clang-format on
     };
-    if (type.base_type == BASE_TYPE_BOOL) return "u8";
     return ctypename[type.base_type];
   }
 
@@ -825,17 +829,6 @@ class RustGenerator : public BaseGenerator {
 
   std::string GenFieldOffsetName(const FieldDef &field) {
     return "VT_" + MakeUpper(Name(field));
-  }
-
-  void GenFullyQualifiedNameGetter(const StructDef &struct_def,
-                                   const std::string &name) {
-    if (!parser_.opts.generate_name_strings) { return; }
-    auto fullname = struct_def.defined_namespace->GetFullyQualifiedName(name);
-    code_.SetValue("NAME", fullname);
-    code_.SetValue("CONSTEXPR", "FLATBUFFERS_CONSTEXPR");
-    code_ += "  static {{CONSTEXPR}} const char *GetFullyQualifiedName() {";
-    code_ += "    return \"{{NAME}}\";";
-    code_ += "  }";
   }
 
   std::string GetRelativeNamespaceTraversal(const Namespace *src,
@@ -1238,7 +1231,7 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  bool ElementTypeUsesOption(const Type& type) {
+  bool TableFieldReturnsOption(const Type& type) {
     switch (GetFullType(type)) {
       case FullType::Integer:
       case FullType::Float:
@@ -1294,11 +1287,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,";
     code_ += "        {{MAYBE_UNDERSCORE}}args: &'y {{STRUCT_NAME}}Args<'y>) -> \\";
     code_ += "flatbuffers::Offset<{{STRUCT_NAME}}<'x>> {";
-    //for (auto it = struct_def.fields.vec.begin();
-    //     it != struct_def.fields.vec.end(); ++it) {
-    //  const auto &field = **it;
-    //  if (!field.deprecated) { GenParam(field, false, ",\n    "); }
-    //}
 
     code_ += "      let mut builder = {{STRUCT_NAME}}Builder::new(_fbb);";
     for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
@@ -1310,7 +1298,7 @@ class RustGenerator : public BaseGenerator {
         if (!field.deprecated && (!struct_def.sortbysize ||
                                   size == SizeOf(field.value.type.base_type))) {
           code_.SetValue("FIELD_NAME", Name(field));
-          if (ElementTypeUsesOption(field.value.type)) {
+          if (TableFieldReturnsOption(field.value.type)) {
             code_ += "      if let Some(x) = args.{{FIELD_NAME}} { builder.add_{{FIELD_NAME}}(x); }";
           } else {
             code_ += "      builder.add_{{FIELD_NAME}}(args.{{FIELD_NAME}});";
@@ -1321,8 +1309,6 @@ class RustGenerator : public BaseGenerator {
     code_ += "      builder.finish()";
     code_ += "    }";
     code_ += "";
-
-    GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate field id constants.
     if (struct_def.fields.vec.size() > 0) {
@@ -1628,7 +1614,6 @@ class RustGenerator : public BaseGenerator {
     // Generate GetFullyQualifiedName
     code_ += "";
     code_ += "impl {{STRUCT_NAME}} {";
-    GenFullyQualifiedNameGetter(struct_def, Name(struct_def));
 
     // Generate a constructor that takes all fields as arguments.
     std::string arg_list;
