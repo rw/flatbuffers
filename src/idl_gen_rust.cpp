@@ -565,11 +565,6 @@ class RustGenerator : public BaseGenerator {
                             : name;
   }
 
-  const std::string &PtrType(const FieldDef *field) {
-    auto attr = field ? field->attributes.Lookup("cpp_ptr_type") : nullptr;
-    return attr ? attr->constant : parser_.opts.cpp_object_api_pointer_type;
-  }
-
   enum class ContainerType { None, Vector, Enum, Union };
   ContainerType GetContainerType(const Type &type) const {
     if (type.base_type == BASE_TYPE_VECTOR) {
@@ -1244,144 +1239,15 @@ class RustGenerator : public BaseGenerator {
   }
 
   bool ElementTypeUsesOption(const Type& type) {
-    const auto et = GetElementType(type);
-
-    switch (GetContainerType(type)) {
-      case ContainerType::Vector:
-      case ContainerType::Union: {
-        switch (GetElementType(type)) {
-          case ElementType::UnionEnumValue: {
-            return false;
-          }
-          default: {
-            return true;
-          }
-        }
-      }
-      case ContainerType::Enum: {
+    switch (GetFullType(type)) {
+      case FullType::Integer:
+      case FullType::Float:
+      case FullType::Bool:
+      case FullType::EnumKey:
+      case FullType::UnionKey:
         return false;
-      }
-      case ContainerType::None: {
-        switch (et) {
-          case ElementType::Struct:
-          case ElementType::Table:
-          case ElementType::String:
-          case ElementType::UnionMember: {
-            return true;
-          }
-          case ElementType::Bool:
-          case ElementType::Number:
-          case ElementType::EnumValue:
-          case ElementType::UnionEnumValue: {
-            return false;
-          }
-        }
-      }
+      default: return true;
     }
-  }
-
-  //UNNEEDED void GenParam(const FieldDef &field, bool direct, const char *prefix,
-  //UNNEEDED               const std::string &lifetime, const std::string tmpl) {
-  //UNNEEDED   code_.SetValue("PRE", prefix);
-  //UNNEEDED   code_.SetValue("PARAM_NAME", Name(field));
-  //UNNEEDED   //code_.SetValue("PARAM_LIFETIME", lifetime);
-  //UNNEEDED   if (direct && field.value.type.base_type == BASE_TYPE_STRING) {
-  //UNNEEDED     code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + "str>");
-  //UNNEEDED     code_.SetValue("PARAM_VALUE", "nullptr");
-  //UNNEEDED   //} else if (IsStruct(field.value.type)) {
-  //UNNEEDED   //    code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", lifetime, true));
-  //UNNEEDED   //    code_.SetValue("PARAM_VALUE", "None");
-  //UNNEEDED   } else if (direct && field.value.type.base_type == BASE_TYPE_VECTOR) {
-  //UNNEEDED     const auto vtype = field.value.type.VectorType();
-  //UNNEEDED     std::string type;
-  //UNNEEDED     if (IsStruct(vtype)) {
-  //UNNEEDED       type = WrapInNameSpace(*vtype.struct_def);
-  //UNNEEDED       //std::string s;
-  //UNNEEDED       //s.append("Option<&"); s.append(lifetime); s.append("[&");
-  //UNNEEDED       //s.append(lifetime) ; s.append(type); s.append("]>");
-  //UNNEEDED       //code_.SetValue("PARAM_TYPE", s);
-  //UNNEEDED       code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + "[&" + lifetime + type + "]>");
-  //UNNEEDED     } else {
-  //UNNEEDED       type = GenTypeWire(vtype, "", lifetime, false);
-  //UNNEEDED       code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + "[" + type + "]>");
-  //UNNEEDED       //code_.SetValue("PARAM_TYPE", "Option<flatbuffers::LabeledVectorUOffsetT<" + type + ">>");
-  //UNNEEDED       //code_.SetValue("PARAM_TYPE", "Option<flatbuffers" + type + "]>");
-  //UNNEEDED     }
-  //UNNEEDED     code_.SetValue("PARAM_VALUE", "nullptr");
-  //UNNEEDED   } else if (IsStruct(field.value.type)) {
-  //UNNEEDED     code_.SetValue("PARAM_TYPE", "Option<&" + lifetime + " " + GenTypeWire(field.value.type, " ", lifetime, true) + ">");
-  //UNNEEDED     code_.SetValue("PARAM_VALUE", "/* sup */" + GetDefaultScalarValue(field));
-  //UNNEEDED   } else if (field.value.type.base_type == BASE_TYPE_UNION) {
-  //UNNEEDED     code_.SetValue("PARAM_TYPE", "Option<flatbuffers::LabeledUOffsetT<flatbuffers::UnionOffset>>");
-  //UNNEEDED     code_.SetValue("PARAM_VALUE", "None");
-  //UNNEEDED   } else {
-  //UNNEEDED     code_.SetValue("PARAM_TYPE", GenTypeWire(field.value.type, " ", lifetime, true));
-  //UNNEEDED     const std::string type_suffix = GenTypeBasic(field.value.type, true);
-  //UNNEEDED     //code_.SetValue("PARAM_VALUE", GetDefaultScalarValue(field) + type_suffix + ".into()");
-  //UNNEEDED     //code_.SetValue("PARAM_VALUE", GetDefaultScalarValue(field) + ".into()");
-  //UNNEEDED     code_.SetValue("PARAM_VALUE", "/* yo */" + GetDefaultScalarValue(field));
-  //UNNEEDED   }
-  //UNNEEDED   code_ += tmpl;
-  //UNNEEDED   //code_ += "{{PRE}}{{PARAM_NAME}}: {{PARAM_TYPE}} /* = {{PARAM_VALUE}} */\\";
-  //UNNEEDED }
-
-  //UNNEEDED // Generate a member, including a default value for scalars and raw pointers.
-  //UNNEEDED void GenMember(const FieldDef &field) {
-  //UNNEEDED   if (!field.deprecated &&  // Deprecated fields won't be accessible.
-  //UNNEEDED       field.value.type.base_type != BASE_TYPE_UTYPE &&
-  //UNNEEDED       (field.value.type.base_type != BASE_TYPE_VECTOR ||
-  //UNNEEDED        field.value.type.element != BASE_TYPE_UTYPE)) {
-  //UNNEEDED     auto type = GenTypeNative(field.value.type, false, field);
-  //UNNEEDED     auto cpp_type = field.attributes.Lookup("cpp_type");
-  //UNNEEDED     auto full_type = (cpp_type ? cpp_type->constant + " *" : type + " ");
-  //UNNEEDED     code_.SetValue("FIELD_TYPE", full_type);
-  //UNNEEDED     code_.SetValue("FIELD_NAME", Name(field));
-  //UNNEEDED     code_ += "  {{FIELD_TYPE}}{{FIELD_NAME}};";
-  //UNNEEDED   }
-  //UNNEEDED }
-
-  // Generate the default constructor for this struct. Properly initialize all
-  // scalar members with default values.
-  void GenDefaultConstructor(const StructDef &struct_def) {
-    std::string initializer_list;
-    for (auto it = struct_def.fields.vec.begin();
-         it != struct_def.fields.vec.end(); ++it) {
-      const auto &field = **it;
-      if (!field.deprecated &&  // Deprecated fields won't be accessible.
-          field.value.type.base_type != BASE_TYPE_UTYPE) {
-        auto cpp_type = field.attributes.Lookup("cpp_type");
-        // Scalar types get parsed defaults, raw pointers get nullptrs.
-        if (IsScalar(field.value.type.base_type)) {
-          if (!initializer_list.empty()) { initializer_list += ",\n        "; }
-          initializer_list += Name(field);
-          initializer_list += "(" + GetDefaultScalarValue(field) + ")";
-        } else if (field.value.type.base_type == BASE_TYPE_STRUCT) {
-          if (IsStruct(field.value.type)) {
-            auto native_default = field.attributes.Lookup("native_default");
-            if (native_default) {
-              if (!initializer_list.empty()) {
-                initializer_list += ",\n        ";
-              }
-              initializer_list +=
-                  Name(field) + "(" + native_default->constant + ")";
-            }
-          }
-        } else if (cpp_type) {
-          if (!initializer_list.empty()) { initializer_list += ",\n        "; }
-          initializer_list += Name(field) + "(0)";
-        }
-      }
-    }
-    if (!initializer_list.empty()) {
-      initializer_list = "\n      : " + initializer_list;
-    }
-
-    code_.SetValue("NATIVE_NAME",
-                   NativeName(Name(struct_def), &struct_def, parser_.opts));
-    code_.SetValue("INIT_LIST", initializer_list);
-
-    code_ += "  {{NATIVE_NAME}}(){{INIT_LIST}} {";
-    code_ += "  }";
   }
 
   // Generate an accessor struct, builder structs & function for a table.
