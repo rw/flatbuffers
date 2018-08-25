@@ -549,13 +549,9 @@ class RustGenerator : public BaseGenerator {
       return GenTypeBasic(type, user_facing_type) + postfix;
     } else if (IsStruct(type)) {
       // TODO distinguish between struct and table
-      //return "&'xxx" + GenTypePointer(type, lifetime);
-      //return "&" + lifetime + GenTypePointer(type, lifetime);
       return GenTypePointer(type, lifetime);
-      //return "&" + lifetime + " " + GenTypePointer(type, lifetime) + postfix;
     } else if (type.base_type == BASE_TYPE_UNION) {
       return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
-      //return "Option<flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">>" + postfix;
     } else {
       return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
     }
