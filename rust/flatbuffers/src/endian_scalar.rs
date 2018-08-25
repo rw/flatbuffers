@@ -165,5 +165,3 @@ pub fn read_scalar<T: EndianScalar>(s: &[u8]) -> T {
 
     x.from_little_endian()
 }
-
-fn main() {}
