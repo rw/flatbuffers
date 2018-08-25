@@ -28,26 +28,27 @@ pub enum EnumInNestedNS {
   C = 2
 }
 
-const ENUM_MIN_ENUM_IN_NESTED_N_S:i8 = 0;
-const ENUM_MAX_ENUM_IN_NESTED_N_S:i8 = 2;
+const ENUM_MIN_ENUM_IN_NESTED_N_S: i8 = 0;
+const ENUM_MAX_ENUM_IN_NESTED_N_S: i8 = 2;
 
 impl<'a> flatbuffers::Follow<'a> for EnumInNestedNS {
-    type Inner = Self;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        flatbuffers::read_scalar_at::<Self>(buf, loc)
-    }
+  type Inner = Self;
+  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+    flatbuffers::read_scalar_at::<Self>(buf, loc)
+  }
 }
+
 impl flatbuffers::EndianScalar for EnumInNestedNS {
-    fn to_little_endian(self) -> Self {
-        let n = i8::to_le(self as i8);
-        let ptr = (&n) as *const i8 as *const EnumInNestedNS;
-        unsafe { *ptr }
-    }
-    fn from_little_endian(self) -> Self {
-        let n = i8::from_le(self as i8);
-        let ptr = (&n) as *const i8 as *const EnumInNestedNS;
-        unsafe { *ptr }
-    }
+  fn to_little_endian(self) -> Self {
+    let n = i8::to_le(self as i8);
+    let p = &n as *const i8 as *const EnumInNestedNS;
+    unsafe { *p }
+  }
+  fn from_little_endian(self) -> Self {
+    let n = i8::from_le(self as i8);
+    let p = &n as *const i8 as *const EnumInNestedNS;
+    unsafe { *p }
+  }
 }
 
 #[allow(non_camel_case_types)]

@@ -167,26 +167,27 @@ pub enum Color {
   Blue = 8
 }
 
-const ENUM_MIN_COLOR:i8 = 1;
-const ENUM_MAX_COLOR:i8 = 8;
+const ENUM_MIN_COLOR: i8 = 1;
+const ENUM_MAX_COLOR: i8 = 8;
 
 impl<'a> flatbuffers::Follow<'a> for Color {
-    type Inner = Self;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        flatbuffers::read_scalar_at::<Self>(buf, loc)
-    }
+  type Inner = Self;
+  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+    flatbuffers::read_scalar_at::<Self>(buf, loc)
+  }
 }
+
 impl flatbuffers::EndianScalar for Color {
-    fn to_little_endian(self) -> Self {
-        let n = i8::to_le(self as i8);
-        let ptr = (&n) as *const i8 as *const Color;
-        unsafe { *ptr }
-    }
-    fn from_little_endian(self) -> Self {
-        let n = i8::from_le(self as i8);
-        let ptr = (&n) as *const i8 as *const Color;
-        unsafe { *ptr }
-    }
+  fn to_little_endian(self) -> Self {
+    let n = i8::to_le(self as i8);
+    let p = &n as *const i8 as *const Color;
+    unsafe { *p }
+  }
+  fn from_little_endian(self) -> Self {
+    let n = i8::from_le(self as i8);
+    let p = &n as *const i8 as *const Color;
+    unsafe { *p }
+  }
 }
 
 #[allow(non_camel_case_types)]
@@ -222,26 +223,27 @@ pub enum ColorBig {
   Blue = 3
 }
 
-const ENUM_MIN_COLOR_BIG:i64 = 0;
-const ENUM_MAX_COLOR_BIG:i64 = 3;
+const ENUM_MIN_COLOR_BIG: i64 = 0;
+const ENUM_MAX_COLOR_BIG: i64 = 3;
 
 impl<'a> flatbuffers::Follow<'a> for ColorBig {
-    type Inner = Self;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        flatbuffers::read_scalar_at::<Self>(buf, loc)
-    }
+  type Inner = Self;
+  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+    flatbuffers::read_scalar_at::<Self>(buf, loc)
+  }
 }
+
 impl flatbuffers::EndianScalar for ColorBig {
-    fn to_little_endian(self) -> Self {
-        let n = i64::to_le(self as i64);
-        let ptr = (&n) as *const i64 as *const ColorBig;
-        unsafe { *ptr }
-    }
-    fn from_little_endian(self) -> Self {
-        let n = i64::from_le(self as i64);
-        let ptr = (&n) as *const i64 as *const ColorBig;
-        unsafe { *ptr }
-    }
+  fn to_little_endian(self) -> Self {
+    let n = i64::to_le(self as i64);
+    let p = &n as *const i64 as *const ColorBig;
+    unsafe { *p }
+  }
+  fn from_little_endian(self) -> Self {
+    let n = i64::from_le(self as i64);
+    let p = &n as *const i64 as *const ColorBig;
+    unsafe { *p }
+  }
 }
 
 #[allow(non_camel_case_types)]
@@ -274,26 +276,27 @@ pub enum Any {
   MyGame_Example2_Monster = 3
 }
 
-const ENUM_MIN_ANY:u8 = 0;
-const ENUM_MAX_ANY:u8 = 3;
+const ENUM_MIN_ANY: u8 = 0;
+const ENUM_MAX_ANY: u8 = 3;
 
 impl<'a> flatbuffers::Follow<'a> for Any {
-    type Inner = Self;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        flatbuffers::read_scalar_at::<Self>(buf, loc)
-    }
+  type Inner = Self;
+  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+    flatbuffers::read_scalar_at::<Self>(buf, loc)
+  }
 }
+
 impl flatbuffers::EndianScalar for Any {
-    fn to_little_endian(self) -> Self {
-        let n = u8::to_le(self as u8);
-        let ptr = (&n) as *const u8 as *const Any;
-        unsafe { *ptr }
-    }
-    fn from_little_endian(self) -> Self {
-        let n = u8::from_le(self as u8);
-        let ptr = (&n) as *const u8 as *const Any;
-        unsafe { *ptr }
-    }
+  fn to_little_endian(self) -> Self {
+    let n = u8::to_le(self as u8);
+    let p = &n as *const u8 as *const Any;
+    unsafe { *p }
+  }
+  fn from_little_endian(self) -> Self {
+    let n = u8::from_le(self as u8);
+    let p = &n as *const u8 as *const Any;
+    unsafe { *p }
+  }
 }
 
 #[allow(non_camel_case_types)]
