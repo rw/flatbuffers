@@ -155,7 +155,7 @@ FullType GetFullType(const Type &type) {
   return FullType::Bool;
 }
 
-// Determine if our Type needs a lifetime when used in Rust.
+// Determine if a Type has a lifetime template parameter when used in Rust.
 bool TypeNeedsLifetime(const Type &type) {
   switch (GetFullType(type)) {
     case FullType::Integer:
@@ -169,8 +169,8 @@ bool TypeNeedsLifetime(const Type &type) {
   }
 }
 
-// Determine if our Type needs to be copied (for endian safety) when used in
-// a Struct.
+// Determine if a Type needs to be copied (for endian safety) when used in a
+// Struct.
 bool StructMemberAccessNeedsCopy(const Type &type) {
   switch (GetFullType(type)) {
     case FullType::Integer:  // requires endian swap
@@ -269,27 +269,6 @@ class RustGenerator : public BaseGenerator {
     for (auto kw = keywords; *kw; kw++) keywords_.insert(*kw);
   }
 
-  void GenIncludeDependencies() {
-    int num_includes = 0;
-    for (auto it = parser_.native_included_files_.begin();
-         it != parser_.native_included_files_.end(); ++it) {
-      code_ += "// #include \"" + *it + "\"";
-      num_includes++;
-    }
-    for (auto it = parser_.included_files_.begin();
-         it != parser_.included_files_.end(); ++it) {
-      if (it->second.empty()) continue;
-      auto noext = flatbuffers::StripExtension(it->second);
-      auto basename = flatbuffers::StripPath(noext);
-
-      code_ += "// #include \"" + parser_.opts.include_prefix +
-               (parser_.opts.keep_include_path ? noext : basename) +
-               "_generated.rs\"";
-      num_includes++;
-    }
-    if (num_includes) code_ += "";
-  }
-
   std::string EscapeKeyword(const std::string &name) const {
     return keywords_.find(name) == keywords_.end() ? name : name + "_";
   }
@@ -314,8 +293,6 @@ class RustGenerator : public BaseGenerator {
   // structs, and tables) and output them to a single file.
   bool generate() {
     code_.Clear();
-
-    if (parser_.opts.include_dependence_headers) { GenIncludeDependencies(); }
 
     assert(!cur_name_space_);
 
@@ -1717,3 +1694,5 @@ std::string RustMakeRule(const Parser &parser, const std::string &path,
 }
 
 }  // namespace flatbuffers
+
+// TODO(rw): generated code should import other generated files
