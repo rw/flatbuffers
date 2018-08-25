@@ -1,5 +1,6 @@
 use std::marker::PhantomData;
 use std::mem::size_of;
+use std::slice::from_raw_parts;
 use std::str::from_utf8_unchecked;
 
 use follow::Follow;
@@ -70,3 +71,46 @@ impl<'a> Follow<'a> for &'a str {
         s
     }
 }
+
+/// Implement direct slice access to structs (they are endian-safe because we
+/// use accessors to get their elements).
+impl<'a, T: GeneratedStruct + 'a> Follow<'a> for SliceOfGeneratedStruct<T> {
+    type Inner = &'a [T];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let sz = size_of::<T>();
+        assert!(sz > 0);
+        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
+        let ptr = data_buf.as_ptr() as *const T;
+        let s: &'a [T] = unsafe { from_raw_parts(ptr, len) };
+        s
+    }
+}
+
+fn follow_slice_helper<T>(buf: &[u8], loc: usize) -> &[T] {
+    let sz = size_of::<T>();
+    debug_assert!(sz > 0);
+    let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+    let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
+    let ptr = data_buf.as_ptr() as *const T;
+    let s: &[T] = unsafe { from_raw_parts(ptr, len) };
+    s
+}
+
+/// Implement direct slice access if the host is little-endian.
+#[cfg(target_endian = "little")]
+impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
+    type Inner = &'a [T];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        follow_slice_helper::<T>(buf, loc)
+    }
+}
+
+/// Implement Follow for all possible Vectors that have Follow-able elements.
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for Vector<'a, T> {
+    type Inner = Vector<'a, T>;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        Vector::new(buf, loc)
+    }
+}
+

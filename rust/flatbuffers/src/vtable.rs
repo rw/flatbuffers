@@ -1,5 +1,6 @@
-use primitives::*;
 use endian_scalar::read_scalar_at;
+use follow::Follow;
+use primitives::*;
 
 #[derive(Debug)]
 pub struct VTable<'a> {
@@ -64,4 +65,11 @@ pub fn field_offset_to_field_index(field_o: VOffsetT) -> VOffsetT {
     debug_assert!(field_o >= 2);
     let fixed_fields = 2; // VTable size and Object Size.
     (field_o / (SIZE_VOFFSET as VOffsetT)) - fixed_fields
+}
+
+impl<'a> Follow<'a> for VTable<'a> {
+    type Inner = VTable<'a>;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        VTable::init(buf, loc)
+    }
 }

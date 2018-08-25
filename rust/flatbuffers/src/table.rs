@@ -28,3 +28,29 @@ impl<'a> Table<'a> {
         Some(<T>::follow(self.buf, self.loc + o))
     }
 }
+
+impl<'a> Follow<'a> for Table<'a> {
+    type Inner = Table<'a>;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        Table { buf: buf, loc: loc }
+    }
+}
+
+pub fn get_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
+    <ForwardsUOffset<T>>::follow(data, 0)
+}
+pub fn get_size_prefixed_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
+    <SkipSizePrefix<ForwardsUOffset<T>>>::follow(data, 0)
+}
+pub fn buffer_has_identifier(data: &[u8], ident: &str, size_prefixed: bool) -> bool {
+    assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
+
+    let got = if size_prefixed {
+        <SkipSizePrefix<SkipRootOffset<FileIdentifier>>>::follow(data, 0)
+    } else {
+        <SkipRootOffset<FileIdentifier>>::follow(data, 0)
+    };
+
+    ident.as_bytes() == got
+}
+

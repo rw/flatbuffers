@@ -1,4 +1,5 @@
 use std::marker::PhantomData;
+use std::mem::size_of;
 use std::ops::Deref;
 
 use endian_scalar::*;
@@ -109,6 +110,139 @@ impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
         let slice = &buf[loc..loc + SIZE_SOFFSET];
         let off = read_scalar::<SOffsetT>(slice);
         T::follow(buf, (loc as SOffsetT - off) as usize)
+    }
+}
+
+impl<'a, T: Follow<'a>> Follow<'a> for ForwardsUOffset<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let slice = &buf[loc..loc + SIZE_UOFFSET];
+        let off = read_scalar::<u32>(slice) as usize;
+        T::follow(buf, loc + off)
+    }
+}
+
+pub struct SkipSizePrefix<T>(PhantomData<T>);
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipSizePrefix<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        T::follow(buf, loc + SIZE_SIZEPREFIX)
+    }
+}
+
+pub struct SkipRootOffset<T>(PhantomData<T>);
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipRootOffset<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        T::follow(buf, loc + SIZE_UOFFSET)
+    }
+}
+
+pub struct FileIdentifier;
+impl<'a> Follow<'a> for FileIdentifier {
+    type Inner = &'a [u8];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        &buf[loc..loc + FILE_IDENTIFIER_LENGTH]
+    }
+}
+
+pub struct SkipFileIdentifier<T>(PhantomData<T>);
+impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
+    type Inner = T::Inner;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        T::follow(buf, loc + FILE_IDENTIFIER_LENGTH)
+    }
+}
+
+// Follow trait impls for primitive types.
+//
+// Ideally, these would be implemented as a single impl using trait bounds on
+// EndianScalar, but implementing Follow that way causes a conflict with
+// other impls:
+//error[E0119]: conflicting implementations of trait `Follow<'_>` for type `&_`:
+//     |
+//     | impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
+//     | ------------------------------------------------- first implementation here
+//...
+//     | impl<'a, T: EndianScalar> Follow<'a> for T {
+//     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `&_`
+//     |
+
+impl<'a> Follow<'a> for bool {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u8 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u16 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u32 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for u64 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i8 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i16 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i32 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for i64 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for f32 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+impl<'a> Follow<'a> for f64 {
+    type Inner = Self;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        read_scalar_at::<Self>(buf, loc)
+    }
+}
+
+
+impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
+    type Inner = &'a T;
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let sz = size_of::<T>();
+        let buf = &buf[loc..loc + sz];
+        let ptr = buf.as_ptr() as *const T;
+        unsafe { &*ptr }
     }
 }
 

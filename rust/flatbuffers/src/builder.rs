@@ -3,7 +3,6 @@ use std::marker::PhantomData;
 use std::mem::size_of;
 use std::slice::from_raw_parts;
 
-use primitives::*;
 pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
 pub use primitives::*;
 pub use table::*;
