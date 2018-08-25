@@ -462,7 +462,7 @@ class RustGenerator : public BaseGenerator {
     code_ += text + "\\";
   }
 
-  // Return a C++ type from the table in idl.h
+  // Return a Rust type from the table in idl.h
   std::string GenTypeBasic(const Type &type, bool user_facing_type) const {
     static const char *ctypename[] = {
     // clang-format off
@@ -559,59 +559,6 @@ class RustGenerator : public BaseGenerator {
       //return "Option<flatbuffers::LabeledUOffsetT<" + GenTypePointer(type, lifetime) + ">>" + postfix;
     } else {
       return "flatbuffers::Offset<" + GenTypePointer(type, lifetime) + ">" + postfix;
-    }
-  }
-
-  static std::string NativeName(const std::string &name, const StructDef *sd,
-                                const IDLOptions &opts) {
-    return sd && !sd->fixed ? opts.object_prefix + name + opts.object_suffix
-                            : name;
-  }
-
-  enum class ContainerType { None, Vector, Enum, Union };
-  ContainerType GetContainerType(const Type &type) const {
-    if (type.base_type == BASE_TYPE_VECTOR) {
-      return ContainerType::Vector;
-    } else if (type.enum_def != nullptr) {
-      if (type.enum_def->is_union) {
-        return ContainerType::Union;
-      } else {
-        return ContainerType::Enum;
-      }
-    } else {
-      return ContainerType::None;
-    }
-  }
-
-  enum class ElementType { Struct, Table, Number, EnumValue, Bool, String, UnionMember, UnionEnumValue }; // TODO: bytestring
-  ElementType GetElementType(const Type &origin_type) const {
-    Type type = origin_type;
-    if (GetContainerType(origin_type) == ContainerType::Vector) {
-        type = origin_type.VectorType();
-    }
-
-    if (type.base_type == BASE_TYPE_STRUCT) {
-      if (type.struct_def->fixed) {
-        return ElementType::Struct;
-      } else {
-        return ElementType::Table;
-      }
-    } else if (type.base_type == BASE_TYPE_STRING) {
-      return ElementType::String;
-    } else if (type.enum_def && !type.enum_def->is_union) {
-      return ElementType::EnumValue;
-    } else if (type.enum_def && type.enum_def->is_union && type.base_type == BASE_TYPE_UNION) {
-      return ElementType::UnionMember;
-    } else if (type.enum_def && type.enum_def->is_union && type.base_type == BASE_TYPE_UTYPE) {
-      return ElementType::UnionEnumValue;
-    } else if (type.base_type == BASE_TYPE_UNION) {
-      assert(false);
-    } else if (type.base_type == BASE_TYPE_BOOL) {
-      return ElementType::Bool;
-    } else if (IsScalar(type.base_type)) {
-      return ElementType::Number;
-    } else {
-      assert(false);
     }
   }
 
@@ -892,7 +839,7 @@ class RustGenerator : public BaseGenerator {
 
   // Note: we could make all inputs be an Option, as well as all outputs.
   // But the UX of Flatbuffers is that the user doesn't get to know if the value is default or not.
-  std::string GenBuilderArgsDefnType(const FieldDef &field, const std::string lifetime) {
+  std::string TableBuilderArgsDefnType(const FieldDef &field, const std::string lifetime) {
     //assert(false, "note to self: use real lifetimes for written objects--just give the returned offsets a lifetime compatible with the builder, not the original thing. then the offset can be dereferenced to read (or mutate?) the original object.");
     const Type& type = field.value.type;
 
@@ -955,12 +902,11 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  std::string GenBuilderArgsDefaultValue(const FieldDef &field) {
+  std::string TableBuilderArgsDefaultValue(const FieldDef &field) {
       return GetDefaultScalarValue(field);
   }
-  std::string GenBuilderAddFuncDefaultValue(const FieldDef &field) {
+  std::string TableBuilderAddFuncDefaultValue(const FieldDef &field) {
     switch (GetFullType(field.value.type)) {
-
       case FullType::UnionKey:
       case FullType::EnumKey: {
         const std::string basetype = GenTypeBasic(field.value.type, false);
@@ -971,7 +917,7 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  std::string GenBuilderArgsAddFuncType(const FieldDef &field, const std::string lifetime) {
+  std::string TableBuilderArgsAddFuncType(const FieldDef &field, const std::string lifetime) {
     const Type& type = field.value.type;
 
     switch (GetFullType(field.value.type)) {
@@ -1036,7 +982,7 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  std::string GenBuilderArgsAddFuncBody(const FieldDef &field) {
+  std::string TableBuilderArgsAddFuncBody(const FieldDef &field) {
     const Type& type = field.value.type;
 
     switch (GetFullType(field.value.type)) {
@@ -1079,7 +1025,7 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
-  std::string GenBuilderArgsAddFuncFieldCast(const FieldDef &field) {
+  std::string TableBuilderArgsAddFuncFieldCast(const FieldDef &field) {
     const Type& type = field.value.type;
 
     const auto ft = GetFullType(type);
@@ -1428,7 +1374,7 @@ class RustGenerator : public BaseGenerator {
       if (!field.deprecated) {
         // TODO: required-ness
         code_.SetValue("PARAM_NAME", Name(field));
-        code_.SetValue("PARAM_TYPE", GenBuilderArgsDefnType(field, "'a "));
+        code_.SetValue("PARAM_TYPE", TableBuilderArgsDefnType(field, "'a "));
         code_ += "    pub {{PARAM_NAME}}: {{PARAM_TYPE}},";
       }
     }
@@ -1443,7 +1389,7 @@ class RustGenerator : public BaseGenerator {
         it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       if (!field.deprecated) {
-        code_.SetValue("PARAM_VALUE", GenBuilderArgsDefaultValue(field));
+        code_.SetValue("PARAM_VALUE", TableBuilderArgsDefaultValue(field));
         //code_.SetValue("PARAM_VALUE", "None");
         if (field.required) {
           code_ += " // required";
@@ -1485,13 +1431,13 @@ class RustGenerator : public BaseGenerator {
         //   fbb_.AddElement::<type>(offset, name, default);
         // }
         code_.SetValue("FIELD_NAME", Name(field));
-        code_.SetValue("FIELD_CAST", GenBuilderArgsAddFuncFieldCast(field));
+        code_.SetValue("FIELD_CAST", TableBuilderArgsAddFuncFieldCast(field));
         code_.SetValue("FIELD_OFFSET", Name(struct_def) + "::" + offset);
-        code_.SetValue("FIELD_TYPE", GenBuilderArgsAddFuncType(field, "'b "));
-        code_.SetValue("FUNC_BODY", GenBuilderArgsAddFuncBody(field));
+        code_.SetValue("FIELD_TYPE", TableBuilderArgsAddFuncType(field, "'b "));
+        code_.SetValue("FUNC_BODY", TableBuilderArgsAddFuncBody(field));
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         if (is_scalar) {
-          code_.SetValue("FIELD_DEFAULT_VALUE", GenBuilderAddFuncDefaultValue(field));
+          code_.SetValue("FIELD_DEFAULT_VALUE", TableBuilderAddFuncDefaultValue(field));
           code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, {{FIELD_DEFAULT_VALUE}});";
         } else {
           code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}});";
@@ -1666,7 +1612,7 @@ class RustGenerator : public BaseGenerator {
       const auto &field = **it;
 
       //auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
-      auto field_type = GenBuilderArgsAddFuncType(field, "'a");
+      auto field_type = TableBuilderArgsAddFuncType(field, "'a");
       //auto is_scalar = IsScalar(field.value.type.base_type) &&
       //                 !IsFloat(field.value.type.base_type);
       auto member = "self." + Name(field) + "_";
