@@ -155,37 +155,6 @@ FullType GetFullType(const Type &type) {
   return FullType::Bool;
 }
 
-// Determine if a Type has a lifetime template parameter when used in Rust.
-bool TypeNeedsLifetime(const Type &type) {
-  switch (GetFullType(type)) {
-    case FullType::Integer:
-    case FullType::Float:
-    case FullType::Bool:
-    case FullType::Table:
-    case FullType::EnumKey:
-    case FullType::UnionKey:
-    case FullType::Struct: { return false; }
-    default: { return true; }
-  }
-}
-
-// Determine if a Type needs to be copied (for endian safety) when used in a
-// Struct.
-bool StructMemberAccessNeedsCopy(const Type &type) {
-  switch (GetFullType(type)) {
-    case FullType::Integer:  // requires endian swap
-    case FullType::Float: // requires endian swap
-    case FullType::Bool: // no endian-swap, but copy for consistency
-    case FullType::EnumKey: { return true; } // requires endian swap
-    case FullType::Struct: { return false; } // no endian swap
-    default: {
-      // logic error: no other types can be struct members.
-      FLATBUFFERS_ASSERT(false);
-      return false; // only to satisfy compiler's return analysis
-    }
-  }
-}
-
 namespace rust {
 
 class RustGenerator : public BaseGenerator {
@@ -269,26 +238,6 @@ class RustGenerator : public BaseGenerator {
     for (auto kw = keywords; *kw; kw++) keywords_.insert(*kw);
   }
 
-  std::string EscapeKeyword(const std::string &name) const {
-    return keywords_.find(name) == keywords_.end() ? name : name + "_";
-  }
-
-  std::string Name(const Definition &def) const {
-    return EscapeKeyword(def.name);
-  }
-
-  std::string Name(const EnumVal &ev) const { return EscapeKeyword(ev.name); }
-
-  std::string WrapInNameSpace(const Definition &def) const {
-    return WrapInNameSpace(def.defined_namespace, Name(def));
-  }
-  std::string WrapInNameSpace(const Namespace *ns,
-                              const std::string &name) const {
-    if (CurrentNameSpace() == ns) return name;
-    std::string prefix = GetRelativeNamespaceTraversal(CurrentNameSpace(), ns);
-    return prefix + name;
-  }
-
   // Iterate through all definitions we haven't generated code for (enums,
   // structs, and tables) and output them to a single file.
   bool generate() {
@@ -357,6 +306,93 @@ class RustGenerator : public BaseGenerator {
   const Namespace *cur_name_space_;
 
   const Namespace *CurrentNameSpace() const { return cur_name_space_; }
+
+  // Determine if a Type has a lifetime template parameter when used in Rust.
+  bool TypeNeedsLifetime(const Type &type) const {
+    switch (GetFullType(type)) {
+      case FullType::Integer:
+      case FullType::Float:
+      case FullType::Bool:
+      case FullType::Table:
+      case FullType::EnumKey:
+      case FullType::UnionKey:
+      case FullType::Struct: { return false; }
+      default: { return true; }
+    }
+  }
+
+  // Determine if a Type needs to be copied (for endian safety) when used in a
+  // Struct.
+  bool StructMemberAccessNeedsCopy(const Type &type) const {
+    switch (GetFullType(type)) {
+      case FullType::Integer:  // requires endian swap
+      case FullType::Float: // requires endian swap
+      case FullType::Bool: // no endian-swap, but copy for consistency
+      case FullType::EnumKey: { return true; } // requires endian swap
+      case FullType::Struct: { return false; } // no endian swap
+      default: {
+        // logic error: no other types can be struct members.
+        FLATBUFFERS_ASSERT(false);
+        return false; // only to satisfy compiler's return analysis
+      }
+    }
+  }
+
+  std::string EscapeKeyword(const std::string &name) const {
+    return keywords_.find(name) == keywords_.end() ? name : name + "_";
+  }
+
+  std::string Name(const Definition &def) const {
+    return EscapeKeyword(def.name);
+  }
+
+  std::string Name(const EnumVal &ev) const { return EscapeKeyword(ev.name); }
+
+  std::string WrapInNameSpace(const Definition &def) const {
+    return WrapInNameSpace(def.defined_namespace, Name(def));
+  }
+  std::string WrapInNameSpace(const Namespace *ns,
+                              const std::string &name) const {
+    if (CurrentNameSpace() == ns) return name;
+    std::string prefix = GetRelativeNamespaceTraversal(CurrentNameSpace(), ns);
+    return prefix + name;
+  }
+
+  std::string GetRelativeNamespaceTraversal(const Namespace *src,
+                                            const Namespace *dst) const {
+    // calculate the path needed to reference dst from src.
+    // example: f(A::B::C, A::B::C) -> n/a
+    // example: f(A::B::C, A::B)    -> super::
+    // example: f(A::B::C, A::B::D) -> super::D
+    // example: f(A::B::C, A)       -> super::super::
+    // example: f(A::B::C, D)       -> super::super::super::D
+    // example: f(A::B::C, D::E)    -> super::super::super::D::E
+    // example: f(A, D::E)          -> super::D::E
+    // does not include leaf object (typically a struct type).
+
+    size_t i = 0;
+    std::stringstream stream;
+
+    auto s = src->components.begin();
+    auto d = dst->components.begin();
+    while(true) {
+      if (s == src->components.end()) { break; }
+      if (d == dst->components.end()) { break; }
+      if (*s != *d) { break; }
+      s++;
+      d++;
+      i++;
+    }
+
+    for (; s != src->components.end(); s++) {
+      stream << "super::";
+    }
+    for (; d != dst->components.end(); d++) {
+      stream << MakeSnakeCase(*d) + "::";
+    }
+    return stream.str();
+  }
+
 
   // Generate a comment from the schema.
   void GenComment(const std::vector<std::string> &dc, const char *prefix = "") {
@@ -679,41 +715,6 @@ class RustGenerator : public BaseGenerator {
 
   std::string GenFieldOffsetName(const FieldDef &field) {
     return "VT_" + MakeUpper(Name(field));
-  }
-
-  std::string GetRelativeNamespaceTraversal(const Namespace *src,
-                                            const Namespace *dst) const {
-    // calculate the path needed to reference dst from src.
-    // example: f(A::B::C, A::B::C) -> n/a
-    // example: f(A::B::C, A::B)    -> super::
-    // example: f(A::B::C, A::B::D) -> super::D
-    // example: f(A::B::C, A)       -> super::super::
-    // example: f(A::B::C, D)       -> super::super::super::D
-    // example: f(A::B::C, D::E)    -> super::super::super::D::E
-    // example: f(A, D::E)          -> super::D::E
-    // does not include leaf object (typically a struct type).
-
-    size_t i = 0;
-    std::stringstream stream;
-
-    auto s = src->components.begin();
-    auto d = dst->components.begin();
-    while(true) {
-      if (s == src->components.end()) { break; }
-      if (d == dst->components.end()) { break; }
-      if (*s != *d) { break; }
-      s++;
-      d++;
-      i++;
-    }
-
-    for (; s != src->components.end(); s++) {
-      stream << "super::";
-    }
-    for (; d != dst->components.end(); d++) {
-      stream << MakeSnakeCase(*d) + "::";
-    }
-    return stream.str();
   }
 
   std::string GetDefaultConstant(const FieldDef &field) {
