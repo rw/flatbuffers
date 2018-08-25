@@ -161,7 +161,6 @@ impl<'a: 'b, 'b> TableInNestedNSBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // TableInNestedNSBuilder &operator=(const TableInNestedNSBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<TableInNestedNS<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())

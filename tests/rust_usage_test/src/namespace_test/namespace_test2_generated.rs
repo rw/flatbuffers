@@ -97,7 +97,6 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // TableInFirstNSBuilder &operator=(const TableInFirstNSBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<TableInFirstNS<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -170,7 +169,6 @@ impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
       start_: start,
     }
   }
-  // SecondTableInABuilder &operator=(const SecondTableInABuilder &);
   pub fn finish(self) -> flatbuffers::Offset<SecondTableInA<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -267,7 +265,6 @@ impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // TableInCBuilder &operator=(const TableInCBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<TableInC<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())

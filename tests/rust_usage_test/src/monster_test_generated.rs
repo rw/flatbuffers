@@ -63,7 +63,6 @@ impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // InParentNamespaceBuilder &operator=(const InParentNamespaceBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<InParentNamespace<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -135,7 +134,6 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // MonsterBuilder &operator=(const MonsterBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -341,7 +339,7 @@ impl Test {
   }
 }
 
-// Size 4, aligned to 16
+// Size STRUCT_BYTE_SIZE, aligned to 16
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {
@@ -392,7 +390,7 @@ impl Vec3 {
   }
 }
 
-// Size 32, aligned to 4
+// Size STRUCT_BYTE_SIZE, aligned to 4
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Ability {
@@ -490,7 +488,6 @@ impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // TestSimpleTableWithEnumBuilder &operator=(const TestSimpleTableWithEnumBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<TestSimpleTableWithEnum<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -585,7 +582,6 @@ impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // StatBuilder &operator=(const StatBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<Stat<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -658,7 +654,6 @@ impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // ReferrableBuilder &operator=(const ReferrableBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<Referrable<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -1213,10 +1208,9 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // MonsterBuilder &operator=(const MonsterBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<Monster<'a>> {
     let o = self.fbb_.end_table(self.start_);
-    self.fbb_.required(o, Monster::VT_NAME, "name");
+    self.fbb_.required(o, Monster::VT_NAME,"name");
     flatbuffers::Offset::new(o.value())
   }
 }
@@ -1408,7 +1402,6 @@ impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
       start_: start,
     }
   }
-  // TypeAliasesBuilder &operator=(const TypeAliasesBuilder &);
   pub fn finish(self) -> flatbuffers::Offset<TypeAliases<'a>> {
     let o = self.fbb_.end_table(self.start_);
     flatbuffers::Offset::new(o.value())
@@ -1447,7 +1440,7 @@ pub fn finish_monster_buffer<'a, 'b>(
 }
 
 #[inline]
-pub fn finish_size_prefixed_monster_buffer<'a, 'b>(fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,root: flatbuffers::Offset<Monster<'a>>) {
+pub fn finish_size_prefixed_monster_buffer<'a, 'b>(fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>, root: flatbuffers::Offset<Monster<'a>>) {
   fbb.finish_size_prefixed(root, Some(MONSTER_IDENTIFIER));
 }
 }  // pub mod Example

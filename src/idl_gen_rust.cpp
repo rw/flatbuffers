@@ -1393,9 +1393,6 @@ class RustGenerator : public BaseGenerator {
   }
 
   void GenRootTableFuncs(const StructDef &struct_def) {
-    if (!(GetFullType(struct_def))) {
-      FLATBUFFERS_ASSERT(false);
-    }
     auto name = Name(struct_def);
 
     code_.SetValue("STRUCT_NAME", name);
@@ -1412,9 +1409,10 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
 
     code_ += "#[inline]";
-    code_ += "pub fn get_size_prefixed_root_as_{{STRUCT_NAME_SNAKECASE}}\\";
-    code_ += "<'a>(buf: &'a [u8]) -> {{STRUCT_NAME}}<'a> {";
-    code_ += "  flatbuffers::get_size_prefixed_root::<{{STRUCT_NAME}}<'a>>(buf)";
+    code_ += "pub fn get_size_prefixed_root_as_{{STRUCT_NAME_SNAKECASE}}"
+             "<'a>(buf: &'a [u8]) -> {{STRUCT_NAME}}<'a> {";
+    code_ += "  flatbuffers::get_size_prefixed_root::<{{STRUCT_NAME}}<'a>>"
+             "(buf)";
     code_ += "}";
     code_ += "";
 
@@ -1462,10 +1460,10 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
     code_ += "";
     code_ += "#[inline]";
-    code_ += "pub fn finish_size_prefixed_{{STRUCT_NAME_SNAKECASE}}_buffer\\";
-    code_ += "<'a, 'b>(\\";
-    code_ += "fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,\\";
-    code_ += "root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
+    code_ += "pub fn finish_size_prefixed_{{STRUCT_NAME_SNAKECASE}}_buffer"
+             "<'a, 'b>("
+             "fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>, "
+             "root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
     if (parser_.file_identifier_.length()) {
       code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
     } else {
