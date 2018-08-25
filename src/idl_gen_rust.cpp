@@ -470,7 +470,7 @@ class RustGenerator : public BaseGenerator {
 
   // Return a C++ type for any type (scalar/pointer) specifically for
   // using a flatbuffer.
-  std::string GenTypeGet(const Type &type, const char *afterbasic,
+  std::string GetTypeGet(const Type &type, const char *afterbasic,
                          const char *beforeptr, const char *afterptr,
                          bool user_facing_type) {
     if (IsScalar(type.base_type)) {
@@ -1360,7 +1360,7 @@ class RustGenerator : public BaseGenerator {
       }
     }
 
-    // Builder constructor
+    // Struct initializer (all fields required);
     code_ +=
         "  pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> "
         "{{STRUCT_NAME}}Builder<'a, 'b> {";
@@ -1372,12 +1372,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "    }";
     code_ += "  }";
 
-    // Assignment operator;
-    code_ +=
-        "  // {{STRUCT_NAME}}Builder &operator="
-        "(const {{STRUCT_NAME}}Builder &);";
-
-    // Finish() function.
+    // finish() function.
     code_ += "  pub fn finish(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
 
@@ -1387,7 +1382,8 @@ class RustGenerator : public BaseGenerator {
       if (!field.deprecated && field.required) {
         code_.SetValue("FIELD_NAME", MakeSnakeCase(Name(field)));
         code_.SetValue("OFFSET_NAME", GenFieldOffsetName(field));
-        code_ += "    self.fbb_.required(o, {{STRUCT_NAME}}::{{OFFSET_NAME}}, \"{{FIELD_NAME}}\");";
+        code_ += "    self.fbb_.required(o, {{STRUCT_NAME}}::{{OFFSET_NAME}},"
+                 "\"{{FIELD_NAME}}\");";
       }
     }
     code_ += "    flatbuffers::Offset::new(o.value())";
@@ -1397,9 +1393,10 @@ class RustGenerator : public BaseGenerator {
   }
 
   void GenRootTableFuncs(const StructDef &struct_def) {
-    FLATBUFFERS_ASSERT(GetFullType(struct_def) == FullType::Table);
+    if (!(GetFullType(struct_def))) {
+      FLATBUFFERS_ASSERT(false);
+    }
     auto name = Name(struct_def);
-    //auto qualified_name = cur_name_space_->GetFullyQualifiedName(name);
 
     code_.SetValue("STRUCT_NAME", name);
     code_.SetValue("STRUCT_NAME_SNAKECASE", MakeSnakeCase(name));
@@ -1513,8 +1510,10 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "// Size {{STRUCT_BYTE_SIZE}}, aligned to {{ALIGN}}";
     code_ += "#[repr(C, packed)]";
+
     // PartialEq is useful to derive because we can correctly compare structs
-    // by just using their inline data.
+    // for equality by just comparing their underlying byte data. This doesn't
+    // hold for PartialOrd/Ord.
     code_ += "#[derive(Clone, Copy, Debug, PartialEq)]";
     code_ += "pub struct {{STRUCT_NAME}} {";
 
@@ -1522,7 +1521,7 @@ class RustGenerator : public BaseGenerator {
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
-      code_.SetValue("FIELD_TYPE", GenTypeGet(field.value.type, "", "", "", true));
+      code_.SetValue("FIELD_TYPE", GetTypeGet(field.value.type, "", "", "", true));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
@@ -1553,7 +1552,7 @@ class RustGenerator : public BaseGenerator {
       const auto reference = StructMemberAccessNeedsCopy(field.value.type) ? "" : "&'a ";
       const auto arg_name = "_" + Name(field);
       const auto arg_type = reference + 
-          GenTypeGet(field.value.type, "", "", "", true);
+          GetTypeGet(field.value.type, "", "", "", true);
 
       if (it != struct_def.fields.vec.begin()) {
         arg_list += ", ";
@@ -1587,16 +1586,12 @@ class RustGenerator : public BaseGenerator {
     code_ += "    }";
     code_ += "  }";
 
-    // Generate accessor methods of the form:
-    // type name() const { return flatbuffers::endian_scalar(name_); }
+    // Generate accessor methods for the Struct.
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
 
-      //auto field_type = GenTypeGet(field.value.type, " ", "&", "", true);
       auto field_type = TableBuilderArgsAddFuncType(field, "'a");
-      //auto is_scalar = IsScalar(field.value.type.base_type) &&
-      //                 !IsFloat(field.value.type.base_type);
       auto member = "self." + Name(field) + "_";
       auto value = StructMemberAccessNeedsCopy(field.value.type) ?
         member + ".from_little_endian()" : member;
@@ -1619,7 +1614,7 @@ class RustGenerator : public BaseGenerator {
         auto type = GenTypeBasic(field.value.type, false);
         if (parser_.opts.scoped_enums && field.value.type.enum_def &&
             IsScalar(field.value.type.base_type)) {
-          type = GenTypeGet(field.value.type, " ", "const ", " *", true);
+          type = GetTypeGet(field.value.type, " ", "const ", " *", true);
         }
 
         code_.SetValue("KEY_TYPE", type);
@@ -1629,15 +1624,13 @@ class RustGenerator : public BaseGenerator {
         code_ += "  }";
       }
     }
-    code_.SetValue("NATIVE_NAME", Name(struct_def));
     code_ += "}";
-
-    code_.SetValue("STRUCT_BYTE_SIZE", NumToString(struct_def.bytesize));
     code_ += "";
   }
 
-  // Set up the correct namespace. Only open a namespace if the existing one is
-  // different (closing/opening only what is necessary).
+  // Set up the correct namespace. This opens a namespace if the current
+  // namespace is different from the target namespace. This function
+  // closes and opens the namespaces only as necessary.
   //
   // The file must start and end with an empty (or null) namespace so that
   // namespaces are properly opened and closed.
@@ -1708,4 +1701,5 @@ std::string RustMakeRule(const Parser &parser, const std::string &path,
 
 }  // namespace flatbuffers
 
-// TODO(rw): generated code should import other generated files
+// TODO(rw): Generated code should import other generated files.
+// TODO(rw): Generated code should indent according to nesting level.
