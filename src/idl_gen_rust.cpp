@@ -288,10 +288,6 @@ class RustGenerator : public BaseGenerator {
     return keywords_.find(name) == keywords_.end() ? name : name + "_";
   }
 
-  std::string EscapeKeywordPath(const std::string &name) const {
-    return keywords_.find(name) == keywords_.end() ? name : name + "::";
-  }
-
   std::string Name(const Definition &def) const {
     return EscapeKeyword(def.name);
   }
@@ -299,8 +295,7 @@ class RustGenerator : public BaseGenerator {
   std::string Name(const EnumVal &ev) const { return EscapeKeyword(ev.name); }
 
   std::string WrapInNameSpace(const Definition &def) const {
-    auto a = Name(def);
-    return WrapInNameSpace(def.defined_namespace, a);
+    return WrapInNameSpace(def.defined_namespace, Name(def));
   }
   std::string WrapInNameSpace(const Namespace *ns,
                               const std::string &name) const {
