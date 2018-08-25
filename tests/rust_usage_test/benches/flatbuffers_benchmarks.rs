@@ -27,6 +27,10 @@ fn create_canonical_buffer(bench: &mut Bencher) {
     create_serialized_example_with_generated_code(&mut builder);
     let n = builder.finished_bytes().len() as u64;
     builder.reset();
+    for _ in 0..100 {
+        create_serialized_example_with_generated_code(&mut builder);
+        builder.reset();
+    }
 
     bench.iter(|| {
         create_serialized_example_with_generated_code(&mut builder);
