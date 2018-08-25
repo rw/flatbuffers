@@ -60,7 +60,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         let inventory = builder.create_vector_of_scalars::<u8>(&vec![0, 1, 2, 3, 4][..]);
         let test4 = builder.create_vector_of_structs(&vec![my_game::example::Test::new(10, 20),
                                                            my_game::example::Test::new(30, 40)][..]);
-        let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, my_game::example::Test::new(5i16, 6i8));
+        let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
         let args = my_game::example::MonsterArgs{
             hp: 80,
             mana: 150,
@@ -88,7 +88,7 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
         builder.push_slot_offset_relative(my_game::example::Monster::VT_NAME, name);
         builder.end_table(table_start)
     };
-    let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, my_game::example::Test::new(5i16, 6i8));
+    let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
     let inv = builder.create_vector_of_scalars::<u8>(&vec![0, 1, 2, 3, 4]);
 
     let test4 = builder.create_vector_of_structs(&vec![my_game::example::Test::new(10, 20),
@@ -277,12 +277,12 @@ mod roundtrip_generated_code {
             name: Some(name),
             pos: Some(&my_game::example::Vec3::new(1.0, 2.0, 3.0, 4.0,
                                                    my_game::example::Color::Green,
-                                                   my_game::example::Test::new(98, 99))),
+                                                   &my_game::example::Test::new(98, 99))),
             ..Default::default()
         });
         assert_eq!(m.pos(), Some(&my_game::example::Vec3::new(1.0, 2.0, 3.0, 4.0,
                                                               my_game::example::Color::Green,
-                                                              my_game::example::Test::new(98, 99))));
+                                                              &my_game::example::Test::new(98, 99))));
     }
     #[test]
     fn struct_default() {
@@ -558,7 +558,7 @@ mod generated_code_alignment_and_padding {
                 name: Some(name),
                 pos: Some(&my_game::example::Vec3::new(1.0, 2.0, 3.0, 4.0,
                                                        my_game::example::Color::Green,
-                                                       my_game::example::Test::new(98, 99))),
+                                                       &my_game::example::Test::new(98, 99))),
                                                        ..Default::default()});
             my_game::example::finish_monster_buffer(b, mon);
         }

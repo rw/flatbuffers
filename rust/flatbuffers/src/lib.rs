@@ -89,7 +89,19 @@ impl EndianScalar for i64 {
 }
 impl EndianScalar for f32 {
     fn to_little_endian(self) -> Self {
-        self
+        #[cfg(target_endian = "little")]
+        {
+            self
+        }
+        #[cfg(not(target_endian = "little"))]
+        {
+            let mut ret = self.clone();
+
+            let ptr = &mut ret as *mut u32;
+            unsafe { *ptr }.byte_swap();
+
+            ret
+        }
     }
     fn from_little_endian(self) -> Self {
         self
@@ -104,7 +116,7 @@ impl EndianScalar for f64 {
     }
 }
 
-pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = ((1u64 << 32) - 1) as usize;
+pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = (2u64 << 31) as usize;
 
 pub const FILE_IDENTIFIER_LENGTH: usize = 4;
 
@@ -684,12 +696,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         //self.track_field(slotoff, off);
         //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
     }
-    pub fn push_slot_scalar<T: EndianScalar + std::fmt::Display>(
-        &mut self,
-        slotoff: VOffsetT,
-        x: T,
-        default: T,
-    ) {
+    pub fn push_slot_scalar<T: EndianScalar>( &mut self, slotoff: VOffsetT, x: T, default: T) {
         if x != default {
             let off = self.push_element_scalar(x);
             self.track_field(slotoff, off);
@@ -697,11 +704,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     pub fn make_space(&mut self, want: usize) -> usize {
-        self.ensure_space(want);
+        self.ensure_capacity(want);
         self.cur_idx -= want;
         self.cur_idx
     }
-    pub fn ensure_space(&mut self, want: usize) -> usize {
+    pub fn ensure_capacity(&mut self, want: usize) -> usize {
         assert!(
             want <= FLATBUFFERS_MAX_BUFFER_SIZE,
             "cannot grow buffer beyond 2 gigabytes"
@@ -1096,7 +1103,9 @@ impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> { pub fn as_slice(self) -> &'a [
 impl<'a> Vector<'a, bool> { pub fn as_slice(self) -> &'a [bool] { <&'a [bool]>::follow(self.0, self.1) } }
 impl<'a> Vector<'a, u8> { pub fn as_slice(self) -> &'a [u8] { <&'a [u8]>::follow(self.0, self.1) } }
 impl<'a> Vector<'a, i8> { pub fn as_slice(self) -> &'a [i8] { <&'a [i8]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
 impl<'a> Vector<'a, f32> { pub fn as_slice(self) -> &'a [f32] { <&'a [f32]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
 impl<'a> Vector<'a, f64> { pub fn as_slice(self) -> &'a [f64] { <&'a [f64]>::follow(self.0, self.1) } }
 #[cfg(target_endian = "little")]
 impl<'a> Vector<'a, u16> { pub fn as_slice(self) -> &'a [u16] { <&'a [u16]>::follow(self.0, self.1) } }

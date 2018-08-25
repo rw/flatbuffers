@@ -166,13 +166,11 @@ bool TypeNeedsLifetime(const Type &type) {
   }
 }
 
-// Determine if our Type needs a lifetime when used in Rust from a FlatBuffers
-// struct type.
 bool StructMemberAccessNeedsCopy(const Type &type) {
   switch (GetFullType(type)) {
     case FullType::Integer: { return true; } // requires endian swap
-    case FullType::Float: { return false; } // no endian swap
-    case FullType::Bool: { return false; } // no endian swap
+    case FullType::Float: { return true; } // requires endian swap
+    case FullType::Bool: { return true; } // no endian-swap, but copy for consistency
     case FullType::Struct: { return false; } // no endian swap
     case FullType::EnumKey: { return true; } // requires endian swap
     default: {
@@ -590,12 +588,6 @@ class RustGenerator : public BaseGenerator {
       return type + " *";
     }
   }
-
-  std::string GenPtrGet(const FieldDef &field) {
-    auto &ptr_type = PtrType(&field);
-    return ptr_type == "naked" ? "" : ".get()";
-  }
-
 
   enum class ContainerType { None, Vector, Enum, Union };
   ContainerType GetContainerType(const Type &type) const {
@@ -1045,7 +1037,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::UnionKey:
       case FullType::EnumKey: {
         const std::string basetype = GenTypeBasic(field.value.type, false);
-        return GetDefaultScalarValue(field) + " as " + basetype;
+        return GetDefaultScalarValue(field);// + " as " + basetype;
       }
 
       default: { return GetDefaultScalarValue(field); }
@@ -1141,7 +1133,7 @@ class RustGenerator : public BaseGenerator {
 
           case FullType::EnumKey:
           case FullType::UnionKey: {
-            const auto underlying_typname = GenTypeBasic(type, false);
+            const auto underlying_typname = GenTypeBasic(type, true);
             return "self.fbb_.push_slot_scalar::<" + underlying_typname + ">";
           }
 
@@ -1163,13 +1155,12 @@ class RustGenerator : public BaseGenerator {
   std::string GenBuilderArgsAddFuncFieldCast(const FieldDef &field) {
     const Type& type = field.value.type;
 
-    const auto ct = GetContainerType(type);
-    const auto et = GetElementType(type);
+    const auto ft = GetFullType(type);
 
-    if (ct == ContainerType::Union && et == ElementType::UnionEnumValue) {
+    if (ft == FullType::UnionValue) {
       return " as " + GenTypeBasic(type, false);
     }
-    if (ct == ContainerType::Enum && et == ElementType::EnumValue) {
+    if (ft == FullType::EnumKey) {
       return " as " + GenTypeBasic(type, false);
     }
     return "";
@@ -1710,9 +1701,9 @@ class RustGenerator : public BaseGenerator {
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         if (is_scalar) {
           code_.SetValue("FIELD_DEFAULT_VALUE", GenBuilderAddFuncDefaultValue(field));
-          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}{{FIELD_CAST}}, {{FIELD_DEFAULT_VALUE}});";
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, {{FIELD_DEFAULT_VALUE}});";
         } else {
-          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}{{FIELD_CAST}});";
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}});";
         }
         code_ += "  }";
       }
@@ -1841,8 +1832,9 @@ class RustGenerator : public BaseGenerator {
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
       const auto member_name = Name(field) + "_";
+      const auto reference = StructMemberAccessNeedsCopy(field.value.type) ? "" : "&'a ";
       const auto arg_name = "_" + Name(field);
-      const auto arg_type =
+      const auto arg_type = reference + 
           GenTypeGet(field.value.type, "", "", "", true);
 
       if (it != struct_def.fields.vec.begin()) {
@@ -1852,13 +1844,18 @@ class RustGenerator : public BaseGenerator {
       arg_list += arg_name + ": ";
       arg_list += arg_type;
       init_list += "      " + member_name;
-      if (IsScalar(field.value.type.base_type) &&
-          !IsFloat(field.value.type.base_type)) {
-        auto type = GenUnderlyingCast(field, false, arg_name);
+      if (StructMemberAccessNeedsCopy(field.value.type)) {
         init_list += ": " + arg_name + ".to_little_endian(),\n";
       } else {
-        init_list += ": " + arg_name + ",\n";
+        init_list += ": *" + arg_name + ",\n";
       }
+      //if (IsScalar(field.value.type.base_type) &&
+      //    !IsFloat(field.value.type.base_type)) {
+      //  auto type = GenUnderlyingCast(field, false, arg_name);
+      //  init_list += ": " + arg_name + ".to_little_endian(),\n";
+      //} else {
+      //  init_list += ": *" + arg_name + ",\n";
+      //}
       //if (field.padding) {
       //  GenPadding(field, &init_list, &padding_id, PaddingInitializer);
       //}
@@ -1866,7 +1863,7 @@ class RustGenerator : public BaseGenerator {
 
     code_.SetValue("ARG_LIST", arg_list);
     code_.SetValue("INIT_LIST", init_list);
-    code_ += "  pub fn new({{ARG_LIST}}) -> Self {";
+    code_ += "  pub fn new<'a>({{ARG_LIST}}) -> Self {";
     code_ += "    {{STRUCT_NAME}} {";
     code_ += "{{INIT_LIST}}";
     padding_id = 0;

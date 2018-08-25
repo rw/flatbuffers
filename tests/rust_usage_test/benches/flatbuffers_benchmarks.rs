@@ -61,7 +61,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         let inventory = builder.create_vector_of_scalars::<u8>(&[0, 1, 2, 3, 4]);
         let test4 = builder.create_vector_of_structs(&[my_game::example::Test::new(10, 20),
                                                        my_game::example::Test::new(30, 40)]);
-        let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, my_game::example::Test::new(5i16, 6i8));
+        let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
         let args = my_game::example::MonsterArgs{
             hp: 80,
             mana: 150,
