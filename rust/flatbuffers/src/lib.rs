@@ -1,5 +1,4 @@
 use std::marker::PhantomData;
-use std::ops::Index;
 
 // enum causes compile error on type mismatch, whereas newtype () would not.
 pub enum VectorOffset {}
@@ -90,30 +89,47 @@ impl EndianScalar for i64 {
 impl EndianScalar for f32 {
     fn to_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
-        {
-            self
-        }
+        { self }
         #[cfg(not(target_endian = "little"))]
-        {
-            let mut ret = self.clone();
-
-            let ptr = &mut ret as *mut u32;
-            unsafe { *ptr }.byte_swap();
-
-            ret
-        }
+        { byte_swap_f32(&self) }
     }
     fn from_little_endian(self) -> Self {
-        self
+        #[cfg(target_endian = "little")]
+        { self }
+        #[cfg(not(target_endian = "little"))]
+        { byte_swap_f32(&self) }
     }
 }
 impl EndianScalar for f64 {
     fn to_little_endian(self) -> Self {
-        self
+        #[cfg(target_endian = "little")]
+        { self }
+        #[cfg(not(target_endian = "little"))]
+        { byte_swap_f64(&self) }
     }
     fn from_little_endian(self) -> Self {
-        self
+        #[cfg(target_endian = "little")]
+        { self }
+        #[cfg(not(target_endian = "little"))]
+        { byte_swap_f64(&self) }
     }
+}
+
+pub fn byteswap_f32(x: &f32) -> f32 {
+    let mut ret = (*x).clone();
+
+    let ptr = &mut ret as *mut f32 as *mut u32;
+    unsafe { *ptr }.swap_bytes();
+
+    ret
+}
+pub fn byteswap_f64(x: &f64) -> f64 {
+    let mut ret = (*x).clone();
+
+    let ptr = &mut ret as *mut f64 as *mut u64;
+    unsafe { *ptr }.swap_bytes();
+
+    ret
 }
 
 pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = (2u64 << 31) as usize;
