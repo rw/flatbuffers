@@ -1008,47 +1008,21 @@ impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
         T::follow(buf, (loc as SOffsetT - off) as usize)
     }
 }
+
 impl<'a> Follow<'a> for &'a str {
     type Inner = &'a str;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let len = read_scalar::<u32>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
         let slice = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len];
         let s = unsafe { std::str::from_utf8_unchecked(slice) };
         s
     }
 }
 
-///// Implement direct slice access for byte slices.
-//impl<'a> Follow<'a> for &'a [u8] {
-//    type Inner = &'a [u8];
-//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-//        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
-//        let data_buf = &buf[loc + SIZE_UOFFSET .. loc + SIZE_UOFFSET + len];
-//        let ptr = data_buf.as_ptr() as *const u8;
-//        let s: &'a [u8] = unsafe { std::slice::from_raw_parts(ptr, len) };
-//        s
-//    }
-//}
-//
-///// Implement direct slice access for GeneratedStruct, which is endian-safe
-///// because the structs have accessor functions.
-//#[cfg(target_endian="little")]
-//impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
-//    type Inner = &'a [T];
-//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-//        let sz = std::mem::size_of::<T>();
-//        assert!(sz > 0);
-//        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
-//        let data_buf = &buf[loc + SIZE_UOFFSET .. loc + SIZE_UOFFSET + len * sz];
-//        let ptr = data_buf.as_ptr() as *const T;
-//        let s: &'a [T] = unsafe { std::slice::from_raw_parts(ptr, len) };
-//        s
-//    }
-//}
-
 pub struct SliceOfGeneratedStruct<T: GeneratedStruct>(T);
 
-/// Implement direct slice access to structs (they are safe on both endiannesses).
+/// Implement direct slice access to structs (they are endian-safe because we
+/// use accessors to get their elements).
 impl<'a, T: GeneratedStruct + 'a> Follow<'a> for SliceOfGeneratedStruct<T> {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
@@ -1072,7 +1046,7 @@ fn follow_slice_helper<T>(buf: &[u8], loc: usize) -> &[T] {
     s
 }
 
-/// Implement direct slice access iff the host is little-endian.
+/// Implement direct slice access if the host is little-endian.
 #[cfg(target_endian = "little")]
 impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
     type Inner = &'a [T];
@@ -1085,11 +1059,7 @@ impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Vector<'a, T> {
     type Inner = Vector<'a, T>;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Vector {
-            0: buf,
-            1: loc,
-            2: PhantomData,
-        }
+        Vector::new(buf, loc)
     }
 }
 
@@ -1101,28 +1071,31 @@ impl<'a, T: 'a> Vector<'a, T> {
             2: PhantomData,
         }
     }
+
+    #[inline]
     pub fn len(&self) -> usize {
-        read_scalar::<u32>(&self.0[self.1 as usize..]) as usize
+        read_scalar::<UOffsetT>(&self.0[self.1 as usize..]) as usize
     }
 }
-impl<'a, T: Follow<'a>> Vector<'a, T> {
+
+impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     pub fn get(&self, idx: usize) -> T::Inner {
         debug_assert!(idx < read_scalar::<u32>(&self.0[self.1 as usize..]) as usize);
-        //println!("entering get({}) with {:?}", idx, &self.0[self.1 as usize..]);
         let sz = std::mem::size_of::<T>();
         debug_assert!(sz > 0);
         T::follow(self.0, self.1 as usize + SIZE_UOFFSET + sz * idx)
     }
 }
 
-impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> { pub fn as_slice(self) -> &'a [T] { <SliceOfGeneratedStruct<T>>::follow(self.0, self.1) } }
+impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> {
+    pub fn as_slice(self) -> &'a [T] {
+        <SliceOfGeneratedStruct<T>>::follow(self.0, self.1)
+    }
+}
+
 impl<'a> Vector<'a, bool> { pub fn as_slice(self) -> &'a [bool] { <&'a [bool]>::follow(self.0, self.1) } }
 impl<'a> Vector<'a, u8> { pub fn as_slice(self) -> &'a [u8] { <&'a [u8]>::follow(self.0, self.1) } }
 impl<'a> Vector<'a, i8> { pub fn as_slice(self) -> &'a [i8] { <&'a [i8]>::follow(self.0, self.1) } }
-#[cfg(target_endian = "little")]
-impl<'a> Vector<'a, f32> { pub fn as_slice(self) -> &'a [f32] { <&'a [f32]>::follow(self.0, self.1) } }
-#[cfg(target_endian = "little")]
-impl<'a> Vector<'a, f64> { pub fn as_slice(self) -> &'a [f64] { <&'a [f64]>::follow(self.0, self.1) } }
 #[cfg(target_endian = "little")]
 impl<'a> Vector<'a, u16> { pub fn as_slice(self) -> &'a [u16] { <&'a [u16]>::follow(self.0, self.1) } }
 #[cfg(target_endian = "little")]
@@ -1135,14 +1108,16 @@ impl<'a> Vector<'a, i32> { pub fn as_slice(self) -> &'a [i32] { <&'a [i32]>::fol
 impl<'a> Vector<'a, u64> { pub fn as_slice(self) -> &'a [u64] { <&'a [u64]>::follow(self.0, self.1) } }
 #[cfg(target_endian = "little")]
 impl<'a> Vector<'a, i64> { pub fn as_slice(self) -> &'a [i64] { <&'a [i64]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, f32> { pub fn as_slice(self) -> &'a [f32] { <&'a [f32]>::follow(self.0, self.1) } }
+#[cfg(target_endian = "little")]
+impl<'a> Vector<'a, f64> { pub fn as_slice(self) -> &'a [f64] { <&'a [f64]>::follow(self.0, self.1) } }
 
-// TODO(rw): endian safety
 impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
     type Inner = &'a T;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let sz = std::mem::size_of::<T>();
         let buf = &buf[loc..loc + sz];
-        //println!("entering follow for Sized ref with {:?}", buf);
         let ptr = buf.as_ptr() as *const T;
         unsafe { &*ptr }
     }
@@ -1180,8 +1155,20 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
     }
 }
 
-// Implementing Follow using trait bounds (EndianScalar) causes them to
-// conflict with the Sized impl. So, they are implemented here on concrete types.
+// Follow trait impls for primitive types.
+//
+// Ideally, these would be implemented as a single impl using trait bounds on
+// EndianScalar, but implementing Follow that way causes a conflict with
+// other impls:
+//error[E0119]: conflicting implementations of trait `Follow<'_>` for type `&_`:
+//     |
+//     | impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
+//     | ------------------------------------------------- first implementation here
+//...
+//     | impl<'a, T: EndianScalar> Follow<'a> for T {
+//     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `&_`
+//     |
+
 impl<'a> Follow<'a> for bool {
     type Inner = Self;
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
@@ -1250,7 +1237,7 @@ impl<'a> Follow<'a> for f64 {
 }
 
 #[derive(Debug)]
-pub struct Vector<'a, T: Sized + 'a>(&'a [u8], usize, PhantomData<T>);
+pub struct Vector<'a, T: 'a>(&'a [u8], usize, PhantomData<T>);
 
 pub fn lifted_follow<'a, T: Follow<'a>>(buf: &'a [u8], loc: usize) -> T::Inner {
     T::follow(buf, loc)
@@ -1272,3 +1259,7 @@ pub fn buffer_has_identifier(data: &[u8], ident: &str, size_prefixed: bool) -> b
 
     ident.as_bytes() == got
 }
+
+// TODO(rw): figure out better trait bounds for implementing Follow on
+//           EndianScalar and GeneratedStruct
+// TODO(rw): use macros to impl EndianScalar and as_slice on primitives
