@@ -262,7 +262,7 @@ class RustGenerator : public BaseGenerator {
         }
       }
 
-      // Generate code for all structs, then all tables.
+      // Generate code for all structs.
       for (auto it = parser_.structs_.vec.begin();
            it != parser_.structs_.vec.end(); ++it) {
         const auto &struct_def = **it;
@@ -272,6 +272,8 @@ class RustGenerator : public BaseGenerator {
           GenStruct(struct_def);
         }
       }
+
+      // Generate code for all tables.
       for (auto it = parser_.structs_.vec.begin();
            it != parser_.structs_.vec.end(); ++it) {
         const auto &struct_def = **it;
@@ -282,7 +284,7 @@ class RustGenerator : public BaseGenerator {
         }
       }
 
-      // Generate convenient global helper functions:
+      // Generate global helper functions.
       if (parser_.root_struct_def_) {
         auto &struct_def = *parser_.root_struct_def_;
         if (struct_def.defined_namespace != ns) { continue; }
@@ -308,7 +310,7 @@ class RustGenerator : public BaseGenerator {
   const Namespace *CurrentNameSpace() const { return cur_name_space_; }
 
   // Determine if a Type has a lifetime template parameter when used in Rust.
-  bool TypeNeedsLifetime(const Type &type) const {
+  bool TypeNeedsLifetimeParameter(const Type &type) const {
     switch (GetFullType(type)) {
       case FullType::Integer:
       case FullType::Float:
@@ -463,8 +465,8 @@ class RustGenerator : public BaseGenerator {
         //s.append(lifetime);
         s.append(WrapInNameSpace(type.struct_def->defined_namespace,
                                  type.struct_def->name));
-        if (TypeNeedsLifetime(type)) {
-          s.append("<" + lifetime + ">");
+        if (TypeNeedsLifetimeParameter(type)) {
+          s.append("<" + lifetime + " /* qqq */>");
         } else {
           s.append("/* foo */");
         }
@@ -762,11 +764,11 @@ class RustGenerator : public BaseGenerator {
       case FullType::Integer:
       case FullType::Float:
       case FullType::Bool: {
-        const auto typname = GetTypeWire(type, "", "", false);
+        const auto typname = GetTypeBasic(type, false);
         return typname;
       }
       case FullType::Struct: {
-        //const auto typname = WrapInNameSpace(*type.struct_def);
+        //const auto typname = WrapInNameSpace(field);
         const auto typname = GetTypeWire(type, "", "", false);
         return "Option<&" + lifetime + " " + typname + ">";
       }
