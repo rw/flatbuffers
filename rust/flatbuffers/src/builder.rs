@@ -93,7 +93,6 @@ macro_rules! impl_pushable_method_for_struct_reference {
     )
 }
 
-// TODO(rw) is it always sane that Offset::new(0) means a bogus default value?
 impl<T> PushableMethod for Offset<T> {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         assert_eq!(dst.len(), SIZE_UOFFSET);

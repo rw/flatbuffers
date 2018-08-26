@@ -59,7 +59,7 @@ impl LCG {
 fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder) {
     let mon = {
         let fred_name = builder.create_string("Fred");
-        let inventory = builder.create_vector_of_scalars::<u8>(&vec![0, 1, 2, 3, 4][..]);
+        let inventory = builder.create_vector_of_scalars(&[0u8, 1, 2, 3, 4][..]);
         let test4 = builder.create_vector_of_structs(&vec![my_game::example::Test::new(10, 20),
                                                            my_game::example::Test::new(30, 40)][..]);
         let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
@@ -91,10 +91,10 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
         builder.end_table(table_start)
     };
     let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
-    let inv = builder.create_vector_of_scalars::<u8>(&vec![0, 1, 2, 3, 4]);
+    let inv = builder.create_vector_of_scalars(&[0u8, 1, 2, 3, 4]);
 
-    let test4 = builder.create_vector_of_structs(&vec![my_game::example::Test::new(10, 20),
-                                                       my_game::example::Test::new(30, 40)][..]);
+    let test4 = builder.create_vector_of_structs(&[my_game::example::Test::new(10, 20),
+                                                   my_game::example::Test::new(30, 40)][..]);
 
     let name = builder.create_string("MyMonster");
     let testarrayofstring = builder.create_vector_of_strings(&["test1", "test2"][..]);

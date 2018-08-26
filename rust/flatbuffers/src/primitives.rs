@@ -75,8 +75,6 @@ impl<T> Deref for Offset<T> {
     }
 }
 impl<'a, T: 'a> Offset<T> {
-    const BOTTOM: UOffsetT = UOffsetT::max_value();
-
     pub fn new(o: UOffsetT) -> Offset<T> {
         Offset {
             0: o,
@@ -88,12 +86,6 @@ impl<'a, T: 'a> Offset<T> {
     }
     pub fn value(&self) -> UOffsetT {
         self.0
-    }
-    pub fn bottom() -> Offset<T> {
-        Offset {
-            0: Offset::<T>::BOTTOM,
-            1: PhantomData,
-        }
     }
 }
 
