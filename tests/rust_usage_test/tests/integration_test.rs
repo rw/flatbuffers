@@ -17,7 +17,9 @@
 
 extern crate quickcheck;
 
+#[macro_use(impl_pushable_method_for_struct_reference)]
 extern crate flatbuffers;
+
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::my_game;
 // TODO(rw): use rust_usage_test::namespace_test;
@@ -1843,7 +1845,7 @@ mod byte_layouts {
     }
     #[test]
     fn layout_14_vtable_with_1_struct_of_int8_and_int16_and_int32() {
-        #[derive(Copy, Clone, Debug, PartialEq)]
+        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
         #[repr(C, packed)]
         struct foo {
             a: i32,
@@ -1852,11 +1854,12 @@ mod byte_layouts {
             _pad1: [u8; 3],
             c: i8,
         }
+        impl_pushable_method_for_struct_reference!(foo);
 
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
         let x = foo{a: 0x12345678i32.to_le(), _pad0: [0,0], b: 0x1234i16.to_le(), _pad1: [0, 0, 0], c: 55i8.to_le()};
-        b.push_slot_struct(fi2fo(0), &x);
+        b.push_slot(fi2fo(0), &x, None);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
