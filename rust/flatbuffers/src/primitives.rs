@@ -51,7 +51,7 @@ pub struct SliceOfGeneratedStruct<T: GeneratedStruct>(T);
 pub trait GeneratedStruct {}
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Offset<T>(UOffsetT, PhantomData<T>);
 
 // TODO(rw): why do we need to reimplement (with a default impl) Copy to
@@ -60,6 +60,11 @@ impl<T> Copy for Offset<T> {}
 impl<T> Clone for Offset<T> {
     fn clone(&self) -> Offset<T> {
         Offset::new(self.0.clone())
+    }
+}
+impl<T> PartialEq for Offset<T> {
+    fn eq(&self, o: &Offset<T>) -> bool {
+        self.value() == o.value()
     }
 }
 

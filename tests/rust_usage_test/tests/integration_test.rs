@@ -584,13 +584,13 @@ mod roundtrip_vectors {
 
         const N: u64 = 20;
 
-        fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::EndianScalar>(xs: Vec<T>) {
+        fn prop<T: PartialEq + ::std::fmt::Debug + Copy + flatbuffers::EndianScalar + flatbuffers::PushableMethod>(xs: Vec<T>) {
             use flatbuffers::Follow;
 
             let mut b = flatbuffers::FlatBufferBuilder::new();
             b.start_vector(xs.len(), ::std::mem::size_of::<T>());
             for i in (0..xs.len()).rev() {
-                b.push_element_scalar::<T>(xs[i]);
+                b.push::<T>(xs[i]);
             }
             let vecend = b.end_vector::<T>(xs.len());
             b.finish_minimal(vecend);
@@ -650,7 +650,7 @@ mod roundtrip_vectors {
 
             b.start_vector(flatbuffers::SIZE_UOFFSET, xs.len());
             for &i in offsets.iter() {
-                b.push_element_scalar_indirect_uoffset(i.value());
+                b.push(i);
             }
             let vecend = b.end_vector::<flatbuffers::Offset<&str>>(xs.len());
 
@@ -1549,26 +1549,26 @@ mod byte_layouts {
     #[test]
     fn layout_01_basic_numbers() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.push_element_scalar(true);
+        b.push(true);
         check(&b, &[1]);
-        b.push_element_scalar(-127i8);
+        b.push(-127i8);
         check(&b, &[129, 1]);
-        b.push_element_scalar(255u8);
+        b.push(255u8);
         check(&b, &[255, 129, 1]);
-        b.push_element_scalar(-32222i16);
+        b.push(-32222i16);
         check(&b, &[0x22, 0x82, 0, 255, 129, 1]); // first pad
-        b.push_element_scalar(0xFEEEu16);
+        b.push(0xFEEEu16);
         check(&b, &[0xEE, 0xFE, 0x22, 0x82, 0, 255, 129, 1]); // no pad this time
-        b.push_element_scalar(-53687092i32);
+        b.push(-53687092i32);
         check(&b, &[204, 204, 204, 252, 0xEE, 0xFE, 0x22, 0x82, 0, 255, 129, 1]);
-        b.push_element_scalar(0x98765432u32);
+        b.push(0x98765432u32);
         check(&b, &[0x32, 0x54, 0x76, 0x98, 204, 204, 204, 252, 0xEE, 0xFE, 0x22, 0x82, 0, 255, 129, 1]);
     }
 
     #[test]
     fn layout_01b_bigger_numbers() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.push_element_scalar(0x1122334455667788u64);
+        b.push(0x1122334455667788u64);
         check(&b, &[0x88, 0x77, 0x66, 0x55, 0x44, 0x33, 0x22, 0x11]);
     }
 
@@ -1578,7 +1578,7 @@ mod byte_layouts {
         check(&b, &[]);
         b.start_vector(flatbuffers::SIZE_U8, 1);
         check(&b, &[0, 0, 0]); // align to 4bytes
-        b.push_element_scalar(1u8);
+        b.push(1u8);
         check(&b, &[1, 0, 0, 0]);
         b.end_vector::<&u8>(1);
         check(&b, &[1, 0, 0, 0, 1, 0, 0, 0]); // padding
@@ -1589,9 +1589,9 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U8, 2);
         check(&b, &[0, 0]); // align to 4bytes
-        b.push_element_scalar(1u8);
+        b.push(1u8);
         check(&b, &[1, 0, 0]);
-        b.push_element_scalar(2u8);
+        b.push(2u8);
         check(&b, &[2, 1, 0, 0]);
         b.end_vector::<&u8>(2);
         check(&b, &[2, 0, 0, 0, 2, 1, 0, 0]); // padding
@@ -1606,7 +1606,7 @@ mod byte_layouts {
         check(&b, &gold[..]);
 
         for i in 1u8..=8 {
-            b.push_element_scalar(i);
+            b.push(i);
             gold.insert(0, i);
             check(&b, &gold[..]);
         }
@@ -1619,7 +1619,7 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_U16, 1);
         check(&b, &[0, 0]); // align to 4bytes
-        b.push_element_scalar(1u16);
+        b.push(1u16);
         check(&b, &[1, 0, 0, 0]);
         b.end_vector::<&u16>(1);
         check(&b, &[1, 0, 0, 0, 1, 0, 0, 0]); // padding
@@ -1630,9 +1630,9 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let _off = b.start_vector(flatbuffers::SIZE_U16, 2);
         check(&b, &[]); // align to 4bytes
-        b.push_element_scalar(0xABCDu16);
+        b.push(0xABCDu16);
         check(&b, &[0xCD, 0xAB]);
-        b.push_element_scalar(0xDCBAu16);
+        b.push(0xDCBAu16);
         check(&b, &[0xBA, 0xDC, 0xCD, 0xAB]);
         b.end_vector::<&u16>(2);
         check(&b, &[2, 0, 0, 0, 0xBA, 0xDC, 0xCD, 0xAB]);
@@ -1693,7 +1693,7 @@ mod byte_layouts {
         let off0 = b.start_table();
         assert_eq!(0, off0.value());
         check(&b, &[]);
-        b.push_slot_scalar(fi2fo(0), true, false);
+        b.push_slot(fi2fo(0), true, false);
         check(&b, &[1]);
         let off1 = b.end_table(off0);
         assert_eq!(8, off1.value());
@@ -1713,7 +1713,7 @@ mod byte_layouts {
         check(&b, &[]);
         let off = b.start_table();
         check(&b, &[]);
-        b.push_slot_scalar(fi2fo(0), false, false);
+        b.push_slot(fi2fo(0), false, false);
         b.end_table(off);
         check(&b, &[
              4, 0, // vtable bytes
@@ -1728,7 +1728,7 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         check(&b, &[]);
         let off = b.start_table();
-        b.push_slot_scalar(fi2fo(0), 0x789Ai16, 0);
+        b.push_slot(fi2fo(0), 0x789Ai16, 0);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
@@ -1744,8 +1744,8 @@ mod byte_layouts {
     fn layout_11_vtable_with_two_int16() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar(fi2fo(0), 0x3456i16, 0);
-        b.push_slot_scalar(fi2fo(1), 0x789Ai16, 0);
+        b.push_slot(fi2fo(0), 0x3456i16, 0);
+        b.push_slot(fi2fo(1), 0x789Ai16, 0);
         b.end_table(off);
         check(&b, &[
               8, 0, // vtable bytes
@@ -1762,8 +1762,8 @@ mod byte_layouts {
     fn layout_12_vtable_with_int16_and_bool() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar(fi2fo(0), 0x3456i16, 0);
-        b.push_slot_scalar(fi2fo(1), true, false);
+        b.push_slot(fi2fo(0), 0x3456i16, 0);
+        b.push_slot(fi2fo(1), true, false);
         b.end_table(off);
         check(&b, &[
             8, 0, // vtable bytes
@@ -1801,8 +1801,8 @@ mod byte_layouts {
         b.start_vector(flatbuffers::SIZE_U8, 0);
         let vecend = b.end_vector::<&u8>(0);
         let off = b.start_table();
-        b.push_slot_scalar::<i16>(fi2fo(0), 55i16, 0);
-        b.push_slot_scalar_indirect_uoffset(fi2fo(1), vecend.value(), 0);
+        b.push_slot::<i16>(fi2fo(0), 55i16, 0);
+        b.push_slot::<flatbuffers::Offset<_>>(fi2fo(1), vecend, flatbuffers::Offset::new(0));
         b.end_table(off);
         check(&b, &[
               8, 0, // vtable bytes
@@ -1820,12 +1820,12 @@ mod byte_layouts {
     fn layout_13_vtable_with_1_int16_and_2_vector_of_i16() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(flatbuffers::SIZE_I16, 2);
-        b.push_element_scalar(0x1234i16);
-        b.push_element_scalar(0x5678i16);
+        b.push(0x1234i16);
+        b.push(0x5678i16);
         let vecend = b.end_vector::<&i16>(2);
         let off = b.start_table();
-        b.push_slot_scalar_indirect_uoffset(fi2fo(1), vecend.value(), 0);
-        b.push_slot_scalar(fi2fo(0), 55i16, 0);
+        b.push_slot(fi2fo(1), vecend, flatbuffers::Offset::new(0));
+        b.push_slot(fi2fo(0), 55i16, 0);
         b.end_table(off);
         check(&b, &[
               8, 0, // vtable bytes
@@ -1887,9 +1887,9 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(::std::mem::size_of::<FooStruct>(), 2);
         b.push(33i8);
-        b.push_element_scalar(44i8);
-        b.push_element_scalar(55i8);
-        b.push_element_scalar(66i8);
+        b.push(44i8);
+        b.push(55i8);
+        b.push(66i8);
         let vecend = b.end_vector::<&FooStruct>(2);
         let off = b.start_table();
         b.push_slot_scalar_indirect_uoffset(fi2fo(0), vecend.value(), 0);
@@ -1913,8 +1913,8 @@ mod byte_layouts {
     fn layout_16_table_with_some_elements() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar(fi2fo(0), 33i8, 0);
-        b.push_slot_scalar(fi2fo(1), 66i16, 0);
+        b.push_slot(fi2fo(0), 33i8, 0);
+        b.push_slot(fi2fo(1), 66i16, 0);
         let off2 = b.end_table(off);
         b.finish_minimal(off2);
 
@@ -1939,16 +1939,16 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         {
             let off = b.start_table();
-            b.push_slot_scalar(fi2fo(0), 33i8, 0);
-            b.push_slot_scalar(fi2fo(1), 44i8, 0);
+            b.push_slot(fi2fo(0), 33i8, 0);
+            b.push_slot(fi2fo(1), 44i8, 0);
             b.end_table(off);
         }
 
         {
             let off = b.start_table();
-            b.push_slot_scalar(fi2fo(0), 55i8, 0);
-            b.push_slot_scalar(fi2fo(1), 66i8, 0);
-            b.push_slot_scalar(fi2fo(2), 77i8, 0);
+            b.push_slot(fi2fo(0), 55i8, 0);
+            b.push_slot(fi2fo(1), 66i8, 0);
+            b.push_slot(fi2fo(2), 77i8, 0);
             let off2 = b.end_table(off);
             b.finish_minimal(off2);
         }
@@ -1985,14 +1985,14 @@ mod byte_layouts {
     fn layout_18_a_bunch_of_bools() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar(fi2fo(0), true, false);
-        b.push_slot_scalar(fi2fo(1), true, false);
-        b.push_slot_scalar(fi2fo(2), true, false);
-        b.push_slot_scalar(fi2fo(3), true, false);
-        b.push_slot_scalar(fi2fo(4), true, false);
-        b.push_slot_scalar(fi2fo(5), true, false);
-        b.push_slot_scalar(fi2fo(6), true, false);
-        b.push_slot_scalar(fi2fo(7), true, false);
+        b.push_slot(fi2fo(0), true, false);
+        b.push_slot(fi2fo(1), true, false);
+        b.push_slot(fi2fo(2), true, false);
+        b.push_slot(fi2fo(3), true, false);
+        b.push_slot(fi2fo(4), true, false);
+        b.push_slot(fi2fo(5), true, false);
+        b.push_slot(fi2fo(6), true, false);
+        b.push_slot(fi2fo(7), true, false);
         let off2 = b.end_table(off);
         b.finish_minimal(off2);
 
@@ -2026,9 +2026,9 @@ mod byte_layouts {
     fn layout_19_three_bools() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar(fi2fo(0), true, false);
-        b.push_slot_scalar(fi2fo(1), true, false);
-        b.push_slot_scalar(fi2fo(2), true, false);
+        b.push_slot(fi2fo(0), true, false);
+        b.push_slot(fi2fo(1), true, false);
+        b.push_slot(fi2fo(2), true, false);
         let off2 = b.end_table(off);
         b.finish_minimal(off2);
 
@@ -2055,7 +2055,7 @@ mod byte_layouts {
     fn layout_20_some_floats() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar(fi2fo(0), 1.0f32, 0.0);
+        b.push_slot(fi2fo(0), 1.0f32, 0.0);
         b.end_table(off);
 
         check(&b, &[
@@ -2072,9 +2072,9 @@ mod byte_layouts {
     fn layout_21_vtable_defaults() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar::<i8>(fi2fo(0), 1, 1);
-        b.push_slot_scalar::<i8>(fi2fo(1), 3, 2);
-        b.push_slot_scalar::<i8>(fi2fo(2), 3, 3);
+        b.push_slot::<i8>(fi2fo(0), 1, 1);
+        b.push_slot::<i8>(fi2fo(1), 3, 2);
+        b.push_slot::<i8>(fi2fo(2), 3, 3);
         b.end_table(off);
         check(&b, &[
               8, 0, // vtable size in bytes
@@ -2093,8 +2093,8 @@ mod byte_layouts {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
         // skipped: b.push_slot_scalar::<i16>(0, 1, 1);
-        b.push_slot_scalar::<i16>(fi2fo(1), 3, 2);
-        b.push_slot_scalar::<i16>(fi2fo(2), 3, 3);
+        b.push_slot::<i16>(fi2fo(1), 3, 2);
+        b.push_slot::<i16>(fi2fo(2), 3, 3);
         let table_end = b.end_table(off);
         b.finish_minimal(table_end);
         check(&b, &[
@@ -2114,9 +2114,9 @@ mod byte_layouts {
     fn layout_23_varied_slots_and_root() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        b.push_slot_scalar::<i16>(fi2fo(0), 1, 0);
-        b.push_slot_scalar::<u8>(fi2fo(1), 2, 0);
-        b.push_slot_scalar::<f32>(fi2fo(2), 3.0, 0.0);
+        b.push_slot::<i16>(fi2fo(0), 1, 0);
+        b.push_slot::<u8>(fi2fo(1), 2, 0);
+        b.push_slot::<f32>(fi2fo(2), 3.0, 0.0);
         let table_end = b.end_table(off);
         b.finish_minimal(table_end);
         check(&b, &[

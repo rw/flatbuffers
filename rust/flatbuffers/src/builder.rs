@@ -43,7 +43,7 @@ impl<T> Pushable for Offset<T> {
     }
 }
 
-pub trait PushableMethod: Sized  {
+pub trait PushableMethod: Sized + PartialEq  {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         let sz = size_of::<Self>();
         assert_eq!(sz, dst.len());
@@ -80,6 +80,7 @@ impl_pushable_method_for_endian_scalar!(i64);
 impl_pushable_method_for_endian_scalar!(f32);
 impl_pushable_method_for_endian_scalar!(f64);
 
+// TODO(rw) is it always sane that Offset::new(0) means a bogus default value?
 impl<T> PushableMethod for Offset<T> {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         assert_eq!(dst.len(), SIZE_UOFFSET);
@@ -523,6 +524,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             x.do_write(dst, rest);
         }
         self.get_size() as UOffsetT
+    }
+    pub fn push_slot<X: PushableMethod>(&mut self, slotoff: VOffsetT, x: X, d: X) {
+        if x == d {
+            return;
+        }
+        let off = self.push(x);
+        self.track_field(slotoff, off);
     }
     pub fn push_a<X: Pushable>(&mut self, x: X::Item) -> UOffsetT {
         let sz = X::size();
