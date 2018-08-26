@@ -685,7 +685,7 @@ mod roundtrip_vectors {
                 b1.start_vector(flatbuffers::SIZE_U8, xs.len());
 
                 for i in (0..xs.len()).rev() {
-                    b1.push_element_scalar(xs[i]);
+                    b1.push(xs[i]);
                 }
                 b1.end_vector::<&u8>(xs.len());
 
@@ -915,7 +915,7 @@ mod roundtrip_table {
 
         const N: u64 = 20;
 
-        fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::EndianScalar + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
+        fn prop<'a, T: flatbuffers::Follow<'a> + 'a + flatbuffers::EndianScalar + flatbuffers::PushableMethod + ::std::fmt::Debug>(vecs: Vec<Vec<T>>) {
             use flatbuffers::field_index_to_field_offset as fi2fo;
             use flatbuffers::Follow;
 
@@ -927,7 +927,7 @@ mod roundtrip_table {
 
                 let xs = &vec[..];
                 for i in (0..xs.len()).rev() {
-                    b.push_element_scalar::<T>(xs[i]);
+                    b.push::<T>(xs[i]);
                 }
                 let vecend = b.end_vector::<T>(xs.len());
                 offs.push(vecend);
