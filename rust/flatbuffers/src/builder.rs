@@ -525,7 +525,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         self.get_size() as UOffsetT
     }
-    pub fn push_slot<X: PushableMethod>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
+    pub fn push_slot<X: PushableMethod>(&mut self, slotoff: VOffsetT, x: AsRef<X>, d: Option<AsRef<X>>) {
         if d.is_some() && x == d.unwrap() {
             return;
         }
