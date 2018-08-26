@@ -1886,7 +1886,7 @@ mod byte_layouts {
         //}
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(::std::mem::size_of::<FooStruct>(), 2);
-        b.push_element_scalar(33i8);
+        b.push(33i8);
         b.push_element_scalar(44i8);
         b.push_element_scalar(55i8);
         b.push_element_scalar(66i8);

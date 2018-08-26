@@ -43,6 +43,51 @@ impl<T> Pushable for Offset<T> {
     }
 }
 
+pub trait PushableMethod: Sized  {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
+        let sz = size_of::<Self>();
+        assert_eq!(sz, dst.len());
+
+        let src = unsafe {
+            from_raw_parts(self as *const Self as *const u8, sz)
+        };
+        dst.copy_from_slice(src);
+    }
+    fn size(&self) -> usize {
+        size_of::<Self>()
+    }
+
+}
+
+macro_rules! impl_pushable_method_for_endian_scalar {
+    ($ty:ident) => (
+        impl PushableMethod for $ty {
+            fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+                emplace_scalar::<$ty>(dst, *self);
+            }
+        }
+    )
+}
+impl_pushable_method_for_endian_scalar!(bool);
+impl_pushable_method_for_endian_scalar!(u8);
+impl_pushable_method_for_endian_scalar!(i8);
+impl_pushable_method_for_endian_scalar!(u16);
+impl_pushable_method_for_endian_scalar!(i16);
+impl_pushable_method_for_endian_scalar!(u32);
+impl_pushable_method_for_endian_scalar!(i32);
+impl_pushable_method_for_endian_scalar!(u64);
+impl_pushable_method_for_endian_scalar!(i64);
+impl_pushable_method_for_endian_scalar!(f32);
+impl_pushable_method_for_endian_scalar!(f64);
+
+impl<T> PushableMethod for Offset<T> {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
+        assert_eq!(dst.len(), SIZE_UOFFSET);
+        let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
+        emplace_scalar::<UOffsetT>(dst, n);
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {
     off: UOffsetT,
@@ -469,13 +514,23 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let s = self.get_size();
         self.fill(padding_bytes(s, elem_size));
     }
-    pub fn push<X, T: Pushable<Item=X>>(&mut self, x: &X) -> UOffsetT {
-        let sz = T::size();
+    pub fn push<X: PushableMethod>(&mut self, x: X) -> UOffsetT {
+        let sz = x.size();
         self.align(sz);
         self.make_space(sz);
         {
             let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(sz);
-            T::do_write(dst, rest, t);
+            x.do_write(dst, rest);
+        }
+        self.get_size() as UOffsetT
+    }
+    pub fn push_a<X: Pushable>(&mut self, x: X::Item) -> UOffsetT {
+        let sz = X::size();
+        self.align(sz);
+        self.make_space(sz);
+        {
+            let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(sz);
+            X::do_write(dst, rest, &x);
         }
         self.get_size() as UOffsetT
     }
