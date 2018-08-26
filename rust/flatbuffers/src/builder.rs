@@ -51,6 +51,16 @@ pub trait PushableMethod: Sized {
 
 }
 
+impl<'b> PushableMethod for &'b [u8] {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        debug_assert_eq!(dst.len(), self.len());
+        dst.copy_from_slice(self);
+    }
+    fn size(&self) -> usize {
+        self.len()
+    }
+}
+
 #[macro_export]
 macro_rules! impl_pushable_method_for_endian_scalar {
     ($ty:ident) => (
@@ -79,7 +89,7 @@ macro_rules! impl_pushable_method_for_struct_reference {
         impl<'b> flatbuffers::PushableMethod for &'b $ty {
            fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
                let sz = ::std::mem::size_of::<$ty>();
-               assert_eq!(sz, dst.len());
+               debug_assert_eq!(sz, dst.len());
 
                let src = unsafe {
                    ::std::slice::from_raw_parts(*self as *const $ty as *const u8, sz)
@@ -95,7 +105,7 @@ macro_rules! impl_pushable_method_for_struct_reference {
 
 impl<T> PushableMethod for Offset<T> {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
-        assert_eq!(dst.len(), SIZE_UOFFSET);
+        debug_assert_eq!(dst.len(), SIZE_UOFFSET);
         let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
         emplace_scalar::<UOffsetT>(dst, n);
     }
@@ -250,7 +260,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn end_vector<T: 'fbb>(&mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
         self.assert_nested("end_vector must be called after a call to start_vector");
         self.nested = false;
-        let off = self.push_element_scalar::<UOffsetT>(num_elems as UOffsetT);
+        let off = self.push::<UOffsetT>(num_elems as UOffsetT);
         Offset::new(off)
     }
     fn pre_align(&mut self, len: usize, alignment: usize) {
@@ -279,14 +289,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.pre_align(data.len() + 1, SIZE_UOFFSET); // Always 0-terminated.
         self.fill(1);
         self.push_bytes(data);
-        self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
+        self.push::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
     }
     pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &'b [u8]) -> Offset<Vector<'fbb, u8>> {
         self.assert_not_nested();
         self.pre_align(data.len(), SIZE_UOFFSET);
         self.push_bytes(data);
-        self.push_element_scalar::<UOffsetT>(data.len() as UOffsetT);
+        self.push::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
     }
     pub fn create_vector_of_strings<'a, 'b>(
@@ -355,7 +365,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // We fill its value later.
         //let object_vtable_revloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0x99999999 as SOffsetT);
         let object_vtable_revloc: UOffsetT =
-            self.push_element_scalar::<UOffsetT>(0xF0F0F0F0 as UOffsetT);
+            self.push::<UOffsetT>(0xF0F0F0F0 as UOffsetT);
         //println!("just wrote filler: {:?}", self.get_active_buf_slice());
 
         // Layout of the data this function will create when a new vtable is
@@ -511,13 +521,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
 
         {
-            let fwd = self.refer_to(root.value());
-            self.push_element_scalar(fwd);
+            self.push(root);
         }
 
         if size_prefixed {
             let sz = self.get_size() as UOffsetT;
-            self.push_element_scalar::<UOffsetT>(sz);
+            self.push::<UOffsetT>(sz);
         }
         self.finished = true;
     }
@@ -546,37 +555,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let off = self.push(x);
         self.track_field(slotoff, off);
     }
-    pub fn push_element_scalar<T: EndianScalar>(&mut self, t: T) -> UOffsetT {
-        self.align(size_of::<T>());
-        self.push_small(t);
-        self.get_size() as UOffsetT
-    }
-    pub fn place_element_scalar<T: EndianScalar>(&mut self, t: T) -> UOffsetT {
-        self.cur_idx -= size_of::<T>();
-        let cur_idx = self.cur_idx;
-        emplace_scalar(&mut self.owned_buf[cur_idx..], t);
-        self.get_size() as UOffsetT
-    }
-    fn push_small<T: EndianScalar>(&mut self, x: T) {
-        self.make_space(size_of::<T>());
-        emplace_scalar(&mut self.owned_buf[self.cur_idx..], x);
-    }
     pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
         let n = self.make_space(x.len());
         &mut self.owned_buf[n..n + x.len()].copy_from_slice(x);
 
         n as UOffsetT
-    }
-    // Offsets initially are relative to the end of the buffer (downwards).
-    // This function converts them to be relative to the current location
-    // in the buffer (when stored here), pointing upwards.
-    pub fn refer_to(&mut self, off: TailUOffsetT) -> HeadUOffsetT {
-        // Align to ensure GetSize() below is correct.
-        self.align(SIZE_UOFFSET);
-        // Offset must refer to something already in buffer.
-        debug_assert!(off > 0);
-        debug_assert!(off <= self.get_size() as UOffsetT);
-        self.get_size() as UOffsetT - off + SIZE_UOFFSET as UOffsetT
     }
     pub fn make_space(&mut self, want: usize) -> usize {
         self.ensure_capacity(want);

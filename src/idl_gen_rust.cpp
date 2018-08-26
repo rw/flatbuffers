@@ -1634,7 +1634,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "impl<'b> flatbuffers::PushableMethod for &'b {{STRUCT_NAME}} {";
     code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
     code_ += "        let sz = ::std::mem::size_of::<{{STRUCT_NAME}}>();";
-    code_ += "        assert_eq!(sz, dst.len());";
+    code_ += "        debug_assert_eq!(sz, dst.len());";
     code_ += "        let src = unsafe {";
     code_ += "            ::std::slice::from_raw_parts(*self as *const {{STRUCT_NAME}} as *const u8, sz)";
     code_ += "        };";

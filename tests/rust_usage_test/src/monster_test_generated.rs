@@ -306,7 +306,7 @@ impl Test {
 impl<'b> flatbuffers::PushableMethod for &'b Test {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let sz = ::std::mem::size_of::<Test>();
-        assert_eq!(sz, dst.len());
+        debug_assert_eq!(sz, dst.len());
         let src = unsafe {
             ::std::slice::from_raw_parts(*self as *const Test as *const u8, sz)
         };
@@ -371,7 +371,7 @@ impl Vec3 {
 impl<'b> flatbuffers::PushableMethod for &'b Vec3 {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let sz = ::std::mem::size_of::<Vec3>();
-        assert_eq!(sz, dst.len());
+        debug_assert_eq!(sz, dst.len());
         let src = unsafe {
             ::std::slice::from_raw_parts(*self as *const Vec3 as *const u8, sz)
         };
@@ -410,7 +410,7 @@ impl Ability {
 impl<'b> flatbuffers::PushableMethod for &'b Ability {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let sz = ::std::mem::size_of::<Ability>();
-        assert_eq!(sz, dst.len());
+        debug_assert_eq!(sz, dst.len());
         let src = unsafe {
             ::std::slice::from_raw_parts(*self as *const Ability as *const u8, sz)
         };
