@@ -478,7 +478,7 @@ pub struct TestSimpleTableWithEnumBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
   pub fn add_color(&mut self, color: Color) {
-    self.fbb_.push_slot_scalar::<Color>(TestSimpleTableWithEnum::VT_COLOR, color, Color::Green);
+    self.fbb_.push_slot::<Color>(TestSimpleTableWithEnum::VT_COLOR, color, Some(Color::Green));
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TestSimpleTableWithEnumBuilder<'a, 'b> {
     let start = _fbb.start_table();
@@ -566,13 +566,13 @@ pub struct StatBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
   pub fn add_id(&mut self, id: flatbuffers::Offset<&'b  str>) {
-    self.fbb_.push_slot_offset_relative(Stat::VT_ID, id);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Stat::VT_ID, id, None);
   }
   pub fn add_val(&mut self, val: i64) {
-    self.fbb_.push_slot_scalar::<i64>(Stat::VT_VAL, val, 0);
+    self.fbb_.push_slot::<i64>(Stat::VT_VAL, val, Some(0));
   }
   pub fn add_count(&mut self, count: u16) {
-    self.fbb_.push_slot_scalar::<u16>(Stat::VT_COUNT, count, 0);
+    self.fbb_.push_slot::<u16>(Stat::VT_COUNT, count, Some(0));
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> StatBuilder<'a, 'b> {
     let start = _fbb.start_table();
@@ -644,7 +644,7 @@ pub struct ReferrableBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
   pub fn add_id(&mut self, id: u64) {
-    self.fbb_.push_slot_scalar::<u64>(Referrable::VT_ID, id, 0);
+    self.fbb_.push_slot::<u64>(Referrable::VT_ID, id, Some(0));
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> ReferrableBuilder<'a, 'b> {
     let start = _fbb.start_table();
@@ -1075,130 +1075,130 @@ pub struct MonsterBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn add_pos(&mut self, pos: &'b  Vec3) {
-    self.fbb_.push_slot_struct::<Vec3/* foo */>(Monster::VT_POS, pos);
+    self.fbb_.push_slot::<&Vec3/* foo */>(Monster::VT_POS, pos, None);
   }
   pub fn add_mana(&mut self, mana: i16) {
-    self.fbb_.push_slot_scalar::<i16>(Monster::VT_MANA, mana, 150);
+    self.fbb_.push_slot::<i16>(Monster::VT_MANA, mana, Some(150));
   }
   pub fn add_hp(&mut self, hp: i16) {
-    self.fbb_.push_slot_scalar::<i16>(Monster::VT_HP, hp, 100);
+    self.fbb_.push_slot::<i16>(Monster::VT_HP, hp, Some(100));
   }
   pub fn add_name(&mut self, name: flatbuffers::Offset<&'b  str>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_NAME, name);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_NAME, name, None);
   }
   pub fn add_inventory(&mut self, inventory: flatbuffers::Offset<flatbuffers::Vector<'b , u8>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_INVENTORY, inventory);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_INVENTORY, inventory, None);
   }
   pub fn add_color(&mut self, color: Color) {
-    self.fbb_.push_slot_scalar::<Color>(Monster::VT_COLOR, color, Color::Blue);
+    self.fbb_.push_slot::<Color>(Monster::VT_COLOR, color, Some(Color::Blue));
   }
   pub fn add_test_type(&mut self, test_type: Any) {
-    self.fbb_.push_slot_scalar::<Any>(Monster::VT_TEST_TYPE, test_type, Any::NONE);
+    self.fbb_.push_slot::<Any>(Monster::VT_TEST_TYPE, test_type, Some(Any::NONE));
   }
   pub fn add_test(&mut self, test: flatbuffers::Offset<flatbuffers::UnionMarker>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TEST, test);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TEST, test, None);
   }
   pub fn add_test4(&mut self, test4: flatbuffers::Offset<flatbuffers::Vector<'b , Test>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TEST4, test4);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TEST4, test4, None);
   }
   pub fn add_testarrayofstring(&mut self, testarrayofstring: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsUOffset<&'b  str>>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TESTARRAYOFSTRING, testarrayofstring, None);
   }
   pub fn add_testarrayoftables(&mut self, testarrayoftables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsUOffset<Monster<'b >>>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFTABLES, testarrayoftables);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TESTARRAYOFTABLES, testarrayoftables, None);
   }
   pub fn add_enemy(&mut self, enemy: flatbuffers::Offset<Monster<'b >>) {
-    self.fbb_.push_slot_offset_relative::<Monster>(Monster::VT_ENEMY, enemy);
+    self.fbb_.push_slot::<flatbuffers::Offset<Monster>>(Monster::VT_ENEMY, enemy, None);
   }
   pub fn add_testnestedflatbuffer(&mut self, testnestedflatbuffer: flatbuffers::Offset<flatbuffers::Vector<'b , u8>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TESTNESTEDFLATBUFFER, testnestedflatbuffer, None);
   }
   pub fn add_testempty(&mut self, testempty: flatbuffers::Offset<Stat<'b >>) {
-    self.fbb_.push_slot_offset_relative::<Stat>(Monster::VT_TESTEMPTY, testempty);
+    self.fbb_.push_slot::<flatbuffers::Offset<Stat>>(Monster::VT_TESTEMPTY, testempty, None);
   }
   pub fn add_testbool(&mut self, testbool: bool) {
-    self.fbb_.push_slot_scalar::<bool>(Monster::VT_TESTBOOL, testbool, false);
+    self.fbb_.push_slot::<bool>(Monster::VT_TESTBOOL, testbool, Some(false));
   }
   pub fn add_testhashs32_fnv1(&mut self, testhashs32_fnv1: i32) {
-    self.fbb_.push_slot_scalar::<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, 0);
+    self.fbb_.push_slot::<i32>(Monster::VT_TESTHASHS32_FNV1, testhashs32_fnv1, Some(0));
   }
   pub fn add_testhashu32_fnv1(&mut self, testhashu32_fnv1: u32) {
-    self.fbb_.push_slot_scalar::<u32>(Monster::VT_TESTHASHU32_FNV1, testhashu32_fnv1, 0);
+    self.fbb_.push_slot::<u32>(Monster::VT_TESTHASHU32_FNV1, testhashu32_fnv1, Some(0));
   }
   pub fn add_testhashs64_fnv1(&mut self, testhashs64_fnv1: i64) {
-    self.fbb_.push_slot_scalar::<i64>(Monster::VT_TESTHASHS64_FNV1, testhashs64_fnv1, 0);
+    self.fbb_.push_slot::<i64>(Monster::VT_TESTHASHS64_FNV1, testhashs64_fnv1, Some(0));
   }
   pub fn add_testhashu64_fnv1(&mut self, testhashu64_fnv1: u64) {
-    self.fbb_.push_slot_scalar::<u64>(Monster::VT_TESTHASHU64_FNV1, testhashu64_fnv1, 0);
+    self.fbb_.push_slot::<u64>(Monster::VT_TESTHASHU64_FNV1, testhashu64_fnv1, Some(0));
   }
   pub fn add_testhashs32_fnv1a(&mut self, testhashs32_fnv1a: i32) {
-    self.fbb_.push_slot_scalar::<i32>(Monster::VT_TESTHASHS32_FNV1A, testhashs32_fnv1a, 0);
+    self.fbb_.push_slot::<i32>(Monster::VT_TESTHASHS32_FNV1A, testhashs32_fnv1a, Some(0));
   }
   pub fn add_testhashu32_fnv1a(&mut self, testhashu32_fnv1a: u32) {
-    self.fbb_.push_slot_scalar::<u32>(Monster::VT_TESTHASHU32_FNV1A, testhashu32_fnv1a, 0);
+    self.fbb_.push_slot::<u32>(Monster::VT_TESTHASHU32_FNV1A, testhashu32_fnv1a, Some(0));
   }
   pub fn add_testhashs64_fnv1a(&mut self, testhashs64_fnv1a: i64) {
-    self.fbb_.push_slot_scalar::<i64>(Monster::VT_TESTHASHS64_FNV1A, testhashs64_fnv1a, 0);
+    self.fbb_.push_slot::<i64>(Monster::VT_TESTHASHS64_FNV1A, testhashs64_fnv1a, Some(0));
   }
   pub fn add_testhashu64_fnv1a(&mut self, testhashu64_fnv1a: u64) {
-    self.fbb_.push_slot_scalar::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, 0);
+    self.fbb_.push_slot::<u64>(Monster::VT_TESTHASHU64_FNV1A, testhashu64_fnv1a, Some(0));
   }
   pub fn add_testarrayofbools(&mut self, testarrayofbools: flatbuffers::Offset<flatbuffers::Vector<'b , bool>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TESTARRAYOFBOOLS, testarrayofbools, None);
   }
   pub fn add_testf(&mut self, testf: f32) {
-    self.fbb_.push_slot_scalar::<f32>(Monster::VT_TESTF, testf, 3.14159);
+    self.fbb_.push_slot::<f32>(Monster::VT_TESTF, testf, Some(3.14159));
   }
   pub fn add_testf2(&mut self, testf2: f32) {
-    self.fbb_.push_slot_scalar::<f32>(Monster::VT_TESTF2, testf2, 3.0);
+    self.fbb_.push_slot::<f32>(Monster::VT_TESTF2, testf2, Some(3.0));
   }
   pub fn add_testf3(&mut self, testf3: f32) {
-    self.fbb_.push_slot_scalar::<f32>(Monster::VT_TESTF3, testf3, 0.0);
+    self.fbb_.push_slot::<f32>(Monster::VT_TESTF3, testf3, Some(0.0));
   }
   pub fn add_testarrayofstring2(&mut self, testarrayofstring2: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsUOffset<&'b  str>>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TESTARRAYOFSTRING2, testarrayofstring2, None);
   }
   pub fn add_testarrayofsortedstruct(&mut self, testarrayofsortedstruct: flatbuffers::Offset<flatbuffers::Vector<'b , Ability>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, testarrayofsortedstruct, None);
   }
   pub fn add_flex(&mut self, flex: flatbuffers::Offset<flatbuffers::Vector<'b , u8>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_FLEX, flex);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_FLEX, flex, None);
   }
   pub fn add_test5(&mut self, test5: flatbuffers::Offset<flatbuffers::Vector<'b , Test>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_TEST5, test5);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_TEST5, test5, None);
   }
   pub fn add_vector_of_longs(&mut self, vector_of_longs: flatbuffers::Offset<flatbuffers::Vector<'b , i64>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_LONGS, vector_of_longs);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_LONGS, vector_of_longs, None);
   }
   pub fn add_vector_of_doubles(&mut self, vector_of_doubles: flatbuffers::Offset<flatbuffers::Vector<'b , f64>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_DOUBLES, vector_of_doubles, None);
   }
   pub fn add_parent_namespace_test(&mut self, parent_namespace_test: flatbuffers::Offset<super::InParentNamespace<'b >>) {
-    self.fbb_.push_slot_offset_relative::<super::InParentNamespace>(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test);
+    self.fbb_.push_slot::<flatbuffers::Offset<super::InParentNamespace>>(Monster::VT_PARENT_NAMESPACE_TEST, parent_namespace_test, None);
   }
   pub fn add_vector_of_referrables(&mut self, vector_of_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsUOffset<Referrable<'b >>>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_REFERRABLES, vector_of_referrables);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_REFERRABLES, vector_of_referrables, None);
   }
   pub fn add_single_weak_reference(&mut self, single_weak_reference: u64) {
-    self.fbb_.push_slot_scalar::<u64>(Monster::VT_SINGLE_WEAK_REFERENCE, single_weak_reference, 0);
+    self.fbb_.push_slot::<u64>(Monster::VT_SINGLE_WEAK_REFERENCE, single_weak_reference, Some(0));
   }
   pub fn add_vector_of_weak_references(&mut self, vector_of_weak_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_WEAK_REFERENCES, vector_of_weak_references);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_WEAK_REFERENCES, vector_of_weak_references, None);
   }
   pub fn add_vector_of_strong_referrables(&mut self, vector_of_strong_referrables: flatbuffers::Offset<flatbuffers::Vector<'b , flatbuffers::ForwardsUOffset<Referrable<'b >>>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_STRONG_REFERRABLES, vector_of_strong_referrables);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_STRONG_REFERRABLES, vector_of_strong_referrables, None);
   }
   pub fn add_co_owning_reference(&mut self, co_owning_reference: u64) {
-    self.fbb_.push_slot_scalar::<u64>(Monster::VT_CO_OWNING_REFERENCE, co_owning_reference, 0);
+    self.fbb_.push_slot::<u64>(Monster::VT_CO_OWNING_REFERENCE, co_owning_reference, Some(0));
   }
   pub fn add_vector_of_co_owning_references(&mut self, vector_of_co_owning_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_CO_OWNING_REFERENCES, vector_of_co_owning_references);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_CO_OWNING_REFERENCES, vector_of_co_owning_references, None);
   }
   pub fn add_non_owning_reference(&mut self, non_owning_reference: u64) {
-    self.fbb_.push_slot_scalar::<u64>(Monster::VT_NON_OWNING_REFERENCE, non_owning_reference, 0);
+    self.fbb_.push_slot::<u64>(Monster::VT_NON_OWNING_REFERENCE, non_owning_reference, Some(0));
   }
   pub fn add_vector_of_non_owning_references(&mut self, vector_of_non_owning_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
-    self.fbb_.push_slot_offset_relative(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, vector_of_non_owning_references);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, vector_of_non_owning_references, None);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
     let start = _fbb.start_table();
@@ -1359,40 +1359,40 @@ pub struct TypeAliasesBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
   pub fn add_i8_(&mut self, i8_: i8) {
-    self.fbb_.push_slot_scalar::<i8>(TypeAliases::VT_I8_, i8_, 0);
+    self.fbb_.push_slot::<i8>(TypeAliases::VT_I8_, i8_, Some(0));
   }
   pub fn add_u8_(&mut self, u8_: u8) {
-    self.fbb_.push_slot_scalar::<u8>(TypeAliases::VT_U8_, u8_, 0);
+    self.fbb_.push_slot::<u8>(TypeAliases::VT_U8_, u8_, Some(0));
   }
   pub fn add_i16_(&mut self, i16_: i16) {
-    self.fbb_.push_slot_scalar::<i16>(TypeAliases::VT_I16_, i16_, 0);
+    self.fbb_.push_slot::<i16>(TypeAliases::VT_I16_, i16_, Some(0));
   }
   pub fn add_u16_(&mut self, u16_: u16) {
-    self.fbb_.push_slot_scalar::<u16>(TypeAliases::VT_U16_, u16_, 0);
+    self.fbb_.push_slot::<u16>(TypeAliases::VT_U16_, u16_, Some(0));
   }
   pub fn add_i32_(&mut self, i32_: i32) {
-    self.fbb_.push_slot_scalar::<i32>(TypeAliases::VT_I32_, i32_, 0);
+    self.fbb_.push_slot::<i32>(TypeAliases::VT_I32_, i32_, Some(0));
   }
   pub fn add_u32_(&mut self, u32_: u32) {
-    self.fbb_.push_slot_scalar::<u32>(TypeAliases::VT_U32_, u32_, 0);
+    self.fbb_.push_slot::<u32>(TypeAliases::VT_U32_, u32_, Some(0));
   }
   pub fn add_i64_(&mut self, i64_: i64) {
-    self.fbb_.push_slot_scalar::<i64>(TypeAliases::VT_I64_, i64_, 0);
+    self.fbb_.push_slot::<i64>(TypeAliases::VT_I64_, i64_, Some(0));
   }
   pub fn add_u64_(&mut self, u64_: u64) {
-    self.fbb_.push_slot_scalar::<u64>(TypeAliases::VT_U64_, u64_, 0);
+    self.fbb_.push_slot::<u64>(TypeAliases::VT_U64_, u64_, Some(0));
   }
   pub fn add_f32_(&mut self, f32_: f32) {
-    self.fbb_.push_slot_scalar::<f32>(TypeAliases::VT_F32_, f32_, 0.0);
+    self.fbb_.push_slot::<f32>(TypeAliases::VT_F32_, f32_, Some(0.0));
   }
   pub fn add_f64_(&mut self, f64_: f64) {
-    self.fbb_.push_slot_scalar::<f64>(TypeAliases::VT_F64_, f64_, 0.0);
+    self.fbb_.push_slot::<f64>(TypeAliases::VT_F64_, f64_, Some(0.0));
   }
   pub fn add_v8(&mut self, v8: flatbuffers::Offset<flatbuffers::Vector<'b , i8>>) {
-    self.fbb_.push_slot_offset_relative(TypeAliases::VT_V8, v8);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(TypeAliases::VT_V8, v8, None);
   }
   pub fn add_vf64(&mut self, vf64: flatbuffers::Offset<flatbuffers::Vector<'b , f64>>) {
-    self.fbb_.push_slot_offset_relative(TypeAliases::VT_VF64, vf64);
+    self.fbb_.push_slot::<flatbuffers::Offset<_>>(TypeAliases::VT_VF64, vf64, None);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TypeAliasesBuilder<'a, 'b> {
     let start = _fbb.start_table();
