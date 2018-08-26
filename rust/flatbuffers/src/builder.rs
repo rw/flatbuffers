@@ -10,6 +10,39 @@ pub use vtable::*;
 use vtable_writer::*;
 pub use vector::*;
 
+pub trait Pushable  {
+    type Item: Sized;
+    fn do_write<'a>(dst: &'a mut [u8], rest: &'a [u8], x: &'a Self::Item) {
+        let sz = size_of::<Self::Item>();
+        assert_eq!(sz, dst.len());
+
+        let src = unsafe {
+            from_raw_parts(x as *const Self::Item as *const u8, sz)
+        };
+        dst.copy_from_slice(src);
+    }
+    fn size() -> usize {
+        size_of::<Self::Item>()
+    }
+
+}
+
+impl<T: EndianScalar> Pushable for T {
+    type Item=T;
+    fn do_write<'a>(dst: &'a mut [u8], rest: &'a [u8], x: &'a Self::Item) {
+        emplace_scalar::<Self::Item>(dst, *x);
+    }
+}
+
+impl<T> Pushable for Offset<T> {
+    type Item=Offset<T>;
+    fn do_write<'a>(dst: &'a mut [u8], rest: &'a [u8], x: &'a Self::Item) {
+        assert_eq!(dst.len(), SIZE_UOFFSET);
+        let n = (SIZE_UOFFSET + rest.len() - x.value() as usize) as UOffsetT;
+        emplace_scalar::<UOffsetT>(dst, n);
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {
     off: UOffsetT,
@@ -435,6 +468,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.track_min_align(elem_size);
         let s = self.get_size();
         self.fill(padding_bytes(s, elem_size));
+    }
+    pub fn push<X, T: Pushable<Item=X>>(&mut self, x: &X) -> UOffsetT {
+        let sz = T::size();
+        self.align(sz);
+        self.make_space(sz);
+        {
+            let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(sz);
+            T::do_write(dst, rest, t);
+        }
+        self.get_size() as UOffsetT
     }
     pub fn push_element_scalar<T: EndianScalar>(&mut self, t: T) -> UOffsetT {
         self.align(size_of::<T>());
