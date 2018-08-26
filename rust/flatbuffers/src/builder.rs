@@ -10,39 +10,6 @@ pub use vtable::*;
 use vtable_writer::*;
 pub use vector::*;
 
-//pub trait Pushable  {
-//    type Item: Sized;
-//    fn do_write<'a>(dst: &'a mut [u8], rest: &'a [u8], x: &'a Self::Item) {
-//        let sz = size_of::<Self::Item>();
-//        assert_eq!(sz, dst.len());
-//
-//        let src = unsafe {
-//            from_raw_parts(x as *const Self::Item as *const u8, sz)
-//        };
-//        dst.copy_from_slice(src);
-//    }
-//    fn size() -> usize {
-//        size_of::<Self::Item>()
-//    }
-//
-//}
-//
-//impl<T: EndianScalar> Pushable for T {
-//    type Item=T;
-//    fn do_write<'a>(dst: &'a mut [u8], rest: &'a [u8], x: &'a Self::Item) {
-//        emplace_scalar::<Self::Item>(dst, *x);
-//    }
-//}
-//
-//impl<T> Pushable for Offset<T> {
-//    type Item=Offset<T>;
-//    fn do_write<'a>(dst: &'a mut [u8], rest: &'a [u8], x: &'a Self::Item) {
-//        assert_eq!(dst.len(), SIZE_UOFFSET);
-//        let n = (SIZE_UOFFSET + rest.len() - x.value() as usize) as UOffsetT;
-//        emplace_scalar::<UOffsetT>(dst, n);
-//    }
-//}
-
 pub trait PushableMethod: Sized {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]);
     fn size(&self) -> usize {
