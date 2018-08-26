@@ -310,14 +310,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let elemsize = size_of::<Offset<T>>();
         self.start_vector(elemsize, items.len());
         for o in items.iter().rev() {
-            self.push_element_scalar_indirect_uoffset(o.value());
+            self.push(*o);
         }
         Offset::new(
             self.end_vector::<Offset<Vector<'fbb, ForwardsUOffset<T>>>>(items.len())
                 .value(),
         )
     }
-    pub fn create_vector_of_scalars<T: EndianScalar + 'fbb>(
+    pub fn create_vector_of_scalars<T: PushableMethod + EndianScalar + 'fbb>(
         &mut self,
         items: &[T],
     ) -> Offset<Vector<'fbb, T>> {
@@ -325,7 +325,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
         for x in items.iter().rev() {
-            self.push_element_scalar(*x);
+            self.push(*x);
         }
         Offset::new(self.end_vector::<T>(items.len()).value())
     }
@@ -567,30 +567,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         n as UOffsetT
     }
-    pub fn push_slot_scalar_indirect_uoffset(
-        &mut self,
-        slotoff: VOffsetT,
-        x: UOffsetT,
-        default: UOffsetT,
-    ) {
-        if x != default {
-            let off = self.push_element_scalar_indirect_uoffset(x);
-            self.track_field(slotoff, off);
-        }
-    }
-    pub fn push_element_scalar_indirect_uoffset(&mut self, x: UOffsetT) -> UOffsetT {
-        let x = self.refer_to(x);
-        return self.push_element_scalar(x);
-    }
-    pub fn push_slot_struct<T: Sized>(&mut self, slotoff: VOffsetT, x: &T) {
-        // using to_bytes as a trait makes it easier to mix references into T
-        self.assert_nested("");
-        let bytes = to_bytes(x);
-        self.align(bytes.len());
-        self.push_bytes(bytes);
-        let sz = self.get_size() as UOffsetT;
-        self.track_field(slotoff, sz);
-    }
     // Offsets initially are relative to the end of the buffer (downwards).
     // This function converts them to be relative to the current location
     // in the buffer (when stored here), pointing upwards.
@@ -602,24 +578,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         debug_assert!(off <= self.get_size() as UOffsetT);
         self.get_size() as UOffsetT - off + SIZE_UOFFSET as UOffsetT
     }
-    pub fn push_slot_offset_relative<T>(&mut self, slotoff: VOffsetT, x: Offset<T>) {
-        if x.value() == 0 {
-            return;
-        }
-        let rel_off = self.refer_to(x.value());
-        self.push_slot_scalar::<UOffsetT>(slotoff, rel_off, 0);
-        //AddElement(field, ReferTo(off.o), static_cast<uoffset_t>(0));
-        //self.push_uoffset_relative(x.value());
-        //self.track_field(slotoff, off);
-        //self.push_slot_scalar::<u32>(slotoff, x.value(), 0)
-    }
-    pub fn push_slot_scalar<T: EndianScalar>( &mut self, slotoff: VOffsetT, x: T, default: T) {
-        if x != default {
-            let off = self.push_element_scalar(x);
-            self.track_field(slotoff, off);
-        }
-    }
-
     pub fn make_space(&mut self, want: usize) -> usize {
         self.ensure_capacity(want);
         self.cur_idx -= want;
