@@ -43,16 +43,8 @@ pub use vector::*;
 //    }
 //}
 
-pub trait PushableMethod: Sized + PartialEq  {
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
-        let sz = size_of::<Self>();
-        assert_eq!(sz, dst.len());
-
-        let src = unsafe {
-            from_raw_parts(self as *const Self as *const u8, sz)
-        };
-        dst.copy_from_slice(src);
-    }
+pub trait PushableMethod: Sized {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]);
     fn size(&self) -> usize {
         size_of::<Self>()
     }
@@ -545,7 +537,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         self.get_size() as UOffsetT
     }
-    pub fn push_slot<X: PushableMethod>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
+    pub fn push_slot<X: PushableMethod + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
         if d.is_some() && x == d.unwrap() {
             return;
         }

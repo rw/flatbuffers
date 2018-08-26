@@ -87,7 +87,7 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     let nested_union_mon = {
         let name = builder.create_string("Fred");
         let table_start = builder.start_table();
-        builder.push_slot_offset_relative(my_game::example::Monster::VT_NAME, name);
+        builder.push_slot(my_game::example::Monster::VT_NAME, name, None);
         builder.end_table(table_start)
     };
     let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
@@ -102,7 +102,7 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     // begin building
 
     let table_start = builder.start_table();
-    builder.push_slot_scalar::<i16>(my_game::example::Monster::VT_HP, 80, 100);
+    builder.push_slot::<i16>(my_game::example::Monster::VT_HP, 80, Some(100));
     builder.push_slot_offset_relative::<&str>(my_game::example::Monster::VT_NAME, name);
     builder.push_slot_struct(my_game::example::Monster::VT_POS, &pos);
     builder.push_slot_scalar::<u8>(my_game::example::Monster::VT_TEST_TYPE, my_game::example::Any::Monster as u8, 0);
