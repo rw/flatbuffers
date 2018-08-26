@@ -51,6 +51,7 @@ pub trait PushableMethod: Sized {
 
 }
 
+#[macro_export]
 macro_rules! impl_pushable_method_for_endian_scalar {
     ($ty:ident) => (
         impl PushableMethod for $ty {

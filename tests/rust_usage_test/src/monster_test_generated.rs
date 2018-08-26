@@ -184,6 +184,11 @@ impl flatbuffers::EndianScalar for Color {
     unsafe { *p }
   }
 }
+impl flatbuffers::PushableMethod for Color {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::emplace_scalar::<Color>(dst, *self);
+    }
+}
 
 #[allow(non_camel_case_types)]
 const ENUM_VALUES_COLOR:[Color; 3] = [
@@ -240,6 +245,11 @@ impl flatbuffers::EndianScalar for Any {
     let p = &n as *const u8 as *const Any;
     unsafe { *p }
   }
+}
+impl flatbuffers::PushableMethod for Any {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::emplace_scalar::<Any>(dst, *self);
+    }
 }
 
 #[allow(non_camel_case_types)]

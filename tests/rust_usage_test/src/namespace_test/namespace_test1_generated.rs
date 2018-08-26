@@ -50,6 +50,11 @@ impl flatbuffers::EndianScalar for EnumInNestedNS {
     unsafe { *p }
   }
 }
+impl flatbuffers::PushableMethod for EnumInNestedNS {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::emplace_scalar::<EnumInNestedNS>(dst, *self);
+    }
+}
 
 #[allow(non_camel_case_types)]
 const ENUM_VALUES_ENUM_IN_NESTED_N_S:[EnumInNestedNS; 3] = [

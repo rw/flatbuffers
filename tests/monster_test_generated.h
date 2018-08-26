@@ -107,35 +107,6 @@ inline const char *EnumNameColor(Color e) {
   return EnumNamesColor()[index];
 }
 
-enum ColorBig {
-  ColorBig_Red = 0,
-  ColorBig_Green = 1,
-  ColorBig_MIN = ColorBig_Red,
-  ColorBig_MAX = ColorBig_Green
-};
-
-inline const ColorBig (&EnumValuesColorBig())[2] {
-  static const ColorBig values[] = {
-    ColorBig_Red,
-    ColorBig_Green
-  };
-  return values;
-}
-
-inline const char * const *EnumNamesColorBig() {
-  static const char * const names[] = {
-    "Red",
-    "Green",
-    nullptr
-  };
-  return names;
-}
-
-inline const char *EnumNameColorBig(ColorBig e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesColorBig()[index];
-}
-
 enum Any {
   Any_NONE = 0,
   Any_Monster = 1,
@@ -2244,24 +2215,6 @@ inline const flatbuffers::TypeTable *ColorTypeTable() {
   };
   static const flatbuffers::TypeTable tt = {
     flatbuffers::ST_ENUM, 3, type_codes, type_refs, values, names
-  };
-  return &tt;
-}
-
-inline const flatbuffers::TypeTable *ColorBigTypeTable() {
-  static const flatbuffers::TypeCode type_codes[] = {
-    { flatbuffers::ET_BOOL, 0, 0 },
-    { flatbuffers::ET_BOOL, 0, 0 }
-  };
-  static const flatbuffers::TypeFunction type_refs[] = {
-    ColorBigTypeTable
-  };
-  static const char * const names[] = {
-    "Red",
-    "Green"
-  };
-  static const flatbuffers::TypeTable tt = {
-    flatbuffers::ST_ENUM, 2, type_codes, type_refs, nullptr, names
   };
   return &tt;
 }

@@ -103,13 +103,13 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
 
     let table_start = builder.start_table();
     builder.push_slot::<i16>(my_game::example::Monster::VT_HP, 80, Some(100));
-    builder.push_slot_offset_relative::<&str>(my_game::example::Monster::VT_NAME, name);
+    builder.push_slot(my_game::example::Monster::VT_NAME, name, None);
     builder.push_slot_struct(my_game::example::Monster::VT_POS, &pos);
-    builder.push_slot_scalar::<u8>(my_game::example::Monster::VT_TEST_TYPE, my_game::example::Any::Monster as u8, 0);
-    builder.push_slot_offset_relative(my_game::example::Monster::VT_TEST, nested_union_mon);
-    builder.push_slot_offset_relative(my_game::example::Monster::VT_INVENTORY, inv);
-    builder.push_slot_offset_relative(my_game::example::Monster::VT_TEST4, test4);
-    builder.push_slot_offset_relative(my_game::example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring);
+    builder.push_slot(my_game::example::Monster::VT_TEST_TYPE, my_game::example::Any::Monster, Some(my_game::example::Any::NONE));
+    builder.push_slot(my_game::example::Monster::VT_TEST, nested_union_mon, None);
+    builder.push_slot(my_game::example::Monster::VT_INVENTORY, inv, None);
+    builder.push_slot(my_game::example::Monster::VT_TEST4, test4, None);
+    builder.push_slot(my_game::example::Monster::VT_TESTARRAYOFSTRING, testarrayofstring, None);
     let root = builder.end_table(table_start);
     builder.finish(root, Some(my_game::example::MONSTER_IDENTIFIER));
 }
