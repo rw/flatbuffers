@@ -622,7 +622,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "    unsafe { *p }";
     code_ += "  }";
     code_ += "}";
-    //code_ += "impl_pushable_method_for_endian_scalar!({{ENUM_NAME}});";
+    code_ += "";
     code_ += "impl flatbuffers::PushableMethod for {{ENUM_NAME}} {";
     code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
     code_ += "        flatbuffers::emplace_scalar::<{{ENUM_NAME}}>(dst, *self);";
@@ -1631,6 +1631,20 @@ class RustGenerator : public BaseGenerator {
     }
     code_ += "}";
     code_ += "";
+    code_ += "impl<'b> flatbuffers::PushableMethod for &'b {{STRUCT_NAME}} {";
+    code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
+    code_ += "        let sz = ::std::mem::size_of::<{{STRUCT_NAME}}>();";
+    code_ += "        assert_eq!(sz, dst.len());";
+    code_ += "        let src = unsafe {";
+    code_ += "            ::std::slice::from_raw_parts(*self as *const {{STRUCT_NAME}} as *const u8, sz)";
+    code_ += "        };";
+    code_ += "        dst.copy_from_slice(src);";
+    code_ += "    }";
+    code_ += "    fn size(&self) -> usize {";
+    code_ += "        ::std::mem::size_of::<{{STRUCT_NAME}}>()";
+    code_ += "    }";
+    code_ += "}";
+    code_ += "";
   }
 
   // Set up the correct namespace. This opens a namespace if the current
@@ -1676,6 +1690,7 @@ class RustGenerator : public BaseGenerator {
       code_ += "";
       //code_ += "  #[macro_use(impl_pushable_method_for_endian_scalar, "
       //         "impl_pushable_method_for_struct_reference)]";
+      //code_ += "  #[macro_use(impl_pushable_method_for_struct_reference)]";
       code_ += "  extern crate flatbuffers;";
       code_ += "  use self::flatbuffers::EndianScalar;";
     }

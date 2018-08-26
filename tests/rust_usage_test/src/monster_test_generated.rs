@@ -184,6 +184,7 @@ impl flatbuffers::EndianScalar for Color {
     unsafe { *p }
   }
 }
+
 impl flatbuffers::PushableMethod for Color {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Color>(dst, *self);
@@ -246,6 +247,7 @@ impl flatbuffers::EndianScalar for Any {
     unsafe { *p }
   }
 }
+
 impl flatbuffers::PushableMethod for Any {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Any>(dst, *self);
@@ -301,6 +303,20 @@ impl Test {
   }
 }
 
+impl<'b> flatbuffers::PushableMethod for &'b Test {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        let sz = ::std::mem::size_of::<Test>();
+        assert_eq!(sz, dst.len());
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const Test as *const u8, sz)
+        };
+        dst.copy_from_slice(src);
+    }
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Test>()
+    }
+}
+
 // Size STRUCT_BYTE_SIZE, aligned to 16
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -352,6 +368,20 @@ impl Vec3 {
   }
 }
 
+impl<'b> flatbuffers::PushableMethod for &'b Vec3 {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        let sz = ::std::mem::size_of::<Vec3>();
+        assert_eq!(sz, dst.len());
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const Vec3 as *const u8, sz)
+        };
+        dst.copy_from_slice(src);
+    }
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Vec3>()
+    }
+}
+
 // Size STRUCT_BYTE_SIZE, aligned to 4
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -375,6 +405,20 @@ impl Ability {
   pub fn distance<'a>(&'a self) -> u32 {
     self.distance_.from_little_endian()
   }
+}
+
+impl<'b> flatbuffers::PushableMethod for &'b Ability {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        let sz = ::std::mem::size_of::<Ability>();
+        assert_eq!(sz, dst.len());
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const Ability as *const u8, sz)
+        };
+        dst.copy_from_slice(src);
+    }
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Ability>()
+    }
 }
 
 pub enum TestSimpleTableWithEnumOffset {}

@@ -50,6 +50,7 @@ impl flatbuffers::EndianScalar for EnumInNestedNS {
     unsafe { *p }
   }
 }
+
 impl flatbuffers::PushableMethod for EnumInNestedNS {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<EnumInNestedNS>(dst, *self);
@@ -98,6 +99,20 @@ impl StructInNestedNS {
   pub fn b<'a>(&'a self) -> i32 {
     self.b_.from_little_endian()
   }
+}
+
+impl<'b> flatbuffers::PushableMethod for &'b StructInNestedNS {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        let sz = ::std::mem::size_of::<StructInNestedNS>();
+        assert_eq!(sz, dst.len());
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const StructInNestedNS as *const u8, sz)
+        };
+        dst.copy_from_slice(src);
+    }
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<StructInNestedNS>()
+    }
 }
 
 pub enum TableInNestedNSOffset {}

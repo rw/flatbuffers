@@ -539,6 +539,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.get_size() as UOffsetT
     }
     pub fn push_slot<X: PushableMethod + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
+        self.assert_nested("push_slot must be called after start_table");
+
         if d.is_some() && x == d.unwrap() {
             return;
         }

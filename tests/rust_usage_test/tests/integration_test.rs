@@ -104,7 +104,7 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     let table_start = builder.start_table();
     builder.push_slot::<i16>(my_game::example::Monster::VT_HP, 80, Some(100));
     builder.push_slot(my_game::example::Monster::VT_NAME, name, None);
-    builder.push_slot_struct(my_game::example::Monster::VT_POS, &pos);
+    builder.push_slot(my_game::example::Monster::VT_POS, &pos, None);
     builder.push_slot(my_game::example::Monster::VT_TEST_TYPE, my_game::example::Any::Monster, Some(my_game::example::Any::NONE));
     builder.push_slot(my_game::example::Monster::VT_TEST, nested_union_mon, None);
     builder.push_slot(my_game::example::Monster::VT_INVENTORY, inv, None);
@@ -775,17 +775,17 @@ mod roundtrip_table {
                 let f = flatbuffers::field_index_to_field_offset(j);
 
                 match choice {
-                    0 => {builder.push_slot_scalar::<bool>(f, bool_val, false);}
-                    1 => {builder.push_slot_scalar::<i8>(f, char_val, 0);}
-                    2 => {builder.push_slot_scalar::<u8>(f, uchar_val, 0);}
-                    3 => {builder.push_slot_scalar::<i16>(f, short_val, 0);}
-                    4 => {builder.push_slot_scalar::<u16>(f, ushort_val, 0);}
-                    5 => {builder.push_slot_scalar::<i32>(f, int_val, 0);}
-                    6 => {builder.push_slot_scalar::<u32>(f, uint_val, 0);}
-                    7 => {builder.push_slot_scalar::<i64>(f, long_val, 0);}
-                    8 => {builder.push_slot_scalar::<u64>(f, ulong_val, 0);}
-                    9 => {builder.push_slot_scalar::<f32>(f, float_val, 0.0);}
-                    10 => {builder.push_slot_scalar::<f64>(f, double_val, 0.0);}
+                    0 => {builder.push_slot::<bool>(f, bool_val, Some(false));}
+                    1 => {builder.push_slot::<i8>(f, char_val, Some(0));}
+                    2 => {builder.push_slot::<u8>(f, uchar_val, Some(0));}
+                    3 => {builder.push_slot::<i16>(f, short_val, Some(0));}
+                    4 => {builder.push_slot::<u16>(f, ushort_val, Some(0));}
+                    5 => {builder.push_slot::<i32>(f, int_val, Some(0));}
+                    6 => {builder.push_slot::<u32>(f, uint_val, Some(0));}
+                    7 => {builder.push_slot::<i64>(f, long_val, Some(0));}
+                    8 => {builder.push_slot::<u64>(f, ulong_val, Some(0));}
+                    9 => {builder.push_slot::<f32>(f, float_val, Some(0.0));}
+                    10 => {builder.push_slot::<f64>(f, double_val, Some(0.0));}
                     _ => { panic!("unknown choice: {}", choice); }
                 }
             }
@@ -859,7 +859,7 @@ mod roundtrip_table {
             let table_start = b.start_table();
 
             for i in 0..xs.len() {
-                b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+                b.push_slot(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i], None);
             }
             let root = b.end_table(table_start);
             b.finish_minimal(root);
@@ -893,7 +893,7 @@ mod roundtrip_table {
             let table_start = b.start_table();
 
             for i in 0..xs.len() {
-                b.push_slot_offset_relative(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i]);
+                b.push_slot(fi2fo(i as flatbuffers::VOffsetT), str_offsets[i], None);
             }
             let root = b.end_table(table_start);
             b.finish_minimal(root);
@@ -1147,9 +1147,10 @@ mod builder_asserts {
         #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct foo { }
+        impl_pushable_method_for_struct_reference!(foo);
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let x = foo{};
-        b.push_slot_struct(0, &x);
+        b.push_slot(0, &x, None);
     }
 
     #[test]
@@ -1496,12 +1497,12 @@ mod vtable_deduplication {
     fn two_tables_with_two_conveniently_sized_inline_elements_are_deduplicated() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let start0 = b.start_table();
-        b.push_slot_scalar::<u64>(fi2fo(0), 100, 0);
-        b.push_slot_scalar::<u32>(fi2fo(1), 101, 0);
+        b.push_slot::<u64>(fi2fo(0), 100, Some(0));
+        b.push_slot::<u32>(fi2fo(1), 101, Some(0));
         b.end_table(start0);
         let start1 = b.start_table();
-        b.push_slot_scalar::<u64>(fi2fo(0), 200, 0);
-        b.push_slot_scalar::<u32>(fi2fo(1), 201, 0);
+        b.push_slot::<u64>(fi2fo(0), 200, Some(0));
+        b.push_slot::<u32>(fi2fo(1), 201, Some(0));
         b.end_table(start1);
         check(&b, &[
               240, 255, 255, 255, // forwards offset to vtable
@@ -1525,8 +1526,8 @@ mod vtable_deduplication {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         for _ in 0..1000 {
         let start = b.start_table();
-            b.push_slot_scalar::<u8>(fi2fo(0), 100, 0);
-            b.push_slot_scalar::<u32>(fi2fo(1), 101, 0);
+            b.push_slot::<u8>(fi2fo(0), 100, Some(0));
+            b.push_slot::<u32>(fi2fo(1), 101, Some(0));
             b.end_table(start);
         }
         assert!(b.num_written_vtables() <= 10);
@@ -1785,7 +1786,7 @@ mod byte_layouts {
         b.start_vector(flatbuffers::SIZE_U8, 0);
         let vecend = b.end_vector::<&u8>(0);
         let off = b.start_table();
-        b.push_slot_offset_relative(fi2fo(0), vecend);
+        b.push_slot(fi2fo(0), vecend, None);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
@@ -1895,7 +1896,7 @@ mod byte_layouts {
         b.push(66i8);
         let vecend = b.end_vector::<&FooStruct>(2);
         let off = b.start_table();
-        b.push_slot_scalar_indirect_uoffset(fi2fo(0), vecend.value(), 0);
+        b.push_slot(fi2fo(0), vecend, None);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
