@@ -201,6 +201,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn num_written_vtables(&self) -> usize {
         self.written_vtable_revpos.len()
     }
+    pub fn get_active_buf_slice<'a>(&'a self) -> &'a [u8] {
+        &self.owned_buf[self.cur_idx..]
+    }
 
     fn track_field(&mut self, slot_off: VOffsetT, off: UOffsetT) {
         let fl = FieldLoc {
@@ -217,9 +220,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.field_locs.clear();
 
         Offset::new(self.get_size() as UOffsetT)
-    }
-    pub fn get_active_buf_slice<'a>(&'a self) -> &'a [u8] {
-        &self.owned_buf[self.cur_idx..]
     }
     fn grow_owned_buf(&mut self) {
         let starting_active_size = self.get_size();
@@ -278,9 +278,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
         self.rev_cur_idx()
     }
-    pub fn flip_forwards(&self, x: UOffsetT) -> UOffsetT {
-        self.get_size() as UOffsetT - x
-    }
     // Offset relative to the end of the buffer.
     pub fn rev_cur_idx(&self) -> UOffsetT {
         (self.owned_buf.len() - self.cur_idx) as UOffsetT
@@ -293,9 +290,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn get_size(&self) -> usize {
         self.owned_buf.len() - self.cur_idx as usize
-    }
-    fn fill_big(&mut self, zero_pad_bytes: usize) {
-        self.fill(zero_pad_bytes);
     }
     fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
@@ -403,11 +397,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // by the offsets themselves. In reverse:
         // Include space for the last offset and ensure empty tables have a
         // minimum size.
-        let vtable_len = max(
-            self.max_voffset + SIZE_VOFFSET as VOffsetT,
-            field_index_to_field_offset(0),
-        ) as usize;
-        self.fill_big(vtable_len);
+        let vtable_len = max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
+                             field_index_to_field_offset(0)) as usize;
+        self.fill(vtable_len);
         let table_object_size = object_vtable_revloc - table_tail_revloc;
         debug_assert!(table_object_size < 0x10000); // Vtable use 16bit offsets.
 
@@ -419,11 +411,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             vtfw.write_object_inline_size(table_object_size as VOffsetT);
             for &fl in self.field_locs.iter() {
                 let pos: VOffsetT = (object_vtable_revloc - fl.off) as VOffsetT;
-                debug_assert_eq!(
-                    vtfw.get_field_offset(fl.id),
-                    0,
-                    "tried to write a vtable field multiple times"
-                );
+                debug_assert_eq!(vtfw.get_field_offset(fl.id),
+                                 0,
+                                 "tried to write a vtable field multiple times");
                 vtfw.write_field_offset(fl.id, pos);
             }
         }
@@ -578,8 +568,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         want
     }
     fn unused_ready_space(&self) -> usize {
-        debug_assert!(self.owned_buf.len() >= self.get_size());
-        self.owned_buf.len() - self.get_size()
+        self.cur_idx
     }
     pub fn finished_bytes(&self) -> &[u8] {
         self.assert_finished();

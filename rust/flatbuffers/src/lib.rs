@@ -25,3 +25,4 @@ pub use vtable_writer::*;
 // TODO(rw): figure out better trait bounds for implementing Follow on
 //           EndianScalar and GeneratedStruct
 // TODO(rw): use macros to impl EndianScalar and as_slice on primitives
+// TODO(rw): split fill ops in builder into fill_small, fill_big like in C++
