@@ -15,17 +15,22 @@ pub trait PushableMethod: Sized {
     fn size(&self) -> usize {
         size_of::<Self>()
     }
+    //fn align(&self) -> (usize) {
+    //    (self.size(), self.size())
+    //}
 
 }
 
 impl<'b> PushableMethod for &'b [u8] {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        debug_assert_eq!(dst.len(), self.len());
         dst.copy_from_slice(self);
     }
     fn size(&self) -> usize {
         self.len()
     }
+    //fn align(&self) -> (usize, usize) {
+    //    (self.len(), SIZE_UOFFSET)
+    //}
 }
 
 #[macro_export]
@@ -499,9 +504,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     fn align(&mut self, elem_size: usize) {
-        self.track_min_align(elem_size);
-        let s = self.get_size();
-        self.fill(padding_bytes(s, elem_size));
+        self.pre_align(0, elem_size);
+        //self.track_min_align(elem_size);
+        //let s = self.get_size();
+        //self.fill(padding_bytes(s, elem_size));
     }
     pub fn push<X: PushableMethod>(&mut self, x: X) -> UOffsetT {
         let sz = x.size();
