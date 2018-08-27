@@ -1545,6 +1545,20 @@ class RustGenerator : public BaseGenerator {
 
     // Impl the dummy GeneratedStruct trait to get a free impl of Follow:
     code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
+    code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
+    code_ += "  type Inner = &'a {{STRUCT_NAME}};";
+    code_ += "  #[inline(always)]";
+    code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "    flatbuffers::impl_follow_struct::<{{STRUCT_NAME}}>(buf, loc)";
+    code_ += "  }";
+    code_ += "}";
+    code_ += "impl<'a> flatbuffers::Follow<'a> for &'a {{STRUCT_NAME}} {";
+    code_ += "  type Inner = &'a {{STRUCT_NAME}};";
+    code_ += "  #[inline(always)]";
+    code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "    flatbuffers::impl_follow_struct::<{{STRUCT_NAME}}>(buf, loc)";
+    code_ += "  }";
+    code_ += "}";
 
     // Generate GetFullyQualifiedName
     code_ += "";
