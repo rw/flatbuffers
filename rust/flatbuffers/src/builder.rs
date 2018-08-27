@@ -546,24 +546,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn push_slot<X: PushableMethod + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
         self.assert_nested("push_slot must be called after start_table");
-
         if d.is_some() && x == d.unwrap() {
             return;
         }
-        let off = self.push(x);
-        self.track_field(slotoff, off);
+        self.push_slot_always(slotoff, x);
     }
-    pub fn push_slot_default<X: PushableMethod + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: X) {
-        self.assert_nested("push_slot must be called after start_table");
-
-        if x == d {
-            return;
-        }
-        let off = self.push(x);
-        self.track_field(slotoff, off);
-    }
-    pub fn push_slot_always<X: PushableMethod + PartialEq>(&mut self, slotoff: VOffsetT, x: X) {
-        self.assert_nested("push_slot must be called after start_table");
+    pub fn push_slot_always<X: PushableMethod>(&mut self, slotoff: VOffsetT, x: X) {
+        self.assert_nested("push_slot_always must be called after start_table");
         let off = self.push(x);
         self.track_field(slotoff, off);
     }

@@ -916,10 +916,16 @@ class RustGenerator : public BaseGenerator {
       case FullType::Integer:
       case FullType::Float: {
         const auto typname = GetTypeWire(field.value.type, "", "", false);
-        return "self.fbb_.push_slot_default::<" + typname + ">";
+        return "self.fbb_.push_slot::<" + typname + ">";
       }
       case FullType::Bool: {
-        return "self.fbb_.push_slot_default::<bool>";
+        return "self.fbb_.push_slot::<bool>";
+      }
+
+      case FullType::EnumKey:
+      case FullType::UnionKey: {
+        const auto underlying_typname = GetTypeBasic(type, true);
+        return "self.fbb_.push_slot::<" + underlying_typname + ">";
       }
 
       case FullType::Struct: {
@@ -930,12 +936,6 @@ class RustGenerator : public BaseGenerator {
       case FullType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
         return "self.fbb_.push_slot_always::<flatbuffers::Offset<" + typname + ">>";
-      }
-
-      case FullType::EnumKey:
-      case FullType::UnionKey: {
-        const auto underlying_typname = GetTypeBasic(type, true);
-        return "self.fbb_.push_slot_default::<" + underlying_typname + ">";
       }
 
       case FullType::UnionValue:
@@ -1361,7 +1361,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         if (is_scalar) {
           code_.SetValue("FIELD_DEFAULT_VALUE", TableBuilderAddFuncDefaultValue(field));
-          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, {{FIELD_DEFAULT_VALUE}});";
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, Some({{FIELD_DEFAULT_VALUE}}));";
         } else {
           code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}});";
         }

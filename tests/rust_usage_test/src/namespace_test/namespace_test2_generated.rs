@@ -85,7 +85,7 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
     self.fbb_.push_slot_always::<flatbuffers::Offset<namespace_b::TableInNestedNS>>(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
   pub fn add_foo_enum(&mut self, foo_enum: namespace_b::EnumInNestedNS) {
-    self.fbb_.push_slot_default::<namespace_b::EnumInNestedNS>(TableInFirstNS::VT_FOO_ENUM, foo_enum, namespace_b::EnumInNestedNS::A);
+    self.fbb_.push_slot::<namespace_b::EnumInNestedNS>(TableInFirstNS::VT_FOO_ENUM, foo_enum, Some(namespace_b::EnumInNestedNS::A));
   }
   pub fn add_foo_struct(&mut self, foo_struct: &'b  namespace_b::StructInNestedNS) {
     self.fbb_.push_slot_always::<&namespace_b::StructInNestedNS/* foo */>(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
