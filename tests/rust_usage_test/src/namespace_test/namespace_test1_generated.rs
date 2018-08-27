@@ -85,15 +85,7 @@ pub struct StructInNestedNS {
   a_: i32,
   b_: i32,
 } // pub struct StructInNestedNS
-impl flatbuffers::EndianSafeFollow for StructInNestedNS {}
-//type SliceOfStructInNestedNS<'a> = &'a [StructInNestedNS];
-//impl<'a> flatbuffers::Follow<'a> for SliceOfStructInNestedNS<'a> {
-//    type Inner = &'a [StructInNestedNS];
-//    #[inline(always)]
-//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-//        flatbuffers::follow_slice_helper::<StructInNestedNS>(buf, loc)
-//    }
-//}
+impl flatbuffers::GeneratedStruct for StructInNestedNS {}
 impl<'a> flatbuffers::Follow<'a> for StructInNestedNS {
   type Inner = &'a StructInNestedNS;
   #[inline(always)]

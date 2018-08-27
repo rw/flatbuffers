@@ -1088,7 +1088,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self._tab.get::<flatbuffers::ForwardsUOffset<&[" + typname + "]>>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<" + typname + ">>>(" + offset_name + ", None)";
         //return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None)";
       }
       case FullType::VectorOfTable: {
@@ -1544,15 +1544,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "} // pub struct {{STRUCT_NAME}}";
 
     // Impl the dummy GeneratedStruct trait to get a free impl of Follow:
-    code_ += "impl flatbuffers::EndianSafeFollow for {{STRUCT_NAME}} {}";
-    code_ += "//type SliceOf{{STRUCT_NAME}}<'a> = &'a [{{STRUCT_NAME}}];";
-    code_ += "//impl<'a> flatbuffers::Follow<'a> for SliceOf{{STRUCT_NAME}}<'a> {";
-    code_ += "//    type Inner = &'a [{{STRUCT_NAME}}];";
-    code_ += "//    #[inline(always)]";
-    code_ += "//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
-    code_ += "//        flatbuffers::follow_slice_helper::<{{STRUCT_NAME}}>(buf, loc)";
-    code_ += "//    }";
-    code_ += "//}";
+    code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
     code_ += "  type Inner = &'a {{STRUCT_NAME}};";
     code_ += "  #[inline(always)]";
