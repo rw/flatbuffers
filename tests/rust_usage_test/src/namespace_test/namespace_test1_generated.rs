@@ -169,6 +169,7 @@ pub struct TableInNestedNSBuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> TableInNestedNSBuilder<'a, 'b> {
+  #[inline(always)]
   pub fn add_foo(&mut self, foo: i32) {
     self.fbb_.push_slot::<i32>(TableInNestedNS::VT_FOO, foo, Some(0));
   }

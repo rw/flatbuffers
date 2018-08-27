@@ -35,6 +35,20 @@ pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut
     dst.copy_from_slice(src);
 }
 
+//impl<'b, T: PushableMethod + 'b> PushableMethod for &'b [T] {
+//    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+//        let l = self.len() as UOffsetT;
+//        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
+//        dst[SIZE_UOFFSET..].copy_from_slice(self);
+//    }
+//    fn size(&self) -> usize {
+//        SIZE_UOFFSET + self.len() * T::size()
+//    }
+//    fn align_params(&self) -> AlignParams {
+//        AlignParams{len: self.size(), alignment: SIZE_UOFFSET}
+//    }
+//}
+
 impl<'b> PushableMethod for &'b [u8] {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let l = self.len() as UOffsetT;
@@ -320,6 +334,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             self.end_vector::<Offset<Vector<'fbb, ForwardsUOffset<T>>>>(items.len())
                 .value(),
         )
+    }
+    pub fn create_vector<'a, T: PushableMethod + Clone + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T>> {
+        let elemsize = size_of::<T>();
+        self.start_vector(elemsize, items.len());
+        for i in (0..items.len()).rev() {
+            self.push(items[i].clone());
+        }
+        Offset::new(self.end_vector::<T>(items.len()).value())
     }
     pub fn create_vector_of_scalars<T: PushableMethod + EndianScalar + 'fbb>(
         &mut self,

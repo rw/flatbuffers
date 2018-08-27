@@ -81,12 +81,15 @@ pub struct TableInFirstNSBuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
+  #[inline(always)]
   pub fn add_foo_table(&mut self, foo_table: flatbuffers::Offset<namespace_b::TableInNestedNS<'b >>) {
     self.fbb_.push_slot_always::<flatbuffers::Offset<namespace_b::TableInNestedNS>>(TableInFirstNS::VT_FOO_TABLE, foo_table);
   }
+  #[inline(always)]
   pub fn add_foo_enum(&mut self, foo_enum: namespace_b::EnumInNestedNS) {
     self.fbb_.push_slot::<namespace_b::EnumInNestedNS>(TableInFirstNS::VT_FOO_ENUM, foo_enum, Some(namespace_b::EnumInNestedNS::A));
   }
+  #[inline(always)]
   pub fn add_foo_struct(&mut self, foo_struct: &'b  namespace_b::StructInNestedNS) {
     self.fbb_.push_slot_always::<&namespace_b::StructInNestedNS/* foo */>(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
@@ -159,6 +162,7 @@ pub struct SecondTableInABuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
+  #[inline(always)]
   pub fn add_refer_to_c(&mut self, refer_to_c: flatbuffers::Offset<super::namespace_c::TableInC<'b >>) {
     self.fbb_.push_slot_always::<flatbuffers::Offset<super::namespace_c::TableInC>>(SecondTableInA::VT_REFER_TO_C, refer_to_c);
   }
@@ -252,9 +256,11 @@ pub struct TableInCBuilder<'a: 'b, 'b> {
   start_: flatbuffers::Offset<flatbuffers::TableOffset>,
 }
 impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
+  #[inline(always)]
   pub fn add_refer_to_a1(&mut self, refer_to_a1: flatbuffers::Offset<super::namespace_a::TableInFirstNS<'b >>) {
     self.fbb_.push_slot_always::<flatbuffers::Offset<super::namespace_a::TableInFirstNS>>(TableInC::VT_REFER_TO_A1, refer_to_a1);
   }
+  #[inline(always)]
   pub fn add_refer_to_a2(&mut self, refer_to_a2: flatbuffers::Offset<super::namespace_a::SecondTableInA<'b >>) {
     self.fbb_.push_slot_always::<flatbuffers::Offset<super::namespace_a::SecondTableInA>>(TableInC::VT_REFER_TO_A2, refer_to_a2);
   }
