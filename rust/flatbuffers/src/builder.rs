@@ -1,3 +1,5 @@
+extern crate smallvec;
+
 use std::cmp::max;
 use std::marker::PhantomData;
 use std::mem::size_of;
@@ -27,7 +29,7 @@ pub trait PushableMethod: Sized {
 }
 
 
-pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut [u8], rest: &'a [u8]) {
+pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut [u8], _rest: &'a [u8]) {
     let sz = ::std::mem::size_of::<T>();
     debug_assert_eq!(sz, dst.len());
     let src = unsafe {
@@ -263,7 +265,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     fn assert_not_nested(&self) {
         assert!(!self.nested);
-        assert_eq!(self.field_locs.len(), 0);
     }
     fn assert_finished(&self) {
         assert!(self.finished);
@@ -311,18 +312,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.push(data);
         Offset::new(self.get_size() as UOffsetT)
     }
-    pub fn create_vector_of_strings<'a, 'b>(
-        &'a mut self,
-        xs: &'b [&'b str],
-    ) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
-        // TODO(rw): write these in-place, then swap their order, to avoid a
-        // heap allocation.
-        let offsets: Vec<Offset<&str>> = xs
-            .iter()
-            .rev()
-            .map(|s| self.create_string(s))
-            .rev()
-            .collect();
+    pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
+        let mut offsets: smallvec::SmallVec<[Offset<&str>; 0]> = smallvec::SmallVec::with_capacity(xs.len());
+        unsafe { offsets.set_len(xs.len()); }
+        for (i, &s) in xs.iter().enumerate().rev() {
+            let o = self.create_string(s);
+            offsets[i] = o;
+        }
         self.create_vector(&offsets[..])
     }
     pub fn create_vector<'a, T: PushableMethod + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T::Output>> {
@@ -343,7 +339,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         o
     }
     fn write_vtable(&mut self, table_tail_revloc: UOffsetT) -> UOffsetT {
-        // If you get this assert, a corresponding start_table wasn't called.
         self.assert_nested("write_vtable must be called after a call to start_table");
 
         // Write the vtable offset, which is the start of any Table.
