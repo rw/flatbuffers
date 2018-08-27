@@ -1,5 +1,4 @@
 use std::mem::size_of;
-use std::slice::from_raw_parts;
 
 pub use primitives::*;
 pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
@@ -8,34 +7,34 @@ pub use vector::*;
 pub trait Push: Sized {
     type Output;
     fn push(&self, dst: &mut [u8], _rest: &[u8]);
+
+    #[inline(always)]
     fn size(&self) -> usize {
         size_of::<Self>()
     }
+
+    #[inline(always)]
     fn alignment(&self) -> usize {
         self.size()
     }
 }
 
-
-pub fn pushable_method_struct_push<T: Sized>(x: &T, dst: &mut [u8], _rest: &[u8]) {
-    let sz = size_of::<T>();
-    debug_assert_eq!(sz, dst.len());
-    let src = unsafe {
-        from_raw_parts(x as *const T as *const u8, sz)
-    };
-    dst.copy_from_slice(src);
-}
-
 impl<'b> Push for &'b [u8] {
     type Output = Vector<'b, u8>;
+
+    #[inline(always)]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let l = self.len() as UOffsetT;
         emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
         dst[SIZE_UOFFSET..].copy_from_slice(self);
     }
+
+    #[inline(always)]
     fn size(&self) -> usize {
-        self.len() + SIZE_UOFFSET
+        SIZE_UOFFSET + self.len()
     }
+
+    #[inline(always)]
     fn alignment(&self) -> usize {
         SIZE_UOFFSET
     }
@@ -44,14 +43,19 @@ impl<'b> Push for &'b [u8] {
 impl<'b> Push for &'b str {
     type Output = Vector<'b, u8>;
 
+    #[inline(always)]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let l = self.len();
         emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l as UOffsetT);
         dst[SIZE_UOFFSET..SIZE_UOFFSET+l].copy_from_slice(self.as_bytes());
     }
+
+    #[inline(always)]
     fn size(&self) -> usize {
         SIZE_UOFFSET + self.len() + 1
     }
+
+    #[inline(always)]
     fn alignment(&self) -> usize {
         SIZE_UOFFSET
     }
@@ -75,14 +79,19 @@ impl<'a> ZeroTerminatedByteSlice<'a> {
 impl<'b> Push for ZeroTerminatedByteSlice<'b> {
     type Output = Vector<'b, u8>;
 
+    #[inline(always)]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let l = self.data().len();
         emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l as UOffsetT);
         dst[SIZE_UOFFSET..SIZE_UOFFSET+l].copy_from_slice(self.data());
     }
+
+    #[inline(always)]
     fn size(&self) -> usize {
         SIZE_UOFFSET + self.0.len() + 1
     }
+
+    #[inline(always)]
     fn alignment(&self) -> usize {
         SIZE_UOFFSET
     }

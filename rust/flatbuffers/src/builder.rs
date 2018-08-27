@@ -4,7 +4,6 @@ use std::cmp::max;
 use std::marker::PhantomData;
 use std::mem::size_of;
 use std::ptr::write_bytes;
-use std::slice::from_raw_parts;
 
 pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
 pub use primitives::*;
@@ -21,7 +20,7 @@ struct FieldLoc {
 }
 pub struct FlatBufferBuilder<'fbb> {
     pub owned_buf: Vec<u8>,
-    pub cur_idx: usize,
+    pub head: usize,
 
     field_locs: Vec<FieldLoc>,
     written_vtable_revpos: Vec<UOffsetT>,
@@ -41,7 +40,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn new_with_capacity(size: usize) -> Self {
         FlatBufferBuilder {
             owned_buf: vec![0u8; size],
-            cur_idx: size,
+            head: size,
 
             field_locs: Vec::new(),
             written_vtable_revpos: Vec::new(),
@@ -63,7 +62,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 	    self.owned_buf.set_len(cap);
             write_bytes(ptr, 0, cap);
 	}
-        self.cur_idx = self.owned_buf.len();
+        self.head = self.owned_buf.len();
 
         self.written_vtable_revpos.clear();
 
@@ -78,7 +77,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.written_vtable_revpos.len()
     }
     pub fn get_active_buf_slice<'a>(&'a self) -> &'a [u8] {
-        &self.owned_buf[self.cur_idx..]
+        &self.owned_buf[self.head..]
     }
 
     fn track_field(&mut self, slot_off: VOffsetT, off: UOffsetT) {
@@ -90,72 +89,27 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.max_voffset = max(self.max_voffset, slot_off);
     }
     pub fn start_table(&mut self) -> Offset<TableUnfinishedOffset> {
-        self.assert_not_nested();
+        self.assert_not_nested("start_table can not be called when a table or vector is under construction");
         self.nested = true;
 
+        Offset::new(self.used_space() as UOffsetT)
+    }
+    pub fn end_table(&mut self, off: Offset<TableUnfinishedOffset>) -> Offset<TableFinishedOffset> {
+        self.assert_nested("end_table must be called after a call to start_table");
+
+        let o = self.write_vtable(off);
+
+        self.nested = false;
         self.field_locs.clear();
+        self.max_voffset = 0;
 
-        Offset::new(self.get_size() as UOffsetT)
+        Offset::new(o.value())
     }
-    fn grow_owned_buf(&mut self) {
-        let starting_active_size = self.get_size();
-
-        let old_len = self.owned_buf.len();
-        let new_len = max(1, old_len * 2);
-
-        assert!(
-            new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
-            "cannot grow buffer beyond 2 gigabytes"
-        );
-
-        let diff = new_len - old_len;
-        self.owned_buf.resize(new_len, 0);
-        self.cur_idx += diff;
-
-        let ending_active_size = self.get_size();
-        assert_eq!(starting_active_size, ending_active_size);
-
-        if new_len == 1 {
-            return;
-        }
-
-        // calculate the midpoint, and safely copy the old end data to the new
-        // end position:
-        let middle = new_len / 2;
-        {
-            let (left, right) = &mut self.owned_buf[..].split_at_mut(middle);
-            right.copy_from_slice(left);
-        }
-        // then, zero out the old end data (just to be safe).
-        // this should be vectorized by rustc. rust has no stdlib memset.
-        for x in &mut self.owned_buf[..middle] {
-            *x = 0;
-        }
-    }
-    fn assert_nested(&self, msg: &'static str) {
-        assert!(self.nested, msg);
-        // we don't assert that self.field_locs.len() >0 because the vtable
-        // could be empty (e.g. for empty tables, or for all-default values).
-    }
-    fn assert_not_nested(&self) {
-        assert!(!self.nested);
-    }
-    fn assert_finished(&self) {
-        assert!(self.finished);
-    }
-    fn assert_not_finished(&self) {
-        assert!(!self.finished);
-    }
-    pub fn start_vector(&mut self, len: usize, elem_size: usize) -> UOffsetT {
-        self.assert_not_nested();
+    pub fn start_vector(&mut self, len: usize, elem_size: usize) {
+        self.assert_not_nested("start_vector can not be called when a table or vector is under construction");
         self.nested = true;
         self.align(len * elem_size, SIZE_UOFFSET);
         self.align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
-        self.rev_cur_idx()
-    }
-    // Offset relative to the end of the buffer.
-    pub fn rev_cur_idx(&self) -> UOffsetT {
-        (self.owned_buf.len() - self.cur_idx) as UOffsetT
     }
     pub fn end_vector<T: 'fbb>(&mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
         self.assert_nested("end_vector must be called after a call to start_vector");
@@ -163,22 +117,21 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let o = self.push::<UOffsetT>(num_elems as UOffsetT);
         Offset::new(o.value())
     }
-    pub fn get_size(&self) -> usize {
-        self.owned_buf.len() - self.cur_idx as usize
+    pub fn used_space(&self) -> usize {
+        self.owned_buf.len() - self.head as usize
     }
     fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
     }
-    // utf-8 string creation
     pub fn create_string(&mut self, s: &str) -> Offset<&'fbb str> {
-        self.assert_not_nested();
+        self.assert_not_nested("create_string can not be called when a table or vector is under construction");
         self.push(ZeroTerminatedByteSlice::new(s.as_bytes()));
-        Offset::new(self.get_size() as UOffsetT)
+        Offset::new(self.used_space() as UOffsetT)
     }
     pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<&'fbb [u8]> {
-        self.assert_not_nested();
+        self.assert_not_nested("create_byte_string can not be called when a table or vector is under construction");
         self.push(ZeroTerminatedByteSlice::new(data));
-        Offset::new(self.get_size() as UOffsetT)
+        Offset::new(self.used_space() as UOffsetT)
     }
     pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
         let mut offsets: smallvec::SmallVec<[Offset<&str>; 0]> = smallvec::SmallVec::with_capacity(xs.len());
@@ -197,23 +150,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         Offset::new(self.end_vector::<T::Output>(items.len()).value())
     }
-    pub fn end_table(&mut self, off: Offset<TableUnfinishedOffset>) -> Offset<TableFinishedOffset> {
-        self.assert_nested("end_table must be called after a call to start_table");
-        let o = self.write_vtable(off);
-        self.nested = false;
-        self.field_locs.clear();
-        self.max_voffset = 0;
-        Offset::new(o.value())
-    }
     fn write_vtable(&mut self, table_tail_revloc: Offset<TableUnfinishedOffset>) -> Offset<VTableOffset> {
         self.assert_nested("write_vtable must be called after a call to start_table");
 
         // Write the vtable offset, which is the start of any Table.
         // We fill its value later.
-        //let object_vtable_revloc: UOffsetT = self.push_element_scalar::<SOffsetT>(0x99999999 as SOffsetT);
         let object_vtable_revloc: Offset<VTableOffset> =
             Offset::new(self.push::<UOffsetT>(0xF0F0F0F0 as UOffsetT).value());
-        //println!("just wrote filler: {:?}", self.get_active_buf_slice());
 
         // Layout of the data this function will create when a new vtable is
         // needed.
@@ -265,8 +208,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let table_object_size = object_vtable_revloc.value() - table_tail_revloc.value();
         debug_assert!(table_object_size < 0x10000); // Vtable use 16bit offsets.
 
-        let vt_start_pos = self.cur_idx;
-        let vt_end_pos = self.cur_idx + vtable_len;
+        let vt_start_pos = self.head;
+        let vt_end_pos = self.head + vtable_len;
         {
             let vtfw = &mut VTableWriter::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]);
             vtfw.write_vtable_byte_length(vtable_len as VOffsetT);
@@ -280,31 +223,31 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             }
         }
         let vt_use = {
-            let mut ret: usize = self.get_size();
+            let mut ret: usize = self.used_space();
 
             // LIFO order
             for &vt_rev_pos in self.written_vtable_revpos.iter().rev() {
                 let eq = {
-                    let this_vt = VTable::init(&self.owned_buf[..], self.cur_idx);
-                    let other_vt = VTable::init(&self.owned_buf[..], self.cur_idx + self.get_size() - vt_rev_pos as usize);
+                    let this_vt = VTable::init(&self.owned_buf[..], self.head);
+                    let other_vt = VTable::init(&self.owned_buf[..], self.head + self.used_space() - vt_rev_pos as usize);
                     other_vt == this_vt
                 };
                 if eq {
                     VTableWriter::init(&mut self.owned_buf[vt_start_pos..vt_end_pos]).clear();
-                    self.cur_idx += vtable_len;
+                    self.head += vtable_len;
                     ret = vt_rev_pos as usize;
                     break;
                 }
             }
             ret
         };
-        if vt_use == self.get_size() {
-            let n = self.rev_cur_idx();
-            self.written_vtable_revpos.push(n);
+
+        if vt_use == self.used_space() {
+            self.written_vtable_revpos.push(vt_use as UOffsetT);
         }
 
         {
-            let n = self.cur_idx + self.get_size() - object_vtable_revloc.value() as usize;
+            let n = self.head + self.used_space() - object_vtable_revloc.value() as usize;
             let saw = read_scalar::<UOffsetT>(&self.owned_buf[n..n + SIZE_SOFFSET]);
             debug_assert_eq!(saw, 0xF0F0F0F0);
             emplace_scalar::<SOffsetT>(
@@ -318,6 +261,39 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         object_vtable_revloc
     }
+    fn grow_owned_buf(&mut self) {
+        let old_len = self.owned_buf.len();
+        let new_len = max(1, old_len * 2);
+
+        assert!(new_len <= FLATBUFFERS_MAX_BUFFER_SIZE,
+                "cannot grow buffer beyond 2 gigabytes");
+
+        let starting_active_size = self.used_space();
+
+        let diff = new_len - old_len;
+        self.owned_buf.resize(new_len, 0);
+        self.head += diff;
+
+        let ending_active_size = self.used_space();
+        debug_assert_eq!(starting_active_size, ending_active_size);
+
+        if new_len == 1 {
+            return;
+        }
+
+        // calculate the midpoint, and safely copy the old end data to the new
+        // end position:
+        let middle = new_len / 2;
+        {
+            let (left, right) = &mut self.owned_buf[..].split_at_mut(middle);
+            right.copy_from_slice(left);
+        }
+        // finally, zero out the old end data.
+        {
+            let ptr = (&mut self.owned_buf[..middle]).as_mut_ptr();
+            unsafe { write_bytes(ptr, 0, middle); }
+        }
+    }
     pub fn finish_size_prefixed<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, true);
     }
@@ -329,14 +305,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     // with or without a size prefix changes how we load the data, so finish*
     // functions are split along those lines.
-    fn finish_with_opts<T>(
-        &mut self,
-        root: Offset<T>,
-        file_identifier: Option<&str>,
-        size_prefixed: bool,
-    ) {
-        self.assert_not_finished();
-        self.assert_not_nested();
+    fn finish_with_opts<T>(&mut self,
+                           root: Offset<T>,
+                           file_identifier: Option<&str>,
+                           size_prefixed: bool) {
+        self.assert_not_finished("buffer cannot be finished when it is already finished");
+        self.assert_not_nested("buffer cannot be finished when a table or vector is under construction");
         self.written_vtable_revpos.clear();
 
         let to_align = {
@@ -359,16 +333,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
 
         if let Some(ident) = file_identifier {
-            assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
-            self.push_bytes(ident.as_bytes());
+            debug_assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
+            self.push_bytes_unprefixed(ident.as_bytes());
         }
 
-        {
-            self.push(root);
-        }
+        self.push(root);
 
         if size_prefixed {
-            let sz = self.get_size() as UOffsetT;
+            let sz = self.used_space() as UOffsetT;
             self.push::<UOffsetT>(sz);
         }
         self.finished = true;
@@ -376,7 +348,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
     fn align(&mut self, len: usize, alignment: usize) {
         self.track_min_align(alignment);
-        let s = self.get_size() as usize;
+        let s = self.used_space() as usize;
         self.fill(padding_bytes(s + len, alignment));
     }
     fn track_min_align(&mut self, alignment: usize) {
@@ -386,10 +358,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.align(x.size(), x.alignment());
         self.make_space(x.size());
         {
-            let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(x.size());
+            let (dst, rest) = (&mut self.owned_buf[self.head..]).split_at_mut(x.size());
             x.push(dst, rest);
         }
-        Offset::new(self.get_size() as UOffsetT)
+        Offset::new(self.used_space() as UOffsetT)
     }
     pub fn push_slot<X: Push + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
         self.assert_nested("push_slot must be called after start_table");
@@ -403,18 +375,19 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let off = self.push(x);
         self.track_field(slotoff, off.value());
     }
-    pub fn push_bytes(&mut self, x: &[u8]) -> UOffsetT {
+    fn push_bytes_unprefixed(&mut self, x: &[u8]) -> UOffsetT {
         let n = self.make_space(x.len());
         &mut self.owned_buf[n..n + x.len()].copy_from_slice(x);
 
         n as UOffsetT
     }
-    pub fn make_space(&mut self, want: usize) -> usize {
+    #[inline(always)]
+    fn make_space(&mut self, want: usize) -> usize {
         self.ensure_capacity(want);
-        self.cur_idx -= want;
-        self.cur_idx
+        self.head -= want;
+        self.head
     }
-    pub fn ensure_capacity(&mut self, want: usize) -> usize {
+    fn ensure_capacity(&mut self, want: usize) -> usize {
         if self.unused_ready_space() >= want {
             return want;
         }
@@ -427,34 +400,40 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         want
     }
+    #[inline(always)]
     fn unused_ready_space(&self) -> usize {
-        self.cur_idx
+        self.head
     }
     pub fn finished_bytes(&self) -> &[u8] {
-        self.assert_finished();
-        &self.owned_buf[self.cur_idx..]
+        self.assert_finished("finished_bytes cannot be called when the buffer is not yet finished");
+        &self.owned_buf[self.head..]
     }
-    pub fn required(
-        &self,
-        tab_revloc: Offset<TableFinishedOffset>,
-        slot_byte_loc: VOffsetT,
-        assert_msg_name: &'static str,
-    ) {
-        let tab = Table::new(
-            &self.owned_buf[..],
-            self.cur_idx + (self.get_size() - tab_revloc.value() as usize),
-        );
+    pub fn required(&self,
+                    tab_revloc: Offset<TableFinishedOffset>,
+                    slot_byte_loc: VOffsetT,
+                    assert_msg_name: &'static str) {
+        let idx = self.used_space() - tab_revloc.value() as usize;
+        let tab = Table::new(&self.owned_buf[self.head..], idx);
         let o = tab.vtable().get(slot_byte_loc) as usize;
         assert!(o != 0, "missing required field {}", assert_msg_name);
     }
+    fn assert_nested(&self, msg: &'static str) {
+        assert!(self.nested, msg);
+        // we don't assert that self.field_locs.len() >0 because the vtable
+        // could be empty (e.g. for empty tables, or for all-default values).
+    }
+    fn assert_not_nested(&self, msg: &'static str) {
+        assert!(!self.nested, msg);
+    }
+    fn assert_finished(&self, msg: &'static str) {
+        assert!(self.finished, msg);
+    }
+    fn assert_not_finished(&self, msg: &'static str) {
+        assert!(!self.finished, msg);
+    }
 }
 
-pub fn to_bytes<'a, T: 'a + Sized>(t: &'a T) -> &'a [u8] {
-    let sz = size_of::<T>();
-    unsafe { from_raw_parts((t as *const T) as *const u8, sz) }
-}
-
-#[inline]
+#[inline(always)]
 pub fn padding_bytes(buf_size: usize, scalar_size: usize) -> usize {
     // ((!buf_size) + 1) & (scalar_size - 1)
     (!buf_size).wrapping_add(1) & (scalar_size.wrapping_sub(1))
