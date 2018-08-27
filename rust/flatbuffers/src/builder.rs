@@ -21,6 +21,16 @@ pub trait PushableMethod: Sized {
 
 }
 
+
+pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a &'a T, dst: &'a mut [u8], rest: &'a [u8]) {
+    let sz = ::std::mem::size_of::<T>();
+    debug_assert_eq!(sz, dst.len());
+    let src = unsafe {
+        ::std::slice::from_raw_parts(*x as *const T as *const u8, sz)
+    };
+    dst.copy_from_slice(src);
+}
+
 impl<'b> PushableMethod for &'b [u8] {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         dst.copy_from_slice(self);
