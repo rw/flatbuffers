@@ -329,21 +329,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             .map(|s| self.create_string(s))
             .rev()
             .collect();
-        self.create_vector_of_reverse_offsets(&offsets[..])
-    }
-    pub fn create_vector_of_reverse_offsets<'a, 'b, 'c, T: 'fbb>(
-        &'a mut self,
-        items: &'b [Offset<T>],
-    ) -> Offset<Vector<'fbb, ForwardsUOffset<T>>> {
-        let elemsize = size_of::<Offset<T>>();
-        self.start_vector(elemsize, items.len());
-        for o in items.iter().rev() {
-            self.push(*o);
-        }
-        Offset::new(
-            self.end_vector::<Offset<Vector<'fbb, ForwardsUOffset<T>>>>(items.len())
-                .value(),
-        )
+        self.create_vector(&offsets[..])
     }
     pub fn create_vector<'a, T: PushableMethod + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T::Output>> {
         let elemsize = size_of::<T>();
@@ -352,27 +338,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             self.push(items[i]);
         }
         Offset::new(self.end_vector::<T::Output>(items.len()).value())
-    }
-    pub fn create_vector_of_scalars<T: PushableMethod + EndianScalar + 'fbb>(
-        &mut self,
-        items: &[T],
-    ) -> Offset<Vector<'fbb, T>> {
-        // TODO(rw): if host is little-endian, just do a memcpy
-        let elemsize = size_of::<T>();
-        self.start_vector(elemsize, items.len());
-        for x in items.iter().rev() {
-            self.push(*x);
-        }
-        Offset::new(self.end_vector::<T>(items.len()).value())
-    }
-    pub fn create_vector_of_structs<T>(&mut self, items: &[T]) -> Offset<Vector<'fbb, T>> {
-        // TODO(rw): just do a memcpy
-        let elemsize = size_of::<T>();
-        self.start_vector(elemsize, items.len());
-        for i in (0..items.len()).rev() {
-            self.push_bytes(to_bytes(&items[i]));
-        }
-        Offset::new(self.end_vector::<T>(items.len()).value())
     }
     pub fn end_table(&mut self, off: Offset<TableOffset>) -> Offset<TableOffset> {
         self.assert_nested("end_table must be called after a call to start_table");
