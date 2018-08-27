@@ -305,6 +305,16 @@ impl Test {
   }
 }
 
+impl<'b> flatbuffers::PushableMethod for Test {
+    #[inline(always)]
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+    }
+    #[inline(always)]
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Test>()
+    }
+}
 impl<'b> flatbuffers::PushableMethod for &'b Test {
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
@@ -367,6 +377,16 @@ impl Vec3 {
   }
 }
 
+impl<'b> flatbuffers::PushableMethod for Vec3 {
+    #[inline(always)]
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+    }
+    #[inline(always)]
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Vec3>()
+    }
+}
 impl<'b> flatbuffers::PushableMethod for &'b Vec3 {
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
@@ -403,6 +423,16 @@ impl Ability {
   }
 }
 
+impl<'b> flatbuffers::PushableMethod for Ability {
+    #[inline(always)]
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+    }
+    #[inline(always)]
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Ability>()
+    }
+}
 impl<'b> flatbuffers::PushableMethod for &'b Ability {
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {

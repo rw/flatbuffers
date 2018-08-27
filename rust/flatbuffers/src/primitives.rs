@@ -91,12 +91,30 @@ impl<'a, T: 'a> Offset<T> {
 
 #[derive(Debug)]
 pub struct ForwardsUOffset<T>(UOffsetT, PhantomData<T>); // data unused
+impl<T> ForwardsUOffset<T> {
+    #[inline(always)]
+    pub fn value(&self) -> UOffsetT {
+        self.0
+    }
+}
 
 #[derive(Debug)]
 pub struct ForwardsVOffset<T>(VOffsetT, PhantomData<T>); // data unused
+impl<T> ForwardsVOffset<T> {
+    #[inline(always)]
+    pub fn value(&self) -> VOffsetT {
+        self.0
+    }
+}
 
 #[derive(Debug)]
 pub struct BackwardsSOffset<T>(SOffsetT, PhantomData<T>); // data unused
+impl<T> BackwardsSOffset<T> {
+    #[inline(always)]
+    pub fn value(&self) -> SOffsetT {
+        self.0
+    }
+}
 
 use follow::Follow;
 

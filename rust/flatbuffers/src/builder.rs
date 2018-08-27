@@ -35,20 +35,6 @@ pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut
     dst.copy_from_slice(src);
 }
 
-//impl<'b, T: PushableMethod + 'b> PushableMethod for &'b [T] {
-//    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-//        let l = self.len() as UOffsetT;
-//        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
-//        dst[SIZE_UOFFSET..].copy_from_slice(self);
-//    }
-//    fn size(&self) -> usize {
-//        SIZE_UOFFSET + self.len() * T::size()
-//    }
-//    fn align_params(&self) -> AlignParams {
-//        AlignParams{len: self.size(), alignment: SIZE_UOFFSET}
-//    }
-//}
-
 impl<'b> PushableMethod for &'b [u8] {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let l = self.len() as UOffsetT;
@@ -126,6 +112,21 @@ impl<T> PushableMethod for Offset<T> {
         debug_assert_eq!(dst.len(), SIZE_UOFFSET);
         let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
         emplace_scalar::<UOffsetT>(dst, n);
+    }
+}
+impl<T> PushableMethod for ForwardsUOffset<T> {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
+        self.value().do_write(dst, rest);
+    }
+}
+impl<T> PushableMethod for ForwardsVOffset<T> {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
+        self.value().do_write(dst, rest);
+    }
+}
+impl<T> PushableMethod for BackwardsSOffset<T> {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
+        self.value().do_write(dst, rest);
     }
 }
 
@@ -335,11 +336,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
                 .value(),
         )
     }
-    pub fn create_vector<'a, T: PushableMethod + Clone + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T>> {
+    pub fn create_vector<'a, T: PushableMethod + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T>> {
         let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
         for i in (0..items.len()).rev() {
-            self.push(items[i].clone());
+            self.push(items[i]);
         }
         Offset::new(self.end_vector::<T>(items.len()).value())
     }
