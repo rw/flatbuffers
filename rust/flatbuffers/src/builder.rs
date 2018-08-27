@@ -21,7 +21,7 @@ pub trait PushableMethod: Sized {
         size_of::<Self>()
     }
     fn align_params(&self) -> AlignParams {
-        AlignParams{len: 0, alignment: self.size()}
+        AlignParams{len: self.size(), alignment: self.size()}
     }
 
 }
@@ -519,11 +519,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.min_align = max(self.min_align, alignment);
     }
     pub fn push<X: PushableMethod>(&mut self, x: X) -> UOffsetT {
-        let sz = x.size();
-        self.align(0, sz);
-        self.make_space(sz);
+        let ap = x.align_params();
+
+        self.align(ap.len, ap.alignment);
+        self.make_space(ap.len);
         {
-            let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(sz);
+            let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(ap.len);
             x.do_write(dst, rest);
         }
         self.get_size() as UOffsetT
