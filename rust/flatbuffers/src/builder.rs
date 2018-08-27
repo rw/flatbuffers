@@ -3,6 +3,7 @@ extern crate smallvec;
 use std::cmp::max;
 use std::marker::PhantomData;
 use std::mem::size_of;
+use std::ptr::write_bytes;
 use std::slice::from_raw_parts;
 
 pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
@@ -56,10 +57,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     pub fn reset(&mut self) {
-        self.owned_buf.clear();
-	let cap = self.owned_buf.capacity();
+        let ptr = self.owned_buf.as_mut_ptr();
+        let cap = self.owned_buf.capacity();
         unsafe {
 	    self.owned_buf.set_len(cap);
+            write_bytes(ptr, 0, cap);
 	}
         self.cur_idx = self.owned_buf.len();
 
@@ -172,16 +174,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.assert_not_nested();
         self.push(ZeroTerminatedByteSlice::new(s.as_bytes()));
         Offset::new(self.get_size() as UOffsetT)
-        //Offset::<&str>::new(self.create_byte_string(s.as_bytes()).value())
     }
     pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<&'fbb [u8]> {
         self.assert_not_nested();
         self.push(ZeroTerminatedByteSlice::new(data));
-        Offset::new(self.get_size() as UOffsetT)
-    }
-    pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &'b [u8]) -> Offset<Vector<'fbb, u8>> {
-        self.assert_not_nested();
-        self.push(data);
         Offset::new(self.get_size() as UOffsetT)
     }
     pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {

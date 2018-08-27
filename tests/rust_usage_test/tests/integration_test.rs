@@ -693,7 +693,7 @@ mod roundtrip_vectors {
                 b1.end_vector::<&u8>(xs.len());
 
                 let mut b2 = flatbuffers::FlatBufferBuilder::new();
-                b2.create_byte_vector(xs);
+                b2.create_vector(xs);
                 assert_eq!(&b1.owned_buf[..], &b2.owned_buf[..]);
             }
             quickcheck::QuickCheck::new().max_tests(20).quickcheck(prop as fn(Vec<_>));
@@ -1048,11 +1048,29 @@ mod write_and_read_examples {
     }
 
     #[test]
+    fn generated_code_creates_correct_example_repeatedly_with_reset() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
+        for _ in 0..100 {
+            create_serialized_example_with_generated_code(b);
+            {
+                let buf = b.finished_bytes();
+                serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
+            }
+            b.reset();
+        }
+    }
+
+    #[test]
     fn library_code_creates_correct_example() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
-        create_serialized_example_with_library_code(b);
-        let buf = b.finished_bytes();
-        serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
+        for _ in 0..100 {
+            create_serialized_example_with_library_code(b);
+            {
+                let buf = b.finished_bytes();
+                serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
+            }
+            b.reset();
+        }
     }
 }
 

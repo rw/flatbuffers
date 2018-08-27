@@ -59,6 +59,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         ..Default::default()
     });
     let mon = {
+        let name = builder.create_string("MyMonster");
         let fred_name = builder.create_string("Fred");
         let inventory = builder.create_vector(&[0u8, 1, 2, 3, 4]);
         let test4 = builder.create_vector(&[my_game::example::Test::new(10, 20),
@@ -67,7 +68,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         let args = my_game::example::MonsterArgs{
             hp: 80,
             mana: 150,
-            name: Some(builder.create_string("MyMonster")),
+            name: Some(name),
             pos: Some(&pos),
             test_type: my_game::example::Any::Monster,
             test: Some(my_game::example::Monster::create(builder, &my_game::example::MonsterArgs{
