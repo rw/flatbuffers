@@ -10,14 +10,19 @@ pub use vtable::*;
 use vtable_writer::*;
 pub use vector::*;
 
+pub struct AlignParams {
+    len: usize,
+    alignment: usize,
+}
+
 pub trait PushableMethod: Sized {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]);
     fn size(&self) -> usize {
         size_of::<Self>()
     }
-    //fn align(&self) -> (usize) {
-    //    (self.size(), self.size())
-    //}
+    fn align_params(&self) -> AlignParams {
+        AlignParams{len: 0, alignment: self.size()}
+    }
 
 }
 
