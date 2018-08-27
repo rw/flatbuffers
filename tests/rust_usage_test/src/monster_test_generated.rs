@@ -288,7 +288,15 @@ pub struct Test {
   b_: i8,
   padding0__: u8,
 } // pub struct Test
-impl flatbuffers::GeneratedStruct for Test {}
+impl flatbuffers::EndianSafeFollow for Test {}
+//type SliceOfTest<'a> = &'a [Test];
+//impl<'a> flatbuffers::Follow<'a> for SliceOfTest<'a> {
+//    type Inner = &'a [Test];
+//    #[inline(always)]
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        flatbuffers::follow_slice_helper::<Test>(buf, loc)
+//    }
+//}
 impl<'a> flatbuffers::Follow<'a> for Test {
   type Inner = &'a Test;
   #[inline(always)]
@@ -365,7 +373,15 @@ pub struct Vec3 {
   test3_: Test/* foo */,
   padding2__: u16,
 } // pub struct Vec3
-impl flatbuffers::GeneratedStruct for Vec3 {}
+impl flatbuffers::EndianSafeFollow for Vec3 {}
+//type SliceOfVec3<'a> = &'a [Vec3];
+//impl<'a> flatbuffers::Follow<'a> for SliceOfVec3<'a> {
+//    type Inner = &'a [Vec3];
+//    #[inline(always)]
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        flatbuffers::follow_slice_helper::<Vec3>(buf, loc)
+//    }
+//}
 impl<'a> flatbuffers::Follow<'a> for Vec3 {
   type Inner = &'a Vec3;
   #[inline(always)]
@@ -453,7 +469,15 @@ pub struct Ability {
   id_: u32,
   distance_: u32,
 } // pub struct Ability
-impl flatbuffers::GeneratedStruct for Ability {}
+impl flatbuffers::EndianSafeFollow for Ability {}
+//type SliceOfAbility<'a> = &'a [Ability];
+//impl<'a> flatbuffers::Follow<'a> for SliceOfAbility<'a> {
+//    type Inner = &'a [Ability];
+//    #[inline(always)]
+//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+//        flatbuffers::follow_slice_helper::<Ability>(buf, loc)
+//    }
+//}
 impl<'a> flatbuffers::Follow<'a> for Ability {
   type Inner = &'a Ability;
   #[inline(always)]
@@ -908,7 +932,7 @@ impl<'a> Monster<'a> {
   }
   #[inline]
   pub fn test4(&'a self) -> Option<&'a [Test]> {
-    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<Test>>>(Monster::VT_TEST4, None)
+    self._tab.get::<flatbuffers::ForwardsUOffset<&[Test]>>(Monster::VT_TEST4, None)
   }
   #[inline]
   pub fn testarrayofstring(&'a self) -> Option<flatbuffers::Vector<flatbuffers::ForwardsUOffset<&'a str>>> {
@@ -999,7 +1023,7 @@ impl<'a> Monster<'a> {
   }
   #[inline]
   pub fn testarrayofsortedstruct(&'a self) -> Option<&'a [Ability]> {
-    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<Ability>>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
+    self._tab.get::<flatbuffers::ForwardsUOffset<&[Ability]>>(Monster::VT_TESTARRAYOFSORTEDSTRUCT, None)
   }
   #[inline]
   pub fn flex(&'a self) -> Option<flatbuffers::Vector<'a, u8>> {
@@ -1007,7 +1031,7 @@ impl<'a> Monster<'a> {
   }
   #[inline]
   pub fn test5(&'a self) -> Option<&'a [Test]> {
-    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::SliceOfGeneratedStruct<Test>>>(Monster::VT_TEST5, None)
+    self._tab.get::<flatbuffers::ForwardsUOffset<&[Test]>>(Monster::VT_TEST5, None)
   }
   #[inline]
   pub fn vector_of_longs(&'a self) -> Option<flatbuffers::Vector<'a, i64>> {

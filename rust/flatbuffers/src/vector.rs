@@ -34,8 +34,20 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     }
 }
 
-//#[derive(Debug)]
-//pub struct Vector<'a, T: 'a>(&'a [u8], usize, PhantomData<T>);
+#[derive(Debug)]
+pub struct Slice<T>(PhantomData<T>);
+impl<'a, T: 'a> Follow<'a> for Slice<T> {
+    type Inner = &'a [T];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let sz = size_of::<T>();
+        debug_assert!(sz > 0);
+        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
+        let ptr = data_buf.as_ptr() as *const T;
+        let s: &'a [T] = unsafe { from_raw_parts(ptr, len) };
+        s
+    }
+}
 //impl<'a, T: Follow<'a> + 'a> Slice<'a, T> {
 //    pub fn as_slice(self) -> &'a [T] {
 //        <SliceOfGeneratedStruct<T>>::follow(self.0, self.1)
@@ -80,13 +92,14 @@ impl<'a> Follow<'a> for &'a str {
     }
 }
 
+pub trait EndianSafeFollow {}
 /// Implement direct slice access to structs (they are endian-safe because we
 /// use accessors to get their elements).
-impl<'a, T: GeneratedStruct + 'a> Follow<'a> for &'a [T] {
+impl<'a, T: EndianSafeFollow + 'a> Follow<'a> for &'a [T] {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let sz = size_of::<T>();
-        assert!(sz > 0);
+        debug_assert!(sz > 0);
         let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
         let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
         let ptr = data_buf.as_ptr() as *const T;
@@ -95,7 +108,7 @@ impl<'a, T: GeneratedStruct + 'a> Follow<'a> for &'a [T] {
     }
 }
 
-fn follow_slice_helper<T>(buf: &[u8], loc: usize) -> &[T] {
+pub fn follow_slice_helper<T>(buf: &[u8], loc: usize) -> &[T] {
     let sz = size_of::<T>();
     debug_assert!(sz > 0);
     let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
