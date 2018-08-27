@@ -7,139 +7,11 @@ use std::slice::from_raw_parts;
 
 pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
 pub use primitives::*;
+pub use push::*;
 pub use table::*;
 pub use vtable::*;
 use vtable_writer::*;
 pub use vector::*;
-
-pub struct AlignParams {
-    len: usize,
-    alignment: usize,
-}
-
-pub trait Push: Sized {
-    type Output;
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]);
-    fn size(&self) -> usize {
-        size_of::<Self>()
-    }
-    fn align_params(&self) -> AlignParams {
-        AlignParams{len: self.size(), alignment: self.size()}
-    }
-}
-
-
-pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut [u8], _rest: &'a [u8]) {
-    let sz = ::std::mem::size_of::<T>();
-    debug_assert_eq!(sz, dst.len());
-    let src = unsafe {
-        ::std::slice::from_raw_parts(x as *const T as *const u8, sz)
-    };
-    dst.copy_from_slice(src);
-}
-
-impl<'b> Push for &'b [u8] {
-    type Output = Vector<'b, u8>;
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        let l = self.len() as UOffsetT;
-        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
-        dst[SIZE_UOFFSET..].copy_from_slice(self);
-    }
-    fn size(&self) -> usize {
-        self.len() + SIZE_UOFFSET
-    }
-    fn align_params(&self) -> AlignParams {
-        AlignParams{len: self.size(), alignment: SIZE_UOFFSET}
-    }
-}
-
-struct ZeroTerminatedByteSlice<'a>(&'a [u8]);
-impl<'b> Push for ZeroTerminatedByteSlice<'b> {
-    type Output = Vector<'b, u8>;
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        let data = self.0;
-        let l = data.len();
-        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l as UOffsetT);
-        dst[SIZE_UOFFSET..SIZE_UOFFSET+l].copy_from_slice(data);
-    }
-    fn size(&self) -> usize {
-        SIZE_UOFFSET + self.0.len() + 1
-    }
-    fn align_params(&self) -> AlignParams {
-        AlignParams{len: self.size(), alignment: SIZE_UOFFSET}
-    }
-}
-
-#[macro_export]
-macro_rules! impl_pushable_method_for_endian_scalar {
-    ($ty:ident) => (
-        impl Push for $ty {
-            type Output = $ty;
-            fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-                emplace_scalar::<$ty>(dst, *self);
-            }
-        }
-    )
-}
-impl_pushable_method_for_endian_scalar!(bool);
-impl_pushable_method_for_endian_scalar!(u8);
-impl_pushable_method_for_endian_scalar!(i8);
-impl_pushable_method_for_endian_scalar!(u16);
-impl_pushable_method_for_endian_scalar!(i16);
-impl_pushable_method_for_endian_scalar!(u32);
-impl_pushable_method_for_endian_scalar!(i32);
-impl_pushable_method_for_endian_scalar!(u64);
-impl_pushable_method_for_endian_scalar!(i64);
-impl_pushable_method_for_endian_scalar!(f32);
-impl_pushable_method_for_endian_scalar!(f64);
-
-#[macro_export]
-macro_rules! impl_pushable_method_for_struct_reference {
-    ($ty:ident) => (
-        impl<'b> flatbuffers::Push for &'b $ty {
-           type Output = $ty;
-           fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-               let sz = ::std::mem::size_of::<$ty>();
-               debug_assert_eq!(sz, dst.len());
-
-               let src = unsafe {
-                   ::std::slice::from_raw_parts(*self as *const $ty as *const u8, sz)
-               };
-               dst.copy_from_slice(src);
-           }
-           fn size(&self) -> usize {
-               ::std::mem::size_of::<$ty>()
-           }
-        }
-    )
-}
-
-impl<T> Push for Offset<T> {
-    type Output = ForwardsUOffset<T>;
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
-        debug_assert_eq!(dst.len(), SIZE_UOFFSET);
-        let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
-        emplace_scalar::<UOffsetT>(dst, n);
-    }
-}
-impl<T> Push for ForwardsUOffset<T> {
-    type Output = Self;
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
-        self.value().do_write(dst, rest);
-    }
-}
-impl<T> Push for ForwardsVOffset<T> {
-    type Output = Self;
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
-        self.value().do_write(dst, rest);
-    }
-}
-impl<T> Push for BackwardsSOffset<T> {
-    type Output = Self;
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
-        self.value().do_write(dst, rest);
-    }
-}
 
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {
@@ -518,10 +390,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn push<X: Push>(&mut self, x: X) -> UOffsetT {
         let ap = x.align_params();
 
-        self.align(ap.len, ap.alignment);
+        self.align(ap.len(), ap.alignment());
         self.make_space(ap.len);
         {
-            let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(ap.len);
+            let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(ap.len());
             x.do_write(dst, rest);
         }
         self.get_size() as UOffsetT

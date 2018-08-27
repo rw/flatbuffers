@@ -1700,9 +1700,6 @@ class RustGenerator : public BaseGenerator {
       code_ += "  use std::marker::PhantomData;";
       code_ += "  use std::cmp::Ordering;";
       code_ += "";
-      //code_ += "  #[macro_use(impl_pushable_method_for_endian_scalar, "
-      //         "impl_pushable_method_for_struct_reference)]";
-      //code_ += "  #[macro_use(impl_pushable_method_for_struct_reference)]";
       code_ += "  extern crate flatbuffers;";
       code_ += "  use self::flatbuffers::EndianScalar;";
     }
