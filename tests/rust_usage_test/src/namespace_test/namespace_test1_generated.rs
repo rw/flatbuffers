@@ -104,7 +104,7 @@ impl StructInNestedNS {
 impl<'b> flatbuffers::PushableMethod for &'b StructInNestedNS {
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+        flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
     }
     fn size(&self) -> usize {
         ::std::mem::size_of::<StructInNestedNS>()

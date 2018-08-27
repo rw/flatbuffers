@@ -22,11 +22,11 @@ pub trait PushableMethod: Sized {
 }
 
 
-pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a &'a T, dst: &'a mut [u8], rest: &'a [u8]) {
+pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut [u8], rest: &'a [u8]) {
     let sz = ::std::mem::size_of::<T>();
     debug_assert_eq!(sz, dst.len());
     let src = unsafe {
-        ::std::slice::from_raw_parts(*x as *const T as *const u8, sz)
+        ::std::slice::from_raw_parts(x as *const T as *const u8, sz)
     };
     dst.copy_from_slice(src);
 }
@@ -228,8 +228,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn start_vector(&mut self, len: usize, elem_size: usize) -> UOffsetT {
         self.assert_not_nested();
         self.nested = true;
-        self.pre_align(len * elem_size, SIZE_UOFFSET);
-        self.pre_align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
+        self.align(len * elem_size, SIZE_UOFFSET);
+        self.align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
         self.rev_cur_idx()
     }
     pub fn flip_forwards(&self, x: UOffsetT) -> UOffsetT {
@@ -245,11 +245,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let off = self.push::<UOffsetT>(num_elems as UOffsetT);
         Offset::new(off)
     }
-    fn pre_align(&mut self, len: usize, alignment: usize) {
-        self.track_min_align(alignment);
-        let s = self.get_size() as usize;
-        self.fill(padding_bytes(s + len, alignment));
-    }
     pub fn get_size(&self) -> usize {
         self.owned_buf.len() - self.cur_idx as usize
     }
@@ -259,16 +254,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
     }
-    fn track_min_align(&mut self, alignment: usize) {
-        self.min_align = max(self.min_align, alignment);
-    }
     // utf-8 string creation
     pub fn create_string(&mut self, s: &str) -> Offset<&'fbb str> {
         Offset::<&str>::new(self.create_byte_string(s.as_bytes()).value())
     }
     pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<&'fbb [u8]> {
         self.assert_not_nested();
-        self.pre_align(data.len() + 1, SIZE_UOFFSET); // Always 0-terminated.
+        self.align(data.len() + 1, SIZE_UOFFSET); // Always 0-terminated.
         self.fill(1);
         self.push_bytes(data);
         self.push::<UOffsetT>(data.len() as UOffsetT);
@@ -276,7 +268,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &'b [u8]) -> Offset<Vector<'fbb, u8>> {
         self.assert_not_nested();
-        self.pre_align(data.len(), SIZE_UOFFSET);
+        self.align(data.len(), SIZE_UOFFSET);
         self.push_bytes(data);
         self.push::<UOffsetT>(data.len() as UOffsetT);
         Offset::new(self.get_size() as UOffsetT)
@@ -494,7 +486,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         {
             let ma = self.min_align;
-            self.pre_align(to_align, ma);
+            self.align(to_align, ma);
         }
 
         if let Some(ident) = file_identifier {
@@ -513,15 +505,17 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.finished = true;
     }
 
-    fn align(&mut self, elem_size: usize) {
-        self.pre_align(0, elem_size);
-        //self.track_min_align(elem_size);
-        //let s = self.get_size();
-        //self.fill(padding_bytes(s, elem_size));
+    fn align(&mut self, len: usize, alignment: usize) {
+        self.track_min_align(alignment);
+        let s = self.get_size() as usize;
+        self.fill(padding_bytes(s + len, alignment));
+    }
+    fn track_min_align(&mut self, alignment: usize) {
+        self.min_align = max(self.min_align, alignment);
     }
     pub fn push<X: PushableMethod>(&mut self, x: X) -> UOffsetT {
         let sz = x.size();
-        self.align(sz);
+        self.align(0, sz);
         self.make_space(sz);
         {
             let (dst, rest) = (&mut self.owned_buf[self.cur_idx..]).split_at_mut(sz);
@@ -550,6 +544,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.cur_idx
     }
     pub fn ensure_capacity(&mut self, want: usize) -> usize {
+        if self.unused_ready_space() >= want {
+            return want;
+        }
         assert!(
             want <= FLATBUFFERS_MAX_BUFFER_SIZE,
             "cannot grow buffer beyond 2 gigabytes"
