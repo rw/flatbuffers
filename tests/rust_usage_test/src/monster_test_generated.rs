@@ -188,7 +188,7 @@ impl flatbuffers::EndianScalar for Color {
 impl flatbuffers::Push for Color {
     type Output = Color;
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         flatbuffers::emplace_scalar::<Color>(dst, *self);
     }
 }
@@ -253,7 +253,7 @@ impl flatbuffers::EndianScalar for Any {
 impl flatbuffers::Push for Any {
     type Output = Any;
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         flatbuffers::emplace_scalar::<Any>(dst, *self);
     }
 }
@@ -310,8 +310,11 @@ impl Test {
 impl<'b> flatbuffers::Push for Test {
     type Output = Test;
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(self as *const Test as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -320,9 +323,13 @@ impl<'b> flatbuffers::Push for Test {
 }
 impl<'b> flatbuffers::Push for &'b Test {
     type Output = Test;
+
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const Test as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -384,8 +391,11 @@ impl Vec3 {
 impl<'b> flatbuffers::Push for Vec3 {
     type Output = Vec3;
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(self as *const Vec3 as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -394,9 +404,13 @@ impl<'b> flatbuffers::Push for Vec3 {
 }
 impl<'b> flatbuffers::Push for &'b Vec3 {
     type Output = Vec3;
+
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const Vec3 as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -432,8 +446,11 @@ impl Ability {
 impl<'b> flatbuffers::Push for Ability {
     type Output = Ability;
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(self as *const Ability as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -442,9 +459,13 @@ impl<'b> flatbuffers::Push for Ability {
 }
 impl<'b> flatbuffers::Push for &'b Ability {
     type Output = Ability;
+
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const Ability as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {

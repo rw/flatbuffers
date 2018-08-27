@@ -62,7 +62,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         let fred_name = builder.create_string("Fred");
         let inventory = builder.create_vector(&[0u8, 1, 2, 3, 4][..]);
         let test4 = builder.create_vector(&[my_game::example::Test::new(10, 20),
-                                            my_game::example::Test::new(30, 40)][..]);
+                                            my_game::example::Test::new(30, 40)]);
         let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
         let args = my_game::example::MonsterArgs{
             hp: 80,
@@ -1454,9 +1454,21 @@ mod follow_impls {
         assert_eq!(v.get(1), 71);
         assert_eq!(v.get(2), 72);
     }
-
 }
 
+//#[cfg(test)]
+//mod push_impls {
+//    extern crate flatbuffers;
+//    use flatbuffers::Push;
+//    use flatbuffers::field_index_to_field_offset as fi2fo;
+//
+//    #[test]
+//    fn offset_to_ref_u8() {
+//        let vec: Vec<u8> = vec![255, 3];
+//        let fs: flatbuffers::FollowStart<u8> = flatbuffers::FollowStart::new();
+//        assert_eq!(fs.self_follow(&vec[..], 1), 3);
+//    }
+//
 #[cfg(test)]
 mod vtable_deduplication {
     extern crate flatbuffers;

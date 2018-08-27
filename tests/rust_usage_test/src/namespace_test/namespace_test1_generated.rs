@@ -54,7 +54,7 @@ impl flatbuffers::EndianScalar for EnumInNestedNS {
 impl flatbuffers::Push for EnumInNestedNS {
     type Output = EnumInNestedNS;
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         flatbuffers::emplace_scalar::<EnumInNestedNS>(dst, *self);
     }
 }
@@ -106,8 +106,11 @@ impl StructInNestedNS {
 impl<'b> flatbuffers::Push for StructInNestedNS {
     type Output = StructInNestedNS;
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(self as *const StructInNestedNS as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -116,9 +119,13 @@ impl<'b> flatbuffers::Push for StructInNestedNS {
 }
 impl<'b> flatbuffers::Push for &'b StructInNestedNS {
     type Output = StructInNestedNS;
+
     #[inline(always)]
-    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const StructInNestedNS as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
     }
     #[inline(always)]
     fn size(&self) -> usize {

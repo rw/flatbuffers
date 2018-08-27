@@ -626,7 +626,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "impl flatbuffers::Push for {{ENUM_NAME}} {";
     code_ += "    type Output = {{ENUM_NAME}};";
     code_ += "    #[inline(always)]";
-    code_ += "    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
+    code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
     code_ += "        flatbuffers::emplace_scalar::<{{ENUM_NAME}}>(dst, *self);";
     code_ += "    }";
     code_ += "}";
@@ -1637,8 +1637,11 @@ class RustGenerator : public BaseGenerator {
     code_ += "impl<'b> flatbuffers::Push for {{STRUCT_NAME}} {";
     code_ += "    type Output = {{STRUCT_NAME}};";
     code_ += "    #[inline(always)]";
-    code_ += "    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
-    code_ += "        flatbuffers::pushable_method_struct_push(self, dst, _rest)";
+    code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
+    code_ += "        let src = unsafe {";
+    code_ += "            ::std::slice::from_raw_parts(self as *const {{STRUCT_NAME}} as *const u8, self.size())";
+    code_ += "        };";
+    code_ += "        dst.copy_from_slice(src);";
     code_ += "    }";
     code_ += "    #[inline(always)]";
     code_ += "    fn size(&self) -> usize {";
@@ -1647,9 +1650,13 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
     code_ += "impl<'b> flatbuffers::Push for &'b {{STRUCT_NAME}} {";
     code_ += "    type Output = {{STRUCT_NAME}};";
+    code_ += "";
     code_ += "    #[inline(always)]";
-    code_ += "    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
-    code_ += "        flatbuffers::pushable_method_struct_push(*self, dst, _rest)";
+    code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
+    code_ += "        let src = unsafe {";
+    code_ += "            ::std::slice::from_raw_parts(*self as *const {{STRUCT_NAME}} as *const u8, self.size())";
+    code_ += "        };";
+    code_ += "        dst.copy_from_slice(src);";
     code_ += "    }";
     code_ += "    #[inline(always)]";
     code_ += "    fn size(&self) -> usize {";
