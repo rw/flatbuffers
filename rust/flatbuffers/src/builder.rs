@@ -17,7 +17,7 @@ pub struct AlignParams {
     alignment: usize,
 }
 
-pub trait PushableMethod: Sized {
+pub trait Push: Sized {
     type Output;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]);
     fn size(&self) -> usize {
@@ -38,7 +38,7 @@ pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut
     dst.copy_from_slice(src);
 }
 
-impl<'b> PushableMethod for &'b [u8] {
+impl<'b> Push for &'b [u8] {
     type Output = Vector<'b, u8>;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let l = self.len() as UOffsetT;
@@ -54,7 +54,7 @@ impl<'b> PushableMethod for &'b [u8] {
 }
 
 struct ZeroTerminatedByteSlice<'a>(&'a [u8]);
-impl<'b> PushableMethod for ZeroTerminatedByteSlice<'b> {
+impl<'b> Push for ZeroTerminatedByteSlice<'b> {
     type Output = Vector<'b, u8>;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let data = self.0;
@@ -73,7 +73,7 @@ impl<'b> PushableMethod for ZeroTerminatedByteSlice<'b> {
 #[macro_export]
 macro_rules! impl_pushable_method_for_endian_scalar {
     ($ty:ident) => (
-        impl PushableMethod for $ty {
+        impl Push for $ty {
             type Output = $ty;
             fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
                 emplace_scalar::<$ty>(dst, *self);
@@ -96,7 +96,7 @@ impl_pushable_method_for_endian_scalar!(f64);
 #[macro_export]
 macro_rules! impl_pushable_method_for_struct_reference {
     ($ty:ident) => (
-        impl<'b> flatbuffers::PushableMethod for &'b $ty {
+        impl<'b> flatbuffers::Push for &'b $ty {
            type Output = $ty;
            fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
                let sz = ::std::mem::size_of::<$ty>();
@@ -114,7 +114,7 @@ macro_rules! impl_pushable_method_for_struct_reference {
     )
 }
 
-impl<T> PushableMethod for Offset<T> {
+impl<T> Push for Offset<T> {
     type Output = ForwardsUOffset<T>;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         debug_assert_eq!(dst.len(), SIZE_UOFFSET);
@@ -122,19 +122,19 @@ impl<T> PushableMethod for Offset<T> {
         emplace_scalar::<UOffsetT>(dst, n);
     }
 }
-impl<T> PushableMethod for ForwardsUOffset<T> {
+impl<T> Push for ForwardsUOffset<T> {
     type Output = Self;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         self.value().do_write(dst, rest);
     }
 }
-impl<T> PushableMethod for ForwardsVOffset<T> {
+impl<T> Push for ForwardsVOffset<T> {
     type Output = Self;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         self.value().do_write(dst, rest);
     }
 }
-impl<T> PushableMethod for BackwardsSOffset<T> {
+impl<T> Push for BackwardsSOffset<T> {
     type Output = Self;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         self.value().do_write(dst, rest);
@@ -321,7 +321,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         self.create_vector(&offsets[..])
     }
-    pub fn create_vector<'a, T: PushableMethod + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T::Output>> {
+    pub fn create_vector<'a, T: Push + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T::Output>> {
         let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
         for i in (0..items.len()).rev() {
@@ -515,7 +515,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn track_min_align(&mut self, alignment: usize) {
         self.min_align = max(self.min_align, alignment);
     }
-    pub fn push<X: PushableMethod>(&mut self, x: X) -> UOffsetT {
+    pub fn push<X: Push>(&mut self, x: X) -> UOffsetT {
         let ap = x.align_params();
 
         self.align(ap.len, ap.alignment);
@@ -526,14 +526,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         self.get_size() as UOffsetT
     }
-    pub fn push_slot<X: PushableMethod + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
+    pub fn push_slot<X: Push + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
         self.assert_nested("push_slot must be called after start_table");
         if d.is_some() && x == d.unwrap() {
             return;
         }
         self.push_slot_always(slotoff, x);
     }
-    pub fn push_slot_always<X: PushableMethod>(&mut self, slotoff: VOffsetT, x: X) {
+    pub fn push_slot_always<X: Push>(&mut self, slotoff: VOffsetT, x: X) {
         self.assert_nested("push_slot_always must be called after start_table");
         let off = self.push(x);
         self.track_field(slotoff, off);

@@ -51,7 +51,7 @@ impl flatbuffers::EndianScalar for EnumInNestedNS {
   }
 }
 
-impl flatbuffers::PushableMethod for EnumInNestedNS {
+impl flatbuffers::Push for EnumInNestedNS {
     type Output = EnumInNestedNS;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
@@ -103,7 +103,7 @@ impl StructInNestedNS {
   }
 }
 
-impl<'b> flatbuffers::PushableMethod for StructInNestedNS {
+impl<'b> flatbuffers::Push for StructInNestedNS {
     type Output = StructInNestedNS;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
@@ -114,7 +114,7 @@ impl<'b> flatbuffers::PushableMethod for StructInNestedNS {
         ::std::mem::size_of::<StructInNestedNS>()
     }
 }
-impl<'b> flatbuffers::PushableMethod for &'b StructInNestedNS {
+impl<'b> flatbuffers::Push for &'b StructInNestedNS {
     type Output = StructInNestedNS;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {

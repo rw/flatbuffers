@@ -623,7 +623,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
     code_ += "}";
     code_ += "";
-    code_ += "impl flatbuffers::PushableMethod for {{ENUM_NAME}} {";
+    code_ += "impl flatbuffers::Push for {{ENUM_NAME}} {";
     code_ += "    type Output = {{ENUM_NAME}};";
     code_ += "    #[inline(always)]";
     code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
@@ -1634,7 +1634,7 @@ class RustGenerator : public BaseGenerator {
     }
     code_ += "}";
     code_ += "";
-    code_ += "impl<'b> flatbuffers::PushableMethod for {{STRUCT_NAME}} {";
+    code_ += "impl<'b> flatbuffers::Push for {{STRUCT_NAME}} {";
     code_ += "    type Output = {{STRUCT_NAME}};";
     code_ += "    #[inline(always)]";
     code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
@@ -1645,7 +1645,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "        ::std::mem::size_of::<{{STRUCT_NAME}}>()";
     code_ += "    }";
     code_ += "}";
-    code_ += "impl<'b> flatbuffers::PushableMethod for &'b {{STRUCT_NAME}} {";
+    code_ += "impl<'b> flatbuffers::Push for &'b {{STRUCT_NAME}} {";
     code_ += "    type Output = {{STRUCT_NAME}};";
     code_ += "    #[inline(always)]";
     code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
