@@ -93,10 +93,10 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
         builder.end_table(table_start)
     };
     let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
-    let inv = builder.create_vector_of_scalars(&[0u8, 1, 2, 3, 4]);
+    let inv = builder.create_vector(&[0u8, 1, 2, 3, 4]);
 
-    let test4 = builder.create_vector_of_structs(&[my_game::example::Test::new(10, 20),
-                                                   my_game::example::Test::new(30, 40)][..]);
+    let test4 = builder.create_vector(&[my_game::example::Test::new(10, 20),
+                                        my_game::example::Test::new(30, 40)][..]);
 
     let name = builder.create_string("MyMonster");
     let testarrayofstring = builder.create_vector_of_strings(&["test1", "test2"][..]);
@@ -104,7 +104,7 @@ fn create_serialized_example_with_library_code(builder: &mut flatbuffers::FlatBu
     // begin building
 
     let table_start = builder.start_table();
-    builder.push_slot::<i16>(my_game::example::Monster::VT_HP, 80, Some(100));
+    builder.push_slot(my_game::example::Monster::VT_HP, 80i16, Some(100));
     builder.push_slot(my_game::example::Monster::VT_NAME, name, None);
     builder.push_slot(my_game::example::Monster::VT_POS, &pos, None);
     builder.push_slot(my_game::example::Monster::VT_TEST_TYPE, my_game::example::Any::Monster, Some(my_game::example::Any::NONE));
@@ -420,7 +420,7 @@ mod roundtrip_generated_code {
         let b1 = {
             let mut b1 = flatbuffers::FlatBufferBuilder::new();
             let args = my_game::example::MonsterArgs{
-                testnestedflatbuffer: Some(b1.create_vector_of_scalars::<u8>(b0.finished_bytes())),
+                testnestedflatbuffer: Some(b1.create_vector(b0.finished_bytes())),
                 name: Some(b1.create_string("foo")),
                 ..Default::default()
             };
@@ -468,7 +468,7 @@ mod roundtrip_generated_code {
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let s0 = b.create_string("foobar");
         let s1 = b.create_string("baz");
-        let v = b.create_vector_of_reverse_offsets(&[s0, s1]);
+        let v = b.create_vector(&[s0, s1]);
         let name = b.create_string("foo");
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
@@ -480,7 +480,7 @@ mod roundtrip_generated_code {
     #[test]
     fn vector_of_ubyte_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let v = b.create_vector_of_scalars::<u8>(&[123, 234][..]);
+        let v = b.create_vector(&[123u8, 234u8][..]);
         let name = b.create_string("foo");
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
@@ -490,7 +490,7 @@ mod roundtrip_generated_code {
     #[test]
     fn vector_of_bool_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let v = b.create_vector_of_scalars::<bool>(&[false, true, false, true][..]);
+        let v = b.create_vector::<bool>(&[false, true, false, true][..]);
         let name = b.create_string("foo");
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
@@ -500,7 +500,7 @@ mod roundtrip_generated_code {
     #[test]
     fn vector_of_f64_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let v = b.create_vector_of_scalars::<f64>(&[3.14159265359][..]);
+        let v = b.create_vector::<f64>(&[3.14159265359][..]);
         let name = b.create_string("foo");
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
@@ -510,7 +510,7 @@ mod roundtrip_generated_code {
     #[test]
     fn vector_of_struct_store() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let v = b.create_vector_of_structs::<my_game::example::Test>(&[my_game::example::Test::new(127, -128), my_game::example::Test::new(3, 123)][..]);
+        let v = b.create_vector::<my_game::example::Test>(&[my_game::example::Test::new(127, -128), my_game::example::Test::new(3, 123)][..]);
         let name = b.create_string("foo");
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
@@ -530,7 +530,8 @@ mod roundtrip_generated_code {
             let args = my_game::example::MonsterArgs{name: Some(name), ..Default::default()};
             my_game::example::Monster::create(b, &args)
         };
-        let v = b.create_vector_of_reverse_offsets::<my_game::example::Monster>(&[t0, t1][..]);
+        //let v = b.create_vector::<my_game::example::Monster>(&[t0, t1][..]);
+        let v = b.create_vector(&[t0, t1][..]);
         let name = b.create_string("foo");
         let m = build_mon(b, &my_game::example::MonsterArgs{
             name: Some(name),

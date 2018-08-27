@@ -58,11 +58,9 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         name: Some(t2_name),
         ..Default::default()
     });
-    let s0 = builder.create_string("test1");
-    let s1 = builder.create_string("test2");
     let mon = {
         let fred_name = builder.create_string("Fred");
-        let inventory = builder.create_vector::<u8>(&[0, 1, 2, 3, 4]);
+        let inventory = builder.create_vector(&[0u8, 1, 2, 3, 4]);
         let test4 = builder.create_vector(&[my_game::example::Test::new(10, 20),
                                             my_game::example::Test::new(30, 40)]);
         let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
@@ -78,7 +76,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
             }).as_union_value()),
             inventory: Some(inventory),
             test4: Some(test4),
-            testarrayofstring: Some(builder.create_vector(&[s0, s1])),
+            testarrayofstring: Some(builder.create_vector_of_strings(&["test1", "test2"])),
             testarrayoftables: Some(builder.create_vector(&[t0, t1, t2])),
             ..Default::default()
         };
