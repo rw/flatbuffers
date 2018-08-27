@@ -34,19 +34,11 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     }
 }
 
-//#[derive(Debug)]
-//pub struct Vector<'a, T: 'a>(&'a [u8], usize, PhantomData<T>);
-//impl<'a, T: Follow<'a> + 'a> Slice<'a, T> {
-//    pub fn as_slice(self) -> &'a [T] {
-//        <SliceOfGeneratedStruct<T>>::follow(self.0, self.1)
-//    }
-//}
-
-//impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> {
-//    pub fn as_slice(self) -> &'a [T] {
-//        <SliceOfGeneratedStruct<T>>::follow(self.0, self.1)
-//    }
-//}
+impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> {
+    pub fn as_slice(self) -> &'a [T] {
+        <SliceOfGeneratedStruct<T>>::follow(self.0, self.1)
+    }
+}
 
 
 
@@ -82,7 +74,7 @@ impl<'a> Follow<'a> for &'a str {
 
 /// Implement direct slice access to structs (they are endian-safe because we
 /// use accessors to get their elements).
-impl<'a, T: GeneratedStruct + 'a> Follow<'a> for &'a [T] {
+impl<'a, T: GeneratedStruct + 'a> Follow<'a> for SliceOfGeneratedStruct<T> {
     type Inner = &'a [T];
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let sz = size_of::<T>();
@@ -105,52 +97,14 @@ fn follow_slice_helper<T>(buf: &[u8], loc: usize) -> &[T] {
     s
 }
 
-///// Implement direct slice access if the host is little-endian.
-//#[cfg(target_endian = "little")]
-//impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
-//    type Inner = &'a [T];
-//    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-//        follow_slice_helper::<T>(buf, loc)
-//    }
-//}
-
-macro_rules! impl_follow_for_slice {
-    ($ty:ident) => (
-        impl<'a> Follow<'a> for &'a [$ty] {
-            type Inner = &'a [$ty];
-
-            #[inline(always)]
-            fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-                follow_slice_helper::<$ty>(buf, loc)
-            }
-        }
-    )
+/// Implement direct slice access if the host is little-endian.
+#[cfg(target_endian = "little")]
+impl<'a, T: EndianScalar> Follow<'a> for &'a [T] {
+    type Inner = &'a [T];
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        follow_slice_helper::<T>(buf, loc)
+    }
 }
-macro_rules! impl_follow_for_slice_of_little_endian_scalar {
-    ($ty:ident) => (
-        #[cfg(target_endian = "little")]
-        impl<'a> Follow<'a> for &'a [$ty] {
-            type Inner = &'a [$ty];
-
-            #[inline(always)]
-            fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-                follow_slice_helper::<$ty>(buf, loc)
-            }
-        }
-    )
-}
-
-impl_follow_for_slice!(bool);
-impl_follow_for_slice!(u8);
-impl_follow_for_slice!(i8);
-impl_follow_for_slice_of_little_endian_scalar!(u16);
-impl_follow_for_slice_of_little_endian_scalar!(i16);
-impl_follow_for_slice_of_little_endian_scalar!(u32);
-impl_follow_for_slice_of_little_endian_scalar!(i32);
-impl_follow_for_slice_of_little_endian_scalar!(u64);
-impl_follow_for_slice_of_little_endian_scalar!(i64);
-impl_follow_for_slice_of_little_endian_scalar!(f32);
-impl_follow_for_slice_of_little_endian_scalar!(f64);
 
 /// Implement Follow for all possible Vectors that have Follow-able elements.
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for Vector<'a, T> {

@@ -86,20 +86,6 @@ pub struct StructInNestedNS {
   b_: i32,
 } // pub struct StructInNestedNS
 impl flatbuffers::GeneratedStruct for StructInNestedNS {}
-impl<'a> flatbuffers::Follow<'a> for StructInNestedNS {
-  type Inner = &'a StructInNestedNS;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<StructInNestedNS>(buf, loc)
-  }
-}
-impl<'a> flatbuffers::Follow<'a> for &'a StructInNestedNS {
-  type Inner = &'a StructInNestedNS;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<StructInNestedNS>(buf, loc)
-  }
-}
 
 impl StructInNestedNS {
   pub fn new<'a>(_a: i32, _b: i32) -> Self {

@@ -289,20 +289,6 @@ pub struct Test {
   padding0__: u8,
 } // pub struct Test
 impl flatbuffers::GeneratedStruct for Test {}
-impl<'a> flatbuffers::Follow<'a> for Test {
-  type Inner = &'a Test;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<Test>(buf, loc)
-  }
-}
-impl<'a> flatbuffers::Follow<'a> for &'a Test {
-  type Inner = &'a Test;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<Test>(buf, loc)
-  }
-}
 
 impl Test {
   pub fn new<'a>(_a: i16, _b: i8) -> Self {
@@ -366,20 +352,6 @@ pub struct Vec3 {
   padding2__: u16,
 } // pub struct Vec3
 impl flatbuffers::GeneratedStruct for Vec3 {}
-impl<'a> flatbuffers::Follow<'a> for Vec3 {
-  type Inner = &'a Vec3;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<Vec3>(buf, loc)
-  }
-}
-impl<'a> flatbuffers::Follow<'a> for &'a Vec3 {
-  type Inner = &'a Vec3;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<Vec3>(buf, loc)
-  }
-}
 
 impl Vec3 {
   pub fn new<'a>(_x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a Test/* foo */) -> Self {
@@ -454,20 +426,6 @@ pub struct Ability {
   distance_: u32,
 } // pub struct Ability
 impl flatbuffers::GeneratedStruct for Ability {}
-impl<'a> flatbuffers::Follow<'a> for Ability {
-  type Inner = &'a Ability;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<Ability>(buf, loc)
-  }
-}
-impl<'a> flatbuffers::Follow<'a> for &'a Ability {
-  type Inner = &'a Ability;
-  #[inline(always)]
-  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::impl_follow_struct::<Ability>(buf, loc)
-  }
-}
 
 impl Ability {
   pub fn new<'a>(_id: u32, _distance: u32) -> Self {
