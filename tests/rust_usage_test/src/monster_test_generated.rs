@@ -186,6 +186,7 @@ impl flatbuffers::EndianScalar for Color {
 }
 
 impl flatbuffers::PushableMethod for Color {
+    type Output = Color;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Color>(dst, *self);
@@ -250,6 +251,7 @@ impl flatbuffers::EndianScalar for Any {
 }
 
 impl flatbuffers::PushableMethod for Any {
+    type Output = Any;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Any>(dst, *self);
@@ -306,6 +308,7 @@ impl Test {
 }
 
 impl<'b> flatbuffers::PushableMethod for Test {
+    type Output = Test;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
@@ -316,6 +319,7 @@ impl<'b> flatbuffers::PushableMethod for Test {
     }
 }
 impl<'b> flatbuffers::PushableMethod for &'b Test {
+    type Output = Test;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
@@ -378,6 +382,7 @@ impl Vec3 {
 }
 
 impl<'b> flatbuffers::PushableMethod for Vec3 {
+    type Output = Vec3;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
@@ -388,6 +393,7 @@ impl<'b> flatbuffers::PushableMethod for Vec3 {
     }
 }
 impl<'b> flatbuffers::PushableMethod for &'b Vec3 {
+    type Output = Vec3;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
@@ -424,6 +430,7 @@ impl Ability {
 }
 
 impl<'b> flatbuffers::PushableMethod for Ability {
+    type Output = Ability;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
@@ -434,6 +441,7 @@ impl<'b> flatbuffers::PushableMethod for Ability {
     }
 }
 impl<'b> flatbuffers::PushableMethod for &'b Ability {
+    type Output = Ability;
     #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)

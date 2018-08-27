@@ -16,6 +16,7 @@ pub struct AlignParams {
 }
 
 pub trait PushableMethod: Sized {
+    type Output;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]);
     fn size(&self) -> usize {
         size_of::<Self>()
@@ -36,6 +37,7 @@ pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut
 }
 
 impl<'b> PushableMethod for &'b [u8] {
+    type Output = Vector<'b, u8>;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let l = self.len() as UOffsetT;
         emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
@@ -51,6 +53,7 @@ impl<'b> PushableMethod for &'b [u8] {
 
 struct ZeroTerminatedByteSlice<'a>(&'a [u8]);
 impl<'b> PushableMethod for ZeroTerminatedByteSlice<'b> {
+    type Output = Vector<'b, u8>;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         let data = self.0;
         let l = data.len();
@@ -69,6 +72,7 @@ impl<'b> PushableMethod for ZeroTerminatedByteSlice<'b> {
 macro_rules! impl_pushable_method_for_endian_scalar {
     ($ty:ident) => (
         impl PushableMethod for $ty {
+            type Output = $ty;
             fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
                 emplace_scalar::<$ty>(dst, *self);
             }
@@ -91,6 +95,7 @@ impl_pushable_method_for_endian_scalar!(f64);
 macro_rules! impl_pushable_method_for_struct_reference {
     ($ty:ident) => (
         impl<'b> flatbuffers::PushableMethod for &'b $ty {
+           type Output = $ty;
            fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
                let sz = ::std::mem::size_of::<$ty>();
                debug_assert_eq!(sz, dst.len());
@@ -108,6 +113,7 @@ macro_rules! impl_pushable_method_for_struct_reference {
 }
 
 impl<T> PushableMethod for Offset<T> {
+    type Output = ForwardsUOffset<T>;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         debug_assert_eq!(dst.len(), SIZE_UOFFSET);
         let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
@@ -115,16 +121,19 @@ impl<T> PushableMethod for Offset<T> {
     }
 }
 impl<T> PushableMethod for ForwardsUOffset<T> {
+    type Output = Self;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         self.value().do_write(dst, rest);
     }
 }
 impl<T> PushableMethod for ForwardsVOffset<T> {
+    type Output = Self;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         self.value().do_write(dst, rest);
     }
 }
 impl<T> PushableMethod for BackwardsSOffset<T> {
+    type Output = Self;
     fn do_write<'a>(&'a self, dst: &'a mut [u8], rest: &'a [u8]) {
         self.value().do_write(dst, rest);
     }
@@ -336,13 +345,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
                 .value(),
         )
     }
-    pub fn create_vector<'a, T: PushableMethod + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T>> {
+    pub fn create_vector<'a, T: PushableMethod + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T::Output>> {
         let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
         for i in (0..items.len()).rev() {
             self.push(items[i]);
         }
-        Offset::new(self.end_vector::<T>(items.len()).value())
+        Offset::new(self.end_vector::<T::Output>(items.len()).value())
     }
     pub fn create_vector_of_scalars<T: PushableMethod + EndianScalar + 'fbb>(
         &mut self,
