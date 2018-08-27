@@ -186,6 +186,7 @@ impl flatbuffers::EndianScalar for Color {
 }
 
 impl flatbuffers::PushableMethod for Color {
+    #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Color>(dst, *self);
     }
@@ -249,6 +250,7 @@ impl flatbuffers::EndianScalar for Any {
 }
 
 impl flatbuffers::PushableMethod for Any {
+    #[inline(always)]
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Any>(dst, *self);
     }
@@ -308,6 +310,7 @@ impl<'b> flatbuffers::PushableMethod for &'b Test {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
     }
+    #[inline(always)]
     fn size(&self) -> usize {
         ::std::mem::size_of::<Test>()
     }
@@ -369,6 +372,7 @@ impl<'b> flatbuffers::PushableMethod for &'b Vec3 {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
     }
+    #[inline(always)]
     fn size(&self) -> usize {
         ::std::mem::size_of::<Vec3>()
     }
@@ -404,6 +408,7 @@ impl<'b> flatbuffers::PushableMethod for &'b Ability {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
     }
+    #[inline(always)]
     fn size(&self) -> usize {
         ::std::mem::size_of::<Ability>()
     }

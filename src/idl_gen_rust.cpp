@@ -624,6 +624,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "}";
     code_ += "";
     code_ += "impl flatbuffers::PushableMethod for {{ENUM_NAME}} {";
+    code_ += "    #[inline(always)]";
     code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
     code_ += "        flatbuffers::emplace_scalar::<{{ENUM_NAME}}>(dst, *self);";
     code_ += "    }";
@@ -1636,6 +1637,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {";
     code_ += "        flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)";
     code_ += "    }";
+    code_ += "    #[inline(always)]";
     code_ += "    fn size(&self) -> usize {";
     code_ += "        ::std::mem::size_of::<{{STRUCT_NAME}}>()";
     code_ += "    }";

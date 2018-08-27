@@ -23,7 +23,6 @@ pub trait PushableMethod: Sized {
     fn align_params(&self) -> AlignParams {
         AlignParams{len: self.size(), alignment: self.size()}
     }
-
 }
 
 
@@ -38,14 +37,32 @@ pub fn pushable_method_struct_do_write<'a, T: Sized + 'a>(x: &'a T, dst: &'a mut
 
 impl<'b> PushableMethod for &'b [u8] {
     fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        dst.copy_from_slice(self);
+        let l = self.len() as UOffsetT;
+        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
+        dst[SIZE_UOFFSET..].copy_from_slice(self);
     }
     fn size(&self) -> usize {
-        self.len()
+        self.len() + SIZE_UOFFSET
     }
-    //fn align(&self) -> (usize, usize) {
-    //    (self.len(), SIZE_UOFFSET)
-    //}
+    fn align_params(&self) -> AlignParams {
+        AlignParams{len: self.size(), alignment: SIZE_UOFFSET}
+    }
+}
+
+struct ZeroTerminatedByteSlice<'a>(&'a [u8]);
+impl<'b> PushableMethod for ZeroTerminatedByteSlice<'b> {
+    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        let data = self.0;
+        let l = data.len();
+        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l as UOffsetT);
+        dst[SIZE_UOFFSET..SIZE_UOFFSET+l].copy_from_slice(data);
+    }
+    fn size(&self) -> usize {
+        SIZE_UOFFSET + self.0.len() + 1
+    }
+    fn align_params(&self) -> AlignParams {
+        AlignParams{len: self.size(), alignment: SIZE_UOFFSET}
+    }
 }
 
 #[macro_export]
@@ -261,21 +278,19 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
     // utf-8 string creation
     pub fn create_string(&mut self, s: &str) -> Offset<&'fbb str> {
-        Offset::<&str>::new(self.create_byte_string(s.as_bytes()).value())
+        self.assert_not_nested();
+        self.push(ZeroTerminatedByteSlice{0: s.as_bytes()});
+        Offset::new(self.get_size() as UOffsetT)
+        //Offset::<&str>::new(self.create_byte_string(s.as_bytes()).value())
     }
     pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<&'fbb [u8]> {
         self.assert_not_nested();
-        self.align(data.len() + 1, SIZE_UOFFSET); // Always 0-terminated.
-        self.fill(1);
-        self.push_bytes(data);
-        self.push::<UOffsetT>(data.len() as UOffsetT);
+        self.push(ZeroTerminatedByteSlice{0: data});
         Offset::new(self.get_size() as UOffsetT)
     }
     pub fn create_byte_vector<'a, 'b>(&'a mut self, data: &'b [u8]) -> Offset<Vector<'fbb, u8>> {
         self.assert_not_nested();
-        self.align(data.len(), SIZE_UOFFSET);
-        self.push_bytes(data);
-        self.push::<UOffsetT>(data.len() as UOffsetT);
+        self.push(data);
         Offset::new(self.get_size() as UOffsetT)
     }
     pub fn create_vector_of_strings<'a, 'b>(
