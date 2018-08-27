@@ -53,7 +53,7 @@ impl<'a> Default for InParentNamespaceArgs<'a> {
 }
 pub struct InParentNamespaceBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> InParentNamespaceBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> InParentNamespaceBuilder<'a, 'b> {
@@ -124,7 +124,7 @@ impl<'a> Default for MonsterArgs<'a> {
 }
 pub struct MonsterBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
@@ -188,7 +188,7 @@ impl flatbuffers::EndianScalar for Color {
 impl flatbuffers::Push for Color {
     type Output = Color;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Color>(dst, *self);
     }
 }
@@ -253,7 +253,7 @@ impl flatbuffers::EndianScalar for Any {
 impl flatbuffers::Push for Any {
     type Output = Any;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<Any>(dst, *self);
     }
 }
@@ -310,8 +310,8 @@ impl Test {
 impl<'b> flatbuffers::Push for Test {
     type Output = Test;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -321,8 +321,8 @@ impl<'b> flatbuffers::Push for Test {
 impl<'b> flatbuffers::Push for &'b Test {
     type Output = Test;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -384,8 +384,8 @@ impl Vec3 {
 impl<'b> flatbuffers::Push for Vec3 {
     type Output = Vec3;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -395,8 +395,8 @@ impl<'b> flatbuffers::Push for Vec3 {
 impl<'b> flatbuffers::Push for &'b Vec3 {
     type Output = Vec3;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -432,8 +432,8 @@ impl Ability {
 impl<'b> flatbuffers::Push for Ability {
     type Output = Ability;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -443,8 +443,8 @@ impl<'b> flatbuffers::Push for Ability {
 impl<'b> flatbuffers::Push for &'b Ability {
     type Output = Ability;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -505,7 +505,7 @@ impl<'a> Default for TestSimpleTableWithEnumArgs<'a> {
 }
 pub struct TestSimpleTableWithEnumBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> TestSimpleTableWithEnumBuilder<'a, 'b> {
   #[inline(always)]
@@ -594,7 +594,7 @@ impl<'a> Default for StatArgs<'a> {
 }
 pub struct StatBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> StatBuilder<'a, 'b> {
   #[inline(always)]
@@ -675,7 +675,7 @@ impl<'a> Default for ReferrableArgs<'a> {
 }
 pub struct ReferrableBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> ReferrableBuilder<'a, 'b> {
   #[inline(always)]
@@ -1107,7 +1107,7 @@ impl<'a> Default for MonsterArgs<'a> {
 }
 pub struct MonsterBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   #[inline(always)]
@@ -1433,7 +1433,7 @@ impl<'a> Default for TypeAliasesArgs<'a> {
 }
 pub struct TypeAliasesBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> TypeAliasesBuilder<'a, 'b> {
   #[inline(always)]

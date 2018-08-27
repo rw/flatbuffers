@@ -54,7 +54,7 @@ impl flatbuffers::EndianScalar for EnumInNestedNS {
 impl flatbuffers::Push for EnumInNestedNS {
     type Output = EnumInNestedNS;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
         flatbuffers::emplace_scalar::<EnumInNestedNS>(dst, *self);
     }
 }
@@ -106,8 +106,8 @@ impl StructInNestedNS {
 impl<'b> flatbuffers::Push for StructInNestedNS {
     type Output = StructInNestedNS;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -117,8 +117,8 @@ impl<'b> flatbuffers::Push for StructInNestedNS {
 impl<'b> flatbuffers::Push for &'b StructInNestedNS {
     type Output = StructInNestedNS;
     #[inline(always)]
-    fn do_write<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
-        flatbuffers::pushable_method_struct_do_write(*self, dst, _rest)
+    fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+        flatbuffers::pushable_method_struct_push(*self, dst, _rest)
     }
     #[inline(always)]
     fn size(&self) -> usize {
@@ -179,7 +179,7 @@ impl<'a> Default for TableInNestedNSArgs<'a> {
 }
 pub struct TableInNestedNSBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> TableInNestedNSBuilder<'a, 'b> {
   #[inline(always)]

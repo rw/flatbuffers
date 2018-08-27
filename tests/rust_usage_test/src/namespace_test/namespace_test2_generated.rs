@@ -78,7 +78,7 @@ impl<'a> Default for TableInFirstNSArgs<'a> {
 }
 pub struct TableInFirstNSBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
   #[inline(always)]
@@ -159,7 +159,7 @@ impl<'a> Default for SecondTableInAArgs<'a> {
 }
 pub struct SecondTableInABuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> SecondTableInABuilder<'a, 'b> {
   #[inline(always)]
@@ -253,7 +253,7 @@ impl<'a> Default for TableInCArgs<'a> {
 }
 pub struct TableInCBuilder<'a: 'b, 'b> {
   fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,
-  start_: flatbuffers::Offset<flatbuffers::TableOffset>,
+  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,
 }
 impl<'a: 'b, 'b> TableInCBuilder<'a, 'b> {
   #[inline(always)]

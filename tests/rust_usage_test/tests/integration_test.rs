@@ -17,7 +17,6 @@
 
 extern crate quickcheck;
 
-#[macro_use(impl_pushable_method_for_struct_reference)]
 extern crate flatbuffers;
 
 extern crate rust_usage_test;
@@ -1150,10 +1149,12 @@ mod builder_asserts {
         #[derive(Copy, Clone, Debug, PartialEq)]
         #[repr(C, packed)]
         struct foo { }
-        impl_pushable_method_for_struct_reference!(foo);
+        impl<'b> flatbuffers::Push for &'b foo {
+            type Output = foo;
+            fn push<'a>(&'a self, _dst: &'a mut [u8], _rest: &'a [u8]) { }
+        }
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        let x = foo{};
-        b.push_slot(0, &x, None);
+        b.push_slot(0, &foo{}, None);
     }
 
     #[test]
@@ -1857,24 +1858,42 @@ mod byte_layouts {
             b: i16,
             _pad1: [u8; 3],
             c: i8,
+            _pad2: [u8; 4],
         }
-        impl_pushable_method_for_struct_reference!(foo);
+        assert_eq!(::std::mem::size_of::<foo>(), 16);
+        impl<'b> flatbuffers::Push for &'b foo {
+            type Output = foo;
+            fn push<'a>(&'a self, dst: &'a mut [u8], _rest: &'a [u8]) {
+                let src = unsafe {
+                    ::std::slice::from_raw_parts(*self as *const foo as *const u8, self.size())
+                };
+                dst.copy_from_slice(src);
+            }
+            fn size(&self) -> usize {
+                ::std::mem::size_of::<foo>()
+            }
+            fn alignment(&self) -> usize {
+                self.size()
+            }
+        }
 
         let mut b = flatbuffers::FlatBufferBuilder::new();
         let off = b.start_table();
-        let x = foo{a: 0x12345678i32.to_le(), _pad0: [0,0], b: 0x1234i16.to_le(), _pad1: [0, 0, 0], c: 55i8.to_le()};
+        let x = foo{a: 0x12345678i32.to_le(), _pad0: [0,0], b: 0x1234i16.to_le(), _pad1: [0, 0, 0], c: 0x12i8.to_le(), _pad2: [0, 0, 0, 0]};
         b.push_slot(fi2fo(0), &x, None);
         b.end_table(off);
         check(&b, &[
               6, 0, // vtable bytes
-              16, 0, // end of object from here
+              20, 0, // end of object from here
               4, 0, // start of struct from here
               6, 0, 0, 0, // offset for start of vtable (int32)
-              0x78, 0x56, 0x34, 0x12, // value 2
+
+              0x78, 0x56, 0x34, 0x12, // value a
               0, 0, // padding
-              0x34, 0x12, // value 1
+              0x34, 0x12, // value b
               0, 0, 0, // padding
-              55, // value 0
+              0x12, // value c
+              0, 0, 0, 0, // padding
         ]);
     }
   	// test 15: vtable with 1 vector of 2 struct of 2 int8

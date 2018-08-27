@@ -43,7 +43,9 @@ pub enum VectorOffset {}
 pub enum StringOffset {}
 pub enum ByteStringOffset {}
 pub enum UnionOffset {}
-pub enum TableOffset {}
+pub enum TableUnfinishedOffset {}
+pub enum TableFinishedOffset {}
+pub enum VTableOffset {}
 pub struct UnionMarker;
 
 pub struct SliceOfGeneratedStruct<T: GeneratedStruct>(T);
