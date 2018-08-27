@@ -529,7 +529,6 @@ mod roundtrip_generated_code {
             let args = my_game::example::MonsterArgs{name: Some(name), ..Default::default()};
             my_game::example::Monster::create(b, &args)
         };
-        //let v = b.create_vector::<my_game::example::Monster>(&[t0, t1][..]);
         let v = b.create_vector(&[t0, t1][..]);
         let name = b.create_string("foo");
         let m = build_mon(b, &my_game::example::MonsterArgs{
