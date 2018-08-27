@@ -916,26 +916,26 @@ class RustGenerator : public BaseGenerator {
       case FullType::Integer:
       case FullType::Float: {
         const auto typname = GetTypeWire(field.value.type, "", "", false);
-        return "self.fbb_.push_slot::<" + typname + ">";
+        return "self.fbb_.push_slot_default::<" + typname + ">";
       }
       case FullType::Bool: {
-        return "self.fbb_.push_slot::<bool>";
+        return "self.fbb_.push_slot_default::<bool>";
       }
 
       case FullType::Struct: {
         const std::string typname = GetTypeWire(field.value.type, "", "", false);
         //const std::string typname = WrapInNameSpace(field);
-        return "self.fbb_.push_slot::<&" + typname + ">";
+        return "self.fbb_.push_slot_always::<&" + typname + ">";
       }
       case FullType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self.fbb_.push_slot::<flatbuffers::Offset<" + typname + ">>";
+        return "self.fbb_.push_slot_always::<flatbuffers::Offset<" + typname + ">>";
       }
 
       case FullType::EnumKey:
       case FullType::UnionKey: {
         const auto underlying_typname = GetTypeBasic(type, true);
-        return "self.fbb_.push_slot::<" + underlying_typname + ">";
+        return "self.fbb_.push_slot_default::<" + underlying_typname + ">";
       }
 
       case FullType::UnionValue:
@@ -948,7 +948,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::VectorOfTable:
       case FullType::VectorOfString:
       case FullType::VectorOfUnionValue: {
-        return "self.fbb_.push_slot::<flatbuffers::Offset<_>>";
+        return "self.fbb_.push_slot_always::<flatbuffers::Offset<_>>";
       }
     }
   }
@@ -1361,9 +1361,9 @@ class RustGenerator : public BaseGenerator {
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
         if (is_scalar) {
           code_.SetValue("FIELD_DEFAULT_VALUE", TableBuilderAddFuncDefaultValue(field));
-          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, Some({{FIELD_DEFAULT_VALUE}}));";
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, {{FIELD_DEFAULT_VALUE}});";
         } else {
-          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, None);";
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}});";
         }
         code_ += "  }";
       }

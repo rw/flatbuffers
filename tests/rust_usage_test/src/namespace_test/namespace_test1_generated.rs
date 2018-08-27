@@ -170,7 +170,7 @@ pub struct TableInNestedNSBuilder<'a: 'b, 'b> {
 }
 impl<'a: 'b, 'b> TableInNestedNSBuilder<'a, 'b> {
   pub fn add_foo(&mut self, foo: i32) {
-    self.fbb_.push_slot::<i32>(TableInNestedNS::VT_FOO, foo, Some(0));
+    self.fbb_.push_slot_default::<i32>(TableInNestedNS::VT_FOO, foo, 0);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TableInNestedNSBuilder<'a, 'b> {
     let start = _fbb.start_table();
