@@ -1063,6 +1063,14 @@ mod write_and_read_examples {
     #[test]
     fn library_code_creates_correct_example() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
+        create_serialized_example_with_library_code(b);
+        let buf = b.finished_bytes();
+        serialized_example_is_accessible_and_correct(&buf[..], true, false).unwrap();
+    }
+
+    #[test]
+    fn library_code_creates_correct_example_repeatedly_with_reset() {
+        let b = &mut flatbuffers::FlatBufferBuilder::new();
         for _ in 0..100 {
             create_serialized_example_with_library_code(b);
             {
