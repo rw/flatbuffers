@@ -1455,19 +1455,68 @@ mod follow_impls {
     }
 }
 
-//#[cfg(test)]
-//mod push_impls {
-//    extern crate flatbuffers;
-//    use flatbuffers::Push;
-//    use flatbuffers::field_index_to_field_offset as fi2fo;
-//
-//    #[test]
-//    fn offset_to_ref_u8() {
-//        let vec: Vec<u8> = vec![255, 3];
-//        let fs: flatbuffers::FollowStart<u8> = flatbuffers::FollowStart::new();
-//        assert_eq!(fs.self_follow(&vec[..], 1), 3);
-//    }
-//
+#[cfg(test)]
+mod push_impls {
+    extern crate flatbuffers;
+
+    use rust_usage_test::monster_test_generated::my_game;
+
+    fn check<'a>(b: &'a flatbuffers::FlatBufferBuilder, want: &'a [u8]) {
+        let got = b.get_active_buf_slice();
+        assert_eq!(want, got);
+    }
+
+    #[test]
+    fn push_u8() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.push(123u8);
+        check(&b, &[123]);
+    }
+
+    #[test]
+    fn push_u64() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.push(0x12345678);
+        check(&b, &[0x78, 0x56, 0x34, 0x12]);
+    }
+
+    #[test]
+    fn push_f64() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.push(3.14159265359f64);
+        check(&b, &[234, 46, 68, 84, 251, 33, 9, 64]);
+    }
+
+    #[test]
+    fn push_generated_struct() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.push(my_game::example::Test::new(10, 20));
+        check(&b, &[10, 0, 20, 0]);
+    }
+
+    #[test]
+    fn push_string() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.push("foo");
+        check(&b, &[3, 0, 0, 0, 102, 111, 111, 0]);
+    }
+
+    #[test]
+    fn push_byte_slice_with_alignment() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        b.push(&[1u8, 2, 3, 4, 5][..]);
+        check(&b, &[5, 0, 0, 0, 1, 2, 3, 4, 5, 0, 0, 0]);
+    }
+
+    #[test]
+    fn push_u8_slice_with_alignment() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let off = b.create_vector(&[1u8, 2, 3, 4, 5, 6, 7, 8, 9][..]);
+        b.push(off);
+        check(&b, &[/* loc */ 4, 0, 0, 0, /* len */ 9, 0, 0, 0, /* val */ 1, 2, 3, 4, 5, 6, 7, 8, 9, /* padding */ 0, 0, 0]);
+    }
+}
+
 #[cfg(test)]
 mod vtable_deduplication {
     extern crate flatbuffers;

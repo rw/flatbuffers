@@ -41,6 +41,23 @@ impl<'b> Push for &'b [u8] {
     }
 }
 
+impl<'b> Push for &'b str {
+    type Output = Vector<'b, u8>;
+
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let l = self.len();
+        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l as UOffsetT);
+        dst[SIZE_UOFFSET..SIZE_UOFFSET+l].copy_from_slice(self.as_bytes());
+    }
+    fn size(&self) -> usize {
+        SIZE_UOFFSET + self.len() + 1
+    }
+    fn alignment(&self) -> usize {
+        SIZE_UOFFSET
+    }
+}
+
+
 pub struct ZeroTerminatedByteSlice<'a>(&'a [u8]);
 
 impl<'a> ZeroTerminatedByteSlice<'a> {
@@ -54,6 +71,7 @@ impl<'a> ZeroTerminatedByteSlice<'a> {
         self.0
     }
 }
+
 impl<'b> Push for ZeroTerminatedByteSlice<'b> {
     type Output = Vector<'b, u8>;
 
