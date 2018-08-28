@@ -1141,6 +1141,10 @@ class RustGenerator : public BaseGenerator {
       code_ += "    {{FUNC_BODY}}";
       code_ += "  }";
 
+      // Generate a comparison function for this field if it is a key.
+      if (field.key) {
+        GenKeyFieldMethods(field, true);
+      }
 
       auto nested = field.attributes.Lookup("nested_flatbuffer");
       if (nested) {
@@ -1323,6 +1327,42 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
     code_ += "}";
     code_ += "";
+  }
+
+  void GenKeyFieldMethods(const FieldDef &field, const bool optional_values) {
+    FLATBUFFERS_ASSERT(field.key);
+    const bool is_string = (field.value.type.base_type == BASE_TYPE_STRING);
+
+    if (is_string) {
+      code_.SetValue("KEY_TYPE", "Option<&str>");
+      //if (optional_values) {
+      //  code_.SetValue("KEY_TYPE", "Option<&str>");
+      //} else {
+      //  code_.SetValue("KEY_TYPE", "&str");
+      //}
+    } else {
+      FLATBUFFERS_ASSERT(IsScalar(field.value.type.base_type));
+      auto type = GetTypeBasic(field.value.type);
+      if (parser_.opts.scoped_enums && field.value.type.enum_def &&
+          IsScalar(field.value.type.base_type)) {
+        type = GetTypeGet(field.value.type);
+      }
+      //if (optional_values) {
+      //  code_.SetValue("KEY_TYPE", "Option<" + type + ">");
+      //} else {
+        code_.SetValue("KEY_TYPE", type);
+      //}
+    }
+
+    code_ += "  pub fn key_compare_less_than(&self, o: &{{STRUCT_NAME}}) -> bool {";
+    code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
+    code_ += "  }";
+    code_ += "";
+    code_ += "  pub fn key_compare_with_value(&self, val: {{KEY_TYPE}}) -> "
+             " ::std::cmp::Ordering {";
+    code_ += "    let key = self.{{FIELD_NAME}}();";
+    code_ += "    key.cmp(&val)";
+    code_ += "  }";
   }
 
   void GenRootTableFuncs(const StructDef &struct_def) {
@@ -1552,22 +1592,7 @@ class RustGenerator : public BaseGenerator {
 
       // Generate a comparison function for this field if it is a key.
       if (field.key) {
-        code_ += "  pub fn key_compare_less_than(&self, o: &{{STRUCT_NAME}}) ->"
-                 " bool {";
-        code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
-        code_ += "  }";
-        auto type = GetTypeBasic(field.value.type);
-        if (parser_.opts.scoped_enums && field.value.type.enum_def &&
-            IsScalar(field.value.type.base_type)) {
-          type = GetTypeGet(field.value.type);
-        }
-
-        code_.SetValue("KEY_TYPE", type);
-        code_ += "  pub fn key_compare_with_value(&self, val: {{KEY_TYPE}}) -> "
-                 " ::std::cmp::Ordering {";
-        code_ += "    let key = self.{{FIELD_NAME}}();";
-        code_ += "    key.cmp(&val)";
-        code_ += "  }";
+        GenKeyFieldMethods(field, false);
       }
     }
     code_ += "}";

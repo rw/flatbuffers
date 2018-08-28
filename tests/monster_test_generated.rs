@@ -493,6 +493,7 @@ impl Ability {
   pub fn key_compare_less_than(&self, o: &Ability) -> bool {
     self.id() < o.id()
   }
+
   pub fn key_compare_with_value(&self, val: u32) ->  ::std::cmp::Ordering {
     let key = self.id();
     key.cmp(&val)
@@ -745,6 +746,14 @@ impl<'a> Referrable<'a> {
   pub fn id(&'a self) -> u64 {
     self._tab.get::<u64>(Referrable::VT_ID, Some(0)).unwrap()
   }
+  pub fn key_compare_less_than(&self, o: &Referrable) -> bool {
+    self.id() < o.id()
+  }
+
+  pub fn key_compare_with_value(&self, val: u64) ->  ::std::cmp::Ordering {
+    let key = self.id();
+    key.cmp(&val)
+  }
 }
 
 pub struct ReferrableArgs<'a> {
@@ -914,6 +923,14 @@ impl<'a> Monster<'a> {
   #[inline]
   pub fn name(&'a self) -> Option<&'a str> {
     self._tab.get::<flatbuffers::ForwardsUOffset<&str>>(Monster::VT_NAME, None)
+  }
+  pub fn key_compare_less_than(&self, o: &Monster) -> bool {
+    self.name() < o.name()
+  }
+
+  pub fn key_compare_with_value(&self, val: Option<&str>) ->  ::std::cmp::Ordering {
+    let key = self.name();
+    key.cmp(&val)
   }
   #[inline]
   pub fn inventory(&'a self) -> Option<&'a [u8]> {

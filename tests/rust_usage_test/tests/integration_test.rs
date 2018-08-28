@@ -1189,12 +1189,70 @@ mod generated_key_comparisons {
     }
 
     #[test]
-    fn struct_ability_key_compare_with_value() {
+    fn struct_key_compare_with_value() {
         let a = my_game::example::Ability::new(1, 2);
 
         assert_eq!(a.key_compare_with_value(0), ::std::cmp::Ordering::Greater);
         assert_eq!(a.key_compare_with_value(1), ::std::cmp::Ordering::Equal);
         assert_eq!(a.key_compare_with_value(2), ::std::cmp::Ordering::Less);
+    }
+
+    #[test]
+    fn struct_key_compare_less_than() {
+        let a = my_game::example::Ability::new(1, 2);
+        let b = my_game::example::Ability::new(2, 1);
+        let c = my_game::example::Ability::new(3, 3);
+
+        assert_eq!(a.key_compare_less_than(&a), false);
+        assert_eq!(b.key_compare_less_than(&b), false);
+        assert_eq!(c.key_compare_less_than(&c), false);
+
+        assert_eq!(a.key_compare_less_than(&b), true);
+        assert_eq!(a.key_compare_less_than(&c), true);
+
+        assert_eq!(b.key_compare_less_than(&a), false);
+        assert_eq!(b.key_compare_less_than(&c), true);
+
+        assert_eq!(c.key_compare_less_than(&a), false);
+        assert_eq!(c.key_compare_less_than(&b), false);
+    }
+
+    #[test]
+    fn table_key_compare_with_value() {
+        // setup
+        let builder = &mut flatbuffers::FlatBufferBuilder::new();
+        super::create_serialized_example_with_library_code(builder);
+        let buf = builder.finished_data();
+        let a = my_game::example::get_root_as_monster(buf);
+
+        // preconditions
+        assert_eq!(a.name(), Some("MyMonster"));
+
+        assert_eq!(a.key_compare_with_value(None), ::std::cmp::Ordering::Greater);
+
+        assert_eq!(a.key_compare_with_value(Some("AAA")), ::std::cmp::Ordering::Greater);
+        assert_eq!(a.key_compare_with_value(Some("MyMonster")), ::std::cmp::Ordering::Equal);
+        assert_eq!(a.key_compare_with_value(Some("ZZZ")), ::std::cmp::Ordering::Less);
+    }
+
+    #[test]
+    fn table_key_compare_less_than() {
+        // setup
+        let builder = &mut flatbuffers::FlatBufferBuilder::new();
+        super::create_serialized_example_with_library_code(builder);
+        let buf = builder.finished_data();
+        let a = my_game::example::get_root_as_monster(buf);
+        let b = a.test_as_monster().unwrap();
+
+        // preconditions
+        assert_eq!(a.name(), Some("MyMonster"));
+        assert_eq!(b.name(), Some("Fred"));
+
+        assert_eq!(a.key_compare_less_than(&a), false);
+        assert_eq!(a.key_compare_less_than(&b), false);
+
+        assert_eq!(b.key_compare_less_than(&a), true);
+        assert_eq!(b.key_compare_less_than(&b), false);
     }
 }
 
@@ -1434,15 +1492,15 @@ mod follow_impls {
 
     #[test]
     fn root_to_empty_table() {
-	let buf: Vec<u8> = vec![
-	    12, 0, 0, 0, // offset to root table
-	    // enter vtable
-	    4, 0, // vtable len
-	    0, 0, // inline size
-	    255, 255, 255, 255, // canary
-	    // enter table
-	    8, 0, 0, 0, // vtable location
-	];
+      let buf: Vec<u8> = vec![
+          12, 0, 0, 0, // offset to root table
+          // enter vtable
+          4, 0, // vtable len
+          0, 0, // inline size
+          255, 255, 255, 255, // canary
+          // enter table
+          8, 0, 0, 0, // vtable location
+      ];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&buf[..], 0), flatbuffers::Table::new(&buf[..], 12));
     }
