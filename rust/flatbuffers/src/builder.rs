@@ -72,6 +72,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.min_align = 0;
     }
 
+    #[inline(always)]
     pub fn push<X: Push>(&mut self, x: X) -> Offset<X::Output> {
         self.align(x.size(), x.alignment());
         self.make_space(x.size());
