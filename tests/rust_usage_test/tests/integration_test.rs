@@ -208,6 +208,19 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
     Ok(())
 }
 
+#[test]
+fn builder_initializes_with_maximum_buffer_size() {
+    flatbuffers::FlatBufferBuilder::new_with_capacity(flatbuffers::FLATBUFFERS_MAX_BUFFER_SIZE);
+}
+
+#[test]
+fn builder_collapses_into_vec() {
+    let mut b = flatbuffers::FlatBufferBuilder::new();
+    create_serialized_example_with_generated_code(&mut b);
+    let (backing_buf, head) = b.collapse();
+    serialized_example_is_accessible_and_correct(&backing_buf[head..], true, false).unwrap();
+}
+
 #[cfg(test)]
 mod generated_constants {
     extern crate flatbuffers;
@@ -695,7 +708,7 @@ mod roundtrip_vectors {
 
                 let mut b2 = flatbuffers::FlatBufferBuilder::new();
                 b2.create_vector(xs);
-                assert_eq!(&b1.owned_buf[..], &b2.owned_buf[..]);
+                assert_eq!(b1.unfinished_data(), b2.unfinished_data());
             }
             quickcheck::QuickCheck::new().max_tests(20).quickcheck(prop as fn(Vec<_>));
         }

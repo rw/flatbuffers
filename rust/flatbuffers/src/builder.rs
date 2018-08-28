@@ -7,20 +7,28 @@ use std::ptr::write_bytes;
 
 use endian_scalar::{read_scalar, emplace_scalar};
 use primitives::*;
-use push::*;
-use table::*;
-use vtable::*;
-use vtable_writer::*;
-use vector::*;
+use push::{Push, ZeroTerminatedByteSlice};
+use table::Table;
+use vtable::{VTable, field_index_to_field_offset};
+use vtable_writer::VTableWriter;
+use vector::Vector;
 
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {
     off: UOffsetT,
     id: VOffsetT,
 }
+
+/// FlatBufferBuilder builds a FlatBuffer through manipulating its internal
+/// state. It has an owned `Vec<u8>` that grows as needed (up to the hardcoded
+/// limit of 2GiB, which is set by the FlatBuffers format).
+///
+/// Users are expected to create/reset instances of this type; however, its
+/// functions are primarily intended for use by the generated code emitted by
+/// the `flatc` compiler.
 pub struct FlatBufferBuilder<'fbb> {
-    pub owned_buf: Vec<u8>,
-    pub head: usize,
+    owned_buf: Vec<u8>,
+    head: usize,
 
     field_locs: Vec<FieldLoc>,
     written_vtable_revpos: Vec<UOffsetT>,
@@ -33,10 +41,19 @@ pub struct FlatBufferBuilder<'fbb> {
     _phantom: PhantomData<&'fbb ()>,
 }
 impl<'fbb> FlatBufferBuilder<'fbb> {
+    /// Create a FlatBufferBuilder that is ready for writing.
     pub fn new() -> Self {
         Self::new_with_capacity(0)
     }
+
+    /// Create a FlatBufferBuilder that is ready for writing, with a
+    /// ready-to-use capacity of the provided size.
+    ///
+    /// To minimize memory allocations after initialization, call this function
+    /// with the constant `FLATBUFFERS_MAX_BUFFER_SIZE`.
     pub fn new_with_capacity(size: usize) -> Self {
+        assert!(size <= FLATBUFFERS_MAX_BUFFER_SIZE,
+                "cannot initialize buffer bigger than 2 gigabytes");
         FlatBufferBuilder {
             owned_buf: vec![0u8; size],
             head: size,
@@ -53,6 +70,9 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
     }
 
+    /// Reset the FlatBufferBuilder in order to reduce heap allocations.
+    /// If you are using a FlatBufferBuilder repeatedly, make sure to use this
+    /// function!
     pub fn reset(&mut self) {
         // memset only the part of the buffer that could be dirty:
         {
@@ -61,15 +81,19 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             unsafe { write_bytes(ptr, 0, to_clear); }
         }
 
-        // reset head
         self.head = self.owned_buf.len();
-
         self.written_vtable_revpos.clear();
 
         self.nested = false;
         self.finished = false;
 
         self.min_align = 0;
+    }
+
+    /// Destroy the FlatBufferBuilder, returning its internal byte vector
+    /// and the index into it that represents the start of valid data.
+    pub fn collapse(self) -> (Vec<u8>, usize) {
+        (self.owned_buf, self.head)
     }
 
     #[inline]

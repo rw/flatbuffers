@@ -110,7 +110,7 @@ impl<'a, T: 'a> WIPOffset<T> {
 #[derive(Debug)]
 pub struct ForwardsUOffset<T>(UOffsetT, PhantomData<T>);
 impl<T> ForwardsUOffset<T> {
-    #[inline]
+    #[inline(always)]
     pub fn value(&self) -> UOffsetT {
         self.0
     }
@@ -118,7 +118,7 @@ impl<T> ForwardsUOffset<T> {
 
 impl<'a, T: Follow<'a>> Follow<'a> for ForwardsUOffset<T> {
     type Inner = T::Inner;
-    #[inline]
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let slice = &buf[loc..loc + SIZE_UOFFSET];
         let off = read_scalar::<u32>(slice) as usize;
@@ -131,7 +131,7 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsUOffset<T> {
 #[derive(Debug)]
 pub struct ForwardsVOffset<T>(VOffsetT, PhantomData<T>);
 impl<T> ForwardsVOffset<T> {
-    #[inline]
+    #[inline(always)]
     pub fn value(&self) -> VOffsetT {
         self.0
     }
@@ -139,7 +139,7 @@ impl<T> ForwardsVOffset<T> {
 
 impl<'a, T: Follow<'a>> Follow<'a> for ForwardsVOffset<T> {
     type Inner = T::Inner;
-    #[inline]
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let slice = &buf[loc..loc + SIZE_VOFFSET];
         let off = read_scalar::<VOffsetT>(slice) as usize;
@@ -152,7 +152,7 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsVOffset<T> {
 #[derive(Debug)]
 pub struct BackwardsSOffset<T>(SOffsetT, PhantomData<T>);
 impl<T> BackwardsSOffset<T> {
-    #[inline]
+    #[inline(always)]
     pub fn value(&self) -> SOffsetT {
         self.0
     }
@@ -160,7 +160,7 @@ impl<T> BackwardsSOffset<T> {
 
 impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
     type Inner = T::Inner;
-    #[inline]
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         let slice = &buf[loc..loc + SIZE_SOFFSET];
         let off = read_scalar::<SOffsetT>(slice);
@@ -173,7 +173,7 @@ impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
 pub struct SkipSizePrefix<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipSizePrefix<T> {
     type Inner = T::Inner;
-    #[inline]
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         T::follow(buf, loc + SIZE_SIZEPREFIX)
     }
@@ -184,7 +184,7 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipSizePrefix<T> {
 pub struct SkipRootOffset<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipRootOffset<T> {
     type Inner = T::Inner;
-    #[inline]
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         T::follow(buf, loc + SIZE_UOFFSET)
     }
@@ -195,7 +195,7 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipRootOffset<T> {
 pub struct FileIdentifier;
 impl<'a> Follow<'a> for FileIdentifier {
     type Inner = &'a [u8];
-    #[inline]
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         &buf[loc..loc + FILE_IDENTIFIER_LENGTH]
     }
@@ -207,7 +207,7 @@ impl<'a> Follow<'a> for FileIdentifier {
 pub struct SkipFileIdentifier<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
     type Inner = T::Inner;
-    #[inline]
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         T::follow(buf, loc + FILE_IDENTIFIER_LENGTH)
     }
@@ -231,7 +231,7 @@ macro_rules! impl_follow_for_endian_scalar {
     ($ty:ident) => (
         impl<'a> Follow<'a> for $ty {
             type Inner = $ty;
-            #[inline]
+            #[inline(always)]
             fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
                 read_scalar_at::<$ty>(buf, loc)
             }
