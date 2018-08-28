@@ -25,25 +25,38 @@ pub const SIZE_I64: usize = 8;
 pub const SIZE_F32: usize = 4;
 pub const SIZE_F64: usize = 8;
 
-pub const SIZE_UOFFSET: usize = SIZE_U32;
 pub const SIZE_SOFFSET: usize = SIZE_I32;
+pub const SIZE_UOFFSET: usize = SIZE_U32;
 pub const SIZE_VOFFSET: usize = SIZE_I16;
 
 pub const SIZE_SIZEPREFIX: usize = SIZE_U32;
 
+/// SOffsetT is an i32 that is used by tables to reference their vtables.
 pub type SOffsetT = i32;
+
+/// UOffsetT is a u32 that is used by pervasively to represent both pointers
+/// and lengths of vectors.
 pub type UOffsetT = u32;
+
+/// VOffsetT is a i32 that is used by vtables to store field data.
 pub type VOffsetT = i16;
 
-pub type HeadUOffsetT = UOffsetT;
-pub type TailUOffsetT = UOffsetT;
+/// TableFinishedWIPOffset marks a WIPOffset as being for a finished table.
+pub struct TableFinishedWIPOffset {}
 
-// enum causes compile error on type mismatch, whereas newtype () would not.
-pub enum TableUnfinishedWIPOffset {}
-pub enum TableFinishedWIPOffset {}
-pub enum VTableWIPOffset {}
-pub enum UnionWIPOffset {}
+/// TableUnfinishedWIPOffset marks a WIPOffset as being for an unfinished table.
+pub struct TableUnfinishedWIPOffset {}
 
+/// UnionWIPOffset marks a WIPOffset as being for a union value.
+pub struct UnionWIPOffset {}
+
+/// VTableWIPOffset marks a WIPOffset as being for a vtable.
+pub struct VTableWIPOffset {}
+
+/// WIPOffset contains an UOffsetT with a special meaning: it is the location of
+/// data relative to the *end* of an in-progress FlatBuffer. The
+/// FlatBufferBuilder uses this to track the location of objects in an absolute
+/// way. The impl of Push converts a WIPOffset into a ForwardsUOffset.
 #[derive(Debug)]
 pub struct WIPOffset<T>(UOffsetT, PhantomData<T>);
 
@@ -70,6 +83,7 @@ impl<T> Deref for WIPOffset<T> {
     }
 }
 impl<'a, T: 'a> WIPOffset<T> {
+    /// Create a new WIPOffset.
     #[inline]
     pub fn new(o: UOffsetT) -> WIPOffset<T> {
         WIPOffset {
@@ -77,18 +91,24 @@ impl<'a, T: 'a> WIPOffset<T> {
             1: PhantomData,
         }
     }
+
+    /// Return a wrapped value that brings its meaning as a union WIPOffset
+    /// into the type system.
     #[inline]
     pub fn as_union_value(&self) -> WIPOffset<UnionWIPOffset> {
         WIPOffset::new(self.0)
     }
+    /// Get the underlying value.
     #[inline]
     pub fn value(&self) -> UOffsetT {
         self.0
     }
 }
 
+/// ForwardsUOffset is used by Follow to traverse a FlatBuffer: the pointer
+/// is incremented by the value contained in this type.
 #[derive(Debug)]
-pub struct ForwardsUOffset<T>(UOffsetT, PhantomData<T>); // data unused
+pub struct ForwardsUOffset<T>(UOffsetT, PhantomData<T>);
 impl<T> ForwardsUOffset<T> {
     #[inline]
     pub fn value(&self) -> UOffsetT {
@@ -96,20 +116,23 @@ impl<T> ForwardsUOffset<T> {
     }
 }
 
-#[derive(Debug)]
-pub struct ForwardsVOffset<T>(VOffsetT, PhantomData<T>); // data unused
-impl<T> ForwardsVOffset<T> {
+impl<'a, T: Follow<'a>> Follow<'a> for ForwardsUOffset<T> {
+    type Inner = T::Inner;
     #[inline]
-    pub fn value(&self) -> VOffsetT {
-        self.0
+    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+        let slice = &buf[loc..loc + SIZE_UOFFSET];
+        let off = read_scalar::<u32>(slice) as usize;
+        T::follow(buf, loc + off)
     }
 }
 
+/// ForwardsVOffset is used by Follow to traverse a FlatBuffer: the pointer
+/// is incremented by the value contained in this type.
 #[derive(Debug)]
-pub struct BackwardsSOffset<T>(SOffsetT, PhantomData<T>); // data unused
-impl<T> BackwardsSOffset<T> {
+pub struct ForwardsVOffset<T>(VOffsetT, PhantomData<T>);
+impl<T> ForwardsVOffset<T> {
     #[inline]
-    pub fn value(&self) -> SOffsetT {
+    pub fn value(&self) -> VOffsetT {
         self.0
     }
 }
@@ -124,6 +147,17 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsVOffset<T> {
     }
 }
 
+/// ForwardsSOffset is used by Follow to traverse a FlatBuffer: the pointer
+/// is incremented by the *negative* of the value contained in this type.
+#[derive(Debug)]
+pub struct BackwardsSOffset<T>(SOffsetT, PhantomData<T>);
+impl<T> BackwardsSOffset<T> {
+    #[inline]
+    pub fn value(&self) -> SOffsetT {
+        self.0
+    }
+}
+
 impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
     type Inner = T::Inner;
     #[inline]
@@ -134,16 +168,8 @@ impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
     }
 }
 
-impl<'a, T: Follow<'a>> Follow<'a> for ForwardsUOffset<T> {
-    type Inner = T::Inner;
-    #[inline]
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let slice = &buf[loc..loc + SIZE_UOFFSET];
-        let off = read_scalar::<u32>(slice) as usize;
-        T::follow(buf, loc + off)
-    }
-}
-
+/// SkipSizePrefix is used by Follow to traverse a FlatBuffer: the pointer is
+/// incremented by a fixed constant in order to skip over the size prefix value.
 pub struct SkipSizePrefix<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipSizePrefix<T> {
     type Inner = T::Inner;
@@ -153,6 +179,8 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipSizePrefix<T> {
     }
 }
 
+/// SkipRootOffset is used by Follow to traverse a FlatBuffer: the pointer is
+/// incremented by a fixed constant in order to skip over the root offset value.
 pub struct SkipRootOffset<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipRootOffset<T> {
     type Inner = T::Inner;
@@ -162,6 +190,8 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipRootOffset<T> {
     }
 }
 
+/// FileIdentifier is used by Follow to traverse a FlatBuffer: the pointer is
+/// dereferenced into a byte slice, whose bytes are the file identifer value.
 pub struct FileIdentifier;
 impl<'a> Follow<'a> for FileIdentifier {
     type Inner = &'a [u8];
@@ -171,6 +201,9 @@ impl<'a> Follow<'a> for FileIdentifier {
     }
 }
 
+/// SkipFileIdentifier is used by Follow to traverse a FlatBuffer: the pointer
+/// is incremented by a fixed constant in order to skip over the file
+/// identifier value.
 pub struct SkipFileIdentifier<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
     type Inner = T::Inner;
