@@ -137,9 +137,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let o = self.push::<UOffsetT>(num_elems as UOffsetT);
         Offset::new(o.value())
     }
+    #[inline(always)]
     pub fn used_space(&self) -> usize {
         self.owned_buf.len() - self.head as usize
     }
+    #[inline(always)]
     fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
     }
@@ -313,12 +315,15 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             unsafe { write_bytes(ptr, 0, middle); }
         }
     }
+    #[inline(always)]
     pub fn finish_size_prefixed<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, true);
     }
+    #[inline(always)]
     pub fn finish<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, false);
     }
+    #[inline(always)]
     pub fn finish_minimal<T>(&mut self, root: Offset<T>) {
         self.finish_with_opts(root, None, false);
     }
@@ -379,7 +384,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         n as UOffsetT
     }
-    #[inline(always)]
     fn make_space(&mut self, want: usize) -> usize {
         self.ensure_capacity(want);
         self.head -= want;
