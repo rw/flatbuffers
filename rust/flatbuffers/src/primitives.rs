@@ -48,11 +48,6 @@ pub enum TableFinishedOffset {}
 pub enum VTableOffset {}
 pub struct UnionMarker;
 
-pub struct SliceOfGeneratedStruct<T: GeneratedStruct>(T);
-
-pub trait GeneratedStruct {}
-
-
 #[derive(Debug)]
 pub struct Offset<T>(UOffsetT, PhantomData<T>);
 
