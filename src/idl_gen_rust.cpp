@@ -1549,6 +1549,14 @@ class RustGenerator : public BaseGenerator {
     code_ += "impl flatbuffers::SafeSliceAccess for {{STRUCT_NAME}} {}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
     code_ += "  type Inner = &'a {{STRUCT_NAME}};";
+    code_ += "  #[inline(always)]";
+    code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
+    code_ += "    flatbuffers::follow_cast_ref::<{{STRUCT_NAME}}>(buf, loc)";
+    code_ += "  }";
+    code_ += "}";
+    code_ += "impl<'a> flatbuffers::Follow<'a> for &'a {{STRUCT_NAME}} {";
+    code_ += "  type Inner = &'a {{STRUCT_NAME}};";
+    code_ += "  #[inline(always)]";
     code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "    flatbuffers::follow_cast_ref::<{{STRUCT_NAME}}>(buf, loc)";
     code_ += "  }";

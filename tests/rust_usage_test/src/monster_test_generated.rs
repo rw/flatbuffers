@@ -291,6 +291,14 @@ pub struct Test {
 impl flatbuffers::SafeSliceAccess for Test {}
 impl<'a> flatbuffers::Follow<'a> for Test {
   type Inner = &'a Test;
+  #[inline(always)]
+  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+    flatbuffers::follow_cast_ref::<Test>(buf, loc)
+  }
+}
+impl<'a> flatbuffers::Follow<'a> for &'a Test {
+  type Inner = &'a Test;
+  #[inline(always)]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
     flatbuffers::follow_cast_ref::<Test>(buf, loc)
   }
@@ -360,6 +368,14 @@ pub struct Vec3 {
 impl flatbuffers::SafeSliceAccess for Vec3 {}
 impl<'a> flatbuffers::Follow<'a> for Vec3 {
   type Inner = &'a Vec3;
+  #[inline(always)]
+  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+    flatbuffers::follow_cast_ref::<Vec3>(buf, loc)
+  }
+}
+impl<'a> flatbuffers::Follow<'a> for &'a Vec3 {
+  type Inner = &'a Vec3;
+  #[inline(always)]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
     flatbuffers::follow_cast_ref::<Vec3>(buf, loc)
   }
@@ -440,6 +456,14 @@ pub struct Ability {
 impl flatbuffers::SafeSliceAccess for Ability {}
 impl<'a> flatbuffers::Follow<'a> for Ability {
   type Inner = &'a Ability;
+  #[inline(always)]
+  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+    flatbuffers::follow_cast_ref::<Ability>(buf, loc)
+  }
+}
+impl<'a> flatbuffers::Follow<'a> for &'a Ability {
+  type Inner = &'a Ability;
+  #[inline(always)]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
     flatbuffers::follow_cast_ref::<Ability>(buf, loc)
   }

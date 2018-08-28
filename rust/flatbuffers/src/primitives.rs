@@ -259,15 +259,3 @@ impl<'a> Follow<'a> for f64 {
         read_scalar_at::<Self>(buf, loc)
     }
 }
-
-
-impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
-    type Inner = &'a T;
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let sz = size_of::<T>();
-        let buf = &buf[loc..loc + sz];
-        let ptr = buf.as_ptr() as *const T;
-        unsafe { &*ptr }
-    }
-}
-

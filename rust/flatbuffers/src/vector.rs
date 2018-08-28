@@ -34,12 +34,6 @@ impl<'a, T: Follow<'a> + 'a> Vector<'a, T> {
     }
 }
 
-impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> {
-    pub fn as_slice(self) -> &'a [T] {
-        <SliceOfGeneratedStruct<T>>::follow(self.0, self.1)
-    }
-}
-
 pub trait SafeSliceAccess {}
 impl<'a, T: SafeSliceAccess + 'a> Vector<'a, T> {
     pub fn safe_slice(self) -> &'a [T] {
@@ -94,21 +88,6 @@ impl<'a> Follow<'a> for &'a str {
         let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
         let slice = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len];
         let s = unsafe { from_utf8_unchecked(slice) };
-        s
-    }
-}
-
-/// Implement direct slice access to structs (they are endian-safe because we
-/// use accessors to get their elements).
-impl<'a, T: GeneratedStruct + 'a> Follow<'a> for SliceOfGeneratedStruct<T> {
-    type Inner = &'a [T];
-    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        let sz = size_of::<T>();
-        assert!(sz > 0);
-        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
-        let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
-        let ptr = data_buf.as_ptr() as *const T;
-        let s: &'a [T] = unsafe { from_raw_parts(ptr, len) };
         s
     }
 }

@@ -1289,7 +1289,13 @@ mod follow_impls {
             b: u8,
             c: i16,
         }
-        impl flatbuffers::GeneratedStruct for FooStruct {}
+        impl<'a> flatbuffers::Follow<'a> for &'a FooStruct {
+            type Inner = &'a FooStruct;
+            #[inline(always)]
+            fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+                flatbuffers::follow_cast_ref::<FooStruct>(buf, loc)
+            }
+        }
 
         let vec: Vec<u8> = vec![255, 255, 255, 255, 1, 2, 3, 4];
         let off: flatbuffers::FollowStart<&FooStruct> = flatbuffers::FollowStart::new();
@@ -1313,13 +1319,18 @@ mod follow_impls {
             b: u8,
             c: i16,
         }
-        impl flatbuffers::GeneratedStruct for FooStruct {}
+        impl flatbuffers::SafeSliceAccess for FooStruct {}
+        impl<'a> flatbuffers::Follow<'a> for FooStruct {
+            type Inner = &'a FooStruct;
+            #[inline(always)]
+            fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+                flatbuffers::follow_cast_ref::<FooStruct>(buf, loc)
+            }
+        }
 
         let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
-        let fs: flatbuffers::FollowStart<flatbuffers::SliceOfGeneratedStruct<FooStruct>> = flatbuffers::FollowStart::new();
-        assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
-        assert_eq!(fs.self_follow(&buf[..], 0).get(0), Some(&FooStruct{a: 1, b: 2, c: 1027}));
-        assert_eq!(fs.self_follow(&buf[..], 0), &vec![FooStruct{a: 1, b: 2, c: 1027}][..]);
+        let fs: flatbuffers::FollowStart<flatbuffers::Vector<FooStruct>> = flatbuffers::FollowStart::new();
+        assert_eq!(fs.self_follow(&buf[..], 0).safe_slice(), &vec![FooStruct{a: 1, b: 2, c: 1027}][..]);
     }
 
     #[test]
@@ -1331,10 +1342,16 @@ mod follow_impls {
             b: u8,
             c: i16,
         }
-        impl flatbuffers::GeneratedStruct for FooStruct {}
+        impl<'a> flatbuffers::Follow<'a> for FooStruct {
+            type Inner = &'a FooStruct;
+            #[inline(always)]
+            fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
+                flatbuffers::follow_cast_ref::<FooStruct>(buf, loc)
+            }
+        }
 
         let buf: Vec<u8> = vec![1, 0, 0, 0, /* struct data */ 1, 2, 3, 4];
-        let fs: flatbuffers::FollowStart<flatbuffers::Vector<&FooStruct>> = flatbuffers::FollowStart::new();
+        let fs: flatbuffers::FollowStart<flatbuffers::Vector<FooStruct>> = flatbuffers::FollowStart::new();
         assert_eq!(fs.self_follow(&buf[..], 0).len(), 1);
         assert_eq!(fs.self_follow(&buf[..], 0).get(0), &FooStruct{a: 1, b: 2, c: 1027});
     }
