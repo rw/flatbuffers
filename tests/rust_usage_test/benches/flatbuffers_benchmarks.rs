@@ -7,7 +7,7 @@ extern crate flatbuffers;
 extern crate rust_usage_test;
 use rust_usage_test::monster_test_generated::my_game;
 
-fn read_canonical_buffer(bench: &mut Bencher) {
+fn traverse_canonical_buffer(bench: &mut Bencher) {
     let owned_data = {
         let mut builder = &mut flatbuffers::FlatBufferBuilder::new();
         create_serialized_example_with_generated_code(&mut builder, true);
@@ -16,7 +16,7 @@ fn read_canonical_buffer(bench: &mut Bencher) {
     let data = &owned_data[..];
     let n = data.len() as u64;
     bench.iter(|| {
-        read_serialized_example_with_generated_code(data);
+        traverse_serialized_example_with_generated_code(data);
     });
     bench.bytes = n;
 }
@@ -38,6 +38,8 @@ fn create_canonical_buffer_then_reset(bench: &mut Bencher) {
 
 #[inline(always)]
 fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder, finish: bool) {
+    let s0 = builder.create_string("test1");
+    let s1 = builder.create_string("test2");
     let t0_name = builder.create_string("Barney");
     let t1_name = builder.create_string("Fred");
     let t2_name = builder.create_string("Wilma");
@@ -73,7 +75,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
             }).as_union_value()),
             inventory: Some(inventory),
             test4: Some(test4),
-            testarrayofstring: Some(builder.create_vector_of_strings(&["test1", "test2"])),
+            testarrayofstring: Some(builder.create_vector(&[s0, s1])),
             testarrayoftables: Some(builder.create_vector(&[t0, t1, t2])),
             ..Default::default()
         };
@@ -94,7 +96,7 @@ fn blackbox<T>(t: T) -> T {
 }
 
 #[inline(always)]
-fn read_serialized_example_with_generated_code(bytes: &[u8]) {
+fn traverse_serialized_example_with_generated_code(bytes: &[u8]) {
     let m = my_game::example::get_root_as_monster(bytes);
     blackbox(m.hp());
     blackbox(m.mana());
@@ -157,5 +159,5 @@ fn create_string_100(bench: &mut Bencher) {
     bench.bytes = s.len() as u64;
 }
 
-benchmark_group!(benches, read_canonical_buffer, create_canonical_buffer_then_reset, create_string_10, create_string_100);
+benchmark_group!(benches, traverse_canonical_buffer, create_canonical_buffer_then_reset, create_string_10, create_string_100);
 benchmark_main!(benches);

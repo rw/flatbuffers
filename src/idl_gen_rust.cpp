@@ -350,7 +350,18 @@ class RustGenerator : public BaseGenerator {
                               const std::string &name) const {
     if (CurrentNameSpace() == ns) return name;
     std::string prefix = GetRelativeNamespaceTraversal(CurrentNameSpace(), ns);
+    //std::string prefix = GetAbsoluteNamespaceTraversal(ns);
     return prefix + name;
+  }
+
+  std::string GetAbsoluteNamespaceTraversal(const Namespace *dst) const {
+    std::stringstream stream;
+
+    stream << "::";
+    for (auto d = dst->components.begin(); d != dst->components.end(); d++) {
+      stream << MakeSnakeCase(*d) + "::";
+    }
+    return stream.str();
   }
 
   std::string GetRelativeNamespaceTraversal(const Namespace *src,
@@ -508,17 +519,20 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{ENUM_NAME}} {";
     code_ += "  type Inner = Self;";
+    code_ += "  #[inline(always)]";
     code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "    flatbuffers::read_scalar_at::<Self>(buf, loc)";
     code_ += "  }";
     code_ += "}";
     code_ += "";
     code_ += "impl flatbuffers::EndianScalar for {{ENUM_NAME}} {";
+    code_ += "  #[inline(always)]";
     code_ += "  fn to_little_endian(self) -> Self {";
     code_ += "    let n = {{BASE_TYPE}}::to_le(self as {{BASE_TYPE}});";
     code_ += "    let p = &n as *const {{BASE_TYPE}} as *const {{ENUM_NAME}};";
     code_ += "    unsafe { *p }";
     code_ += "  }";
+    code_ += "  #[inline(always)]";
     code_ += "  fn from_little_endian(self) -> Self {";
     code_ += "    let n = {{BASE_TYPE}}::from_le(self as {{BASE_TYPE}});";
     code_ += "    let p = &n as *const {{BASE_TYPE}} as *const {{ENUM_NAME}};";
@@ -1042,12 +1056,14 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
     code_ += "    type Inner = {{STRUCT_NAME}}<'a>;";
+    code_ += "    #[inline(always)]";
     code_ += "    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }";
     code_ += "    }";
     code_ += "}";
     code_ += "";
     code_ += "impl<'a> {{STRUCT_NAME}}<'a> {";
+    code_ += "    #[inline(always)]";
     code_ += "    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {";
     code_ += "        {{STRUCT_NAME}} {";
     code_ += "            _tab: table,";

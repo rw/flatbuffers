@@ -19,12 +19,14 @@ pub struct InParentNamespace<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
     type Inner = InParentNamespace<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> InParentNamespace<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         InParentNamespace {
             _tab: table,
@@ -90,12 +92,14 @@ pub struct Monster<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> Monster<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
             _tab: table,
@@ -167,17 +171,20 @@ const ENUM_MAX_COLOR: i8 = 8;
 
 impl<'a> flatbuffers::Follow<'a> for Color {
   type Inner = Self;
+  #[inline(always)]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
     flatbuffers::read_scalar_at::<Self>(buf, loc)
   }
 }
 
 impl flatbuffers::EndianScalar for Color {
+  #[inline(always)]
   fn to_little_endian(self) -> Self {
     let n = i8::to_le(self as i8);
     let p = &n as *const i8 as *const Color;
     unsafe { *p }
   }
+  #[inline(always)]
   fn from_little_endian(self) -> Self {
     let n = i8::from_le(self as i8);
     let p = &n as *const i8 as *const Color;
@@ -232,17 +239,20 @@ const ENUM_MAX_ANY: u8 = 3;
 
 impl<'a> flatbuffers::Follow<'a> for Any {
   type Inner = Self;
+  #[inline(always)]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
     flatbuffers::read_scalar_at::<Self>(buf, loc)
   }
 }
 
 impl flatbuffers::EndianScalar for Any {
+  #[inline(always)]
   fn to_little_endian(self) -> Self {
     let n = u8::to_le(self as u8);
     let p = &n as *const u8 as *const Any;
     unsafe { *p }
   }
+  #[inline(always)]
   fn from_little_endian(self) -> Self {
     let n = u8::from_le(self as u8);
     let p = &n as *const u8 as *const Any;
@@ -525,12 +535,14 @@ pub struct TestSimpleTableWithEnum<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
     type Inner = TestSimpleTableWithEnum<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> TestSimpleTableWithEnum<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TestSimpleTableWithEnum {
             _tab: table,
@@ -598,12 +610,14 @@ pub struct Stat<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
     type Inner = Stat<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> Stat<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Stat {
             _tab: table,
@@ -695,12 +709,14 @@ pub struct Referrable<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for Referrable<'a> {
     type Inner = Referrable<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> Referrable<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Referrable {
             _tab: table,
@@ -769,12 +785,14 @@ pub struct Monster<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> Monster<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         Monster {
             _tab: table,
@@ -1347,12 +1365,14 @@ pub struct TypeAliases<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
     type Inner = TypeAliases<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> TypeAliases<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TypeAliases {
             _tab: table,

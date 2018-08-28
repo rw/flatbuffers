@@ -19,12 +19,14 @@ pub struct TableInFirstNS<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for TableInFirstNS<'a> {
     type Inner = TableInFirstNS<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> TableInFirstNS<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TableInFirstNS {
             _tab: table,
@@ -116,12 +118,14 @@ pub struct SecondTableInA<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for SecondTableInA<'a> {
     type Inner = SecondTableInA<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> SecondTableInA<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         SecondTableInA {
             _tab: table,
@@ -202,12 +206,14 @@ pub struct TableInC<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for TableInC<'a> {
     type Inner = TableInC<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> TableInC<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TableInC {
             _tab: table,

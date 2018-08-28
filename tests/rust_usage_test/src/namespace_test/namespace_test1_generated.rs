@@ -33,17 +33,20 @@ const ENUM_MAX_ENUM_IN_NESTED_N_S: i8 = 2;
 
 impl<'a> flatbuffers::Follow<'a> for EnumInNestedNS {
   type Inner = Self;
+  #[inline(always)]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
     flatbuffers::read_scalar_at::<Self>(buf, loc)
   }
 }
 
 impl flatbuffers::EndianScalar for EnumInNestedNS {
+  #[inline(always)]
   fn to_little_endian(self) -> Self {
     let n = i8::to_le(self as i8);
     let p = &n as *const i8 as *const EnumInNestedNS;
     unsafe { *p }
   }
+  #[inline(always)]
   fn from_little_endian(self) -> Self {
     let n = i8::from_le(self as i8);
     let p = &n as *const i8 as *const EnumInNestedNS;
@@ -157,12 +160,14 @@ pub struct TableInNestedNS<'a> {
 
 impl<'a> flatbuffers::Follow<'a> for TableInNestedNS<'a> {
     type Inner = TableInNestedNS<'a>;
+    #[inline(always)]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
     }
 }
 
 impl<'a> TableInNestedNS<'a> {
+    #[inline(always)]
     pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {
         TableInNestedNS {
             _tab: table,
