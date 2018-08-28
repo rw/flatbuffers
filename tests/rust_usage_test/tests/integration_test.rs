@@ -1033,6 +1033,52 @@ mod roundtrip_scalars {
 }
 
 #[cfg(test)]
+mod roundtrip_push_follow_scalars {
+    extern crate flatbuffers;
+    extern crate quickcheck;
+
+    const N: u64 = 1000;
+
+    fn prop<'a: 'b, 'b, T: flatbuffers::Push + ::std::fmt::Debug + 'a, U: flatbuffers::Follow<'b> + ::std::fmt::Debug + 'b>(x: T) {
+        let buf = {
+            let mut buf = vec![0u8; ::std::mem::size_of::<T>()];
+            flatbuffers::Push::push(&x, &mut buf[..], &[][..]);
+            buf
+        };
+        //{
+        //let data = &buf[..];
+        //{ flatbuffers::lifted_follow::<U>(data, 0); }
+        //}
+        //let fs: flatbuffers::FollowStart<T> = flatbuffers::FollowStart::new();
+        //assert_eq!(fs.self_follow(&buf[..], 0), x);
+    }
+
+    //#[test]
+    //fn fuzz_bool() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<bool> as fn(_)); }
+    //#[test]
+    //fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u8> as fn(_)); }
+    //#[test]
+    //fn fuzz_i8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i8> as fn(_)); }
+    //#[test]
+    //fn fuzz_u16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u16> as fn(_)); }
+    //#[test]
+    //fn fuzz_i16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i16> as fn(_)); }
+    //#[test]
+    //fn fuzz_u32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u32> as fn(_)); }
+    //#[test]
+    //fn fuzz_i32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i32> as fn(_)); }
+    //#[test]
+    //fn fuzz_u64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u64> as fn(_)); }
+    //#[test]
+    //fn fuzz_i64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i64> as fn(_)); }
+    //#[test]
+    //fn fuzz_f32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f32> as fn(_)); }
+    //#[test]
+    //fn fuzz_f64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f64> as fn(_)); }
+}
+
+
+#[cfg(test)]
 mod write_and_read_examples {
     extern crate flatbuffers;
 
