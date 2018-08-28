@@ -329,7 +329,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::Struct: { return false; } // no endian swap
       default: {
         // logic error: no other types can be struct members.
-        FLATBUFFERS_ASSERT(false);
+        FLATBUFFERS_ASSERT(false && "invalid struct member type");
         return false; // only to satisfy compiler's return analysis
       }
     }
@@ -431,7 +431,8 @@ class RustGenerator : public BaseGenerator {
       // clang-format on
     };
 
-    // Enums can be bools, but their Rust representation must be a u8:
+    // Enums can be bools (they probably shouldn't be allowed as enums);
+    // their Rust representation must be a u8 not bool.
     if (type.base_type == BASE_TYPE_BOOL) return "u8";
     return ctypename[type.base_type];
   }
