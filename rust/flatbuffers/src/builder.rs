@@ -29,7 +29,6 @@ pub struct FlatBufferBuilder<'fbb> {
     finished: bool,
 
     min_align: usize,
-    max_voffset: VOffsetT,
 
     _phantom: PhantomData<&'fbb ()>,
 }
@@ -49,19 +48,20 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             finished: false,
 
             min_align: 0,
-            max_voffset: 0,
 
             _phantom: PhantomData,
         }
     }
 
     pub fn reset(&mut self) {
-        let to_clear = self.owned_buf.len() - self.head;
-        let ptr = (&mut self.owned_buf[self.head..]).as_mut_ptr();
-        unsafe { write_bytes(ptr, 0, to_clear); }
+        // memset only the part of the buffer that could be dirty:
+        {
+            let to_clear = self.owned_buf.len() - self.head;
+            let ptr = (&mut self.owned_buf[self.head..]).as_mut_ptr();
+            unsafe { write_bytes(ptr, 0, to_clear); }
+        }
 
-        let cap = self.owned_buf.capacity();
-        unsafe { self.owned_buf.set_len(cap); }
+        // reset head
         self.head = self.owned_buf.len();
 
         self.written_vtable_revpos.clear();
@@ -70,7 +70,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.finished = false;
 
         self.min_align = 0;
-        self.max_voffset = 0;
     }
 
     pub fn num_written_vtables(&self) -> usize {
@@ -86,7 +85,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             off: off,
         };
         self.field_locs.push(fl);
-        self.max_voffset = max(self.max_voffset, slot_off);
     }
     pub fn start_table(&mut self) -> Offset<TableUnfinishedOffset> {
         self.assert_not_nested("start_table can not be called when a table or vector is under construction");
@@ -101,7 +99,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
         self.nested = false;
         self.field_locs.clear();
-        self.max_voffset = 0;
 
         Offset::new(o.value())
     }
@@ -202,8 +199,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // by the offsets themselves. In reverse:
         // Include space for the last offset and ensure empty tables have a
         // minimum size.
-        let vtable_len = max(self.max_voffset + SIZE_VOFFSET as VOffsetT,
-                             field_index_to_field_offset(0)) as usize;
+        let max_voffset = self.field_locs.iter().map(|fl| fl.id).max();
+        let vtable_len = match max_voffset {
+            None => { field_index_to_field_offset(0) as usize }
+            Some(mv) => { mv as usize + SIZE_VOFFSET }
+        };
         self.fill(vtable_len);
         let table_object_size = object_vtable_revloc.value() - table_tail_revloc.value();
         debug_assert!(table_object_size < 0x10000); // Vtable use 16bit offsets.
@@ -257,7 +257,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
 
         self.field_locs.clear();
-        self.max_voffset = 0;
 
         object_vtable_revloc
     }
