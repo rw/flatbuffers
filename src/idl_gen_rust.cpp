@@ -73,8 +73,8 @@ enum class FullType {
   UnionValue,
 
   String, // todo: bytestring
-  VectorOfInteger, VectorOfFloat, VectorOfBool, VectorOfEnumKey, VectorOfStruct,
-  VectorOfTable, VectorOfString, VectorOfUnionValue,
+  VectorOfInteger, VectorOfFloat, VectorOfBool, VectorOfEnumKey,
+  VectorOfStruct, VectorOfTable, VectorOfString, VectorOfUnionValue,
 };
 
 // Convert a Type to a FullType (exhaustive).
@@ -446,7 +446,8 @@ class RustGenerator : public BaseGenerator {
 
   // Return a C++ pointer type, specialized to the actual struct/table types,
   // and vector element types.
-  std::string GetTypePointer(const Type &type, const std::string &lifetime) const {
+  std::string GetTypePointer(const Type &type,
+                             const std::string &lifetime) const {
     switch (type.base_type) {
       case BASE_TYPE_STRING: {
         //return "&str";
@@ -1353,9 +1354,12 @@ class RustGenerator : public BaseGenerator {
         std::string name = GenUnderlyingCast(field, false, Name(field));
         std::string value = GetDefaultScalarValue(field);
 
-        // Generate accessor functions of the form:
-        // fn add_name(type name) {
-        //   fbb_.AddElement::<type>(offset, name, default);
+        // Generate accessor functions of one of two forms:
+        // fn add_x(x: type) {
+        //   fbb_.push_slot::<type>(offset, x, Some(default));
+        // }
+        // fn add_x(x: type) {
+        //   fbb_.push_slot_always::<type>(offset, x);
         // }
         code_.SetValue("FIELD_NAME", Name(field));
         code_.SetValue("FIELD_CAST", TableBuilderArgsAddFuncFieldCast(field));
@@ -1363,10 +1367,13 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("FIELD_TYPE", TableBuilderArgsAddFuncType(field, "'b "));
         code_.SetValue("FUNC_BODY", TableBuilderArgsAddFuncBody(field));
         code_ += "  #[inline(always)]";
-        code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: {{FIELD_TYPE}}) {";
+        code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: "
+                 "{{FIELD_TYPE}}) {";
         if (is_scalar) {
-          code_.SetValue("FIELD_DEFAULT_VALUE", TableBuilderAddFuncDefaultValue(field));
-          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, {{FIELD_DEFAULT_VALUE}});";
+          code_.SetValue("FIELD_DEFAULT_VALUE",
+                         TableBuilderAddFuncDefaultValue(field));
+          code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}}, "
+                   "{{FIELD_DEFAULT_VALUE}});";
         } else {
           code_ += "    {{FUNC_BODY}}({{FIELD_OFFSET}}, {{FIELD_NAME}});";
         }
