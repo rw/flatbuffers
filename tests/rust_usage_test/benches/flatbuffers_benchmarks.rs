@@ -11,7 +11,7 @@ fn read_canonical_buffer(bench: &mut Bencher) {
     let owned_data = {
         let mut builder = &mut flatbuffers::FlatBufferBuilder::new();
         create_serialized_example_with_generated_code(&mut builder, true);
-        builder.finished_bytes().to_vec()
+        builder.finished_data().to_vec()
     };
     let data = &owned_data[..];
     let n = data.len() as u64;
@@ -25,7 +25,7 @@ fn create_canonical_buffer_then_reset(bench: &mut Bencher) {
     let mut builder = &mut flatbuffers::FlatBufferBuilder::new();
     // warmup
     create_serialized_example_with_generated_code(&mut builder, true);
-    let n = builder.finished_bytes().len() as u64;
+    let n = builder.finished_data().len() as u64;
     builder.reset();
 
     bench.iter(|| {
@@ -84,7 +84,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
     }
 
     // make it do some work
-    // if builder.finished_bytes().len() == 0 { panic!("bad benchmark"); }
+    // if builder.finished_data().len() == 0 { panic!("bad benchmark"); }
 }
 
 #[inline(always)]

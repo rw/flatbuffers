@@ -72,6 +72,28 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.min_align = 0;
     }
 
+    pub fn push<X: Push>(&mut self, x: X) -> Offset<X::Output> {
+        self.align(x.size(), x.alignment());
+        self.make_space(x.size());
+        {
+            let (dst, rest) = (&mut self.owned_buf[self.head..]).split_at_mut(x.size());
+            x.push(dst, rest);
+        }
+        Offset::new(self.used_space() as UOffsetT)
+    }
+    pub fn push_slot<X: Push + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: X) {
+        self.assert_nested("push_slot must be called after start_table");
+        if x == d {
+            return;
+        }
+        self.push_slot_always(slotoff, x);
+    }
+    pub fn push_slot_always<X: Push>(&mut self, slotoff: VOffsetT, x: X) {
+        self.assert_nested("push_slot_always must be called after start_table");
+        let off = self.push(x);
+        self.track_field(slotoff, off.value());
+    }
+
     pub fn num_written_vtables(&self) -> usize {
         self.written_vtable_revpos.len()
     }
@@ -194,9 +216,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // table starts here: aka "table_start"
         // --------------------------------------------------------------------
 
-        // Write a vtable, which consists entirely of voffset_t elements.
-        // It starts with the number of offsets, followed by a type id, followed
-        // by the offsets themselves. In reverse:
         // Include space for the last offset and ensure empty tables have a
         // minimum size.
         let max_voffset = self.field_locs.iter().map(|fl| fl.id).max();
@@ -353,27 +372,6 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn track_min_align(&mut self, alignment: usize) {
         self.min_align = max(self.min_align, alignment);
     }
-    pub fn push<X: Push>(&mut self, x: X) -> Offset<X::Output> {
-        self.align(x.size(), x.alignment());
-        self.make_space(x.size());
-        {
-            let (dst, rest) = (&mut self.owned_buf[self.head..]).split_at_mut(x.size());
-            x.push(dst, rest);
-        }
-        Offset::new(self.used_space() as UOffsetT)
-    }
-    pub fn push_slot<X: Push + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: Option<X>) {
-        self.assert_nested("push_slot must be called after start_table");
-        if d.is_some() && x == d.unwrap() {
-            return;
-        }
-        self.push_slot_always(slotoff, x);
-    }
-    pub fn push_slot_always<X: Push>(&mut self, slotoff: VOffsetT, x: X) {
-        self.assert_nested("push_slot_always must be called after start_table");
-        let off = self.push(x);
-        self.track_field(slotoff, off.value());
-    }
     fn push_bytes_unprefixed(&mut self, x: &[u8]) -> UOffsetT {
         let n = self.make_space(x.len());
         &mut self.owned_buf[n..n + x.len()].copy_from_slice(x);
@@ -403,7 +401,10 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn unused_ready_space(&self) -> usize {
         self.head
     }
-    pub fn finished_bytes(&self) -> &[u8] {
+    pub fn unfinished_data(&self) -> &[u8] {
+        &self.owned_buf[self.head..]
+    }
+    pub fn finished_data(&self) -> &[u8] {
         self.assert_finished("finished_bytes cannot be called when the buffer is not yet finished");
         &self.owned_buf[self.head..]
     }
