@@ -951,7 +951,6 @@ class RustGenerator : public BaseGenerator {
         if (IsOneByte(type.VectorType().base_type)) {
           return "Option<&" + lifetime + " [" + typname + "]>";
         }
-        //return "Option<&" + lifetime + " [" + typname + "]>";
         return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullType::VectorOfBool: {
