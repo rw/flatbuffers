@@ -1163,6 +1163,42 @@ mod generated_code_asserts {
 }
 
 #[cfg(test)]
+mod generated_key_comparisons {
+    extern crate flatbuffers;
+
+    use super::my_game;
+
+    #[test]
+    fn struct_ability_key_compare_less_than() {
+        let a = my_game::example::Ability::new(1, 2);
+        let b = my_game::example::Ability::new(2, 1);
+        let c = my_game::example::Ability::new(3, 3);
+
+        assert_eq!(a.key_compare_less_than(&a), false);
+        assert_eq!(b.key_compare_less_than(&b), false);
+        assert_eq!(c.key_compare_less_than(&c), false);
+
+        assert_eq!(a.key_compare_less_than(&b), true);
+        assert_eq!(a.key_compare_less_than(&c), true);
+
+        assert_eq!(b.key_compare_less_than(&a), false);
+        assert_eq!(b.key_compare_less_than(&c), true);
+
+        assert_eq!(c.key_compare_less_than(&a), false);
+        assert_eq!(c.key_compare_less_than(&b), false);
+    }
+
+    #[test]
+    fn struct_ability_key_compare_with_value() {
+        let a = my_game::example::Ability::new(1, 2);
+
+        assert_eq!(a.key_compare_with_value(0), ::std::cmp::Ordering::Greater);
+        assert_eq!(a.key_compare_with_value(1), ::std::cmp::Ordering::Equal);
+        assert_eq!(a.key_compare_with_value(2), ::std::cmp::Ordering::Less);
+    }
+}
+
+#[cfg(test)]
 mod included_schema_generated_code {
     extern crate flatbuffers;
 
@@ -1690,9 +1726,6 @@ mod byte_layouts {
     fn check<'a>(b: &'a flatbuffers::FlatBufferBuilder, want: &'a [u8]) {
         let got = b.unfinished_data();
         assert_eq!(want, got);
-        //let message = format!("case %d: want\n%v\nbut got\n%v\n", i, want, got);
-        //let message = format!("foo: {}", case_message);
-        //assert_eq!(1, 1);//, message);
     }
 
     //fn run<f: Fn(&mut flatbuffers::FlatBufferBuilder, &)(label: &'static str, f: F
@@ -2048,12 +2081,6 @@ mod byte_layouts {
             a: i8,
             b: i8,
         }
-        //impl<'a> flatbuffers::Follow<'a> for FooStruct {
-        //    type Inner = &'a FooStruct;
-        //    fn follow(&'a self, _buf: &'a [u8], loc: usize) -> Self::Inner {
-        //        self
-        //    }
-        //}
         let mut b = flatbuffers::FlatBufferBuilder::new();
         b.start_vector(::std::mem::size_of::<FooStruct>(), 2);
         b.push(33i8);

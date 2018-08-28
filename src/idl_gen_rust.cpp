@@ -1550,23 +1550,25 @@ class RustGenerator : public BaseGenerator {
       code_ += "    {{REF}}{{FIELD_VALUE}}";
       code_ += "  }";
 
-      //TODO(rw) // Generate a comparison function for this field if it is a key.
-      //TODO(rw) if (field.key) {
-      //TODO(rw)   code_ += "  fn key_compare_less_than(&self, o: &{{STRUCT_NAME}}) -> bool {";
-      //TODO(rw)   code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
-      //TODO(rw)   code_ += "  }";
-      //TODO(rw)   auto type = GetTypeBasic(field.value.type);
-      //TODO(rw)   if (parser_.opts.scoped_enums && field.value.type.enum_def &&
-      //TODO(rw)       IsScalar(field.value.type.base_type)) {
-      //TODO(rw)     type = GetTypeGet(field.value.type, " ", "const ", " *", true);
-      //TODO(rw)   }
+      // Generate a comparison function for this field if it is a key.
+      if (field.key) {
+        code_ += "  pub fn key_compare_less_than(&self, o: &{{STRUCT_NAME}}) ->"
+                 " bool {";
+        code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
+        code_ += "  }";
+        auto type = GetTypeBasic(field.value.type);
+        if (parser_.opts.scoped_enums && field.value.type.enum_def &&
+            IsScalar(field.value.type.base_type)) {
+          type = GetTypeGet(field.value.type);
+        }
 
-      //TODO(rw)   code_.SetValue("KEY_TYPE", type);
-      //TODO(rw)   code_ += "  fn key_compare_with_value(&self, val: {{KEY_TYPE}}) -> isize {";
-      //TODO(rw)   code_ += "    let key = self.{{FIELD_NAME}}();";
-      //TODO(rw)   code_ += "    (key > val) as isize - (key < val) as isize";
-      //TODO(rw)   code_ += "  }";
-      //TODO(rw) }
+        code_.SetValue("KEY_TYPE", type);
+        code_ += "  pub fn key_compare_with_value(&self, val: {{KEY_TYPE}}) -> "
+                 " ::std::cmp::Ordering {";
+        code_ += "    let key = self.{{FIELD_NAME}}();";
+        code_ += "    key.cmp(&val)";
+        code_ += "  }";
+      }
     }
     code_ += "}";
     code_ += "";

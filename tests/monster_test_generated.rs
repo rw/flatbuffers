@@ -490,6 +490,13 @@ impl Ability {
   pub fn id<'a>(&'a self) -> u32 {
     self.id_.from_little_endian()
   }
+  pub fn key_compare_less_than(&self, o: &Ability) -> bool {
+    self.id() < o.id()
+  }
+  pub fn key_compare_with_value(&self, val: u32) ->  ::std::cmp::Ordering {
+    let key = self.id();
+    key.cmp(&val)
+  }
   pub fn distance<'a>(&'a self) -> u32 {
     self.distance_.from_little_endian()
   }
