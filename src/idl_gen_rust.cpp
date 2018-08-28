@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Google Inc. All rights reserved.
+ * Copyright 2018 Google Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,7 +239,8 @@ class RustGenerator : public BaseGenerator {
     assert(!cur_name_space_);
 
     // Generate all code in their namespaces, once, because Rust does not
-    // permit re-opening modules. TODO: O(n**2) -> O(n) with a sorted set.
+    // permit re-opening modules.
+    // TODO(rw): Use a set to reduce namespace evaluations from O(n**2) to O(n).
     for (auto it = parser_.namespaces_.begin(); it != parser_.namespaces_.end();
          ++it) {
       const auto &ns = *it;
@@ -322,7 +323,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(type)) {
       case FullType::Integer:  // requires endian swap
       case FullType::Float: // requires endian swap
-      case FullType::Bool: // no endian-swap, but copy for consistency
+      case FullType::Bool: // no endian-swap, but do copy for consistency
       case FullType::EnumKey: { return true; } // requires endian swap
       case FullType::Struct: { return false; } // no endian swap
       default: {
@@ -350,10 +351,12 @@ class RustGenerator : public BaseGenerator {
                               const std::string &name) const {
     if (CurrentNameSpace() == ns) return name;
     std::string prefix = GetRelativeNamespaceTraversal(CurrentNameSpace(), ns);
-    //std::string prefix = GetAbsoluteNamespaceTraversal(ns);
     return prefix + name;
   }
 
+  // Determine the namespace traversal needed from the mod root.
+  // This may be useful in the future for referring to included files, but is
+  // currently unused.
   std::string GetAbsoluteNamespaceTraversal(const Namespace *dst) const {
     std::stringstream stream;
 
@@ -364,6 +367,11 @@ class RustGenerator : public BaseGenerator {
     return stream.str();
   }
 
+  // Determine the relative namespace traversal needed to reference one
+  // namespace from another namespace. This is useful because it does not force
+  // the user to have a particular file layout. (If we made users use absolute
+  // namespace paths, they would need to organize their crates in a particular
+  // way.)
   std::string GetRelativeNamespaceTraversal(const Namespace *src,
                                             const Namespace *dst) const {
     // calculate the path needed to reference dst from src.
@@ -378,8 +386,6 @@ class RustGenerator : public BaseGenerator {
 
     size_t i = 0;
     std::stringstream stream;
-    //stream << qualifying_start_;
-    //stream << "::";
 
     auto s = src->components.begin();
     auto d = dst->components.begin();
@@ -410,8 +416,17 @@ class RustGenerator : public BaseGenerator {
 
   // Return a Rust type from the table in idl.h.
   std::string GetTypeBasic(const Type &type) const {
-    static const char *ctypename[] = {
+    switch (GetFullType(type)) {
+      case FullType::Integer:
+      case FullType::Float:
+      case FullType::Bool:
+      case FullType::EnumKey:
+      case FullType::UnionKey: { break; }
+      default: { FLATBUFFERS_ASSERT(false && "incorrect type given");}
+    }
+
     // clang-format off
+    static const char * const ctypename[] = {
     #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE, \
                            RTYPE) \
             #RTYPE,
@@ -420,7 +435,7 @@ class RustGenerator : public BaseGenerator {
       // clang-format on
     };
 
-    if (type.enum_def) return WrapInNameSpace(*type.enum_def);
+    if (type.enum_def) { return WrapInNameSpace(*type.enum_def); }
     return ctypename[type.base_type];
   }
 
@@ -442,8 +457,7 @@ class RustGenerator : public BaseGenerator {
       // clang-format on
     };
 
-    // Enums can be bools (they probably shouldn't be allowed as enums);
-    // their Rust representation must be a u8 not bool.
+    // Enums can be bools but their Rust representation must be a u8 not bool.
     if (type.base_type == BASE_TYPE_BOOL) return "u8";
     return ctypename[type.base_type];
   }
@@ -722,7 +736,6 @@ class RustGenerator : public BaseGenerator {
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ",  " + typname + ">>>";
       }
       case FullType::VectorOfBool: {
-        const auto typname = GetTypeBasic(type);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>>";
       }
       case FullType::VectorOfEnumKey: {
@@ -868,20 +881,6 @@ class RustGenerator : public BaseGenerator {
         return "self.fbb_.push_slot_always::<flatbuffers::Offset<_>>";
       }
     }
-  }
-
-  std::string TableBuilderArgsAddFuncFieldCast(const FieldDef &field) {
-    const Type& type = field.value.type;
-
-    const auto ft = GetFullType(type);
-
-    if (ft == FullType::UnionValue) {
-      return " as " + GetTypeBasic(type);
-    }
-    if (ft == FullType::EnumKey) {
-      return " as " + GetTypeBasic(type);
-    }
-    return "";
   }
 
   std::string GenTableAccessorFuncReturnType(const FieldDef &field,
@@ -1278,7 +1277,6 @@ class RustGenerator : public BaseGenerator {
         //   fbb_.push_slot_always::<type>(offset, x);
         // }
         code_.SetValue("FIELD_NAME", Name(field));
-        code_.SetValue("FIELD_CAST", TableBuilderArgsAddFuncFieldCast(field));
         code_.SetValue("FIELD_OFFSET", Name(struct_def) + "::" + offset);
         code_.SetValue("FIELD_TYPE", TableBuilderArgsAddFuncType(field, "'b "));
         code_.SetValue("FUNC_BODY", TableBuilderArgsAddFuncBody(field));
