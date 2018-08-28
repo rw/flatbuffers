@@ -533,6 +533,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("ENUM_MIN_BASE_VALUE", NumToString(minv->value));
     code_.SetValue("ENUM_MAX_BASE_VALUE", NumToString(maxv->value));
 
+    // Generate enum constants, and impls for Follow, EndianScalar, and Push.
     code_ += "const ENUM_MIN_{{ENUM_NAME_CAPS}}: {{BASE_TYPE}} = \\";
     code_ += "{{ENUM_MIN_BASE_VALUE}};";
     code_ += "const ENUM_MAX_{{ENUM_NAME_CAPS}}: {{BASE_TYPE}} = \\";
@@ -1721,4 +1722,4 @@ std::string RustMakeRule(const Parser &parser, const std::string &path,
 //           way that makes them referrable.
 // TODO(rw): Generated code should indent according to nesting level.
 // TODO(rw): Generated code could use a Rust-only enum type to access unions,
-//           instead of making the user use _type() to switch.
+//           instead of making the user use _type() to manually switch.

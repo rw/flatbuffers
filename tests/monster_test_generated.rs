@@ -821,6 +821,7 @@ impl<'a> Monster<'a> {
       builder.add_testhashs64_fnv1a(args.testhashs64_fnv1a);
       builder.add_testhashu64_fnv1(args.testhashu64_fnv1);
       builder.add_testhashs64_fnv1(args.testhashs64_fnv1);
+      if let Some(x) = args.vector_of_enum { builder.add_vector_of_enum(x); }
       if let Some(x) = args.vector_of_non_owning_references { builder.add_vector_of_non_owning_references(x); }
       if let Some(x) = args.vector_of_co_owning_references { builder.add_vector_of_co_owning_references(x); }
       if let Some(x) = args.vector_of_strong_referrables { builder.add_vector_of_strong_referrables(x); }
@@ -901,6 +902,7 @@ impl<'a> Monster<'a> {
     pub const VT_VECTOR_OF_CO_OWNING_REFERENCES: flatbuffers::VOffsetT = 84;
     pub const VT_NON_OWNING_REFERENCE: flatbuffers::VOffsetT = 86;
     pub const VT_VECTOR_OF_NON_OWNING_REFERENCES: flatbuffers::VOffsetT = 88;
+    pub const VT_VECTOR_OF_ENUM: flatbuffers::VOffsetT = 90;
 
   #[inline]
   pub fn pos(&'a self) -> Option<&'a Vec3> {
@@ -1089,6 +1091,10 @@ impl<'a> Monster<'a> {
   pub fn vector_of_non_owning_references(&'a self) -> Option<flatbuffers::Vector<'a, u64>> {
     self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, u64>>>(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, None)
   }
+  #[inline]
+  pub fn vector_of_enum(&'a self) -> Option<flatbuffers::Vector<'a, Color>> {
+    self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, Color>>>(Monster::VT_VECTOR_OF_ENUM, None)
+  }
 #[inline]
 #[allow(non_snake_case)]
 pub fn test_as_monster(&'a self) -> Option<Monster> {
@@ -1164,6 +1170,7 @@ pub struct MonsterArgs<'a> {
     pub vector_of_co_owning_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
     pub non_owning_reference: u64,
     pub vector_of_non_owning_references: Option<flatbuffers::Offset<flatbuffers::Vector<'a ,  u64>>>,
+    pub vector_of_enum: Option<flatbuffers::Offset<flatbuffers::Vector<'a , Color>>>,
     pub _phantom: PhantomData<&'a ()>, // pub for default trait
 }
 impl<'a> Default for MonsterArgs<'a> {
@@ -1212,6 +1219,7 @@ impl<'a> Default for MonsterArgs<'a> {
             vector_of_co_owning_references: None,
             non_owning_reference: 0,
             vector_of_non_owning_references: None,
+            vector_of_enum: None,
             _phantom: PhantomData,
         }
     }
@@ -1388,6 +1396,10 @@ impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   #[inline]
   pub fn add_vector_of_non_owning_references(&mut self, vector_of_non_owning_references: flatbuffers::Offset<flatbuffers::Vector<'b , u64>>) {
     self.fbb_.push_slot_always::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, vector_of_non_owning_references);
+  }
+  #[inline]
+  pub fn add_vector_of_enum(&mut self, vector_of_enum: flatbuffers::Offset<flatbuffers::Vector<'b , Color>>) {
+    self.fbb_.push_slot_always::<flatbuffers::Offset<_>>(Monster::VT_VECTOR_OF_ENUM, vector_of_enum);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> MonsterBuilder<'a, 'b> {
     let start = _fbb.start_table();

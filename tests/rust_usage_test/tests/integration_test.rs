@@ -506,6 +506,18 @@ mod roundtrip_generated_code {
         assert_eq!(m.test4().unwrap(), &[my_game::example::Test::new(127, -128), my_game::example::Test::new(3, 123)][..]);
     }
     #[test]
+    fn vector_of_enum_store() {
+        let mut b = flatbuffers::FlatBufferBuilder::new();
+        let v = b.create_vector::<my_game::example::Color>(&[my_game::example::Color::Red, my_game::example::Color::Green][..]);
+        let name = b.create_string("foo");
+        let m = build_mon(&mut b, &my_game::example::MonsterArgs{
+            name: Some(name),
+            vector_of_enum: Some(v), ..Default::default()});
+        assert_eq!(m.vector_of_enum().unwrap().len(), 2);
+        assert_eq!(m.vector_of_enum().unwrap().get(0), my_game::example::Color::Red);
+        assert_eq!(m.vector_of_enum().unwrap().get(1), my_game::example::Color::Green);
+    }
+    #[test]
     fn vector_of_table_store() {
         let b = &mut flatbuffers::FlatBufferBuilder::new();
         let t0 = {
