@@ -144,6 +144,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     /// Asserts that the builder is not in a nested state.
     ///
     /// Users probably want to use `push_slot` to add values after calling this.
+    #[inline]
     pub fn start_table(&mut self) -> WIPOffset<TableUnfinishedWIPOffset> {
         self.assert_not_nested("start_table can not be called when a table or vector is under construction");
         self.nested = true;
@@ -154,6 +155,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     /// End a Table write.
     ///
     /// Asserts that the builder is in a nested state.
+    #[inline]
     pub fn end_table(&mut self, off: WIPOffset<TableUnfinishedWIPOffset>) -> WIPOffset<TableFinishedWIPOffset> {
         self.assert_nested("end_table must be called after a call to start_table");
 
@@ -172,6 +174,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     /// Most users will prefer to call `create_vector`.
     /// Speed optimizing users who choose to create vectors manually using this
     /// function will want to use `push` to add values.
+    #[inline]
     pub fn start_vector(&mut self, len: usize, elem_size: usize) {
         self.assert_not_nested("start_vector can not be called when a table or vector is under construction");
         self.nested = true;
@@ -185,6 +188,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     /// the byte count.
     ///
     /// Asserts that the builder is in a nested state.
+    #[inline]
     pub fn end_vector<T: 'fbb>(&mut self, num_elems: usize) -> WIPOffset<Vector<'fbb, T>> {
         self.assert_nested("end_vector must be called after a call to start_vector");
         self.nested = false;
@@ -195,6 +199,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     /// Create a utf8 string.
     ///
     /// The wire format represents this as a zero-terminated byte vector.
+    #[inline]
     pub fn create_string(&mut self, s: &str) -> WIPOffset<&'fbb str> {
         self.assert_not_nested("create_string can not be called when a table or vector is under construction");
         self.push(ZeroTerminatedByteSlice::new(s.as_bytes()));
@@ -202,6 +207,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     /// Create a zero-terminated byte vector.
+    #[inline]
     pub fn create_byte_string(&mut self, data: &[u8]) -> WIPOffset<&'fbb [u8]> {
         self.assert_not_nested("create_byte_string can not be called when a table or vector is under construction");
         self.push(ZeroTerminatedByteSlice::new(data));
@@ -212,6 +218,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     ///
     /// Speed-sensitive users may wish to reduce memory usage by creating the
     /// vector manually: use `create_vector`, `push`, and `end_vector`.
+    #[inline]
     pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> WIPOffset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
         self.assert_not_nested("create_vector_of_strings can not be called when a table or vector is under construction");
         // internally, smallvec can be a stack-allocated or heap-allocated vector.
@@ -229,6 +236,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     ///
     /// Speed-sensitive users may wish to reduce memory usage by creating the
     /// vector manually: use `create_vector`, `push`, and `end_vector`.
+    #[inline]
     pub fn create_vector<'a, T: Push + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> WIPOffset<Vector<'fbb, T::Output>> {
         let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
@@ -240,11 +248,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
 
     /// Get the byte slice for the data that has been written, regardless of
     /// whether it has been finished.
+    #[inline]
     pub fn unfinished_data(&self) -> &[u8] {
         &self.owned_buf[self.head..]
     }
     /// Get the byte slice for the data that has been written after a call to
     /// one of the `finish` functions.
+    #[inline]
     pub fn finished_data(&self) -> &[u8] {
         self.assert_finished("finished_bytes cannot be called when the buffer is not yet finished");
         &self.owned_buf[self.head..]
@@ -252,6 +262,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     /// Assert that a field is present in the just-finished Table.
     ///
     /// This is somewhat low-level and is mostly used by the generated code.
+    #[inline]
     pub fn required(&self,
                     tab_revloc: WIPOffset<TableFinishedWIPOffset>,
                     slot_byte_loc: VOffsetT,
@@ -292,6 +303,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn used_space(&self) -> usize {
         self.owned_buf.len() - self.head as usize
     }
+
+    #[inline]
     fn track_field(&mut self, slot_off: VOffsetT, off: UOffsetT) {
         let fl = FieldLoc {
             id: slot_off,
@@ -299,6 +312,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         };
         self.field_locs.push(fl);
     }
+
     #[inline]
     fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
