@@ -246,7 +246,7 @@ class RustGenerator : public BaseGenerator {
     assert(!cur_name_space_);
 
     // Generate all code in their namespaces, once, because Rust does not
-    // permit re-opening modules. TODO: O(n**2) -> O(n) with a dictionary.
+    // permit re-opening modules. TODO: O(n**2) -> O(n) with a sorted set.
     for (auto it = parser_.namespaces_.begin(); it != parser_.namespaces_.end();
          ++it) {
       const auto &ns = *it;
