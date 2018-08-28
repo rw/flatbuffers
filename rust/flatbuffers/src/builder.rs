@@ -56,12 +56,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     pub fn reset(&mut self) {
-        let ptr = self.owned_buf.as_mut_ptr();
+        let to_clear = self.owned_buf.len() - self.head;
+        let ptr = (&mut self.owned_buf[self.head..]).as_mut_ptr();
+        unsafe { write_bytes(ptr, 0, to_clear); }
+
         let cap = self.owned_buf.capacity();
-        unsafe {
-	    self.owned_buf.set_len(cap);
-            write_bytes(ptr, 0, cap);
-	}
+        unsafe { self.owned_buf.set_len(cap); }
         self.head = self.owned_buf.len();
 
         self.written_vtable_revpos.clear();

@@ -10,7 +10,7 @@ use rust_usage_test::monster_test_generated::my_game;
 fn read_canonical_buffer(bench: &mut Bencher) {
     let owned_data = {
         let mut builder = &mut flatbuffers::FlatBufferBuilder::new();
-        create_serialized_example_with_generated_code(&mut builder);
+        create_serialized_example_with_generated_code(&mut builder, true);
         builder.finished_bytes().to_vec()
     };
     let data = &owned_data[..];
@@ -21,19 +21,15 @@ fn read_canonical_buffer(bench: &mut Bencher) {
     bench.bytes = n;
 }
 
-fn create_canonical_buffer(bench: &mut Bencher) {
+fn create_canonical_buffer_then_reset(bench: &mut Bencher) {
     let mut builder = &mut flatbuffers::FlatBufferBuilder::new();
     // warmup
-    create_serialized_example_with_generated_code(&mut builder);
+    create_serialized_example_with_generated_code(&mut builder, true);
     let n = builder.finished_bytes().len() as u64;
     builder.reset();
-    for _ in 0..100 {
-        create_serialized_example_with_generated_code(&mut builder);
-        builder.reset();
-    }
 
     bench.iter(|| {
-        create_serialized_example_with_generated_code(&mut builder);
+        create_serialized_example_with_generated_code(&mut builder, true);
         builder.reset();
     });
 
@@ -41,7 +37,7 @@ fn create_canonical_buffer(bench: &mut Bencher) {
 }
 
 #[inline(always)]
-fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder) {
+fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder, finish: bool) {
     let t0_name = builder.create_string("Barney");
     let t1_name = builder.create_string("Fred");
     let t2_name = builder.create_string("Wilma");
@@ -83,7 +79,9 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
         };
         my_game::example::Monster::create(builder, &args)
     };
-    my_game::example::finish_monster_buffer(builder, mon);
+    if finish {
+        my_game::example::finish_monster_buffer(builder, mon);
+    }
 
     // make it do some work
     // if builder.finished_bytes().len() == 0 { panic!("bad benchmark"); }
@@ -126,5 +124,38 @@ fn read_serialized_example_with_generated_code(bytes: &[u8]) {
     blackbox(testarrayofstring.get(1));
 }
 
-benchmark_group!(benches, read_canonical_buffer, create_canonical_buffer);
+fn create_string_10(bench: &mut Bencher) {
+    let builder = &mut flatbuffers::FlatBufferBuilder::new_with_capacity(1<<20);
+    let mut i = 0;
+    bench.iter(|| {
+        builder.create_string("foobarbaz"); // zero-terminated -> 10 bytes
+        i += 1;
+        if i == 10000 {
+            builder.reset();
+            i = 0;
+        }
+    });
+
+    bench.bytes = 10;
+}
+
+fn create_string_100(bench: &mut Bencher) {
+    let builder = &mut flatbuffers::FlatBufferBuilder::new_with_capacity(1<<20);
+    let s_owned = (0..99).map(|_| "x").collect::<String>();
+    let s: &str = &s_owned;
+
+    let mut i = 0;
+    bench.iter(|| {
+        builder.create_string(s); // zero-terminated -> 100 bytes
+        i += 1;
+        if i == 1000 {
+            builder.reset();
+            i = 0;
+        }
+    });
+
+    bench.bytes = s.len() as u64;
+}
+
+benchmark_group!(benches, read_canonical_buffer, create_canonical_buffer_then_reset, create_string_10, create_string_100);
 benchmark_main!(benches);
