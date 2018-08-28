@@ -461,22 +461,6 @@ class RustGenerator : public BaseGenerator {
     return Name(enum_def) + "::" + Name(enum_val);
   }
 
-  std::string GetUnionElement(const EnumVal &ev, bool wrap, bool actual_type,
-                              bool native_type = false) {
-    if (ev.union_type.base_type == BASE_TYPE_STRUCT) {
-      auto name = actual_type ? ev.union_type.struct_def->name : Name(ev);
-      return wrap ? WrapInNameSpace(
-          ev.union_type.struct_def->defined_namespace, name)
-                  : name;
-    } else if (ev.union_type.base_type == BASE_TYPE_STRING) {
-      return actual_type ? (native_type ? "std::string" : "&str")
-                         : Name(ev);
-    } else {
-      assert(false);
-      return Name(ev);
-    }
-  }
-
   // Generate an enum declaration,
   // an enum string lookup table,
   // an enum match function,
@@ -1193,7 +1177,9 @@ class RustGenerator : public BaseGenerator {
         auto &ev = **u_it;
         if (ev.union_type.base_type == BASE_TYPE_NONE) { continue; }
 
-        auto full_struct_name = GetUnionElement(ev, true, true);
+        auto full_struct_name =
+          WrapInNameSpace(ev.union_type.struct_def->defined_namespace,
+                          Name(ev));
 
         //code_.SetValue(
         //    "U_ELEMENT_TYPE",
