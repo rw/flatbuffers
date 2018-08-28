@@ -16,11 +16,15 @@ pub trait Follow<'a> {
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner;
 }
 
+/// Execute a follow as a top-level function.
+#[allow(dead_code)]
 #[inline]
 pub fn lifted_follow<'a, T: Follow<'a>>(buf: &'a [u8], loc: usize) -> T::Inner {
     T::follow(buf, loc)
 }
 
+/// FollowStart wraps a Follow impl in a struct type. This can make certain
+/// programming patterns more ergonomic.
 #[derive(Debug)]
 pub struct FollowStart<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> FollowStart<T> {

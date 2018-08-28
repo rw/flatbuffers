@@ -1,31 +1,19 @@
-pub mod builder;
-pub use builder::*;
+mod builder;
+mod endian_scalar;
+mod follow;
+mod primitives;
+mod push;
+mod table;
+mod vector;
+mod vtable;
+mod vtable_writer;
 
-pub mod endian_scalar;
-pub use endian_scalar::*;
-
-pub mod follow;
-pub use follow::*;
-
-pub mod primitives;
+pub use builder::{FlatBufferBuilder, field_index_to_field_offset};
+pub use endian_scalar::{EndianScalar, emplace_scalar, read_scalar, read_scalar_at};
+pub use follow::{Follow, FollowStart};
 pub use primitives::*;
+pub use push::Push;
+pub use table::{Table, buffer_has_identifier, get_root, get_size_prefixed_root};
+pub use vector::{SafeSliceAccess, Vector, follow_cast_ref};
 
-pub mod push;
-pub use push::*;
-
-pub mod table;
-pub use table::*;
-
-pub mod vector;
-pub use vector::*;
-
-pub mod vtable;
-pub use vtable::*;
-
-pub mod vtable_writer;
-pub use vtable_writer::*;
-
-// TODO(rw): figure out better trait bounds for implementing Follow on
-//           EndianScalar and GeneratedStruct
-// TODO(rw): use macros to impl EndianScalar and as_slice on primitives
-// TODO(rw): split fill ops in builder into fill_small, fill_big like in C++
+// TODO(rw): Split fill ops in builder into fill_small, fill_big like in C++.
