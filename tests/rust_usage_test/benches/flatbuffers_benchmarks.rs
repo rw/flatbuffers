@@ -30,7 +30,7 @@ fn create_canonical_buffer_then_reset(bench: &mut Bencher) {
     builder.reset();
 
     bench.iter(|| {
-        create_serialized_example_with_generated_code(&mut builder, true);
+        let _ = create_serialized_example_with_generated_code(&mut builder, true);
         builder.reset();
     });
 
@@ -38,7 +38,7 @@ fn create_canonical_buffer_then_reset(bench: &mut Bencher) {
 }
 
 #[inline(always)]
-fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder, finish: bool) {
+fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::FlatBufferBuilder, finish: bool) -> usize{
     let s0 = builder.create_string("test1");
     let s1 = builder.create_string("test2");
     let t0_name = builder.create_string("Barney");
@@ -85,6 +85,8 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
     if finish {
         my_game::example::finish_monster_buffer(builder, mon);
     }
+
+    builder.finished_data().len()
 
     // make it do some work
     // if builder.finished_data().len() == 0 { panic!("bad benchmark"); }
