@@ -382,7 +382,7 @@ impl<'a> flatbuffers::Follow<'a> for &'a Vec3 {
 }
 
 impl Vec3 {
-  pub fn new<'a>(_x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a Test/* foo */) -> Self {
+  pub fn new<'a>(_x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a Test) -> Self {
     Vec3 {
       x_: _x.to_little_endian(),
       y_: _y.to_little_endian(),

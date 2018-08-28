@@ -409,10 +409,7 @@ class RustGenerator : public BaseGenerator {
       // clang-format on
     };
 
-    if (user_facing_type) {
-      if (type.enum_def) return WrapInNameSpace(*type.enum_def);
-      if (type.base_type == BASE_TYPE_BOOL) return "bool";
-    }
+    if (type.enum_def) return WrapInNameSpace(*type.enum_def);
     return ctypename[type.base_type];
   }
 
@@ -442,19 +439,19 @@ class RustGenerator : public BaseGenerator {
   // Return a Rust type for any type (scalar/pointer) specifically for using a
   // flatbuffer.
   std::string GetTypeGet(const Type &type) const {
-    if (IsScalar(type.base_type)) {
-      return GetTypeBasic(type, true);
-    } else {
-        std::string s;
-        //s.append(lifetime);
-        s.append(WrapInNameSpace(type.struct_def->defined_namespace,
-                                 type.struct_def->name));
-        if (TypeNeedsLifetimeParameter(type)) {
-          s.append("<'a>");
-        } else {
-          s.append("/* foo */");
-        }
-        return s;
+    switch (GetFullType(type)) {
+      case FullType::Integer:
+      case FullType::Float:
+      case FullType::Bool:
+      case FullType::EnumKey:
+      case FullType::UnionKey: {
+        return GetTypeBasic(type, true); }
+      case FullType::Table: {
+        return WrapInNameSpace(type.struct_def->defined_namespace,
+                               type.struct_def->name) + "<'a>"; }
+      default: {
+        return WrapInNameSpace(type.struct_def->defined_namespace,
+                               type.struct_def->name); }
     }
   }
   std::string StructDefnFieldType(const Type &type) const {
