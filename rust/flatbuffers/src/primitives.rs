@@ -213,20 +213,11 @@ impl<'a, T: Follow<'a> + 'a> Follow<'a> for SkipFileIdentifier<T> {
     }
 }
 
-// Follow trait impls for primitive types.
-//
-// Ideally, these would be implemented as a single impl using trait bounds on
-// EndianScalar, but implementing Follow that way causes a conflict with
-// other impls:
-//error[E0119]: conflicting implementations of trait `Follow<'_>` for type `&_`:
-//     |
-//     | impl<'a, T: GeneratedStruct> Follow<'a> for &'a T {
-//     | ------------------------------------------------- first implementation here
-//...
-//     | impl<'a, T: EndianScalar> Follow<'a> for T {
-//     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `&_`
-//     |
-
+/// Follow trait impls for primitive types.
+///
+/// Ideally, these would be implemented as a single impl using trait bounds on
+/// EndianScalar, but implementing Follow that way causes a conflict with
+/// other impls.
 macro_rules! impl_follow_for_endian_scalar {
     ($ty:ident) => (
         impl<'a> Follow<'a> for $ty {
