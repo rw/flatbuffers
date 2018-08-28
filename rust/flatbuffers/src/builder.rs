@@ -5,13 +5,13 @@ use std::marker::PhantomData;
 use std::mem::size_of;
 use std::ptr::write_bytes;
 
-pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
-pub use primitives::*;
-pub use push::*;
-pub use table::*;
-pub use vtable::*;
+use endian_scalar::{read_scalar, emplace_scalar};
+use primitives::*;
+use push::*;
+use table::*;
+use vtable::*;
 use vtable_writer::*;
-pub use vector::*;
+use vector::*;
 
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {

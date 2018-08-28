@@ -1,8 +1,8 @@
 use std::mem::size_of;
 
-pub use primitives::*;
-pub use endian_scalar::{EndianScalar, read_scalar, emplace_scalar};
-pub use vector::*;
+use primitives::*;
+use endian_scalar::emplace_scalar;
+use vector::Vector;
 
 pub trait Push: Sized {
     type Output;

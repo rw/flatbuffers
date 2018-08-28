@@ -4,7 +4,7 @@ use std::slice::from_raw_parts;
 use std::str::from_utf8_unchecked;
 
 use follow::Follow;
-use endian_scalar::*;
+use endian_scalar::{EndianScalar, read_scalar};
 use primitives::*;
 
 #[derive(Debug)]
