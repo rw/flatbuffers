@@ -957,11 +957,9 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::VectorOfBool: {
         return "Option<&" + lifetime + " [bool]>";
-        //return "Option<flatbuffers::Vector<" + lifetime + ", bool>>";
       }
       case FullType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        //return "Option<&" + lifetime + " [" + typname + "]>";
         return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullType::VectorOfStruct: {
@@ -981,6 +979,7 @@ class RustGenerator : public BaseGenerator {
         FLATBUFFERS_ASSERT(false && "vectors of unions are not yet supported");
         // TODO(rw): when we do support these, we should consider using the
         //           Into trait to convert tables to typesafe union values.
+        return "INVALID_CODE_GENERATION"; // for return analysis
       }
     }
   }
@@ -1070,6 +1069,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::VectorOfUnionValue: {
         FLATBUFFERS_ASSERT(false && "vectors of unions are not yet supported");
+        return "INVALID_CODE_GENERATION"; // for return analysis
       }
     }
   }
