@@ -21,7 +21,10 @@ impl<'a> flatbuffers::Follow<'a> for TableInFirstNS<'a> {
     type Inner = TableInFirstNS<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -34,9 +37,9 @@ impl<'a> TableInFirstNS<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y TableInFirstNSArgs<'y>) -> flatbuffers::Offset<TableInFirstNS<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args TableInFirstNSArgs<'args>) -> flatbuffers::Offset<TableInFirstNS<'bldr>> {
       let mut builder = TableInFirstNSBuilder::new(_fbb);
       if let Some(x) = args.foo_struct { builder.add_foo_struct(x); }
       if let Some(x) = args.foo_table { builder.add_foo_table(x); }
@@ -120,7 +123,10 @@ impl<'a> flatbuffers::Follow<'a> for SecondTableInA<'a> {
     type Inner = SecondTableInA<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -133,9 +139,9 @@ impl<'a> SecondTableInA<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y SecondTableInAArgs<'y>) -> flatbuffers::Offset<SecondTableInA<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args SecondTableInAArgs<'args>) -> flatbuffers::Offset<SecondTableInA<'bldr>> {
       let mut builder = SecondTableInABuilder::new(_fbb);
       if let Some(x) = args.refer_to_c { builder.add_refer_to_c(x); }
       builder.finish()
@@ -208,7 +214,10 @@ impl<'a> flatbuffers::Follow<'a> for TableInC<'a> {
     type Inner = TableInC<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -221,9 +230,9 @@ impl<'a> TableInC<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y TableInCArgs<'y>) -> flatbuffers::Offset<TableInC<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args TableInCArgs<'args>) -> flatbuffers::Offset<TableInC<'bldr>> {
       let mut builder = TableInCBuilder::new(_fbb);
       if let Some(x) = args.refer_to_a2 { builder.add_refer_to_a2(x); }
       if let Some(x) = args.refer_to_a1 { builder.add_refer_to_a1(x); }

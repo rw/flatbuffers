@@ -21,7 +21,10 @@ impl<'a> flatbuffers::Follow<'a> for InParentNamespace<'a> {
     type Inner = InParentNamespace<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -34,9 +37,9 @@ impl<'a> InParentNamespace<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        _args: &'y InParentNamespaceArgs<'y>) -> flatbuffers::Offset<InParentNamespace<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        _args: &'args InParentNamespaceArgs<'args>) -> flatbuffers::Offset<InParentNamespace<'bldr>> {
       let mut builder = InParentNamespaceBuilder::new(_fbb);
       builder.finish()
     }
@@ -94,7 +97,10 @@ impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -107,9 +113,9 @@ impl<'a> Monster<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        _args: &'y MonsterArgs<'y>) -> flatbuffers::Offset<Monster<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        _args: &'args MonsterArgs<'args>) -> flatbuffers::Offset<Monster<'bldr>> {
       let mut builder = MonsterBuilder::new(_fbb);
       builder.finish()
     }
@@ -539,7 +545,10 @@ impl<'a> flatbuffers::Follow<'a> for TestSimpleTableWithEnum<'a> {
     type Inner = TestSimpleTableWithEnum<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -552,9 +561,9 @@ impl<'a> TestSimpleTableWithEnum<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y TestSimpleTableWithEnumArgs<'y>) -> flatbuffers::Offset<TestSimpleTableWithEnum<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args TestSimpleTableWithEnumArgs<'args>) -> flatbuffers::Offset<TestSimpleTableWithEnum<'bldr>> {
       let mut builder = TestSimpleTableWithEnumBuilder::new(_fbb);
       builder.add_color(args.color);
       builder.finish()
@@ -614,7 +623,10 @@ impl<'a> flatbuffers::Follow<'a> for Stat<'a> {
     type Inner = Stat<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -627,9 +639,9 @@ impl<'a> Stat<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y StatArgs<'y>) -> flatbuffers::Offset<Stat<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args StatArgs<'args>) -> flatbuffers::Offset<Stat<'bldr>> {
       let mut builder = StatBuilder::new(_fbb);
       builder.add_val(args.val);
       if let Some(x) = args.id { builder.add_id(x); }
@@ -713,7 +725,10 @@ impl<'a> flatbuffers::Follow<'a> for Referrable<'a> {
     type Inner = Referrable<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -726,9 +741,9 @@ impl<'a> Referrable<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y ReferrableArgs<'y>) -> flatbuffers::Offset<Referrable<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args ReferrableArgs<'args>) -> flatbuffers::Offset<Referrable<'bldr>> {
       let mut builder = ReferrableBuilder::new(_fbb);
       builder.add_id(args.id);
       builder.finish()
@@ -797,7 +812,10 @@ impl<'a> flatbuffers::Follow<'a> for Monster<'a> {
     type Inner = Monster<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -810,9 +828,9 @@ impl<'a> Monster<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y MonsterArgs<'y>) -> flatbuffers::Offset<Monster<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args MonsterArgs<'args>) -> flatbuffers::Offset<Monster<'bldr>> {
       let mut builder = MonsterBuilder::new(_fbb);
       builder.add_non_owning_reference(args.non_owning_reference);
       builder.add_co_owning_reference(args.co_owning_reference);
@@ -966,7 +984,7 @@ impl<'a> Monster<'a> {
   pub fn testnestedflatbuffer(&'a self) -> Option<&'a [u8]> {
     self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<'a, u8>>>(Monster::VT_TESTNESTEDFLATBUFFER, None).map(|v| v.safe_slice())
   }
-  pub fn testnestedflatbuffer_nested_flatbuffer(&'a self) -> Option<Monster<'a>> {
+  pub fn testnestedflatbuffer_nested_flatbuffer(&'a self) ->  Option<Monster<'a>> {
      match self.testnestedflatbuffer() {
          None => { None }
          Some(data) => {
@@ -1427,7 +1445,10 @@ impl<'a> flatbuffers::Follow<'a> for TypeAliases<'a> {
     type Inner = TypeAliases<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -1440,9 +1461,9 @@ impl<'a> TypeAliases<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y TypeAliasesArgs<'y>) -> flatbuffers::Offset<TypeAliases<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args TypeAliasesArgs<'args>) -> flatbuffers::Offset<TypeAliases<'bldr>> {
       let mut builder = TypeAliasesBuilder::new(_fbb);
       builder.add_f64_(args.f64_);
       builder.add_u64_(args.u64_);

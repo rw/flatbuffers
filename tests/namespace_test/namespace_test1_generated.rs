@@ -160,7 +160,10 @@ impl<'a> flatbuffers::Follow<'a> for TableInNestedNS<'a> {
     type Inner = TableInNestedNS<'a>;
     #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }
+        Self {
+            _tab: flatbuffers::Table { buf: buf, loc: loc },
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -173,9 +176,9 @@ impl<'a> TableInNestedNS<'a> {
         }
     }
     #[allow(unused_mut)]
-    pub fn create<'x: 'y, 'y: 'z, 'z>(
-        _fbb: &'z mut flatbuffers::FlatBufferBuilder<'x>,
-        args: &'y TableInNestedNSArgs<'y>) -> flatbuffers::Offset<TableInNestedNS<'x>> {
+    pub fn create<'bldr: 'args, 'args: 'mut_bldr, 'mut_bldr>(
+        _fbb: &'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,
+        args: &'args TableInNestedNSArgs<'args>) -> flatbuffers::Offset<TableInNestedNS<'bldr>> {
       let mut builder = TableInNestedNSBuilder::new(_fbb);
       builder.add_foo(args.foo);
       builder.finish()
