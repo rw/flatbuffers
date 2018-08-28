@@ -985,15 +985,6 @@ mod roundtrip_table {
     }
 }
 
-//void EndianSwapTest() {
-//  TEST_EQ(flatbuffers::EndianSwap(static_cast<int16_t>(0x1234)), 0x3412);
-//  TEST_EQ(flatbuffers::EndianSwap(static_cast<int32_t>(0x12345678)),
-//          0x78563412);
-//  TEST_EQ(flatbuffers::EndianSwap(static_cast<int64_t>(0x1234567890ABCDEF)),
-//          0xEFCDAB9078563412);
-//  TEST_EQ(flatbuffers::EndianSwap(flatbuffers::EndianSwap(3.14f)), 3.14f);
-//}
-
 #[cfg(test)]
 mod roundtrip_scalars {
     extern crate flatbuffers;
@@ -1014,18 +1005,22 @@ mod roundtrip_scalars {
     fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u8> as fn(_)); }
     #[test]
     fn fuzz_i8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i8> as fn(_)); }
+
     #[test]
     fn fuzz_u16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u16> as fn(_)); }
     #[test]
     fn fuzz_i16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i16> as fn(_)); }
+
     #[test]
     fn fuzz_u32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u32> as fn(_)); }
     #[test]
     fn fuzz_i32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i32> as fn(_)); }
+
     #[test]
     fn fuzz_u64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u64> as fn(_)); }
     #[test]
     fn fuzz_i64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i64> as fn(_)); }
+
     #[test]
     fn fuzz_f32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f32> as fn(_)); }
     #[test]
@@ -1037,44 +1032,57 @@ mod roundtrip_push_follow_scalars {
     extern crate flatbuffers;
     extern crate quickcheck;
 
+    use flatbuffers::Push;
+
     const N: u64 = 1000;
 
-    fn prop<'a: 'b, 'b, T: flatbuffers::Push + ::std::fmt::Debug + 'a, U: flatbuffers::Follow<'b> + ::std::fmt::Debug + 'b>(x: T) {
-        let buf = {
-            let mut buf = vec![0u8; ::std::mem::size_of::<T>()];
-            flatbuffers::Push::push(&x, &mut buf[..], &[][..]);
-            buf
-        };
-        //{
-        //let data = &buf[..];
-        //{ flatbuffers::lifted_follow::<U>(data, 0); }
-        //}
-        //let fs: flatbuffers::FollowStart<T> = flatbuffers::FollowStart::new();
-        //assert_eq!(fs.self_follow(&buf[..], 0), x);
+    // This uses a macro because lifetimes for a trait-bounded function get too
+    // complicated.
+    macro_rules! impl_prop {
+        ($fn_name:ident, $ty:ident) => (
+            fn $fn_name(x: $ty) {
+                let mut buf = vec![0u8; ::std::mem::size_of::<$ty>()];
+                x.push(&mut buf[..], &[][..]);
+                let fs: flatbuffers::FollowStart<$ty> = flatbuffers::FollowStart::new();
+                assert_eq!(fs.self_follow(&buf[..], 0), x);
+            }
+        )
     }
 
-    //#[test]
-    //fn fuzz_bool() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<bool> as fn(_)); }
-    //#[test]
-    //fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u8> as fn(_)); }
-    //#[test]
-    //fn fuzz_i8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i8> as fn(_)); }
-    //#[test]
-    //fn fuzz_u16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u16> as fn(_)); }
-    //#[test]
-    //fn fuzz_i16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i16> as fn(_)); }
-    //#[test]
-    //fn fuzz_u32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u32> as fn(_)); }
-    //#[test]
-    //fn fuzz_i32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i32> as fn(_)); }
-    //#[test]
-    //fn fuzz_u64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<u64> as fn(_)); }
-    //#[test]
-    //fn fuzz_i64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<i64> as fn(_)); }
-    //#[test]
-    //fn fuzz_f32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f32> as fn(_)); }
-    //#[test]
-    //fn fuzz_f64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop::<f64> as fn(_)); }
+    impl_prop!(prop_bool, bool);
+    impl_prop!(prop_u8, u8);
+    impl_prop!(prop_i8, i8);
+    impl_prop!(prop_u16, u16);
+    impl_prop!(prop_i16, i16);
+    impl_prop!(prop_u32, u32);
+    impl_prop!(prop_i32, i32);
+    impl_prop!(prop_u64, u64);
+    impl_prop!(prop_i64, i64);
+    impl_prop!(prop_f32, f32);
+    impl_prop!(prop_f64, f64);
+
+    #[test]
+    fn fuzz_bool() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_bool as fn(bool)); }
+    #[test]
+    fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_u8 as fn(u8)); }
+    #[test]
+    fn fuzz_i8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_i8 as fn(i8)); }
+    #[test]
+    fn fuzz_u16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_u16 as fn(u16)); }
+    #[test]
+    fn fuzz_i16() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_i16 as fn(i16)); }
+    #[test]
+    fn fuzz_u32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_u32 as fn(u32)); }
+    #[test]
+    fn fuzz_i32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_i32 as fn(i32)); }
+    #[test]
+    fn fuzz_u64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_u64 as fn(u64)); }
+    #[test]
+    fn fuzz_i64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_i64 as fn(i64)); }
+    #[test]
+    fn fuzz_f32() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_f32 as fn(f32)); }
+    #[test]
+    fn fuzz_f64() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_f64 as fn(f64)); }
 }
 
 
