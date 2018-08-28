@@ -9,7 +9,7 @@ pub struct Table<'a> {
 }
 
 impl<'a> Table<'a> {
-    #[inline(always)]
+    #[inline]
     pub fn new(buf: &'a [u8], loc: usize) -> Self {
         Table { buf: buf, loc: loc }
     }
@@ -17,7 +17,7 @@ impl<'a> Table<'a> {
     pub fn vtable(&'a self) -> VTable<'a> {
         <BackwardsSOffset<VTable<'a>>>::follow(self.buf, self.loc)
     }
-    #[inline(always)]
+    #[inline]
     pub fn get<T: Follow<'a> + 'a>(
         &'a self,
         slot_byte_loc: VOffsetT,
@@ -33,21 +33,21 @@ impl<'a> Table<'a> {
 
 impl<'a> Follow<'a> for Table<'a> {
     type Inner = Table<'a>;
-    #[inline(always)]
+    #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         Table { buf: buf, loc: loc }
     }
 }
 
-#[inline(always)]
+#[inline]
 pub fn get_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
     <ForwardsUOffset<T>>::follow(data, 0)
 }
-#[inline(always)]
+#[inline]
 pub fn get_size_prefixed_root<'a, T: Follow<'a> + 'a>(data: &'a [u8]) -> T::Inner {
     <SkipSizePrefix<ForwardsUOffset<T>>>::follow(data, 0)
 }
-#[inline(always)]
+#[inline]
 pub fn buffer_has_identifier(data: &[u8], ident: &str, size_prefixed: bool) -> bool {
     assert_eq!(ident.len(), FILE_IDENTIFIER_LENGTH);
 

@@ -72,7 +72,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.min_align = 0;
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn push<X: Push>(&mut self, x: X) -> Offset<X::Output> {
         self.align(x.size(), x.alignment());
         self.make_space(x.size());
@@ -137,11 +137,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         let o = self.push::<UOffsetT>(num_elems as UOffsetT);
         Offset::new(o.value())
     }
-    #[inline(always)]
+    #[inline]
     pub fn used_space(&self) -> usize {
         self.owned_buf.len() - self.head as usize
     }
-    #[inline(always)]
+    #[inline]
     fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
     }
@@ -315,15 +315,15 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
             unsafe { write_bytes(ptr, 0, middle); }
         }
     }
-    #[inline(always)]
+    #[inline]
     pub fn finish_size_prefixed<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, true);
     }
-    #[inline(always)]
+    #[inline]
     pub fn finish<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, false);
     }
-    #[inline(always)]
+    #[inline]
     pub fn finish_minimal<T>(&mut self, root: Offset<T>) {
         self.finish_with_opts(root, None, false);
     }
@@ -402,7 +402,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         want
     }
-    #[inline(always)]
+    #[inline]
     fn unused_ready_space(&self) -> usize {
         self.head
     }
@@ -438,7 +438,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 }
 
-#[inline(always)]
+#[inline]
 pub fn padding_bytes(buf_size: usize, scalar_size: usize) -> usize {
     // ((!buf_size) + 1) & (scalar_size - 1)
     (!buf_size).wrapping_add(1) & (scalar_size.wrapping_sub(1))

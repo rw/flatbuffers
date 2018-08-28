@@ -16,7 +16,7 @@ pub trait Follow<'a> {
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner;
 }
 
-#[inline(always)]
+#[inline]
 pub fn lifted_follow<'a, T: Follow<'a>>(buf: &'a [u8], loc: usize) -> T::Inner {
     T::follow(buf, loc)
 }
@@ -24,18 +24,18 @@ pub fn lifted_follow<'a, T: Follow<'a>>(buf: &'a [u8], loc: usize) -> T::Inner {
 #[derive(Debug)]
 pub struct FollowStart<T>(PhantomData<T>);
 impl<'a, T: Follow<'a> + 'a> FollowStart<T> {
-    #[inline(always)]
+    #[inline]
     pub fn new() -> Self {
         Self { 0: PhantomData }
     }
-    #[inline(always)]
+    #[inline]
     pub fn self_follow(&'a self, buf: &'a [u8], loc: usize) -> T::Inner {
         T::follow(buf, loc)
     }
 }
 impl<'a, T: Follow<'a>> Follow<'a> for FollowStart<T> {
     type Inner = T::Inner;
-    #[inline(always)]
+    #[inline]
     fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
         T::follow(buf, loc)
     }

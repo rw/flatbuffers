@@ -8,12 +8,12 @@ pub trait Push: Sized {
     type Output;
     fn push(&self, dst: &mut [u8], _rest: &[u8]);
 
-    #[inline(always)]
+    #[inline]
     fn size(&self) -> usize {
         size_of::<Self>()
     }
 
-    #[inline(always)]
+    #[inline]
     fn alignment(&self) -> usize {
         self.size()
     }
@@ -22,19 +22,19 @@ pub trait Push: Sized {
 impl<'b> Push for &'b [u8] {
     type Output = Vector<'b, u8>;
 
-    #[inline(always)]
+    #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let l = self.len() as UOffsetT;
         emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
         dst[SIZE_UOFFSET..].copy_from_slice(self);
     }
 
-    #[inline(always)]
+    #[inline]
     fn size(&self) -> usize {
         SIZE_UOFFSET + self.len()
     }
 
-    #[inline(always)]
+    #[inline]
     fn alignment(&self) -> usize {
         SIZE_UOFFSET
     }
@@ -43,19 +43,19 @@ impl<'b> Push for &'b [u8] {
 impl<'b> Push for &'b str {
     type Output = Vector<'b, u8>;
 
-    #[inline(always)]
+    #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let l = self.len();
         emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l as UOffsetT);
         dst[SIZE_UOFFSET..SIZE_UOFFSET+l].copy_from_slice(self.as_bytes());
     }
 
-    #[inline(always)]
+    #[inline]
     fn size(&self) -> usize {
         SIZE_UOFFSET + self.len() + 1
     }
 
-    #[inline(always)]
+    #[inline]
     fn alignment(&self) -> usize {
         SIZE_UOFFSET
     }
@@ -65,12 +65,12 @@ impl<'b> Push for &'b str {
 pub struct ZeroTerminatedByteSlice<'a>(&'a [u8]);
 
 impl<'a> ZeroTerminatedByteSlice<'a> {
-    #[inline(always)]
+    #[inline]
     pub fn new(buf: &'a [u8]) -> Self {
         ZeroTerminatedByteSlice { 0: buf }
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn data(&'a self) -> &'a [u8] {
         self.0
     }
@@ -79,19 +79,19 @@ impl<'a> ZeroTerminatedByteSlice<'a> {
 impl<'b> Push for ZeroTerminatedByteSlice<'b> {
     type Output = Vector<'b, u8>;
 
-    #[inline(always)]
+    #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
         let l = self.data().len();
         emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l as UOffsetT);
         dst[SIZE_UOFFSET..SIZE_UOFFSET+l].copy_from_slice(self.data());
     }
 
-    #[inline(always)]
+    #[inline]
     fn size(&self) -> usize {
         SIZE_UOFFSET + self.0.len() + 1
     }
 
-    #[inline(always)]
+    #[inline]
     fn alignment(&self) -> usize {
         SIZE_UOFFSET
     }
@@ -102,7 +102,7 @@ macro_rules! impl_pushable_method_for_endian_scalar {
         impl Push for $ty {
             type Output = $ty;
 
-            #[inline(always)]
+            #[inline]
             fn push(&self, dst: &mut [u8], _rest: &[u8]) {
                 emplace_scalar::<$ty>(dst, *self);
             }
@@ -125,7 +125,7 @@ impl_pushable_method_for_endian_scalar!(f64);
 impl<T> Push for Offset<T> {
     type Output = ForwardsUOffset<T>;
 
-    #[inline(always)]
+    #[inline]
     fn push(&self, dst: &mut [u8], rest: &[u8]) {
         let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
         emplace_scalar::<UOffsetT>(dst, n);
@@ -134,7 +134,7 @@ impl<T> Push for Offset<T> {
 impl<T> Push for ForwardsUOffset<T> {
     type Output = Self;
 
-    #[inline(always)]
+    #[inline]
     fn push(&self, dst: &mut [u8], rest: &[u8]) {
         self.value().push(dst, rest);
     }
@@ -142,7 +142,7 @@ impl<T> Push for ForwardsUOffset<T> {
 impl<T> Push for ForwardsVOffset<T> {
     type Output = Self;
 
-    #[inline(always)]
+    #[inline]
     fn push(&self, dst: &mut [u8], rest: &[u8]) {
         self.value().push(dst, rest);
     }
@@ -150,7 +150,7 @@ impl<T> Push for ForwardsVOffset<T> {
 impl<T> Push for BackwardsSOffset<T> {
     type Output = Self;
 
-    #[inline(always)]
+    #[inline]
     fn push(&self, dst: &mut [u8], rest: &[u8]) {
         self.value().push(dst, rest);
     }

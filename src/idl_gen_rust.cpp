@@ -535,20 +535,20 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{ENUM_NAME}} {";
     code_ += "  type Inner = Self;";
-    code_ += "  #[inline(always)]";
+    code_ += "  #[inline]";
     code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "    flatbuffers::read_scalar_at::<Self>(buf, loc)";
     code_ += "  }";
     code_ += "}";
     code_ += "";
     code_ += "impl flatbuffers::EndianScalar for {{ENUM_NAME}} {";
-    code_ += "  #[inline(always)]";
+    code_ += "  #[inline]";
     code_ += "  fn to_little_endian(self) -> Self {";
     code_ += "    let n = {{BASE_TYPE}}::to_le(self as {{BASE_TYPE}});";
     code_ += "    let p = &n as *const {{BASE_TYPE}} as *const {{ENUM_NAME}};";
     code_ += "    unsafe { *p }";
     code_ += "  }";
-    code_ += "  #[inline(always)]";
+    code_ += "  #[inline]";
     code_ += "  fn from_little_endian(self) -> Self {";
     code_ += "    let n = {{BASE_TYPE}}::from_le(self as {{BASE_TYPE}});";
     code_ += "    let p = &n as *const {{BASE_TYPE}} as *const {{ENUM_NAME}};";
@@ -558,7 +558,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "impl flatbuffers::Push for {{ENUM_NAME}} {";
     code_ += "    type Output = {{ENUM_NAME}};";
-    code_ += "    #[inline(always)]";
+    code_ += "    #[inline]";
     code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
     code_ += "        flatbuffers::emplace_scalar::<{{ENUM_NAME}}>(dst, *self);";
     code_ += "    }";
@@ -1057,14 +1057,14 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}}<'a> {";
     code_ += "    type Inner = {{STRUCT_NAME}}<'a>;";
-    code_ += "    #[inline(always)]";
+    code_ += "    #[inline]";
     code_ += "    fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "        Self { _tab: flatbuffers::Table { buf: buf, loc: loc }, _phantom: PhantomData }";
     code_ += "    }";
     code_ += "}";
     code_ += "";
     code_ += "impl<'a> {{STRUCT_NAME}}<'a> {";
-    code_ += "    #[inline(always)]";
+    code_ += "    #[inline]";
     code_ += "    pub fn init_from_table(table: flatbuffers::Table<'a>) -> Self {";
     code_ += "        {{STRUCT_NAME}} {";
     code_ += "            _tab: table,";
@@ -1197,7 +1197,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("U_ELEMENT_TABLE_TYPE", table_init_type);
         code_.SetValue("U_ELEMENT_NAME", MakeSnakeCase(Name(ev)));
 
-        code_ += "#[inline(always)]";
+        code_ += "#[inline]";
         code_ += "#[allow(non_snake_case)]";
         code_ += "pub fn {{FIELD_NAME}}_as_{{U_ELEMENT_NAME}}(&'a self) -> "
                  "Option<{{U_ELEMENT_TABLE_TYPE}}> {";
@@ -1281,7 +1281,7 @@ class RustGenerator : public BaseGenerator {
         code_.SetValue("FIELD_OFFSET", Name(struct_def) + "::" + offset);
         code_.SetValue("FIELD_TYPE", TableBuilderArgsAddFuncType(field, "'b "));
         code_.SetValue("FUNC_BODY", TableBuilderArgsAddFuncBody(field));
-        code_ += "  #[inline(always)]";
+        code_ += "  #[inline]";
         code_ += "  pub fn add_{{FIELD_NAME}}(&mut self, {{FIELD_NAME}}: "
                  "{{FIELD_TYPE}}) {";
         if (is_scalar) {
@@ -1509,14 +1509,14 @@ class RustGenerator : public BaseGenerator {
     code_ += "impl flatbuffers::SafeSliceAccess for {{STRUCT_NAME}} {}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
     code_ += "  type Inner = &'a {{STRUCT_NAME}};";
-    code_ += "  #[inline(always)]";
+    code_ += "  #[inline]";
     code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "    flatbuffers::follow_cast_ref::<{{STRUCT_NAME}}>(buf, loc)";
     code_ += "  }";
     code_ += "}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for &'a {{STRUCT_NAME}} {";
     code_ += "  type Inner = &'a {{STRUCT_NAME}};";
-    code_ += "  #[inline(always)]";
+    code_ += "  #[inline]";
     code_ += "  fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {";
     code_ += "    flatbuffers::follow_cast_ref::<{{STRUCT_NAME}}>(buf, loc)";
     code_ += "  }";
@@ -1599,7 +1599,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "";
     code_ += "impl<'b> flatbuffers::Push for {{STRUCT_NAME}} {";
     code_ += "    type Output = {{STRUCT_NAME}};";
-    code_ += "    #[inline(always)]";
+    code_ += "    #[inline]";
     code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
     code_ += "        let src = unsafe {";
     code_ += "            ::std::slice::from_raw_parts("
@@ -1607,7 +1607,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "        };";
     code_ += "        dst.copy_from_slice(src);";
     code_ += "    }";
-    code_ += "    #[inline(always)]";
+    code_ += "    #[inline]";
     code_ += "    fn size(&self) -> usize {";
     code_ += "        ::std::mem::size_of::<{{STRUCT_NAME}}>()";
     code_ += "    }";
@@ -1615,7 +1615,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "impl<'b> flatbuffers::Push for &'b {{STRUCT_NAME}} {";
     code_ += "    type Output = {{STRUCT_NAME}};";
     code_ += "";
-    code_ += "    #[inline(always)]";
+    code_ += "    #[inline]";
     code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
     code_ += "        let src = unsafe {";
     code_ += "            ::std::slice::from_raw_parts("
@@ -1623,7 +1623,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "        };";
     code_ += "        dst.copy_from_slice(src);";
     code_ += "    }";
-    code_ += "    #[inline(always)]";
+    code_ += "    #[inline]";
     code_ += "    fn size(&self) -> usize {";
     code_ += "        ::std::mem::size_of::<{{STRUCT_NAME}}>()";
     code_ += "    }";
