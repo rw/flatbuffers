@@ -16,6 +16,7 @@
 
 #include "flatbuffers/code_generators.h"
 #include <assert.h>
+#include <iostream> // cerr messages for logging warnings
 #include "flatbuffers/base.h"
 #include "flatbuffers/util.h"
 
@@ -47,6 +48,7 @@ void CodeWriter::operator+=(std::string text) {
       const std::string &value = iter->second;
       stream_ << value;
     } else {
+      std::cerr << "MISSING " << key << std::endl;
       FLATBUFFERS_ASSERT(false && "could not find key");
       stream_ << key;
     }

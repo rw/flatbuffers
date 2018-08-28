@@ -114,12 +114,10 @@ FullType GetFullType(const Type &type) {
       }
       case FullType::UnionKey:
       case FullType::UnionValue: {
-        // unreachable: vectors of unions are unsupported.
-        FLATBUFFERS_ASSERT(false);
+        FLATBUFFERS_ASSERT(false && "vectors of unions are unsupported");
       }
       default: {
-        // unreachable: vectors of vectors are unsupported.
-        FLATBUFFERS_ASSERT(false);
+        FLATBUFFERS_ASSERT(false && "vector of vectors are unsupported");
       }
     }
   } else if (type.enum_def != nullptr) {
@@ -129,8 +127,7 @@ FullType GetFullType(const Type &type) {
       } else if (IsInteger(type.base_type)) {
         return FullType::UnionKey;
       } else {
-        // unreachable: unknown union field.
-        FLATBUFFERS_ASSERT(false);
+        FLATBUFFERS_ASSERT(false && "unknown union field type");
       }
     } else {
       return FullType::EnumKey;
@@ -143,13 +140,11 @@ FullType GetFullType(const Type &type) {
     } else if (IsFloat(type.base_type)) {
       return FullType::Float;
     } else {
-      // unreachable: unknown number type.
-      FLATBUFFERS_ASSERT(false);
+      FLATBUFFERS_ASSERT(false && "unknown number type");
     }
   }
 
-  // unreachable: completely unknown type.
-  FLATBUFFERS_ASSERT(false);
+  FLATBUFFERS_ASSERT(false && "completely unknown type");
 
   // this is to satisfy the compiler's return analysis.
   return FullType::Bool;
@@ -444,82 +439,37 @@ class RustGenerator : public BaseGenerator {
     return ctypename[type.base_type];
   }
 
-  // Return a C++ pointer type, specialized to the actual struct/table types,
-  // and vector element types.
-  std::string GetTypePointer(const Type &type,
-                             const std::string &lifetime) const {
-    switch (type.base_type) {
-      case BASE_TYPE_STRING: {
-        //return "&str";
-        return "flatbuffers::StringOffset";
-        //return "flatbuffers::String<" + lifetime + ">";
-      }
-      case BASE_TYPE_VECTOR: {
-        const auto type_name = GetTypeWire(type.VectorType(), "", lifetime, false);
-        //return "flatbuffers::Vector<" + type_name + ">";
-        return "&" + lifetime + "[" + type_name + "]";
-        //return "flatbuffers::LabeledVectorUOffsetT<" + type_name + ">";
-      }
-      case BASE_TYPE_STRUCT: {
-        //return WrapInNameSpace(*type.struct_def);
-        std::string s;
-        //s.append(lifetime);
-        s.append(WrapInNameSpace(type.struct_def->defined_namespace,
-                                 type.struct_def->name));
-        if (TypeNeedsLifetimeParameter(type)) {
-          s.append("<" + lifetime + " /* qqq */>");
-        } else {
-          s.append("/* foo */");
-        }
-        return s;
-      }
-      case BASE_TYPE_UNION: {
-        return "flatbuffers::Table<" + lifetime + ">";
-      }
-      default: {
-        assert(false);
-      }
-      // fall through
-      //default: { return "&" + lifetime + "flatbuffers::Void"; }
-      //default: { return "flatbuffers::Void<" + lifetime + ">"; }
-      //default: { return "flatbuffers::UnionOffset"; }
-    }
-    assert(false);
-    return "XXX";
-  }
-
-  // Return a C++ type for any type (scalar/pointer) specifically for
-  // building a flatbuffer.
-  std::string GetTypeWire(const Type &type, const char *postfix,
-                          const std::string &lifetime,
-                          bool user_facing_type) const {
-    // TODO(rw): convert this to enum switch
-    if (IsScalar(type.base_type)) {
-      return GetTypeBasic(type, user_facing_type) + postfix;
-    } else if (IsStruct(type)) {
-      // TODO distinguish between struct and table
-      return GetTypePointer(type, lifetime);
-    } else if (type.base_type == BASE_TYPE_UNION) {
-      return "flatbuffers::Offset<" + GetTypePointer(type, lifetime) + ">" + postfix;
-    } else {
-      return "flatbuffers::Offset<" + GetTypePointer(type, lifetime) + ">" + postfix;
-    }
-  }
-
   // Return a Rust type for any type (scalar/pointer) specifically for using a
   // flatbuffer.
   std::string GetTypeGet(const Type &type) const {
     if (IsScalar(type.base_type)) {
       return GetTypeBasic(type, true);
     } else {
-      return GetTypePointer(type, "'a");
+        std::string s;
+        //s.append(lifetime);
+        s.append(WrapInNameSpace(type.struct_def->defined_namespace,
+                                 type.struct_def->name));
+        if (TypeNeedsLifetimeParameter(type)) {
+          s.append("<'a>");
+        } else {
+          s.append("/* foo */");
+        }
+        return s;
     }
   }
   std::string StructDefnFieldType(const Type &type) const {
     if (IsScalar(type.base_type)) {
       return GetTypeBasic(type, true);
     } else {
-      return GetTypePointer(type, "'a");
+        std::string s;
+        s.append(WrapInNameSpace(type.struct_def->defined_namespace,
+                                 type.struct_def->name));
+        if (TypeNeedsLifetimeParameter(type)) {
+          s.append("<'a>");
+        } else {
+          s.append("/* foo */");
+        }
+        return s;
     }
   }
 
@@ -729,7 +679,6 @@ class RustGenerator : public BaseGenerator {
   }
 
   std::string GetDefaultConstant(const FieldDef &field) {
-    //assert(false);
     return field.value.type.base_type == BASE_TYPE_FLOAT
                ? field.value.constant + ""
                : field.value.constant;
@@ -1277,22 +1226,22 @@ class RustGenerator : public BaseGenerator {
 
         auto full_struct_name = GetUnionElement(ev, true, true);
 
-        code_.SetValue(
-            "U_ELEMENT_TYPE",
-            WrapInNameSpace(u->defined_namespace, GetEnumValUse(*u, ev)));
-        code_.SetValue("U_FIELD_TYPE", "&" + full_struct_name + "");
-        code_.SetValue("U_ELEMENT_NAME", full_struct_name);
-        code_.SetValue("U_FIELD_NAME", Name(field) + "_as_" + Name(ev));
+        //code_.SetValue(
+        //    "U_ELEMENT_TYPE",
+        //    WrapInNameSpace(u->defined_namespace, GetEnumValUse(*u, ev)));
+        //code_.SetValue("U_FIELD_TYPE", "&" + full_struct_name + "");
+        //code_.SetValue("U_ELEMENT_NAME", full_struct_name);
+        //code_.SetValue("U_FIELD_NAME", Name(field) + "_as_" + Name(ev));
 
         // `template<> const T *union_name_as<T>() const` accessor.
-        code_ += "//TODO: inject these functions into impl for type";
-        code_ += "//#[inline]";
-        code_ +=
-            "//fn {{STRUCT_NAME}}_MEMBER_{{FIELD_NAME}}_as"
-            "_X_{{U_ELEMENT_NAME}}_X() -> {{U_FIELD_TYPE}} {";
-        code_ += "//  return {{U_FIELD_NAME}}();";
-        code_ += "//}";
-        code_ += "//";
+        //code_ += "//TODO: inject these functions into impl for type";
+        //code_ += "//#[inline]";
+        //code_ +=
+        //    "//fn {{STRUCT_NAME}}_MEMBER_{{FIELD_NAME}}_as"
+        //    "_X_{{U_ELEMENT_NAME}}_X() -> {{U_FIELD_TYPE}} {";
+        //code_ += "//  return {{U_FIELD_NAME}}();";
+        //code_ += "//}";
+        //code_ += "//";
       }
     }
 
@@ -1526,7 +1475,7 @@ class RustGenerator : public BaseGenerator {
     code_.SetValue("ALIGN", NumToString(struct_def.minalign));
     code_.SetValue("STRUCT_NAME", Name(struct_def));
 
-    code_ += "// Size {{STRUCT_BYTE_SIZE}}, aligned to {{ALIGN}}";
+    code_ += "// struct {{STRUCT_NAME}}, aligned to {{ALIGN}}";
     code_ += "#[repr(C, packed)]";
 
     // PartialEq is useful to derive because we can correctly compare structs

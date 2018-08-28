@@ -280,7 +280,7 @@ pub fn enum_name_any(e: Any) -> &'static str {
 }
 
 pub struct AnyUnionTableOffset {}
-// Size STRUCT_BYTE_SIZE, aligned to 2
+// struct Test, aligned to 2
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Test {
@@ -351,7 +351,7 @@ impl<'b> flatbuffers::Push for &'b Test {
     }
 }
 
-// Size STRUCT_BYTE_SIZE, aligned to 16
+// struct Vec3, aligned to 16
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vec3 {
@@ -446,7 +446,7 @@ impl<'b> flatbuffers::Push for &'b Vec3 {
     }
 }
 
-// Size STRUCT_BYTE_SIZE, aligned to 4
+// struct Ability, aligned to 4
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Ability {
@@ -1055,24 +1055,6 @@ impl<'a> Monster<'a> {
   }
 }
 
-//TODO: inject these functions into impl for type
-//#[inline]
-//fn Monster_MEMBER_test_as_X_Monster_X() -> &Monster {
-//  return test_as_Monster();
-//}
-//
-//TODO: inject these functions into impl for type
-//#[inline]
-//fn Monster_MEMBER_test_as_X_TestSimpleTableWithEnum_X() -> &TestSimpleTableWithEnum {
-//  return test_as_TestSimpleTableWithEnum();
-//}
-//
-//TODO: inject these functions into impl for type
-//#[inline]
-//fn Monster_MEMBER_test_as_X_super::example_2::Monster_X() -> &super::example_2::Monster {
-//  return test_as_MyGame_Example2_Monster();
-//}
-//
 pub struct MonsterArgs<'a> {
     pub pos: Option<&'a  Vec3>,
     pub mana: i16,

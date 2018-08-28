@@ -78,7 +78,7 @@ pub fn enum_name_enum_in_nested_n_s(e: EnumInNestedNS) -> &'static str {
   ENUM_NAMES_ENUM_IN_NESTED_N_S[index]
 }
 
-// Size STRUCT_BYTE_SIZE, aligned to 4
+// struct StructInNestedNS, aligned to 4
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct StructInNestedNS {
