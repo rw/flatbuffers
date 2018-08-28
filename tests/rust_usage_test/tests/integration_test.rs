@@ -1507,17 +1507,17 @@ mod follow_impls {
 
     #[test]
     fn table_get_slot_scalar_u8() {
-	let buf: Vec<u8> = vec![
-	    14, 0, 0, 0, // offset to root table
-	    // enter vtable
-	    6, 0, // vtable len
-	    2, 0, // inline size
-	    5, 0, // value loc
-	    255, 255, 255, 255, // canary
-	    // enter table
-	    10, 0, 0, 0, // vtable location
-	    0, 99 // value (with padding)
-	];
+        let buf: Vec<u8> = vec![
+            14, 0, 0, 0, // offset to root table
+            // enter vtable
+            6, 0, // vtable len
+            2, 0, // inline size
+            5, 0, // value loc
+            255, 255, 255, 255, // canary
+            // enter table
+            10, 0, 0, 0, // vtable location
+            0, 99 // value (with padding)
+        ];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
         assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(99));
@@ -1525,15 +1525,15 @@ mod follow_impls {
 
     #[test]
     fn table_get_slot_scalar_u8_default_via_vtable_len() {
-	let buf: Vec<u8> = vec![
-	    12, 0, 0, 0, // offset to root table
-	    // enter vtable
-	    4, 0, // vtable len
-	    2, 0, // inline size
-	    255, 255, 255, 255, // canary
-	    // enter table
-	    8, 0, 0, 0, // vtable location
-	];
+        let buf: Vec<u8> = vec![
+            12, 0, 0, 0, // offset to root table
+            // enter vtable
+            4, 0, // vtable len
+            2, 0, // inline size
+            255, 255, 255, 255, // canary
+            // enter table
+            8, 0, 0, 0, // vtable location
+        ];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
         assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(123));
@@ -1541,16 +1541,16 @@ mod follow_impls {
 
     #[test]
     fn table_get_slot_scalar_u8_default_via_vtable_zero() {
-	let buf: Vec<u8> = vec![
-	    14, 0, 0, 0, // offset to root table
-	    // enter vtable
-	    6, 0, // vtable len
-	    2, 0, // inline size
-	    0, 0, // zero means use the default value
-	    255, 255, 255, 255, // canary
-	    // enter table
-	    10, 0, 0, 0, // vtable location
-	];
+        let buf: Vec<u8> = vec![
+            14, 0, 0, 0, // offset to root table
+            // enter vtable
+            6, 0, // vtable len
+            2, 0, // inline size
+            0, 0, // zero means use the default value
+            255, 255, 255, 255, // canary
+            // enter table
+            10, 0, 0, 0, // vtable location
+        ];
         let fs: flatbuffers::FollowStart<flatbuffers::ForwardsUOffset<flatbuffers::Table>> = flatbuffers::FollowStart::new();
         let tab = fs.self_follow(&buf[..], 0);
         assert_eq!(tab.get::<u8>(fi2fo(0), Some(123)), Some(123));
@@ -1558,21 +1558,21 @@ mod follow_impls {
 
     #[test]
     fn table_get_slot_string_multiple_types() {
-	let buf: Vec<u8> = vec![
-	    14, 0, 0, 0, // offset to root table
-	    // enter vtable
-	    6, 0, // vtable len
-	    2, 0, // inline size
-	    4, 0, // value loc
-	    255, 255, 255, 255, // canary
-	    // enter table
-	    10, 0, 0, 0, // vtable location
-	    8, 0, 0, 0, // offset to string
-	    // leave table
-	    255, 255, 255, 255, // canary
-	    // enter string
-	    3, 0, 0, 0, 109, 111, 111, 0 // string length and contents
-	];
+        let buf: Vec<u8> = vec![
+            14, 0, 0, 0, // offset to root table
+            // enter vtable
+            6, 0, // vtable len
+            2, 0, // inline size
+            4, 0, // value loc
+            255, 255, 255, 255, // canary
+            // enter table
+            10, 0, 0, 0, // vtable location
+            8, 0, 0, 0, // offset to string
+            // leave table
+            255, 255, 255, 255, // canary
+            // enter string
+            3, 0, 0, 0, 109, 111, 111, 0 // string length and contents
+        ];
         let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(&buf[..], 0);
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(0), None), Some("moo"));
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(0), None), Some(&vec![109, 111, 111][..]));
@@ -1585,15 +1585,15 @@ mod follow_impls {
 
     #[test]
     fn table_get_slot_string_multiple_types_default_via_vtable_len() {
-	let buf: Vec<u8> = vec![
-	    12, 0, 0, 0, // offset to root table
-	    // enter vtable
-	    4, 0, // vtable len
-	    4, 0, // table inline len
-	    255, 255, 255, 255, // canary
-	    // enter table
-	    8, 0, 0, 0, // vtable location
-	];
+        let buf: Vec<u8> = vec![
+            12, 0, 0, 0, // offset to root table
+            // enter vtable
+            4, 0, // vtable len
+            4, 0, // table inline len
+            255, 255, 255, 255, // canary
+            // enter table
+            8, 0, 0, 0, // vtable location
+        ];
         let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(&buf[..], 0);
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(0), Some("abc")), Some("abc"));
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(0), Some(&vec![70, 71, 72][..])), Some(&vec![70, 71, 72][..]));
@@ -1609,16 +1609,16 @@ mod follow_impls {
 
     #[test]
     fn table_get_slot_string_multiple_types_default_via_vtable_zero() {
-	let buf: Vec<u8> = vec![
-	    14, 0, 0, 0, // offset to root table
-	    // enter vtable
-	    6, 0, // vtable len
-	    2, 0, // inline size
-	    0, 0, // value loc
-	    255, 255, 255, 255, // canary
-	    // enter table
-	    10, 0, 0, 0, // vtable location
-	];
+        let buf: Vec<u8> = vec![
+            14, 0, 0, 0, // offset to root table
+            // enter vtable
+            6, 0, // vtable len
+            2, 0, // inline size
+            0, 0, // value loc
+            255, 255, 255, 255, // canary
+            // enter table
+            10, 0, 0, 0, // vtable location
+        ];
         let tab = <flatbuffers::ForwardsUOffset<flatbuffers::Table>>::follow(&buf[..], 0);
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&str>>(fi2fo(0), Some("abc")), Some("abc"));
         assert_eq!(tab.get::<flatbuffers::ForwardsUOffset<&[u8]>>(fi2fo(0), Some(&vec![70, 71, 72][..])), Some(&vec![70, 71, 72][..]));
@@ -2131,7 +2131,7 @@ mod byte_layouts {
               0, 0, 0, 0, // padding
         ]);
     }
-  	// test 15: vtable with 1 vector of 2 struct of 2 int8
+    // test 15: vtable with 1 vector of 2 struct of 2 int8
     #[test]
     fn layout_15_vtable_with_1_vector_of_2_struct_2_int8() {
         #[allow(dead_code)]
