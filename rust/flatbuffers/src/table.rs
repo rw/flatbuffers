@@ -1,5 +1,5 @@
-use primitives::*;
 use follow::Follow;
+use primitives::*;
 use vtable::VTable;
 
 #[derive(Clone, Copy, Debug, PartialEq)]

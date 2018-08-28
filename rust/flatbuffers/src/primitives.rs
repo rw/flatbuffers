@@ -1,10 +1,10 @@
 use std::marker::PhantomData;
 use std::ops::Deref;
 
-use endian_scalar::*;
+use endian_scalar::{read_scalar, read_scalar_at};
 use follow::Follow;
 
-pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = (2u64 << 31) as usize;
+pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = (1u64 << 31) as usize;
 
 pub const FILE_IDENTIFIER_LENGTH: usize = 4;
 

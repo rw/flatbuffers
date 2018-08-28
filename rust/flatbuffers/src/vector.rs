@@ -3,8 +3,8 @@ use std::mem::size_of;
 use std::slice::from_raw_parts;
 use std::str::from_utf8_unchecked;
 
-use follow::Follow;
 use endian_scalar::{EndianScalar, read_scalar};
+use follow::Follow;
 use primitives::*;
 
 #[derive(Debug)]
