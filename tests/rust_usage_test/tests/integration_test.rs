@@ -318,6 +318,9 @@ mod roundtrip_generated_code {
         assert_eq!(mon.test_type(), my_game::example::Any::Monster);
         assert_eq!(my_game::example::Monster::init_from_table(mon.test().unwrap()).name(),
                    Some("foo"));
+        assert_eq!(mon.test_as_monster().unwrap().name(), Some("foo"));
+        assert_eq!(mon.test_as_test_simple_table_with_enum(), None);
+        assert_eq!(mon.test_as_my_game___example_2___monster(), None);
     }
     #[test]
     fn union_default() {
