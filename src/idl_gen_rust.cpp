@@ -238,6 +238,8 @@ class RustGenerator : public BaseGenerator {
 
     assert(!cur_name_space_);
 
+    if (parser_.opts.include_dependence_headers) { GenIncludeDependencies(); }
+
     // Generate all code in their namespaces, once, because Rust does not
     // permit re-opening modules. TODO: O(n**2) -> O(n) with a sorted set.
     for (auto it = parser_.namespaces_.begin(); it != parser_.namespaces_.end();
@@ -333,6 +335,25 @@ class RustGenerator : public BaseGenerator {
     }
   }
 
+  void GenIncludeDependencies() {
+  //TODO(rw) int num_includes = 0;
+  //TODO(rw) for (auto it = parser_.included_files_.begin();
+  //TODO(rw)      it != parser_.included_files_.end(); ++it) {
+  //TODO(rw)   if (it->second.empty()) continue;
+  //TODO(rw)   auto noext = flatbuffers::StripExtension(it->second);
+  //TODO(rw)   auto basename = flatbuffers::StripPath(noext);
+
+  //TODO(rw)   code_ += "// " + it->first;
+  //TODO(rw)   code_ += "#[path = \"./" + parser_.opts.include_prefix +
+  //TODO(rw)            (parser_.opts.keep_include_path ? noext : basename) +
+  //TODO(rw)            +"_generated.rs\"]";
+  //TODO(rw)   code_ += "mod " + basename + ";";
+  //TODO(rw)   code_ += "use " + basename + "::*;";
+  //TODO(rw)   num_includes++;
+  //TODO(rw) }
+  //TODO(rw) if (num_includes) code_ += "";
+  }
+
   std::string EscapeKeyword(const std::string &name) const {
     return keywords_.find(name) == keywords_.end() ? name : name + "_";
   }
@@ -378,6 +399,8 @@ class RustGenerator : public BaseGenerator {
 
     size_t i = 0;
     std::stringstream stream;
+    //stream << qualifying_start_;
+    //stream << "::";
 
     auto s = src->components.begin();
     auto d = dst->components.begin();

@@ -4,8 +4,9 @@ use bencher::Bencher;
 
 extern crate flatbuffers;
 
-extern crate rust_usage_test;
-use rust_usage_test::monster_test_generated::my_game;
+#[path = "../../monster_test_generated.rs"]
+mod monster_test_generated;
+pub use monster_test_generated::my_game;
 
 fn traverse_canonical_buffer(bench: &mut Bencher) {
     let owned_data = {

@@ -19,8 +19,16 @@ extern crate quickcheck;
 
 extern crate flatbuffers;
 
-extern crate rust_usage_test;
-use rust_usage_test::monster_test_generated::my_game;
+#[path = "../../monster_test_generated.rs"]
+mod monster_test_generated;
+pub use monster_test_generated::my_game;
+
+//TODO(rw) #[path = "../../namespace_test/namespace_test1_generated.rs"]
+//TODO(rw) mod namespace_test1;
+//TODO(rw) #[path = "../../namespace_test/namespace_test2_generated.rs"]
+//TODO(rw) mod namespace_test2;
+
+//use rust_usage_test::namespace_test;
 // TODO(rw): use rust_usage_test::namespace_test;
 
 //pub use my_game::Example;
@@ -242,8 +250,7 @@ mod generated_constants {
 mod roundtrip_generated_code {
     extern crate flatbuffers;
 
-    extern crate rust_usage_test;
-    use rust_usage_test::monster_test_generated::my_game;
+    use super::my_game;
 
     fn build_mon<'a, 'b>(builder: &'a mut flatbuffers::FlatBufferBuilder, args: &'b my_game::example::MonsterArgs) -> my_game::example::Monster<'a> {
         let mon = my_game::example::Monster::create(builder, &args);
@@ -706,8 +713,7 @@ mod roundtrip_vectors {
 mod framing_format {
     extern crate flatbuffers;
 
-    extern crate rust_usage_test;
-    use rust_usage_test::monster_test_generated::my_game;
+    use super::my_game;
 
     #[test]
     fn test_size_prefixed_buffer() {
@@ -1165,8 +1171,7 @@ mod read_examples_from_other_language_ports {
 mod generated_code_asserts {
     extern crate flatbuffers;
 
-    extern crate rust_usage_test;
-    use rust_usage_test::monster_test_generated::my_game;
+    use super::my_game;
 
     #[test]
     #[should_panic]
@@ -1176,25 +1181,25 @@ mod generated_code_asserts {
     }
 }
 
-// TODO(rw): #[cfg(test)]
-// TODO(rw): mod included_schema_generated_code {
-// TODO(rw):     extern crate flatbuffers;
-// TODO(rw):
-// TODO(rw):     extern crate rust_usage_test;
-// TODO(rw):
-// TODO(rw):     #[test]
-// TODO(rw):     fn namespace_test_mod_is_importable() {
-// TODO(rw):         use rust_usage_test::namespace_test;
-// TODO(rw):     }
-// TODO(rw):     #[test]
-// TODO(rw):     fn namespace_test1_mod_is_importable() {
-// TODO(rw):         use rust_usage_test::namespace_test::namespace_test1_generated;
-// TODO(rw):     }
-// TODO(rw):     #[test]
-// TODO(rw):     fn namespace_test2_mod_is_importable() {
-// TODO(rw):         use rust_usage_test::namespace_test::namespace_test2_generated;
-// TODO(rw):     }
-// TODO(rw): }
+#[cfg(test)]
+mod included_schema_generated_code {
+    extern crate flatbuffers;
+
+    //extern crate rust_usage_test;
+
+    //#[test]
+    //fn namespace_test_mod_is_importable() {
+    //    use rust_usage_test::namespace_test;
+    //}
+    //#[test]
+    //fn namespace_test1_mod_is_importable() {
+    //    use rust_usage_test::namespace_test::namespace_test1_generated;
+    //}
+    //#[test]
+    //fn namespace_test2_mod_is_importable() {
+    //    use rust_usage_test::namespace_test::namespace_test2_generated;
+    //}
+}
 
 #[cfg(test)]
 mod builder_asserts {
@@ -1557,7 +1562,7 @@ mod follow_impls {
 mod push_impls {
     extern crate flatbuffers;
 
-    use rust_usage_test::monster_test_generated::my_game;
+    use super::my_game;
 
     fn check<'a>(b: &'a flatbuffers::FlatBufferBuilder, want: &'a [u8]) {
         let got = b.unfinished_data();

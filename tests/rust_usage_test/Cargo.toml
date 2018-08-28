@@ -5,20 +5,15 @@ authors = ["Robert Winslow <me@rwinslow.com>", "FlatBuffers Maintainers"]
 
 [dependencies]
 flatbuffers = { path = "../../rust/flatbuffers" }
-quickcheck = "0.6"
+
 
 [dev-dependencies]
+quickcheck = "0.6"
 # TODO(rw): look into moving to criterion.rs once its (I think?) compilation
 #           issue is fixed with 0.2.4.
 bencher = "0.1.5"
 
 [[bench]]
-# setup for criterion
+# setup for bencher
 name = "flatbuffers_benchmarks"
 harness = false
-
-#[profile.test]
-#opt-level = 3
-#debug = false
-#overflow-checks = false
-# run tests faster, while preserving debug asserts:

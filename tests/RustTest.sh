@@ -56,8 +56,8 @@ set -ex
 
 
 
-../flatc --rust -I include_test -o rust_usage_test/src monster_test.fbs
-../flatc --rust -o rust_usage_test/src/namespace_test namespace_test/namespace_test1.fbs namespace_test/namespace_test2.fbs
+../flatc --rust -I include_test monster_test.fbs
+../flatc --rust -o namespace_test namespace_test/namespace_test1.fbs namespace_test/namespace_test2.fbs
 cd ./rust_usage_test
 cargo test $1
 TEST_RESULT=$?
