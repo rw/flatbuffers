@@ -23,28 +23,6 @@ extern crate flatbuffers;
 mod monster_test_generated;
 pub use monster_test_generated::my_game;
 
-//TODO(rw) #[path = "../../namespace_test/namespace_test1_generated.rs"]
-//TODO(rw) mod namespace_test1;
-//TODO(rw) #[path = "../../namespace_test/namespace_test2_generated.rs"]
-//TODO(rw) mod namespace_test2;
-
-//use rust_usage_test::namespace_test;
-// TODO(rw): use rust_usage_test::namespace_test;
-
-//pub use my_game::Example;
-
-//mod my_game;
-//#include "flatbuffers/flatbuffers.h"
-//#include "flatbuffers/idl.h"
-//#include "flatbuffers/minireflect.h"
-//#include "flatbuffers/registry.h"
-//#include "flatbuffers/util.h"
-//
-//#include "monster_test_generated.h"
-//#include "namespace_test/namespace_test1_generated.h"
-//#include "namespace_test/namespace_test2_generated.h"
-//#include "union_vector/union_vector_generated.h"
-
 // Include simple random number generator to ensure results will be the
 // same across platforms.
 // http://en.wikipedia.org/wiki/Park%E2%80%93Miller_random_number_generator
