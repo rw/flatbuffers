@@ -1655,10 +1655,35 @@ MyGame.Example.Monster.prototype.vectorOfNonOwningReferencesLength = function() 
 };
 
 /**
+ * @param {number} index
+ * @returns {MyGame.Example.Color}
+ */
+MyGame.Example.Monster.prototype.vectorOfEnum = function(index) {
+  var offset = this.bb.__offset(this.bb_pos, 90);
+  return offset ? /** @type {MyGame.Example.Color} */ (this.bb.readInt8(this.bb.__vector(this.bb_pos + offset) + index)) : /** @type {MyGame.Example.Color} */ (0);
+};
+
+/**
+ * @returns {number}
+ */
+MyGame.Example.Monster.prototype.vectorOfEnumLength = function() {
+  var offset = this.bb.__offset(this.bb_pos, 90);
+  return offset ? this.bb.__vector_len(this.bb_pos + offset) : 0;
+};
+
+/**
+ * @returns {Int8Array}
+ */
+MyGame.Example.Monster.prototype.vectorOfEnumArray = function() {
+  var offset = this.bb.__offset(this.bb_pos, 90);
+  return offset ? new Int8Array(this.bb.bytes().buffer, this.bb.bytes().byteOffset + this.bb.__vector(this.bb_pos + offset), this.bb.__vector_len(this.bb_pos + offset)) : null;
+};
+
+/**
  * @param {flatbuffers.Builder} builder
  */
 MyGame.Example.Monster.startMonster = function(builder) {
-  builder.startObject(43);
+  builder.startObject(44);
 };
 
 /**
@@ -2313,6 +2338,35 @@ MyGame.Example.Monster.createVectorOfNonOwningReferencesVector = function(builde
  */
 MyGame.Example.Monster.startVectorOfNonOwningReferencesVector = function(builder, numElems) {
   builder.startVector(8, numElems, 8);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {flatbuffers.Offset} vectorOfEnumOffset
+ */
+MyGame.Example.Monster.addVectorOfEnum = function(builder, vectorOfEnumOffset) {
+  builder.addFieldOffset(43, vectorOfEnumOffset, 0);
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {Array.<MyGame.Example.Color>} data
+ * @returns {flatbuffers.Offset}
+ */
+MyGame.Example.Monster.createVectorOfEnumVector = function(builder, data) {
+  builder.startVector(1, data.length, 1);
+  for (var i = data.length - 1; i >= 0; i--) {
+    builder.addInt8(data[i]);
+  }
+  return builder.endVector();
+};
+
+/**
+ * @param {flatbuffers.Builder} builder
+ * @param {number} numElems
+ */
+MyGame.Example.Monster.startVectorOfEnumVector = function(builder, numElems) {
+  builder.startVector(1, numElems, 1);
 };
 
 /**

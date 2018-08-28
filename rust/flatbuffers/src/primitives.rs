@@ -39,14 +39,10 @@ pub type HeadUOffsetT = UOffsetT;
 pub type TailUOffsetT = UOffsetT;
 
 // enum causes compile error on type mismatch, whereas newtype () would not.
-pub enum VectorOffset {}
-pub enum StringOffset {}
-pub enum ByteStringOffset {}
-pub enum UnionOffset {}
-pub enum TableUnfinishedOffset {}
-pub enum TableFinishedOffset {}
-pub enum VTableOffset {}
-pub struct UnionMarker;
+pub enum TableUnfinishedWIPOffset {}
+pub enum TableFinishedWIPOffset {}
+pub enum VTableWIPOffset {}
+pub enum UnionWIPOffset {}
 
 #[derive(Debug)]
 pub struct WIPOffset<T>(UOffsetT, PhantomData<T>);
@@ -82,7 +78,7 @@ impl<'a, T: 'a> WIPOffset<T> {
         }
     }
     #[inline]
-    pub fn as_union_value(&self) -> WIPOffset<UnionMarker> {
+    pub fn as_union_value(&self) -> WIPOffset<UnionWIPOffset> {
         WIPOffset::new(self.0)
     }
     #[inline]

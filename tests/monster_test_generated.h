@@ -717,6 +717,7 @@ struct MonsterT : public flatbuffers::NativeTable {
   std::vector<std::unique_ptr<ReferrableT>> vector_of_co_owning_references;
   ReferrableT *non_owning_reference;
   std::vector<ReferrableT *> vector_of_non_owning_references;
+  std::vector<Color> vector_of_enum;
   MonsterT()
       : mana(150),
         hp(100),
@@ -787,7 +788,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_CO_OWNING_REFERENCE = 82,
     VT_VECTOR_OF_CO_OWNING_REFERENCES = 84,
     VT_NON_OWNING_REFERENCE = 86,
-    VT_VECTOR_OF_NON_OWNING_REFERENCES = 88
+    VT_VECTOR_OF_NON_OWNING_REFERENCES = 88,
+    VT_VECTOR_OF_ENUM = 90
   };
   const Vec3 *pos() const {
     return GetStruct<const Vec3 *>(VT_POS);
@@ -1065,6 +1067,12 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<uint64_t> *mutable_vector_of_non_owning_references() {
     return GetPointer<flatbuffers::Vector<uint64_t> *>(VT_VECTOR_OF_NON_OWNING_REFERENCES);
   }
+  const flatbuffers::Vector<int8_t> *vector_of_enum() const {
+    return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_VECTOR_OF_ENUM);
+  }
+  flatbuffers::Vector<int8_t> *mutable_vector_of_enum() {
+    return GetPointer<flatbuffers::Vector<int8_t> *>(VT_VECTOR_OF_ENUM);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<Vec3>(verifier, VT_POS) &&
@@ -1136,6 +1144,8 @@ struct Monster FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint64_t>(verifier, VT_NON_OWNING_REFERENCE) &&
            VerifyOffset(verifier, VT_VECTOR_OF_NON_OWNING_REFERENCES) &&
            verifier.VerifyVector(vector_of_non_owning_references()) &&
+           VerifyOffset(verifier, VT_VECTOR_OF_ENUM) &&
+           verifier.VerifyVector(vector_of_enum()) &&
            verifier.EndTable();
   }
   MonsterT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -1284,6 +1294,9 @@ struct MonsterBuilder {
   void add_vector_of_non_owning_references(flatbuffers::Offset<flatbuffers::Vector<uint64_t>> vector_of_non_owning_references) {
     fbb_.AddOffset(Monster::VT_VECTOR_OF_NON_OWNING_REFERENCES, vector_of_non_owning_references);
   }
+  void add_vector_of_enum(flatbuffers::Offset<flatbuffers::Vector<int8_t>> vector_of_enum) {
+    fbb_.AddOffset(Monster::VT_VECTOR_OF_ENUM, vector_of_enum);
+  }
   explicit MonsterBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -1340,7 +1353,8 @@ inline flatbuffers::Offset<Monster> CreateMonster(
     uint64_t co_owning_reference = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint64_t>> vector_of_co_owning_references = 0,
     uint64_t non_owning_reference = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint64_t>> vector_of_non_owning_references = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<uint64_t>> vector_of_non_owning_references = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int8_t>> vector_of_enum = 0) {
   MonsterBuilder builder_(_fbb);
   builder_.add_non_owning_reference(non_owning_reference);
   builder_.add_co_owning_reference(co_owning_reference);
@@ -1349,6 +1363,7 @@ inline flatbuffers::Offset<Monster> CreateMonster(
   builder_.add_testhashs64_fnv1a(testhashs64_fnv1a);
   builder_.add_testhashu64_fnv1(testhashu64_fnv1);
   builder_.add_testhashs64_fnv1(testhashs64_fnv1);
+  builder_.add_vector_of_enum(vector_of_enum);
   builder_.add_vector_of_non_owning_references(vector_of_non_owning_references);
   builder_.add_vector_of_co_owning_references(vector_of_co_owning_references);
   builder_.add_vector_of_strong_referrables(vector_of_strong_referrables);
@@ -1430,7 +1445,8 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
     uint64_t co_owning_reference = 0,
     const std::vector<uint64_t> *vector_of_co_owning_references = nullptr,
     uint64_t non_owning_reference = 0,
-    const std::vector<uint64_t> *vector_of_non_owning_references = nullptr) {
+    const std::vector<uint64_t> *vector_of_non_owning_references = nullptr,
+    const std::vector<int8_t> *vector_of_enum = nullptr) {
   return MyGame::Example::CreateMonster(
       _fbb,
       pos,
@@ -1474,7 +1490,8 @@ inline flatbuffers::Offset<Monster> CreateMonsterDirect(
       co_owning_reference,
       vector_of_co_owning_references ? _fbb.CreateVector<uint64_t>(*vector_of_co_owning_references) : 0,
       non_owning_reference,
-      vector_of_non_owning_references ? _fbb.CreateVector<uint64_t>(*vector_of_non_owning_references) : 0);
+      vector_of_non_owning_references ? _fbb.CreateVector<uint64_t>(*vector_of_non_owning_references) : 0,
+      vector_of_enum ? _fbb.CreateVector<int8_t>(*vector_of_enum) : 0);
 }
 
 flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -1930,6 +1947,7 @@ if (_resolver) (*_resolver)(reinterpret_cast<void **>(&_o->vector_of_co_owning_r
 if (_resolver) (*_resolver)(reinterpret_cast<void **>(&_o->non_owning_reference), static_cast<flatbuffers::hash_value_t>(_e)); else _o->non_owning_reference = nullptr; };
   { auto _e = vector_of_non_owning_references(); if (_e) { _o->vector_of_non_owning_references.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { //vector resolver, naked
 if (_resolver) (*_resolver)(reinterpret_cast<void **>(&_o->vector_of_non_owning_references[_i]), static_cast<flatbuffers::hash_value_t>(_e->Get(_i))); else _o->vector_of_non_owning_references[_i] = nullptr; } } };
+  { auto _e = vector_of_enum(); if (_e) { _o->vector_of_enum.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->vector_of_enum[_i] = (Color)_e->Get(_i); } } };
 }
 
 inline flatbuffers::Offset<Monster> Monster::Pack(flatbuffers::FlatBufferBuilder &_fbb, const MonsterT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -1982,6 +2000,7 @@ inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder
   auto _vector_of_co_owning_references = _o->vector_of_co_owning_references.size() ? _fbb.CreateVector<uint64_t>(_o->vector_of_co_owning_references.size(), [](size_t i, _VectorArgs *__va) { return __va->__rehasher ? static_cast<uint64_t>((*__va->__rehasher)(__va->__o->vector_of_co_owning_references[i].get())) : 0; }, &_va ) : 0;
   auto _non_owning_reference = _rehasher ? static_cast<uint64_t>((*_rehasher)(_o->non_owning_reference)) : 0;
   auto _vector_of_non_owning_references = _o->vector_of_non_owning_references.size() ? _fbb.CreateVector<uint64_t>(_o->vector_of_non_owning_references.size(), [](size_t i, _VectorArgs *__va) { return __va->__rehasher ? static_cast<uint64_t>((*__va->__rehasher)(__va->__o->vector_of_non_owning_references[i])) : 0; }, &_va ) : 0;
+  auto _vector_of_enum = _o->vector_of_enum.size() ? _fbb.CreateVector((const int8_t*)_o->vector_of_enum.data(), _o->vector_of_enum.size()) : 0;
   return MyGame::Example::CreateMonster(
       _fbb,
       _pos,
@@ -2025,7 +2044,8 @@ inline flatbuffers::Offset<Monster> CreateMonster(flatbuffers::FlatBufferBuilder
       _co_owning_reference,
       _vector_of_co_owning_references,
       _non_owning_reference,
-      _vector_of_non_owning_references);
+      _vector_of_non_owning_references,
+      _vector_of_enum);
 }
 
 inline TypeAliasesT *TypeAliases::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
@@ -2415,7 +2435,8 @@ inline const flatbuffers::TypeTable *MonsterTypeTable() {
     { flatbuffers::ET_ULONG, 0, -1 },
     { flatbuffers::ET_ULONG, 1, -1 },
     { flatbuffers::ET_ULONG, 0, -1 },
-    { flatbuffers::ET_ULONG, 1, -1 }
+    { flatbuffers::ET_ULONG, 1, -1 },
+    { flatbuffers::ET_CHAR, 1, 1 }
   };
   static const flatbuffers::TypeFunction type_refs[] = {
     Vec3TypeTable,
@@ -2471,10 +2492,11 @@ inline const flatbuffers::TypeTable *MonsterTypeTable() {
     "co_owning_reference",
     "vector_of_co_owning_references",
     "non_owning_reference",
-    "vector_of_non_owning_references"
+    "vector_of_non_owning_references",
+    "vector_of_enum"
   };
   static const flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 43, type_codes, type_refs, nullptr, names
+    flatbuffers::ST_TABLE, 44, type_codes, type_refs, nullptr, names
   };
   return &tt;
 }

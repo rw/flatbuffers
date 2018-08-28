@@ -109,13 +109,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         };
         self.field_locs.push(fl);
     }
-    pub fn start_table(&mut self) -> WIPOffset<TableUnfinishedOffset> {
+    pub fn start_table(&mut self) -> WIPOffset<TableUnfinishedWIPOffset> {
         self.assert_not_nested("start_table can not be called when a table or vector is under construction");
         self.nested = true;
 
         WIPOffset::new(self.used_space() as UOffsetT)
     }
-    pub fn end_table(&mut self, off: WIPOffset<TableUnfinishedOffset>) -> WIPOffset<TableFinishedOffset> {
+    pub fn end_table(&mut self, off: WIPOffset<TableUnfinishedWIPOffset>) -> WIPOffset<TableFinishedWIPOffset> {
         self.assert_nested("end_table must be called after a call to start_table");
 
         let o = self.write_vtable(off);
@@ -172,12 +172,12 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         WIPOffset::new(self.end_vector::<T::Output>(items.len()).value())
     }
-    fn write_vtable(&mut self, table_tail_revloc: WIPOffset<TableUnfinishedOffset>) -> WIPOffset<VTableOffset> {
+    fn write_vtable(&mut self, table_tail_revloc: WIPOffset<TableUnfinishedWIPOffset>) -> WIPOffset<VTableWIPOffset> {
         self.assert_nested("write_vtable must be called after a call to start_table");
 
         // Write the vtable offset, which is the start of any Table.
         // We fill its value later.
-        let object_vtable_revloc: WIPOffset<VTableOffset> =
+        let object_vtable_revloc: WIPOffset<VTableWIPOffset> =
             WIPOffset::new(self.push::<UOffsetT>(0xF0F0F0F0 as UOffsetT).value());
 
         // Layout of the data this function will create when a new vtable is
@@ -414,7 +414,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         &self.owned_buf[self.head..]
     }
     pub fn required(&self,
-                    tab_revloc: WIPOffset<TableFinishedOffset>,
+                    tab_revloc: WIPOffset<TableFinishedWIPOffset>,
                     slot_byte_loc: VOffsetT,
                     assert_msg_name: &'static str) {
         let idx = self.used_space() - tab_revloc.value() as usize;

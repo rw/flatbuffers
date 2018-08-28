@@ -736,7 +736,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::UnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "Option<flatbuffers::WIPOffset<flatbuffers::UnionMarker>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>>";
       }
 
       case FullType::VectorOfInteger:
@@ -865,7 +865,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::UnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::WIPOffset<flatbuffers::UnionMarker>";
+        return "flatbuffers::WIPOffset<flatbuffers::UnionWIPOffset>";
       }
     }
   }
@@ -1328,7 +1328,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
     code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
     code_ += "  start_: flatbuffers::WIPOffset<"
-             "flatbuffers::TableUnfinishedOffset>,";
+             "flatbuffers::TableUnfinishedWIPOffset>,";
     code_ += "}";
 
     // Generate builder functions:

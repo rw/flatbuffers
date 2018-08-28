@@ -477,7 +477,22 @@ function Monster_mt:VectorOfNonOwningReferencesLength()
     end
     return 0
 end
-function Monster.Start(builder) builder:StartObject(43) end
+function Monster_mt:VectorOfEnum(j)
+    local o = self.view:Offset(90)
+    if o ~= 0 then
+        local a = self.view:Vector(o)
+        return self.view:Get(flatbuffers.N.Int8, a + ((j-1) * 1))
+    end
+    return 0
+end
+function Monster_mt:VectorOfEnumLength()
+    local o = self.view:Offset(90)
+    if o ~= 0 then
+        return self.view:VectorLen(o)
+    end
+    return 0
+end
+function Monster.Start(builder) builder:StartObject(44) end
 function Monster.AddPos(builder, pos) builder:PrependStructSlot(0, pos, 0) end
 function Monster.AddMana(builder, mana) builder:PrependInt16Slot(1, mana, 150) end
 function Monster.AddHp(builder, hp) builder:PrependInt16Slot(2, hp, 100) end
@@ -537,6 +552,8 @@ function Monster.StartVectorOfCoOwningReferencesVector(builder, numElems) return
 function Monster.AddNonOwningReference(builder, nonOwningReference) builder:PrependUint64Slot(41, nonOwningReference, 0) end
 function Monster.AddVectorOfNonOwningReferences(builder, vectorOfNonOwningReferences) builder:PrependUOffsetTRelativeSlot(42, vectorOfNonOwningReferences, 0) end
 function Monster.StartVectorOfNonOwningReferencesVector(builder, numElems) return builder:StartVector(8, numElems, 8) end
+function Monster.AddVectorOfEnum(builder, vectorOfEnum) builder:PrependUOffsetTRelativeSlot(43, vectorOfEnum, 0) end
+function Monster.StartVectorOfEnumVector(builder, numElems) return builder:StartVector(1, numElems, 1) end
 function Monster.End(builder) return builder:EndObject() end
 
 return Monster -- return the module
