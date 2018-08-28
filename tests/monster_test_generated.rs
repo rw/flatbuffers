@@ -303,7 +303,8 @@ impl<'a> flatbuffers::Follow<'a> for Test {
   type Inner = &'a Test;
   #[inline]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::follow_cast_ref::<Test>(buf, loc)
+    <&'a Test>::follow(buf, loc)
+    //flatbuffers::follow_cast_ref::<Test>(buf, loc)
   }
 }
 impl<'a> flatbuffers::Follow<'a> for &'a Test {
@@ -313,32 +314,11 @@ impl<'a> flatbuffers::Follow<'a> for &'a Test {
     flatbuffers::follow_cast_ref::<Test>(buf, loc)
   }
 }
-
-impl Test {
-  pub fn new<'a>(_a: i16, _b: i8) -> Self {
-    Test {
-      a_: _a.to_little_endian(),
-      b_: _b.to_little_endian(),
-
-      padding0__: 0,
-    }
-  }
-  pub fn a<'a>(&'a self) -> i16 {
-    self.a_.from_little_endian()
-  }
-  pub fn b<'a>(&'a self) -> i8 {
-    self.b_.from_little_endian()
-  }
-}
-
 impl<'b> flatbuffers::Push for Test {
     type Output = Test;
     #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
-        let src = unsafe {
-            ::std::slice::from_raw_parts(self as *const Test as *const u8, self.size())
-        };
-        dst.copy_from_slice(src);
+        (&self).push(dst, _rest)
     }
     #[inline]
     fn size(&self) -> usize {
@@ -361,6 +341,24 @@ impl<'b> flatbuffers::Push for &'b Test {
     }
 }
 
+
+impl Test {
+  pub fn new<'a>(_a: i16, _b: i8) -> Self {
+    Test {
+      a_: _a.to_little_endian(),
+      b_: _b.to_little_endian(),
+
+      padding0__: 0,
+    }
+  }
+  pub fn a<'a>(&'a self) -> i16 {
+    self.a_.from_little_endian()
+  }
+  pub fn b<'a>(&'a self) -> i8 {
+    self.b_.from_little_endian()
+  }
+}
+
 // struct Vec3, aligned to 16
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -380,7 +378,8 @@ impl<'a> flatbuffers::Follow<'a> for Vec3 {
   type Inner = &'a Vec3;
   #[inline]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::follow_cast_ref::<Vec3>(buf, loc)
+    <&'a Vec3>::follow(buf, loc)
+    //flatbuffers::follow_cast_ref::<Vec3>(buf, loc)
   }
 }
 impl<'a> flatbuffers::Follow<'a> for &'a Vec3 {
@@ -390,6 +389,33 @@ impl<'a> flatbuffers::Follow<'a> for &'a Vec3 {
     flatbuffers::follow_cast_ref::<Vec3>(buf, loc)
   }
 }
+impl<'b> flatbuffers::Push for Vec3 {
+    type Output = Vec3;
+    #[inline]
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        (&self).push(dst, _rest)
+    }
+    #[inline]
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Vec3>()
+    }
+}
+impl<'b> flatbuffers::Push for &'b Vec3 {
+    type Output = Vec3;
+
+    #[inline]
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let src = unsafe {
+            ::std::slice::from_raw_parts(*self as *const Vec3 as *const u8, self.size())
+        };
+        dst.copy_from_slice(src);
+    }
+    #[inline]
+    fn size(&self) -> usize {
+        ::std::mem::size_of::<Vec3>()
+    }
+}
+
 
 impl Vec3 {
   pub fn new<'a>(_x: f32, _y: f32, _z: f32, _test1: f64, _test2: Color, _test3: &'a Test) -> Self {
@@ -426,36 +452,6 @@ impl Vec3 {
   }
 }
 
-impl<'b> flatbuffers::Push for Vec3 {
-    type Output = Vec3;
-    #[inline]
-    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
-        let src = unsafe {
-            ::std::slice::from_raw_parts(self as *const Vec3 as *const u8, self.size())
-        };
-        dst.copy_from_slice(src);
-    }
-    #[inline]
-    fn size(&self) -> usize {
-        ::std::mem::size_of::<Vec3>()
-    }
-}
-impl<'b> flatbuffers::Push for &'b Vec3 {
-    type Output = Vec3;
-
-    #[inline]
-    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
-        let src = unsafe {
-            ::std::slice::from_raw_parts(*self as *const Vec3 as *const u8, self.size())
-        };
-        dst.copy_from_slice(src);
-    }
-    #[inline]
-    fn size(&self) -> usize {
-        ::std::mem::size_of::<Vec3>()
-    }
-}
-
 // struct Ability, aligned to 4
 #[repr(C, packed)]
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -468,7 +464,8 @@ impl<'a> flatbuffers::Follow<'a> for Ability {
   type Inner = &'a Ability;
   #[inline]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::follow_cast_ref::<Ability>(buf, loc)
+    <&'a Ability>::follow(buf, loc)
+    //flatbuffers::follow_cast_ref::<Ability>(buf, loc)
   }
 }
 impl<'a> flatbuffers::Follow<'a> for &'a Ability {
@@ -478,39 +475,11 @@ impl<'a> flatbuffers::Follow<'a> for &'a Ability {
     flatbuffers::follow_cast_ref::<Ability>(buf, loc)
   }
 }
-
-impl Ability {
-  pub fn new<'a>(_id: u32, _distance: u32) -> Self {
-    Ability {
-      id_: _id.to_little_endian(),
-      distance_: _distance.to_little_endian(),
-
-    }
-  }
-  pub fn id<'a>(&'a self) -> u32 {
-    self.id_.from_little_endian()
-  }
-  pub fn key_compare_less_than(&self, o: &Ability) -> bool {
-    self.id() < o.id()
-  }
-
-  pub fn key_compare_with_value(&self, val: u32) ->  ::std::cmp::Ordering {
-    let key = self.id();
-    key.cmp(&val)
-  }
-  pub fn distance<'a>(&'a self) -> u32 {
-    self.distance_.from_little_endian()
-  }
-}
-
 impl<'b> flatbuffers::Push for Ability {
     type Output = Ability;
     #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
-        let src = unsafe {
-            ::std::slice::from_raw_parts(self as *const Ability as *const u8, self.size())
-        };
-        dst.copy_from_slice(src);
+        (&self).push(dst, _rest)
     }
     #[inline]
     fn size(&self) -> usize {
@@ -531,6 +500,31 @@ impl<'b> flatbuffers::Push for &'b Ability {
     fn size(&self) -> usize {
         ::std::mem::size_of::<Ability>()
     }
+}
+
+
+impl Ability {
+  pub fn new<'a>(_id: u32, _distance: u32) -> Self {
+    Ability {
+      id_: _id.to_little_endian(),
+      distance_: _distance.to_little_endian(),
+
+    }
+  }
+  pub fn id<'a>(&'a self) -> u32 {
+    self.id_.from_little_endian()
+  }
+  pub fn key_compare_less_than(&self, o: &Ability) ->  bool {
+    self.id() < o.id()
+  }
+
+  pub fn key_compare_with_value(&self, val: u32) ->  ::std::cmp::Ordering {
+    let key = self.id();
+    key.cmp(&val)
+  }
+  pub fn distance<'a>(&'a self) -> u32 {
+    self.distance_.from_little_endian()
+  }
 }
 
 pub enum TestSimpleTableWithEnumOffset {}
@@ -746,7 +740,7 @@ impl<'a> Referrable<'a> {
   pub fn id(&'a self) -> u64 {
     self._tab.get::<u64>(Referrable::VT_ID, Some(0)).unwrap()
   }
-  pub fn key_compare_less_than(&self, o: &Referrable) -> bool {
+  pub fn key_compare_less_than(&self, o: &Referrable) ->  bool {
     self.id() < o.id()
   }
 
@@ -924,7 +918,7 @@ impl<'a> Monster<'a> {
   pub fn name(&'a self) -> Option<&'a str> {
     self._tab.get::<flatbuffers::ForwardsUOffset<&str>>(Monster::VT_NAME, None)
   }
-  pub fn key_compare_less_than(&self, o: &Monster) -> bool {
+  pub fn key_compare_less_than(&self, o: &Monster) ->  bool {
     self.name() < o.name()
   }
 

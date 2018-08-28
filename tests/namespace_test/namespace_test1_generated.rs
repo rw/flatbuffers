@@ -93,7 +93,8 @@ impl<'a> flatbuffers::Follow<'a> for StructInNestedNS {
   type Inner = &'a StructInNestedNS;
   #[inline]
   fn follow(buf: &'a [u8], loc: usize) -> Self::Inner {
-    flatbuffers::follow_cast_ref::<StructInNestedNS>(buf, loc)
+    <&'a StructInNestedNS>::follow(buf, loc)
+    //flatbuffers::follow_cast_ref::<StructInNestedNS>(buf, loc)
   }
 }
 impl<'a> flatbuffers::Follow<'a> for &'a StructInNestedNS {
@@ -103,31 +104,11 @@ impl<'a> flatbuffers::Follow<'a> for &'a StructInNestedNS {
     flatbuffers::follow_cast_ref::<StructInNestedNS>(buf, loc)
   }
 }
-
-impl StructInNestedNS {
-  pub fn new<'a>(_a: i32, _b: i32) -> Self {
-    StructInNestedNS {
-      a_: _a.to_little_endian(),
-      b_: _b.to_little_endian(),
-
-    }
-  }
-  pub fn a<'a>(&'a self) -> i32 {
-    self.a_.from_little_endian()
-  }
-  pub fn b<'a>(&'a self) -> i32 {
-    self.b_.from_little_endian()
-  }
-}
-
 impl<'b> flatbuffers::Push for StructInNestedNS {
     type Output = StructInNestedNS;
     #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {
-        let src = unsafe {
-            ::std::slice::from_raw_parts(self as *const StructInNestedNS as *const u8, self.size())
-        };
-        dst.copy_from_slice(src);
+        (&self).push(dst, _rest)
     }
     #[inline]
     fn size(&self) -> usize {
@@ -148,6 +129,23 @@ impl<'b> flatbuffers::Push for &'b StructInNestedNS {
     fn size(&self) -> usize {
         ::std::mem::size_of::<StructInNestedNS>()
     }
+}
+
+
+impl StructInNestedNS {
+  pub fn new<'a>(_a: i32, _b: i32) -> Self {
+    StructInNestedNS {
+      a_: _a.to_little_endian(),
+      b_: _b.to_little_endian(),
+
+    }
+  }
+  pub fn a<'a>(&'a self) -> i32 {
+    self.a_.from_little_endian()
+  }
+  pub fn b<'a>(&'a self) -> i32 {
+    self.b_.from_little_endian()
+  }
 }
 
 pub enum TableInNestedNSOffset {}
