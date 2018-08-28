@@ -5,79 +5,50 @@ pub trait EndianScalar: Sized + PartialEq + Copy + Clone {
     fn from_little_endian(self) -> Self;
 }
 
-impl EndianScalar for bool {
-    fn to_little_endian(self) -> Self {
-        self
-    }
-    fn from_little_endian(self) -> Self {
-        self
-    }
+macro_rules! impl_endian_scalar_self {
+    ($ty:ident) => (
+        impl EndianScalar for $ty {
+            #[inline(always)]
+            fn to_little_endian(self) -> Self {
+                self
+            }
+            #[inline(always)]
+            fn from_little_endian(self) -> Self {
+                self
+            }
+        }
+    )
 }
-impl EndianScalar for u8 {
-    fn to_little_endian(self) -> Self {
-        self
-    }
-    fn from_little_endian(self) -> Self {
-        self
-    }
+
+macro_rules! impl_endian_scalar_stdlib_le_conversion {
+    ($ty:ident) => (
+        impl EndianScalar for $ty {
+            #[inline(always)]
+            fn to_little_endian(self) -> Self {
+                Self::to_le(self)
+            }
+            #[inline(always)]
+            fn from_little_endian(self) -> Self {
+                Self::from_le(self)
+            }
+        }
+    )
 }
-impl EndianScalar for i8 {
-    fn to_little_endian(self) -> Self {
-        Self::to_le(self)
-    }
-    fn from_little_endian(self) -> Self {
-        Self::from_le(self)
-    }
-}
-impl EndianScalar for u16 {
-    fn to_little_endian(self) -> Self {
-        Self::to_le(self)
-    }
-    fn from_little_endian(self) -> Self {
-        Self::from_le(self)
-    }
-}
-impl EndianScalar for i16 {
-    fn to_little_endian(self) -> Self {
-        Self::to_le(self)
-    }
-    fn from_little_endian(self) -> Self {
-        Self::from_le(self)
-    }
-}
-impl EndianScalar for u32 {
-    fn to_little_endian(self) -> Self {
-        Self::to_le(self)
-    }
-    fn from_little_endian(self) -> Self {
-        Self::from_le(self)
-    }
-}
-impl EndianScalar for i32 {
-    fn to_little_endian(self) -> Self {
-        Self::to_le(self)
-    }
-    fn from_little_endian(self) -> Self {
-        Self::from_le(self)
-    }
-}
-impl EndianScalar for u64 {
-    fn to_little_endian(self) -> Self {
-        Self::to_le(self)
-    }
-    fn from_little_endian(self) -> Self {
-        Self::from_le(self)
-    }
-}
-impl EndianScalar for i64 {
-    fn to_little_endian(self) -> Self {
-        Self::to_le(self)
-    }
-    fn from_little_endian(self) -> Self {
-        Self::from_le(self)
-    }
-}
+
+impl_endian_scalar_self!(bool);
+impl_endian_scalar_self!(u8);
+impl_endian_scalar_self!(i8);
+
+impl_endian_scalar_stdlib_le_conversion!(u16);
+impl_endian_scalar_stdlib_le_conversion!(u32);
+impl_endian_scalar_stdlib_le_conversion!(u64);
+impl_endian_scalar_stdlib_le_conversion!(i16);
+impl_endian_scalar_stdlib_le_conversion!(i32);
+impl_endian_scalar_stdlib_le_conversion!(i64);
+
+
 impl EndianScalar for f32 {
+    #[inline(always)]
     fn to_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
         {
@@ -88,6 +59,7 @@ impl EndianScalar for f32 {
             byte_swap_f32(&self)
         }
     }
+    #[inline(always)]
     fn from_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
         {
@@ -100,6 +72,7 @@ impl EndianScalar for f32 {
     }
 }
 impl EndianScalar for f64 {
+    #[inline(always)]
     fn to_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
         {
@@ -110,6 +83,7 @@ impl EndianScalar for f64 {
             byte_swap_f64(&self)
         }
     }
+    #[inline(always)]
     fn from_little_endian(self) -> Self {
         #[cfg(target_endian = "little")]
         {
@@ -123,6 +97,7 @@ impl EndianScalar for f64 {
 }
 
 #[allow(dead_code)]
+#[inline(always)]
 pub fn byte_swap_f32(x: f32) -> f32 {
     let mut ret = x;
 
@@ -133,6 +108,7 @@ pub fn byte_swap_f32(x: f32) -> f32 {
 }
 
 #[allow(dead_code)]
+#[inline(always)]
 pub fn byte_swap_f64(x: f64) -> f64 {
     let mut ret = x;
 
@@ -142,6 +118,7 @@ pub fn byte_swap_f64(x: f64) -> f64 {
     ret
 }
 
+#[inline(always)]
 pub fn emplace_scalar<T: EndianScalar>(s: &mut [u8], x: T) {
     let sz = size_of::<T>();
     debug_assert!(s.len() >= sz);
