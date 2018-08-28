@@ -1175,7 +1175,7 @@ pub struct MonsterBuilder<'a: 'b, 'b> {
 impl<'a: 'b, 'b> MonsterBuilder<'a, 'b> {
   #[inline(always)]
   pub fn add_pos(&mut self, pos: &'b  Vec3) {
-    self.fbb_.push_slot_always::<&Vec3/* foo */>(Monster::VT_POS, pos);
+    self.fbb_.push_slot_always::<&Vec3>(Monster::VT_POS, pos);
   }
   #[inline(always)]
   pub fn add_mana(&mut self, mana: i16) {

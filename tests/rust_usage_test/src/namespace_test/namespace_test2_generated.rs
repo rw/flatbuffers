@@ -91,7 +91,7 @@ impl<'a: 'b, 'b> TableInFirstNSBuilder<'a, 'b> {
   }
   #[inline(always)]
   pub fn add_foo_struct(&mut self, foo_struct: &'b  namespace_b::StructInNestedNS) {
-    self.fbb_.push_slot_always::<&namespace_b::StructInNestedNS/* foo */>(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
+    self.fbb_.push_slot_always::<&namespace_b::StructInNestedNS>(TableInFirstNS::VT_FOO_STRUCT, foo_struct);
   }
   pub fn new(_fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>) -> TableInFirstNSBuilder<'a, 'b> {
     let start = _fbb.start_table();

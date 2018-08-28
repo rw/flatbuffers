@@ -917,7 +917,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GetTypeWire(field.value.type, "", "", false);
+        const auto typname = GetTypeBasic(field.value.type, true);
         return "self.fbb_.push_slot::<" + typname + ">";
       }
       case FullType::Bool: {
@@ -931,8 +931,7 @@ class RustGenerator : public BaseGenerator {
       }
 
       case FullType::Struct: {
-        const std::string typname = GetTypeWire(field.value.type, "", "", false);
-        //const std::string typname = WrapInNameSpace(field);
+        const std::string typname = WrapInNameSpace(*type.struct_def);
         return "self.fbb_.push_slot_always::<&" + typname + ">";
       }
       case FullType::Table: {
