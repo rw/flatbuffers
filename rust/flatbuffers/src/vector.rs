@@ -40,6 +40,28 @@ impl<'a, T: GeneratedStruct + 'a> Vector<'a, T> {
     }
 }
 
+pub trait SafeSliceAccess {}
+impl<'a, T: SafeSliceAccess + 'a> Vector<'a, T> {
+    pub fn safe_slice(self) -> &'a [T] {
+        let buf = self.0;
+        let loc = self.1;
+        let sz = size_of::<T>();
+        debug_assert!(sz > 0);
+        let len = read_scalar::<UOffsetT>(&buf[loc..loc + SIZE_UOFFSET]) as usize;
+        let data_buf = &buf[loc + SIZE_UOFFSET..loc + SIZE_UOFFSET + len * sz];
+        let ptr = data_buf.as_ptr() as *const T;
+        let s: &'a [T] = unsafe { from_raw_parts(ptr, len) };
+        s
+    }
+}
+
+pub fn follow_cast_ref<'a, T: Sized + 'a>(buf: &'a [u8], loc: usize) -> &'a T {
+    let sz = size_of::<T>();
+    let buf = &buf[loc..loc + sz];
+    let ptr = buf.as_ptr() as *const T;
+    unsafe { &*ptr }
+}
+
 
 
 impl<'a> Vector<'a, bool> { pub fn as_slice(self) -> &'a [bool] { <&'a [bool]>::follow(self.0, self.1) } }
