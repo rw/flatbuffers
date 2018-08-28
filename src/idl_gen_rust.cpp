@@ -398,7 +398,7 @@ class RustGenerator : public BaseGenerator {
   }
 
   // Return a Rust type from the table in idl.h.
-  std::string GetTypeBasic(const Type &type, bool user_facing_type) const {
+  std::string GetTypeBasic(const Type &type) const {
     static const char *ctypename[] = {
     // clang-format off
     #define FLATBUFFERS_TD(ENUM, IDLTYPE, CTYPE, JTYPE, GTYPE, NTYPE, PTYPE, \
@@ -445,7 +445,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::Bool:
       case FullType::EnumKey:
       case FullType::UnionKey: {
-        return GetTypeBasic(type, true); }
+        return GetTypeBasic(type); }
       case FullType::Table: {
         return WrapInNameSpace(type.struct_def->defined_namespace,
                                type.struct_def->name) + "<'a>"; }
@@ -456,7 +456,7 @@ class RustGenerator : public BaseGenerator {
   }
   std::string StructDefnFieldType(const Type &type) const {
     if (IsScalar(type.base_type)) {
-      return GetTypeBasic(type, true);
+      return GetTypeBasic(type);
     } else {
         std::string s;
         s.append(WrapInNameSpace(type.struct_def->defined_namespace,
@@ -660,11 +660,10 @@ class RustGenerator : public BaseGenerator {
                field.value.type.base_type == BASE_TYPE_BOOL) {
       // TODO(rw): handle enums in other namespaces
       if (from) {
-        //return "EnumValues" + GetTypeBasic(field.value.type, from) + "[" + val + " as usize]";
         //return "unsafe { ::std::mem::transmute(" + val + ") }";
         return val;
       } else {
-        return val + " as " + GetTypeBasic(field.value.type, from);
+        return val + " as " + GetTypeBasic(field.value.type);
       }
     } else {
       return val;
@@ -722,7 +721,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::Integer:
       case FullType::Float:
       case FullType::Bool: {
-        const auto typname = GetTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type);
         return typname;
       }
       case FullType::Struct: {
@@ -748,11 +747,11 @@ class RustGenerator : public BaseGenerator {
 
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GetTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType());
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ",  " + typname + ">>>";
       }
       case FullType::VectorOfBool: {
-        const auto typname = GetTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type);
         return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", bool>>>";
       }
       case FullType::VectorOfEnumKey: {
@@ -784,7 +783,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::UnionKey:
       case FullType::EnumKey: {
-        const std::string basetype = GetTypeBasic(field.value.type, false);
+        const std::string basetype = GetTypeBasic(field.value.type);
         return GetDefaultScalarValue(field);
       }
 
@@ -806,7 +805,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GetTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType());
         return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullType::VectorOfBool: {
@@ -837,7 +836,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GetTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type);
         return typname;
       }
       case FullType::Bool: {
@@ -863,7 +862,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GetTypeBasic(field.value.type, true);
+        const auto typname = GetTypeBasic(field.value.type);
         return "self.fbb_.push_slot::<" + typname + ">";
       }
       case FullType::Bool: {
@@ -872,7 +871,7 @@ class RustGenerator : public BaseGenerator {
 
       case FullType::EnumKey:
       case FullType::UnionKey: {
-        const auto underlying_typname = GetTypeBasic(type, true);
+        const auto underlying_typname = GetTypeBasic(type);
         return "self.fbb_.push_slot::<" + underlying_typname + ">";
       }
 
@@ -906,10 +905,10 @@ class RustGenerator : public BaseGenerator {
     const auto ft = GetFullType(type);
 
     if (ft == FullType::UnionValue) {
-      return " as " + GetTypeBasic(type, false);
+      return " as " + GetTypeBasic(type);
     }
     if (ft == FullType::EnumKey) {
-      return " as " + GetTypeBasic(type, false);
+      return " as " + GetTypeBasic(type);
     }
     return "";
   }
@@ -921,7 +920,7 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::Integer:
       case FullType::Float: {
-        const auto typname = GetTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type);
         return typname;
       }
       case FullType::Bool: {
@@ -949,7 +948,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GetTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType());
         if (IsOneByte(type.VectorType().base_type)) {
           return "Option<&" + lifetime + " [" + typname + "]>";
         }
@@ -994,7 +993,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::Integer:
       case FullType::Float:
       case FullType::Bool: {
-        const auto typname = GetTypeBasic(type, false);
+        const auto typname = GetTypeBasic(type);
         const std::string default_value = GetDefaultScalarValue(field);
         return "self._tab.get::<" + typname + ">(" + offset_name + ", Some(" + default_value + ")).unwrap()";
       }
@@ -1011,7 +1010,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::UnionKey:
       case FullType::EnumKey: {
-        const std::string underlying_typname = GetTypeBasic(type, false);
+        const std::string underlying_typname = GetTypeBasic(type);
         const std::string typname = WrapInNameSpace(*type.enum_def);
         const std::string default_value = GetDefaultScalarValue(field);
         return "self._tab.get::<" + typname + ">(" + offset_name + ", Some(" + default_value + ")).unwrap()";
@@ -1022,7 +1021,7 @@ class RustGenerator : public BaseGenerator {
 
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
-        const auto typname = GetTypeBasic(type.VectorType(), false);
+        const auto typname = GetTypeBasic(type.VectorType());
         if (IsOneByte(type.VectorType().base_type)) {
           return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None).map(|v| v.safe_slice())";
         }
@@ -1587,7 +1586,7 @@ class RustGenerator : public BaseGenerator {
       //TODO(rw)   code_ += "  fn key_compare_less_than(&self, o: &{{STRUCT_NAME}}) -> bool {";
       //TODO(rw)   code_ += "    self.{{FIELD_NAME}}() < o.{{FIELD_NAME}}()";
       //TODO(rw)   code_ += "  }";
-      //TODO(rw)   auto type = GetTypeBasic(field.value.type, false);
+      //TODO(rw)   auto type = GetTypeBasic(field.value.type);
       //TODO(rw)   if (parser_.opts.scoped_enums && field.value.type.enum_def &&
       //TODO(rw)       IsScalar(field.value.type.base_type)) {
       //TODO(rw)     type = GetTypeGet(field.value.type, " ", "const ", " *", true);
