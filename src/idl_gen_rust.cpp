@@ -16,8 +16,6 @@
 
 // independent from idl_parser, since this code is not needed for most clients
 
-#include <iostream> // cerr messages for logging warnings
-
 #include "flatbuffers/code_generators.h"
 #include "flatbuffers/flatbuffers.h"
 #include "flatbuffers/idl.h"
@@ -1153,7 +1151,6 @@ class RustGenerator : public BaseGenerator {
 
       // Generate a comparison function for this field if it is a key.
       if (field.key) {
-        std::cerr << "field with comparison key skipped because it is unsupported in rust" << std::endl;
       }
     }
 
