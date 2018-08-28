@@ -656,7 +656,7 @@ mod roundtrip_vectors {
             for &i in offsets.iter() {
                 b.push(i);
             }
-            let vecend = b.end_vector::<flatbuffers::Offset<&str>>(xs.len());
+            let vecend = b.end_vector::<flatbuffers::WIPOffset<&str>>(xs.len());
 
             b.finish_minimal(vecend);
 
@@ -856,7 +856,7 @@ mod roundtrip_table {
 
             // build
             let mut b = flatbuffers::FlatBufferBuilder::new();
-            let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
+            let str_offsets: Vec<flatbuffers::WIPOffset<_>> = xs.iter().map(|s| b.create_byte_string(&s[..])).collect();
             let table_start = b.start_table();
 
             for i in 0..xs.len() {
@@ -890,7 +890,7 @@ mod roundtrip_table {
 
             // build
             let mut b = flatbuffers::FlatBufferBuilder::new();
-            let str_offsets: Vec<flatbuffers::Offset<_>> = xs.iter().map(|s| b.create_string(&s[..])).collect();
+            let str_offsets: Vec<flatbuffers::WIPOffset<_>> = xs.iter().map(|s| b.create_string(&s[..])).collect();
             let table_start = b.start_table();
 
             for i in 0..xs.len() {
@@ -1296,7 +1296,7 @@ mod builder_asserts {
     #[should_panic]
     fn end_table_should_panic_when_not_in_table() {
         let mut b = flatbuffers::FlatBufferBuilder::new();
-        b.end_table(flatbuffers::Offset::new(0));
+        b.end_table(flatbuffers::WIPOffset::new(0));
     }
 
     #[test]
@@ -2056,7 +2056,7 @@ mod byte_layouts {
         let vecend = b.end_vector::<&u8>(0);
         let off = b.start_table();
         b.push_slot::<i16>(fi2fo(0), 55i16, 0);
-        b.push_slot_always::<flatbuffers::Offset<_>>(fi2fo(1), vecend);
+        b.push_slot_always::<flatbuffers::WIPOffset<_>>(fi2fo(1), vecend);
         b.end_table(off);
         check(&b, &[
               8, 0, // vtable bytes

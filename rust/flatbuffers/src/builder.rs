@@ -73,14 +73,14 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     }
 
     #[inline]
-    pub fn push<X: Push>(&mut self, x: X) -> Offset<X::Output> {
+    pub fn push<X: Push>(&mut self, x: X) -> WIPOffset<X::Output> {
         self.align(x.size(), x.alignment());
         self.make_space(x.size());
         {
             let (dst, rest) = (&mut self.owned_buf[self.head..]).split_at_mut(x.size());
             x.push(dst, rest);
         }
-        Offset::new(self.used_space() as UOffsetT)
+        WIPOffset::new(self.used_space() as UOffsetT)
     }
     pub fn push_slot<X: Push + PartialEq>(&mut self, slotoff: VOffsetT, x: X, d: X) {
         self.assert_nested("push_slot must be called after start_table");
@@ -109,13 +109,13 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         };
         self.field_locs.push(fl);
     }
-    pub fn start_table(&mut self) -> Offset<TableUnfinishedOffset> {
+    pub fn start_table(&mut self) -> WIPOffset<TableUnfinishedOffset> {
         self.assert_not_nested("start_table can not be called when a table or vector is under construction");
         self.nested = true;
 
-        Offset::new(self.used_space() as UOffsetT)
+        WIPOffset::new(self.used_space() as UOffsetT)
     }
-    pub fn end_table(&mut self, off: Offset<TableUnfinishedOffset>) -> Offset<TableFinishedOffset> {
+    pub fn end_table(&mut self, off: WIPOffset<TableUnfinishedOffset>) -> WIPOffset<TableFinishedOffset> {
         self.assert_nested("end_table must be called after a call to start_table");
 
         let o = self.write_vtable(off);
@@ -123,7 +123,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.nested = false;
         self.field_locs.clear();
 
-        Offset::new(o.value())
+        WIPOffset::new(o.value())
     }
     pub fn start_vector(&mut self, len: usize, elem_size: usize) {
         self.assert_not_nested("start_vector can not be called when a table or vector is under construction");
@@ -131,11 +131,11 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         self.align(len * elem_size, SIZE_UOFFSET);
         self.align(len * elem_size, elem_size); // Just in case elemsize > uoffset_t.
     }
-    pub fn end_vector<T: 'fbb>(&mut self, num_elems: usize) -> Offset<Vector<'fbb, T>> {
+    pub fn end_vector<T: 'fbb>(&mut self, num_elems: usize) -> WIPOffset<Vector<'fbb, T>> {
         self.assert_nested("end_vector must be called after a call to start_vector");
         self.nested = false;
         let o = self.push::<UOffsetT>(num_elems as UOffsetT);
-        Offset::new(o.value())
+        WIPOffset::new(o.value())
     }
     #[inline]
     pub fn used_space(&self) -> usize {
@@ -145,18 +145,18 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn fill(&mut self, zero_pad_bytes: usize) {
         self.make_space(zero_pad_bytes);
     }
-    pub fn create_string(&mut self, s: &str) -> Offset<&'fbb str> {
+    pub fn create_string(&mut self, s: &str) -> WIPOffset<&'fbb str> {
         self.assert_not_nested("create_string can not be called when a table or vector is under construction");
         self.push(ZeroTerminatedByteSlice::new(s.as_bytes()));
-        Offset::new(self.used_space() as UOffsetT)
+        WIPOffset::new(self.used_space() as UOffsetT)
     }
-    pub fn create_byte_string(&mut self, data: &[u8]) -> Offset<&'fbb [u8]> {
+    pub fn create_byte_string(&mut self, data: &[u8]) -> WIPOffset<&'fbb [u8]> {
         self.assert_not_nested("create_byte_string can not be called when a table or vector is under construction");
         self.push(ZeroTerminatedByteSlice::new(data));
-        Offset::new(self.used_space() as UOffsetT)
+        WIPOffset::new(self.used_space() as UOffsetT)
     }
-    pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> Offset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
-        let mut offsets: smallvec::SmallVec<[Offset<&str>; 0]> = smallvec::SmallVec::with_capacity(xs.len());
+    pub fn create_vector_of_strings<'a, 'b>(&'a mut self, xs: &'b [&'b str]) -> WIPOffset<Vector<'fbb, ForwardsUOffset<&'fbb str>>> {
+        let mut offsets: smallvec::SmallVec<[WIPOffset<&str>; 0]> = smallvec::SmallVec::with_capacity(xs.len());
         unsafe { offsets.set_len(xs.len()); }
         for (i, &s) in xs.iter().enumerate().rev() {
             let o = self.create_string(s);
@@ -164,21 +164,21 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         self.create_vector(&offsets[..])
     }
-    pub fn create_vector<'a, T: Push + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> Offset<Vector<'fbb, T::Output>> {
+    pub fn create_vector<'a, T: Push + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> WIPOffset<Vector<'fbb, T::Output>> {
         let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
         for i in (0..items.len()).rev() {
             self.push(items[i]);
         }
-        Offset::new(self.end_vector::<T::Output>(items.len()).value())
+        WIPOffset::new(self.end_vector::<T::Output>(items.len()).value())
     }
-    fn write_vtable(&mut self, table_tail_revloc: Offset<TableUnfinishedOffset>) -> Offset<VTableOffset> {
+    fn write_vtable(&mut self, table_tail_revloc: WIPOffset<TableUnfinishedOffset>) -> WIPOffset<VTableOffset> {
         self.assert_nested("write_vtable must be called after a call to start_table");
 
         // Write the vtable offset, which is the start of any Table.
         // We fill its value later.
-        let object_vtable_revloc: Offset<VTableOffset> =
-            Offset::new(self.push::<UOffsetT>(0xF0F0F0F0 as UOffsetT).value());
+        let object_vtable_revloc: WIPOffset<VTableOffset> =
+            WIPOffset::new(self.push::<UOffsetT>(0xF0F0F0F0 as UOffsetT).value());
 
         // Layout of the data this function will create when a new vtable is
         // needed.
@@ -316,21 +316,21 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
     }
     #[inline]
-    pub fn finish_size_prefixed<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
+    pub fn finish_size_prefixed<T>(&mut self, root: WIPOffset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, true);
     }
     #[inline]
-    pub fn finish<T>(&mut self, root: Offset<T>, file_identifier: Option<&str>) {
+    pub fn finish<T>(&mut self, root: WIPOffset<T>, file_identifier: Option<&str>) {
         self.finish_with_opts(root, file_identifier, false);
     }
     #[inline]
-    pub fn finish_minimal<T>(&mut self, root: Offset<T>) {
+    pub fn finish_minimal<T>(&mut self, root: WIPOffset<T>) {
         self.finish_with_opts(root, None, false);
     }
     // with or without a size prefix changes how we load the data, so finish*
     // functions are split along those lines.
     fn finish_with_opts<T>(&mut self,
-                           root: Offset<T>,
+                           root: WIPOffset<T>,
                            file_identifier: Option<&str>,
                            size_prefixed: bool) {
         self.assert_not_finished("buffer cannot be finished when it is already finished");
@@ -414,7 +414,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         &self.owned_buf[self.head..]
     }
     pub fn required(&self,
-                    tab_revloc: Offset<TableFinishedOffset>,
+                    tab_revloc: WIPOffset<TableFinishedOffset>,
                     slot_byte_loc: VOffsetT,
                     assert_msg_name: &'static str) {
         let idx = self.used_space() - tab_revloc.value() as usize;

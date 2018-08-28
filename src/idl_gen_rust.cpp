@@ -723,10 +723,11 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Offset<" + typname + "<" + lifetime + ">>>";
+        return "Option<flatbuffers::WIPOffset<" + typname + "<" + lifetime + \
+               ">>>";
       }
       case FullType::String: {
-        return "Option<flatbuffers::Offset<&" + lifetime + " str>>";
+        return "Option<flatbuffers::WIPOffset<&" + lifetime + " str>>";
       }
       case FullType::EnumKey:
       case FullType::UnionKey: {
@@ -735,45 +736,46 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::UnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "Option<flatbuffers::Offset<flatbuffers::UnionMarker>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::UnionMarker>>";
       }
 
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
         const auto typname = GetTypeBasic(type.VectorType());
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
-               ",  " + typname + ">>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::Vector<" + \
+               lifetime + ",  " + typname + ">>>";
       }
       case FullType::VectorOfBool: {
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
-               ", bool>>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::Vector<" + \
+               lifetime + ", bool>>>";
       }
       case FullType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
-               ", " + typname + ">>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::Vector<" + \
+               lifetime + ", " + typname + ">>>";
       }
       case FullType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
-               ", " + typname + ">>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::Vector<" + \
+               lifetime + ", " + typname + ">>>";
       }
       case FullType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
-               ", flatbuffers::ForwardsUOffset<" + typname + \
+        return "Option<flatbuffers::WIPOffset<flatbuffers::Vector<" + \
+               lifetime + ", flatbuffers::ForwardsUOffset<" + typname + \
                "<" + lifetime + ">>>>>";
       }
       case FullType::VectorOfString: {
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
-               ", flatbuffers::ForwardsUOffset<&" + lifetime + " str>>>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::Vector<" + \
+               lifetime + ", flatbuffers::ForwardsUOffset<&" + lifetime + \
+               " str>>>>";
       }
       case FullType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def) + \
                              "UnionTableOffset";
-        return "Option<flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
-               ", flatbuffers::ForwardsUOffset<flatbuffers::Table<" + \
-               lifetime + ">>>>";
+        return "Option<flatbuffers::WIPOffset<flatbuffers::Vector<" + \
+               lifetime + ", flatbuffers::ForwardsUOffset<"
+               "flatbuffers::Table<" + lifetime + ">>>>";
       }
     }
   }
@@ -800,37 +802,37 @@ class RustGenerator : public BaseGenerator {
     switch (GetFullType(field.value.type)) {
       case FullType::VectorOfStruct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + \
-                typname + ">>";
+        return "flatbuffers::WIPOffset<flatbuffers::Vector<" + lifetime + \
+               ", " + typname + ">>";
       }
       case FullType::VectorOfTable: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
+        return "flatbuffers::WIPOffset<flatbuffers::Vector<" + lifetime + \
                ", flatbuffers::ForwardsUOffset<" + typname + \
                "<" + lifetime + ">>>>";
       }
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
         const auto typname = GetTypeBasic(type.VectorType());
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + \
-               typname + ">>";
+        return "flatbuffers::WIPOffset<flatbuffers::Vector<" + lifetime + \
+               ", " + typname + ">>";
       }
       case FullType::VectorOfBool: {
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
+        return "flatbuffers::WIPOffset<flatbuffers::Vector<" + lifetime + \
                ", bool>>";
       }
       case FullType::VectorOfString: {
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
+        return "flatbuffers::WIPOffset<flatbuffers::Vector<" + lifetime + \
                ", flatbuffers::ForwardsUOffset<&" + lifetime + " str>>>";
       }
       case FullType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + ", " + \
-               typname + ">>";
+        return "flatbuffers::WIPOffset<flatbuffers::Vector<" + lifetime + \
+               ", " + typname + ">>";
       }
       case FullType::VectorOfUnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::Offset<flatbuffers::Vector<" + lifetime + \
+        return "flatbuffers::WIPOffset<flatbuffers::Vector<" + lifetime + \
                ", flatbuffers::ForwardsUOffset<flatbuffers::Table<" + \
                lifetime + ">>>";
       }
@@ -844,7 +846,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "flatbuffers::Offset<" + typname + "<" + lifetime + ">>";
+        return "flatbuffers::WIPOffset<" + typname + "<" + lifetime + ">>";
       }
       case FullType::Integer:
       case FullType::Float: {
@@ -855,7 +857,7 @@ class RustGenerator : public BaseGenerator {
         return "bool";
       }
       case FullType::String: {
-        return "flatbuffers::Offset<&" + lifetime + " str>";
+        return "flatbuffers::WIPOffset<&" + lifetime + " str>";
       }
       case FullType::UnionKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
@@ -863,7 +865,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::UnionValue: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        return "flatbuffers::Offset<flatbuffers::UnionMarker>";
+        return "flatbuffers::WIPOffset<flatbuffers::UnionMarker>";
       }
     }
   }
@@ -893,8 +895,8 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self.fbb_.push_slot_always::<flatbuffers::Offset<" + typname + \
-               ">>";
+        return "self.fbb_.push_slot_always::<flatbuffers::WIPOffset<" + \
+               typname +  ">>";
       }
 
       case FullType::UnionValue:
@@ -907,7 +909,7 @@ class RustGenerator : public BaseGenerator {
       case FullType::VectorOfTable:
       case FullType::VectorOfString:
       case FullType::VectorOfUnionValue: {
-        return "self.fbb_.push_slot_always::<flatbuffers::Offset<_>>";
+        return "self.fbb_.push_slot_always::<flatbuffers::WIPOffset<_>>";
       }
     }
   }
@@ -1133,7 +1135,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "        _fbb: "
              "&'mut_bldr mut flatbuffers::FlatBufferBuilder<'bldr>,";
     code_ += "        {{MAYBE_US}}args: &'args {{STRUCT_NAME}}Args<'args>) -> "
-             "flatbuffers::Offset<{{STRUCT_NAME}}<'bldr>> {";
+             "flatbuffers::WIPOffset<{{STRUCT_NAME}}<'bldr>> {";
 
     code_ += "      let mut builder = {{STRUCT_NAME}}Builder::new(_fbb);";
     for (size_t size = struct_def.sortbysize ? sizeof(largest_scalar_t) : 1;
@@ -1325,7 +1327,7 @@ class RustGenerator : public BaseGenerator {
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
     code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "  start_: flatbuffers::Offset<"
+    code_ += "  start_: flatbuffers::WIPOffset<"
              "flatbuffers::TableUnfinishedOffset>,";
     code_ += "}";
 
@@ -1385,7 +1387,7 @@ class RustGenerator : public BaseGenerator {
 
     // finish() function.
     code_ += "  pub fn finish(self) -> "
-             "flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
+             "flatbuffers::WIPOffset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
 
     for (auto it = struct_def.fields.vec.begin();
@@ -1398,7 +1400,7 @@ class RustGenerator : public BaseGenerator {
                  "\"{{FIELD_NAME}}\");";
       }
     }
-    code_ += "    flatbuffers::Offset::new(o.value())";
+    code_ += "    flatbuffers::WIPOffset::new(o.value())";
     code_ += "  }";
     code_ += "}";
     code_ += "";
@@ -1496,7 +1498,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "#[inline]";
     code_ += "pub fn finish_{{STRUCT_NAME_SNAKECASE}}_buffer<'a, 'b>(";
     code_ += "    fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "    root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
+    code_ += "    root: flatbuffers::WIPOffset<{{STRUCT_NAME}}<'a>>) {";
     if (parser_.file_identifier_.length()) {
       code_ += "  fbb.finish(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
     } else {
@@ -1508,7 +1510,7 @@ class RustGenerator : public BaseGenerator {
     code_ += "pub fn finish_size_prefixed_{{STRUCT_NAME_SNAKECASE}}_buffer"
              "<'a, 'b>("
              "fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>, "
-             "root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
+             "root: flatbuffers::WIPOffset<{{STRUCT_NAME}}<'a>>) {";
     if (parser_.file_identifier_.length()) {
       code_ += "  fbb.finish_size_prefixed(root, "
                "Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";

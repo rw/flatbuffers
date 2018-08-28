@@ -49,41 +49,41 @@ pub enum VTableOffset {}
 pub struct UnionMarker;
 
 #[derive(Debug)]
-pub struct Offset<T>(UOffsetT, PhantomData<T>);
+pub struct WIPOffset<T>(UOffsetT, PhantomData<T>);
 
 // TODO(rw): why do we need to reimplement (with a default impl) Copy to
 //           avoid ownership errors?
-impl<T> Copy for Offset<T> {}
-impl<T> Clone for Offset<T> {
+impl<T> Copy for WIPOffset<T> {}
+impl<T> Clone for WIPOffset<T> {
     #[inline]
-    fn clone(&self) -> Offset<T> {
-        Offset::new(self.0.clone())
+    fn clone(&self) -> WIPOffset<T> {
+        WIPOffset::new(self.0.clone())
     }
 }
-impl<T> PartialEq for Offset<T> {
-    fn eq(&self, o: &Offset<T>) -> bool {
+impl<T> PartialEq for WIPOffset<T> {
+    fn eq(&self, o: &WIPOffset<T>) -> bool {
         self.value() == o.value()
     }
 }
 
-impl<T> Deref for Offset<T> {
+impl<T> Deref for WIPOffset<T> {
     type Target = UOffsetT;
     #[inline]
     fn deref(&self) -> &UOffsetT {
         &self.0
     }
 }
-impl<'a, T: 'a> Offset<T> {
+impl<'a, T: 'a> WIPOffset<T> {
     #[inline]
-    pub fn new(o: UOffsetT) -> Offset<T> {
-        Offset {
+    pub fn new(o: UOffsetT) -> WIPOffset<T> {
+        WIPOffset {
             0: o,
             1: PhantomData,
         }
     }
     #[inline]
-    pub fn as_union_value(&self) -> Offset<UnionMarker> {
-        Offset::new(self.0)
+    pub fn as_union_value(&self) -> WIPOffset<UnionMarker> {
+        WIPOffset::new(self.0)
     }
     #[inline]
     pub fn value(&self) -> UOffsetT {

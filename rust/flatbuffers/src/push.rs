@@ -122,7 +122,7 @@ impl_pushable_method_for_endian_scalar!(i64);
 impl_pushable_method_for_endian_scalar!(f32);
 impl_pushable_method_for_endian_scalar!(f64);
 
-impl<T> Push for Offset<T> {
+impl<T> Push for WIPOffset<T> {
     type Output = ForwardsUOffset<T>;
 
     #[inline]
