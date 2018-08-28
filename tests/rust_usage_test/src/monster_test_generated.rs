@@ -362,7 +362,7 @@ pub struct Vec3 {
   test1_: f64,
   test2_: Color,
   padding1__: u8,
-  test3_: Test/* foo */,
+  test3_: Test,
   padding2__: u16,
 } // pub struct Vec3
 impl flatbuffers::SafeSliceAccess for Vec3 {}

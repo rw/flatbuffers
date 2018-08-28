@@ -418,7 +418,7 @@ class RustGenerator : public BaseGenerator {
   std::string GetEnumTypeForDecl(const Type &type) {
     const auto ft = GetFullType(type);
     if (!(ft == FullType::EnumKey || ft == FullType::UnionKey)) {
-      FLATBUFFERS_ASSERT(false);
+      FLATBUFFERS_ASSERT(false && "precondition failed in GetEnumTypeForDecl");
     }
 
     static const char *ctypename[] = {
@@ -454,38 +454,10 @@ class RustGenerator : public BaseGenerator {
                                type.struct_def->name); }
     }
   }
-  std::string StructDefnFieldType(const Type &type) const {
-    if (IsScalar(type.base_type)) {
-      return GetTypeBasic(type);
-    } else {
-        std::string s;
-        s.append(WrapInNameSpace(type.struct_def->defined_namespace,
-                                 type.struct_def->name));
-        if (TypeNeedsLifetimeParameter(type)) {
-          s.append("<'a>");
-        } else {
-          s.append("/* foo */");
-        }
-        return s;
-    }
-  }
 
   std::string GetEnumValUse(const EnumDef &enum_def,
                             const EnumVal &enum_val) const {
     return Name(enum_def) + "::" + Name(enum_val);
-    //return Name(enum_val);
-    //const IDLOptions &opts = parser_.opts;
-    //if (opts.scoped_enums) {
-    //  return Name(enum_def) + "::" + Name(enum_val);
-    //} else if (opts.prefixed_enums) {
-    //  return Name(enum_def) + "_" + Name(enum_val);
-    //} else {
-    //  return Name(enum_val);
-    //}
-  }
-
-  std::string StripUnionType(const std::string &name) {
-    return name.substr(0, name.size() - strlen(UnionTypeFieldSuffix()));
   }
 
   std::string GetUnionElement(const EnumVal &ev, bool wrap, bool actual_type,
@@ -1243,8 +1215,6 @@ class RustGenerator : public BaseGenerator {
 
     // Generate an args struct:
     code_ += "pub struct {{STRUCT_NAME}}Args<'a> {";
-    //code_ += "  fbb_: &'a mut flatbuffers::FlatBufferBuilder,";
-    //code_ += "  start_: flatbuffers::UOffsetT,";
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
@@ -1272,7 +1242,6 @@ class RustGenerator : public BaseGenerator {
         }
         code_.SetValue("PARAM_NAME", Name(field));
         code_ += "            {{PARAM_NAME}}: {{PARAM_VALUE}},";
-        //GenParam(field, false, "            ", "", tmpl);
       }
     }
     code_ += "            _phantom: PhantomData,";
@@ -1283,7 +1252,8 @@ class RustGenerator : public BaseGenerator {
     // Generate a builder struct:
     code_ += "pub struct {{STRUCT_NAME}}Builder<'a: 'b, 'b> {";
     code_ += "  fbb_: &'b mut flatbuffers::FlatBufferBuilder<'a>,";
-    code_ += "  start_: flatbuffers::Offset<flatbuffers::TableUnfinishedOffset>,";
+    code_ += "  start_: flatbuffers::Offset<"
+             "flatbuffers::TableUnfinishedOffset>,";
     code_ += "}";
 
     // Generate builder functions:
@@ -1338,7 +1308,8 @@ class RustGenerator : public BaseGenerator {
     code_ += "  }";
 
     // finish() function.
-    code_ += "  pub fn finish(self) -> flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
+    code_ += "  pub fn finish(self) -> "
+             "flatbuffers::Offset<{{STRUCT_NAME}}<'a>> {";
     code_ += "    let o = self.fbb_.end_table(self.start_);";
 
     for (auto it = struct_def.fields.vec.begin();
@@ -1430,7 +1401,8 @@ class RustGenerator : public BaseGenerator {
              "fbb: &'b mut flatbuffers::FlatBufferBuilder<'a>, "
              "root: flatbuffers::Offset<{{STRUCT_NAME}}<'a>>) {";
     if (parser_.file_identifier_.length()) {
-      code_ += "  fbb.finish_size_prefixed(root, Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
+      code_ += "  fbb.finish_size_prefixed(root, "
+               "Some({{STRUCT_NAME_CAPS}}_IDENTIFIER));";
     } else {
       code_ += "  fbb.finish_size_prefixed(root, None);";
     }
@@ -1484,7 +1456,7 @@ class RustGenerator : public BaseGenerator {
     for (auto it = struct_def.fields.vec.begin();
          it != struct_def.fields.vec.end(); ++it) {
       const auto &field = **it;
-      code_.SetValue("FIELD_TYPE", StructDefnFieldType(field.value.type));
+      code_.SetValue("FIELD_TYPE", GetTypeGet(field.value.type));
       code_.SetValue("FIELD_NAME", Name(field));
       code_ += "  {{FIELD_NAME}}_: {{FIELD_TYPE}},";
 
@@ -1606,7 +1578,8 @@ class RustGenerator : public BaseGenerator {
     code_ += "    #[inline(always)]";
     code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
     code_ += "        let src = unsafe {";
-    code_ += "            ::std::slice::from_raw_parts(self as *const {{STRUCT_NAME}} as *const u8, self.size())";
+    code_ += "            ::std::slice::from_raw_parts("
+             "self as *const {{STRUCT_NAME}} as *const u8, self.size())";
     code_ += "        };";
     code_ += "        dst.copy_from_slice(src);";
     code_ += "    }";
@@ -1621,7 +1594,8 @@ class RustGenerator : public BaseGenerator {
     code_ += "    #[inline(always)]";
     code_ += "    fn push(&self, dst: &mut [u8], _rest: &[u8]) {";
     code_ += "        let src = unsafe {";
-    code_ += "            ::std::slice::from_raw_parts(*self as *const {{STRUCT_NAME}} as *const u8, self.size())";
+    code_ += "            ::std::slice::from_raw_parts("
+             "*self as *const {{STRUCT_NAME}} as *const u8, self.size())";
     code_ += "        };";
     code_ += "        dst.copy_from_slice(src);";
     code_ += "    }";
