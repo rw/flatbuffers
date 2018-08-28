@@ -1051,7 +1051,7 @@ class RustGenerator : public BaseGenerator {
       }
       case FullType::Struct: {
         const auto typname = WrapInNameSpace(*type.struct_def);
-        return "self._tab.get::<&" + lifetime + " " + typname + ">(" + offset_name + ", None)";
+        return "self._tab.get::<" + typname + ">(" + offset_name + ", None)";
       }
       case FullType::Table: {
         const auto typname = WrapInNameSpace(*type.struct_def);
@@ -1543,8 +1543,6 @@ class RustGenerator : public BaseGenerator {
 
     code_ += "} // pub struct {{STRUCT_NAME}}";
 
-    // Impl the dummy GeneratedStruct trait to get a free impl of Follow:
-    code_ += "impl flatbuffers::GeneratedStruct for {{STRUCT_NAME}} {}";
     code_ += "impl flatbuffers::SafeSliceAccess for {{STRUCT_NAME}} {}";
     code_ += "impl<'a> flatbuffers::Follow<'a> for {{STRUCT_NAME}} {";
     code_ += "  type Inner = &'a {{STRUCT_NAME}};";

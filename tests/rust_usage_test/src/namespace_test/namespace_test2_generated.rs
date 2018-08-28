@@ -56,7 +56,7 @@ impl<'a> TableInFirstNS<'a> {
   }
   #[inline]
   pub fn foo_struct(&'a self) -> Option<&'a namespace_b::StructInNestedNS> {
-    self._tab.get::<&'a namespace_b::StructInNestedNS>(TableInFirstNS::VT_FOO_STRUCT, None)
+    self._tab.get::<namespace_b::StructInNestedNS>(TableInFirstNS::VT_FOO_STRUCT, None)
   }
 }
 

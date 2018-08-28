@@ -85,7 +85,6 @@ pub struct StructInNestedNS {
   a_: i32,
   b_: i32,
 } // pub struct StructInNestedNS
-impl flatbuffers::GeneratedStruct for StructInNestedNS {}
 impl flatbuffers::SafeSliceAccess for StructInNestedNS {}
 impl<'a> flatbuffers::Follow<'a> for StructInNestedNS {
   type Inner = &'a StructInNestedNS;

@@ -288,7 +288,6 @@ pub struct Test {
   b_: i8,
   padding0__: u8,
 } // pub struct Test
-impl flatbuffers::GeneratedStruct for Test {}
 impl flatbuffers::SafeSliceAccess for Test {}
 impl<'a> flatbuffers::Follow<'a> for Test {
   type Inner = &'a Test;
@@ -358,7 +357,6 @@ pub struct Vec3 {
   test3_: Test/* foo */,
   padding2__: u16,
 } // pub struct Vec3
-impl flatbuffers::GeneratedStruct for Vec3 {}
 impl flatbuffers::SafeSliceAccess for Vec3 {}
 impl<'a> flatbuffers::Follow<'a> for Vec3 {
   type Inner = &'a Vec3;
@@ -439,7 +437,6 @@ pub struct Ability {
   id_: u32,
   distance_: u32,
 } // pub struct Ability
-impl flatbuffers::GeneratedStruct for Ability {}
 impl flatbuffers::SafeSliceAccess for Ability {}
 impl<'a> flatbuffers::Follow<'a> for Ability {
   type Inner = &'a Ability;
@@ -855,7 +852,7 @@ impl<'a> Monster<'a> {
 
   #[inline]
   pub fn pos(&'a self) -> Option<&'a Vec3> {
-    self._tab.get::<&'a Vec3>(Monster::VT_POS, None)
+    self._tab.get::<Vec3>(Monster::VT_POS, None)
   }
   #[inline]
   pub fn mana(&'a self) -> i16 {
