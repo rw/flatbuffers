@@ -180,7 +180,7 @@ fn serialized_example_is_accessible_and_correct(bytes: &[u8], identifier_require
 
         let inv: &[u8] = match m.inventory() {
             None => { return Err("bad m.inventory"); }
-            Some(x) => { x.as_slice() }
+            Some(x) => { x }
         };
         if inv.len() != 5 {  return Err("bad m.inventory len"); }
         let invsum: u8 = inv.iter().sum();
@@ -431,9 +431,9 @@ mod roundtrip_generated_code {
         let m = my_game::example::get_root_as_monster(b1.finished_bytes());
 
         assert!(m.testnestedflatbuffer().is_some());
-        assert_eq!(m.testnestedflatbuffer().unwrap().as_slice(), b0.finished_bytes());
+        assert_eq!(m.testnestedflatbuffer().unwrap(), b0.finished_bytes());
 
-        let m2_a = my_game::example::get_root_as_monster(m.testnestedflatbuffer().unwrap().as_slice());
+        let m2_a = my_game::example::get_root_as_monster(m.testnestedflatbuffer().unwrap());
         assert_eq!(m2_a.hp(), 123);
         assert_eq!(m2_a.name(), Some("foobar"));
 
@@ -484,7 +484,7 @@ mod roundtrip_generated_code {
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
             inventory: Some(v), ..Default::default()});
-        assert_eq!(m.inventory().unwrap().as_slice(), &[123, 234][..]);
+        assert_eq!(m.inventory().unwrap(), &[123, 234][..]);
     }
     #[test]
     fn vector_of_bool_store() {
@@ -494,7 +494,7 @@ mod roundtrip_generated_code {
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
             testarrayofbools: Some(v), ..Default::default()});
-        assert_eq!(m.testarrayofbools().unwrap().as_slice(), &[false, true, false, true][..]);
+        assert_eq!(m.testarrayofbools().unwrap(), &[false, true, false, true][..]);
     }
     #[test]
     fn vector_of_f64_store() {
@@ -504,7 +504,8 @@ mod roundtrip_generated_code {
         let m = build_mon(&mut b, &my_game::example::MonsterArgs{
             name: Some(name),
             vector_of_doubles: Some(v), ..Default::default()});
-        assert_eq!(m.vector_of_doubles().unwrap().as_slice(), &[3.14159265359][..]);
+        assert_eq!(m.vector_of_doubles().unwrap().len(), 1);
+        assert_eq!(m.vector_of_doubles().unwrap().get(0), 3.14159265359f64);
     }
     #[test]
     fn vector_of_struct_store() {

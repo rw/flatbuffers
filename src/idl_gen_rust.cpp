@@ -1004,12 +1004,15 @@ class RustGenerator : public BaseGenerator {
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
         const auto typname = GetTypeBasic(type.VectorType(), false);
+        if (IsOneByte(type.VectorType().base_type)) {
+          return "Option<&" + lifetime + " [" + typname + "]>";
+        }
         //return "Option<&" + lifetime + " [" + typname + "]>";
         return "Option<flatbuffers::Vector<" + lifetime + ", " + typname + ">>";
       }
       case FullType::VectorOfBool: {
-        //return "Option<&" + lifetime + " [bool]>";
-        return "Option<flatbuffers::Vector<" + lifetime + ", bool>>";
+        return "Option<&" + lifetime + " [bool]>";
+        //return "Option<flatbuffers::Vector<" + lifetime + ", bool>>";
       }
       case FullType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
@@ -1074,16 +1077,16 @@ class RustGenerator : public BaseGenerator {
       case FullType::VectorOfInteger:
       case FullType::VectorOfFloat: {
         const auto typname = GetTypeBasic(type.VectorType(), false);
-        //return "self._tab.get::<flatbuffers::ForwardsUOffset<&[" + typname + "]>>(" + offset_name + ", None)";
+        if (IsOneByte(type.VectorType().base_type)) {
+          return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None).map(|v| v.safe_slice())";
+        }
         return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None)";
       }
       case FullType::VectorOfBool: {
-        //return "self._tab.get::<flatbuffers::ForwardsUOffset<&[bool]>>(" + offset_name + ", None)";
-        return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", bool>>>(" + offset_name + ", None)";
+        return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", bool>>>(" + offset_name + ", None).map(|v| v.safe_slice())";
       }
       case FullType::VectorOfEnumKey: {
         const auto typname = WrapInNameSpace(*type.enum_def);
-        //return "self._tab.get::<flatbuffers::ForwardsUOffset<&[" + typname + "]>>(" + offset_name + ", None)";
         return "self._tab.get::<flatbuffers::ForwardsUOffset<flatbuffers::Vector<" + lifetime + ", " + typname + ">>>(" + offset_name + ", None)";
       }
       case FullType::VectorOfStruct: {
@@ -1240,7 +1243,7 @@ class RustGenerator : public BaseGenerator {
         code_ += "         None => { None }";
         code_ += "         Some(data) => {";
         code_ += "             use self::flatbuffers::Follow;";
-        code_ += "             Some(<flatbuffers::ForwardsUOffset<{{STRUCT_NAME}}<'a>>>::follow(data.as_slice(), 0))";
+        code_ += "             Some(<flatbuffers::ForwardsUOffset<{{STRUCT_NAME}}<'a>>>::follow(data, 0))";
         code_ += "         },";
         code_ += "     }";
         code_ += "  }";

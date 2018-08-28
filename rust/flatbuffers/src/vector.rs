@@ -55,6 +55,10 @@ impl<'a, T: SafeSliceAccess + 'a> Vector<'a, T> {
     }
 }
 
+impl SafeSliceAccess for u8 {}
+impl SafeSliceAccess for i8 {}
+impl SafeSliceAccess for bool {}
+
 pub fn follow_cast_ref<'a, T: Sized + 'a>(buf: &'a [u8], loc: usize) -> &'a T {
     let sz = size_of::<T>();
     let buf = &buf[loc..loc + sz];

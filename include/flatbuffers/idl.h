@@ -115,6 +115,8 @@ inline bool IsFloat  (BaseType t) { return t == BASE_TYPE_FLOAT ||
 inline bool IsLong   (BaseType t) { return t == BASE_TYPE_LONG ||
                                            t == BASE_TYPE_ULONG; }
 inline bool IsBool   (BaseType t) { return t == BASE_TYPE_BOOL; }
+inline bool IsOneByte(BaseType t) { return t >= BASE_TYPE_UTYPE &&
+                                           t <= BASE_TYPE_UCHAR; }
 // clang-format on
 
 extern const char *const kTypeNames[];
