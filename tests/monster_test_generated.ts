@@ -1594,35 +1594,10 @@ vectorOfNonOwningReferencesLength():number {
 };
 
 /**
- * @param number index
- * @returns MyGame.Example.Color
- */
-vectorOfEnum(index: number):MyGame.Example.Color|null {
-  var offset = this.bb!.__offset(this.bb_pos, 90);
-  return offset ? /**  */ (this.bb!.readInt8(this.bb!.__vector(this.bb_pos + offset) + index)) : /**  */ (0);
-};
-
-/**
- * @returns number
- */
-vectorOfEnumLength():number {
-  var offset = this.bb!.__offset(this.bb_pos, 90);
-  return offset ? this.bb!.__vector_len(this.bb_pos + offset) : 0;
-};
-
-/**
- * @returns Int8Array
- */
-vectorOfEnumArray():Int8Array|null {
-  var offset = this.bb!.__offset(this.bb_pos, 90);
-  return offset ? new Int8Array(this.bb!.bytes().buffer, this.bb!.bytes().byteOffset + this.bb!.__vector(this.bb_pos + offset), this.bb!.__vector_len(this.bb_pos + offset)) : null;
-};
-
-/**
  * @param flatbuffers.Builder builder
  */
 static startMonster(builder:flatbuffers.Builder) {
-  builder.startObject(44);
+  builder.startObject(43);
 };
 
 /**
@@ -2277,35 +2252,6 @@ static createVectorOfNonOwningReferencesVector(builder:flatbuffers.Builder, data
  */
 static startVectorOfNonOwningReferencesVector(builder:flatbuffers.Builder, numElems:number) {
   builder.startVector(8, numElems, 8);
-};
-
-/**
- * @param flatbuffers.Builder builder
- * @param flatbuffers.Offset vectorOfEnumOffset
- */
-static addVectorOfEnum(builder:flatbuffers.Builder, vectorOfEnumOffset:flatbuffers.Offset) {
-  builder.addFieldOffset(43, vectorOfEnumOffset, 0);
-};
-
-/**
- * @param flatbuffers.Builder builder
- * @param Array.<MyGame.Example.Color> data
- * @returns flatbuffers.Offset
- */
-static createVectorOfEnumVector(builder:flatbuffers.Builder, data:MyGame.Example.Color[]):flatbuffers.Offset {
-  builder.startVector(1, data.length, 1);
-  for (var i = data.length - 1; i >= 0; i--) {
-    builder.addInt8(data[i]);
-  }
-  return builder.endVector();
-};
-
-/**
- * @param flatbuffers.Builder builder
- * @param number numElems
- */
-static startVectorOfEnumVector(builder:flatbuffers.Builder, numElems:number) {
-  builder.startVector(1, numElems, 1);
 };
 
 /**

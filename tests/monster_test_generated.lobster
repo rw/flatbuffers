@@ -297,15 +297,11 @@ struct Monster : flatbuffers_handle
         buf_.read_int64_le(buf_.flatbuffers_field_vector(pos_, 88) + i * 8)
     def vector_of_non_owning_references_length():
         buf_.flatbuffers_field_vector_len(pos_, 88)
-    def vector_of_enum(i:int):
-        buf_.read_int8_le(buf_.flatbuffers_field_vector(pos_, 90) + i * 1)
-    def vector_of_enum_length():
-        buf_.flatbuffers_field_vector_len(pos_, 90)
 
 def GetRootAsMonster(buf:string): Monster { buf, buf.flatbuffers_indirect(0) }
 
 def MonsterStart(b_:flatbuffers_builder):
-    b_.StartObject(44)
+    b_.StartObject(43)
 def MonsterAddPos(b_:flatbuffers_builder, pos:int):
     b_.PrependStructSlot(0, pos, 0)
 def MonsterAddMana(b_:flatbuffers_builder, mana:int):
@@ -479,14 +475,6 @@ def MonsterStartVectorOfNonOwningReferencesVector(b_:flatbuffers_builder, n_:int
 def MonsterCreateVectorOfNonOwningReferencesVector(b_:flatbuffers_builder, v_:[int]):
     b_.StartVector(8, v_.length, 8)
     reverse(v_) e_: b_.PrependUint64(e_)
-    b_.EndVector(v_.length)
-def MonsterAddVectorOfEnum(b_:flatbuffers_builder, vector_of_enum:int):
-    b_.PrependUOffsetTRelativeSlot(43, vector_of_enum, 0)
-def MonsterStartVectorOfEnumVector(b_:flatbuffers_builder, n_:int):
-    b_.StartVector(1, n_, 1)
-def MonsterCreateVectorOfEnumVector(b_:flatbuffers_builder, v_:[int]):
-    b_.StartVector(1, v_.length, 1)
-    reverse(v_) e_: b_.PrependInt8(e_)
     b_.EndVector(v_.length)
 def MonsterEnd(b_:flatbuffers_builder):
     b_.EndObject()

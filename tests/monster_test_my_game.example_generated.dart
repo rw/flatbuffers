@@ -652,11 +652,10 @@ class Monster {
   List<int> get vectorOfCoOwningReferences => const fb.ListReader<int>(const fb.Uint64Reader()).vTableGet(_bc, _bcOffset, 84, null);
   int get nonOwningReference => const fb.Uint64Reader().vTableGet(_bc, _bcOffset, 86, 0);
   List<int> get vectorOfNonOwningReferences => const fb.ListReader<int>(const fb.Uint64Reader()).vTableGet(_bc, _bcOffset, 88, null);
-  List<Color> get vectorOfEnum => const fb.ListReader<Color>(Color.reader).vTableGet(_bc, _bcOffset, 90, null);
 
   @override
   String toString() {
-    return 'Monster{pos: $pos, mana: $mana, hp: $hp, name: $name, inventory: $inventory, color: $color, testType: $testType, test: $test, test4: $test4, testarrayofstring: $testarrayofstring, testarrayoftables: $testarrayoftables, enemy: $enemy, testnestedflatbuffer: $testnestedflatbuffer, testempty: $testempty, testbool: $testbool, testhashs32Fnv1: $testhashs32Fnv1, testhashu32Fnv1: $testhashu32Fnv1, testhashs64Fnv1: $testhashs64Fnv1, testhashu64Fnv1: $testhashu64Fnv1, testhashs32Fnv1a: $testhashs32Fnv1a, testhashu32Fnv1a: $testhashu32Fnv1a, testhashs64Fnv1a: $testhashs64Fnv1a, testhashu64Fnv1a: $testhashu64Fnv1a, testarrayofbools: $testarrayofbools, testf: $testf, testf2: $testf2, testf3: $testf3, testarrayofstring2: $testarrayofstring2, testarrayofsortedstruct: $testarrayofsortedstruct, flex: $flex, test5: $test5, vectorOfLongs: $vectorOfLongs, vectorOfDoubles: $vectorOfDoubles, parentNamespaceTest: $parentNamespaceTest, vectorOfReferrables: $vectorOfReferrables, singleWeakReference: $singleWeakReference, vectorOfWeakReferences: $vectorOfWeakReferences, vectorOfStrongReferrables: $vectorOfStrongReferrables, coOwningReference: $coOwningReference, vectorOfCoOwningReferences: $vectorOfCoOwningReferences, nonOwningReference: $nonOwningReference, vectorOfNonOwningReferences: $vectorOfNonOwningReferences, vectorOfEnum: $vectorOfEnum}';
+    return 'Monster{pos: $pos, mana: $mana, hp: $hp, name: $name, inventory: $inventory, color: $color, testType: $testType, test: $test, test4: $test4, testarrayofstring: $testarrayofstring, testarrayoftables: $testarrayoftables, enemy: $enemy, testnestedflatbuffer: $testnestedflatbuffer, testempty: $testempty, testbool: $testbool, testhashs32Fnv1: $testhashs32Fnv1, testhashu32Fnv1: $testhashu32Fnv1, testhashs64Fnv1: $testhashs64Fnv1, testhashu64Fnv1: $testhashu64Fnv1, testhashs32Fnv1a: $testhashs32Fnv1a, testhashu32Fnv1a: $testhashu32Fnv1a, testhashs64Fnv1a: $testhashs64Fnv1a, testhashu64Fnv1a: $testhashu64Fnv1a, testarrayofbools: $testarrayofbools, testf: $testf, testf2: $testf2, testf3: $testf3, testarrayofstring2: $testarrayofstring2, testarrayofsortedstruct: $testarrayofsortedstruct, flex: $flex, test5: $test5, vectorOfLongs: $vectorOfLongs, vectorOfDoubles: $vectorOfDoubles, parentNamespaceTest: $parentNamespaceTest, vectorOfReferrables: $vectorOfReferrables, singleWeakReference: $singleWeakReference, vectorOfWeakReferences: $vectorOfWeakReferences, vectorOfStrongReferrables: $vectorOfStrongReferrables, coOwningReference: $coOwningReference, vectorOfCoOwningReferences: $vectorOfCoOwningReferences, nonOwningReference: $nonOwningReference, vectorOfNonOwningReferences: $vectorOfNonOwningReferences}';
   }
 }
 
@@ -847,10 +846,6 @@ class MonsterBuilder {
     fbBuilder.addOffset(42, offset);
     return fbBuilder.offset;
   }
-  int addVectorOfEnumOffset(int offset) {
-    fbBuilder.addOffset(43, offset);
-    return fbBuilder.offset;
-  }
 
   int finish() {
     return fbBuilder.endTable();
@@ -900,7 +895,6 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
   final List<int> _vectorOfCoOwningReferences;
   final int _nonOwningReference;
   final List<int> _vectorOfNonOwningReferences;
-  final List<Color> _vectorOfEnum;
 
   MonsterObjectBuilder({
     Vec3ObjectBuilder pos,
@@ -945,7 +939,6 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     List<int> vectorOfCoOwningReferences,
     int nonOwningReference,
     List<int> vectorOfNonOwningReferences,
-    List<Color> vectorOfEnum,
   })
       : _pos = pos,
         _mana = mana,
@@ -988,8 +981,7 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
         _coOwningReference = coOwningReference,
         _vectorOfCoOwningReferences = vectorOfCoOwningReferences,
         _nonOwningReference = nonOwningReference,
-        _vectorOfNonOwningReferences = vectorOfNonOwningReferences,
-        _vectorOfEnum = vectorOfEnum;
+        _vectorOfNonOwningReferences = vectorOfNonOwningReferences;
 
   /// Finish building, and store into the [fbBuilder].
   @override
@@ -1051,9 +1043,6 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
         : null;
     final int vectorOfNonOwningReferencesOffset = _vectorOfNonOwningReferences?.isNotEmpty == true
         ? fbBuilder.writeListUint64(_vectorOfNonOwningReferences)
-        : null;
-    final int vectorOfEnumOffset = _vectorOfEnum?.isNotEmpty == true
-        ? fbBuilder.writeListInt8(_vectorOfEnum.map((f) => f.value))
         : null;
 
     fbBuilder.startTable();
@@ -1144,9 +1133,6 @@ class MonsterObjectBuilder extends fb.ObjectBuilder {
     fbBuilder.addUint64(41, _nonOwningReference);
     if (vectorOfNonOwningReferencesOffset != null) {
       fbBuilder.addOffset(42, vectorOfNonOwningReferencesOffset);
-    }
-    if (vectorOfEnumOffset != null) {
-      fbBuilder.addOffset(43, vectorOfEnumOffset);
     }
     return fbBuilder.endTable();
   }

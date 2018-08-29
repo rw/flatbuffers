@@ -132,13 +132,8 @@ public struct Monster : IFlatbufferObject
   public ArraySegment<byte>? GetVectorOfNonOwningReferencesBytes() { return __p.__vector_as_arraysegment(88); }
   public ulong[] GetVectorOfNonOwningReferencesArray() { return __p.__vector_as_array<ulong>(88); }
   public bool MutateVectorOfNonOwningReferences(int j, ulong vector_of_non_owning_references) { int o = __p.__offset(88); if (o != 0) { __p.bb.PutUlong(__p.__vector(o) + j * 8, vector_of_non_owning_references); return true; } else { return false; } }
-  public Color VectorOfEnum(int j) { int o = __p.__offset(90); return o != 0 ? (Color)__p.bb.GetSbyte(__p.__vector(o) + j * 1) : (Color)0; }
-  public int VectorOfEnumLength { get { int o = __p.__offset(90); return o != 0 ? __p.__vector_len(o) : 0; } }
-  public ArraySegment<byte>? GetVectorOfEnumBytes() { return __p.__vector_as_arraysegment(90); }
-  public Color[] GetVectorOfEnumArray() { return __p.__vector_as_array<Color>(90); }
-  public bool MutateVectorOfEnum(int j, Color vector_of_enum) { int o = __p.__offset(90); if (o != 0) { __p.bb.PutSbyte(__p.__vector(o) + j * 1, (sbyte)vector_of_enum); return true; } else { return false; } }
 
-  public static void StartMonster(FlatBufferBuilder builder) { builder.StartObject(44); }
+  public static void StartMonster(FlatBufferBuilder builder) { builder.StartObject(43); }
   public static void AddPos(FlatBufferBuilder builder, Offset<Vec3> posOffset) { builder.AddStruct(0, posOffset.Value, 0); }
   public static void AddMana(FlatBufferBuilder builder, short mana) { builder.AddShort(1, mana, 150); }
   public static void AddHp(FlatBufferBuilder builder, short hp) { builder.AddShort(2, hp, 100); }
@@ -226,10 +221,6 @@ public struct Monster : IFlatbufferObject
   public static VectorOffset CreateVectorOfNonOwningReferencesVector(FlatBufferBuilder builder, ulong[] data) { builder.StartVector(8, data.Length, 8); for (int i = data.Length - 1; i >= 0; i--) builder.AddUlong(data[i]); return builder.EndVector(); }
   public static VectorOffset CreateVectorOfNonOwningReferencesVectorBlock(FlatBufferBuilder builder, ulong[] data) { builder.StartVector(8, data.Length, 8); builder.Add(data); return builder.EndVector(); }
   public static void StartVectorOfNonOwningReferencesVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(8, numElems, 8); }
-  public static void AddVectorOfEnum(FlatBufferBuilder builder, VectorOffset vectorOfEnumOffset) { builder.AddOffset(43, vectorOfEnumOffset.Value, 0); }
-  public static VectorOffset CreateVectorOfEnumVector(FlatBufferBuilder builder, Color[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddSbyte((sbyte)data[i]); return builder.EndVector(); }
-  public static VectorOffset CreateVectorOfEnumVectorBlock(FlatBufferBuilder builder, Color[] data) { builder.StartVector(1, data.Length, 1); builder.Add(data); return builder.EndVector(); }
-  public static void StartVectorOfEnumVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }
   public static Offset<Monster> EndMonster(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     builder.Required(o, 10);  // name
