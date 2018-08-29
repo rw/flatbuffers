@@ -653,25 +653,50 @@ mod roundtrip_vectors {
     }
 
     #[cfg(test)]
-    mod scalar_direct {
+    mod create_vector_direct {
         extern crate quickcheck;
         extern crate flatbuffers;
 
         const N: u64 = 20;
 
-        fn prop_u8(xs: Vec<u8>) {
-            use flatbuffers::Follow;
+        // This uses a macro because lifetimes for the trait-bounded function get too
+        // complicated.
+        macro_rules! impl_prop {
+            ($test_name:ident, $fn_name:ident, $ty:ident) => (
+                fn $fn_name(xs: Vec<$ty>) {
+                    use flatbuffers::Follow;
 
-            let mut b = flatbuffers::FlatBufferBuilder::new();
-            b.create_byte_vector(&xs[..]);
-            let buf = b.unfinished_data();
+                    let mut b = flatbuffers::FlatBufferBuilder::new();
+                    b.create_vector_direct(&xs[..]);
+                    let buf = b.unfinished_data();
 
-            let got = <flatbuffers::Vector<u8>>::follow(&buf[..], 0).safe_slice();
-            assert_eq!(got, &xs[..]);
+                    let got = <flatbuffers::Vector<$ty>>::follow(&buf[..], 0).safe_slice();
+                    assert_eq!(got, &xs[..]);
+                }
+                #[test]
+                fn $test_name() { quickcheck::QuickCheck::new().max_tests(N).quickcheck($fn_name as fn(Vec<_>)); }
+            )
         }
 
-        #[test]
-        fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_u8 as fn(Vec<_>)); }
+        impl_prop!(test_bool, prop_bool, bool);
+        impl_prop!(test_u8, prop_u8, u8);
+        impl_prop!(test_i8, prop_i8, i8);
+
+        #[cfg(test)]
+        #[cfg(target_endian = "little")]
+        mod host_is_le {
+            const N: u64 = 20;
+            use super::flatbuffers;
+            use super::quickcheck;
+            impl_prop!(test_u16, prop_u16, u16);
+            impl_prop!(test_u32, prop_u32, u32);
+            impl_prop!(test_u64, prop_u64, u64);
+            impl_prop!(test_i16, prop_i16, i16);
+            impl_prop!(test_i32, prop_i32, i32);
+            impl_prop!(test_i64, prop_i64, i64);
+            impl_prop!(test_f32, prop_f32, f32);
+            impl_prop!(test_f64, prop_f64, f64);
+        }
     }
 
     #[cfg(test)]

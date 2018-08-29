@@ -11,7 +11,7 @@ use push::{Push, ZeroTerminatedByteSlice};
 use table::Table;
 use vtable::{VTable, field_index_to_field_offset};
 use vtable_writer::VTableWriter;
-use vector::Vector;
+use vector::{SafeSliceAccess, Vector};
 
 #[derive(Clone, Copy, Debug)]
 struct FieldLoc {
@@ -215,16 +215,16 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         WIPOffset::new(self.used_space() as UOffsetT)
     }
 
-    /// Create a byte vector by memcopy'ing. This is much faster than calling
-    /// `create_vector` with a byte slice.
-    //
-    // TODO(rw): make this work well with all SafeSliceAccess types.
+    /// Create a vector by memcpy'ing. This is much faster than calling
+    /// `create_vector`, but the underlying type must be represented as
+    /// little-endian on the host machine. This property is encoded in the
+    /// type system through the SafeSliceAccess trait. The following types are
+    /// always safe, on any platform: bool, u8, i8, and any
+    /// FlatBuffers-generated struct.
     #[inline]
-    pub fn create_byte_vector(&mut self, data: &[u8]) -> WIPOffset<Vector<'fbb, u8>> {
-        self.assert_not_nested("create_byte_string can not be called when a table or vector is under construction");
-        self.align(data.len(), SIZE_UOFFSET);
-        self.push_bytes_unprefixed(data);
-        self.push(data.len() as UOffsetT);
+    pub fn create_vector_direct<T: SafeSliceAccess + Push + Sized>(&mut self, data: &[T]) -> WIPOffset<Vector<'fbb, T>> {
+        self.assert_not_nested("create_vector_direct can not be called when a table or vector is under construction");
+        self.push(data);
         WIPOffset::new(self.used_space() as UOffsetT)
     }
 

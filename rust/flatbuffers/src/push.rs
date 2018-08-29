@@ -1,8 +1,10 @@
+use std::cmp::max;
 use std::mem::size_of;
+use std::slice::from_raw_parts;
 
 use endian_scalar::emplace_scalar;
 use primitives::*;
-use vector::Vector;
+use vector::{SafeSliceAccess, Vector};
 
 /// Trait to abstract over functionality needed to write values. Used in
 /// FlatBufferBuilder and implemented for generated types.
@@ -21,26 +23,26 @@ pub trait Push: Sized {
     }
 }
 
-impl<'b> Push for &'b [u8] {
-    type Output = Vector<'b, u8>;
-
-    #[inline]
-    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
-        let l = self.len() as UOffsetT;
-        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
-        dst[SIZE_UOFFSET..].copy_from_slice(self);
-    }
-
-    #[inline]
-    fn size(&self) -> usize {
-        SIZE_UOFFSET + self.len()
-    }
-
-    #[inline]
-    fn alignment(&self) -> usize {
-        SIZE_UOFFSET
-    }
-}
+//impl<'b> Push for &'b [u8] {
+//    type Output = Vector<'b, u8>;
+//
+//    #[inline]
+//    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+//        let l = self.len() as UOffsetT;
+//        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
+//        dst[SIZE_UOFFSET..].copy_from_slice(self);
+//    }
+//
+//    #[inline]
+//    fn size(&self) -> usize {
+//        SIZE_UOFFSET + self.len()
+//    }
+//
+//    #[inline]
+//    fn alignment(&self) -> usize {
+//        SIZE_UOFFSET
+//    }
+//}
 
 impl<'b> Push for &'b str {
     type Output = Vector<'b, u8>;
@@ -60,6 +62,34 @@ impl<'b> Push for &'b str {
     #[inline]
     fn alignment(&self) -> usize {
         SIZE_UOFFSET
+    }
+}
+
+/// Push-able wrapper for slices of types that implement SafeSliceAccess.
+impl<'a, T: SafeSliceAccess + Sized> Push for &'a [T] {
+    type Output = Vector<'a, u8>;
+
+    #[inline]
+    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
+        let elem_sz = size_of::<T>();
+        let data = {
+            let ptr = self.as_ptr() as *const T as *const u8;
+            unsafe {
+                from_raw_parts(ptr, self.len() * elem_sz)
+            }
+        };
+        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], self.len() as UOffsetT);
+        dst[SIZE_UOFFSET..SIZE_UOFFSET+data.len()].copy_from_slice(data);
+    }
+
+    #[inline]
+    fn size(&self) -> usize {
+        SIZE_UOFFSET + self.len() * size_of::<T>()
+    }
+
+    #[inline]
+    fn alignment(&self) -> usize {
+        max(SIZE_UOFFSET, size_of::<T>())
     }
 }
 

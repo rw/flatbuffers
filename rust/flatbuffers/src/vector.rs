@@ -55,6 +55,22 @@ impl SafeSliceAccess for u8 {}
 impl SafeSliceAccess for i8 {}
 impl SafeSliceAccess for bool {}
 
+#[cfg(target_endian = "little")]
+mod le_safe_slice_impls {
+    impl super::SafeSliceAccess for u16 {}
+    impl super::SafeSliceAccess for u32 {}
+    impl super::SafeSliceAccess for u64 {}
+
+    impl super::SafeSliceAccess for i16 {}
+    impl super::SafeSliceAccess for i32 {}
+    impl super::SafeSliceAccess for i64 {}
+
+    impl super::SafeSliceAccess for f32 {}
+    impl super::SafeSliceAccess for f64 {}
+}
+
+pub use self::le_safe_slice_impls::*;
+
 pub fn follow_cast_ref<'a, T: Sized + 'a>(buf: &'a [u8], loc: usize) -> &'a T {
     let sz = size_of::<T>();
     let buf = &buf[loc..loc + sz];

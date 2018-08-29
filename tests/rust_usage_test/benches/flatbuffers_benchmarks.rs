@@ -60,9 +60,9 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
     let mon = {
         let name = builder.create_string("MyMonster");
         let fred_name = builder.create_string("Fred");
-        let inventory = builder.create_byte_vector(&[0u8, 1, 2, 3, 4]);
-        let test4 = builder.create_vector(&[my_game::example::Test::new(10, 20),
-                                            my_game::example::Test::new(30, 40)]);
+        let inventory = builder.create_vector_direct(&[0u8, 1, 2, 3, 4]);
+        let test4 = builder.create_vector_direct(&[my_game::example::Test::new(10, 20),
+                                                   my_game::example::Test::new(30, 40)]);
         let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
         let args = my_game::example::MonsterArgs{
             hp: 80,
@@ -187,7 +187,7 @@ fn create_byte_vector_100_optimal(bench: &mut Bencher) {
 
     let mut i = 0;
     bench.iter(|| {
-        builder.create_byte_vector(v);
+        builder.create_vector_direct(v);
         i += 1;
         if i == 10000 {
             builder.reset();
