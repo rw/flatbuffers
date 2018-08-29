@@ -23,27 +23,6 @@ pub trait Push: Sized {
     }
 }
 
-//impl<'b> Push for &'b [u8] {
-//    type Output = Vector<'b, u8>;
-//
-//    #[inline]
-//    fn push(&self, dst: &mut [u8], _rest: &[u8]) {
-//        let l = self.len() as UOffsetT;
-//        emplace_scalar::<UOffsetT>(&mut dst[..SIZE_UOFFSET], l);
-//        dst[SIZE_UOFFSET..].copy_from_slice(self);
-//    }
-//
-//    #[inline]
-//    fn size(&self) -> usize {
-//        SIZE_UOFFSET + self.len()
-//    }
-//
-//    #[inline]
-//    fn alignment(&self) -> usize {
-//        SIZE_UOFFSET
-//    }
-//}
-
 impl<'b> Push for &'b str {
     type Output = Vector<'b, u8>;
 
