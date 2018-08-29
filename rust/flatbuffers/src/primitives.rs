@@ -1,8 +1,9 @@
 use std::marker::PhantomData;
 use std::ops::Deref;
 
-use endian_scalar::{read_scalar, read_scalar_at};
+use endian_scalar::{emplace_scalar, read_scalar, read_scalar_at};
 use follow::Follow;
+use push::Push;
 
 pub const FLATBUFFERS_MAX_BUFFER_SIZE: usize = (1u64 << 31) as usize;
 

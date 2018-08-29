@@ -81,7 +81,7 @@ impl<'a> ZeroTerminatedByteSlice<'a> {
 }
 
 impl<'a> Push for ZeroTerminatedByteSlice<'a> {
-    type Output = Vector<'b, u8>;
+    type Output = Vector<'a, u8>;
 
     #[inline]
     fn push(&self, dst: &mut [u8], _rest: &[u8]) {

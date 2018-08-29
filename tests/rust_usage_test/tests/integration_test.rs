@@ -652,6 +652,28 @@ mod roundtrip_vectors {
     }
 
     #[cfg(test)]
+    mod scalar_direct {
+        extern crate quickcheck;
+        extern crate flatbuffers;
+
+        const N: u64 = 20;
+
+        fn prop_u8(xs: Vec<u8>) {
+            use flatbuffers::Follow;
+
+            let mut b = flatbuffers::FlatBufferBuilder::new();
+            b.create_byte_vector(&xs[..]);
+            let buf = b.unfinished_data();
+
+            let got = <flatbuffers::Vector<u8>>::follow(&buf[..], 0).safe_slice();
+            assert_eq!(got, &xs[..]);
+        }
+
+        #[test]
+        fn fuzz_u8() { quickcheck::QuickCheck::new().max_tests(N).quickcheck(prop_u8 as fn(Vec<_>)); }
+    }
+
+    #[cfg(test)]
     mod string_manual_build {
         extern crate quickcheck;
         extern crate flatbuffers;

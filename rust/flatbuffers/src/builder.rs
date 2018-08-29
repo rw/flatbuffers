@@ -96,7 +96,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         (self.owned_buf, self.head)
     }
 
-    /// Push a Push'able value onto the front of our in-progress data.
+    /// Push a Push'able value onto the front of the in-progress data.
     ///
     /// This function uses traits to provide a unified API for writing
     /// scalars, tables, vectors, and WIPOffsets.
@@ -111,7 +111,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         WIPOffset::new(self.used_space() as UOffsetT)
     }
 
-    /// Push a Push'able value onto the front of our in-progress data, and
+    /// Push a Push'able value onto the front of the in-progress data, and
     /// store a reference to it in the in-progress vtable. If the value matches
     /// the default, then this is a no-op.
     #[inline]
@@ -122,7 +122,8 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         }
         self.push_slot_always(slotoff, x);
     }
-    /// Push a Push'able value onto the front of our in-progress data, and
+
+    /// Push a Push'able value onto the front of the in-progress data, and
     /// store a reference to it in the in-progress vtable.
     #[inline]
     pub fn push_slot_always<X: Push>(&mut self, slotoff: VOffsetT, x: X) {
@@ -211,6 +212,19 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_byte_string(&mut self, data: &[u8]) -> WIPOffset<&'fbb [u8]> {
         self.assert_not_nested("create_byte_string can not be called when a table or vector is under construction");
         self.push(ZeroTerminatedByteSlice::new(data));
+        WIPOffset::new(self.used_space() as UOffsetT)
+    }
+
+    /// Create a byte vector by memcopy'ing. This is much faster than calling
+    /// `create_vector` with a byte slice.
+    //
+    // TODO(rw): make this work well with all SafeSliceAccess types.
+    #[inline]
+    pub fn create_byte_vector(&mut self, data: &[u8]) -> WIPOffset<Vector<'fbb, u8>> {
+        self.assert_not_nested("create_byte_string can not be called when a table or vector is under construction");
+        self.align(data.len(), SIZE_UOFFSET);
+        self.push_bytes_unprefixed(data);
+        self.push(data.len() as UOffsetT);
         WIPOffset::new(self.used_space() as UOffsetT)
     }
 
@@ -340,7 +354,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
         // | x, x -- zero, or num bytes from start of object to field #n-1 [u16]
         // vtable ends here
         // table starts here
-        // | x, x, x, x -- offset (negative direction) to our vtable [i32]
+        // | x, x, x, x -- offset (negative direction) to the vtable [i32]
         // |               aka "vtableoffset"
         // | -- table inline data begins here, we don't touch it --
         // table ends here -- aka "table_start"

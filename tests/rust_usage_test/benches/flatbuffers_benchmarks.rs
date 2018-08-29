@@ -60,7 +60,7 @@ fn create_serialized_example_with_generated_code(builder: &mut flatbuffers::Flat
     let mon = {
         let name = builder.create_string("MyMonster");
         let fred_name = builder.create_string("Fred");
-        let inventory = builder.create_vector(&[0u8, 1, 2, 3, 4]);
+        let inventory = builder.create_byte_vector(&[0u8, 1, 2, 3, 4]);
         let test4 = builder.create_vector(&[my_game::example::Test::new(10, 20),
                                             my_game::example::Test::new(30, 40)]);
         let pos = my_game::example::Vec3::new(1.0, 2.0, 3.0, 3.0, my_game::example::Color::Green, &my_game::example::Test::new(5i16, 6i8));
@@ -162,5 +162,41 @@ fn create_string_100(bench: &mut Bencher) {
     bench.bytes = s.len() as u64;
 }
 
-benchmark_group!(benches, traverse_canonical_buffer, create_canonical_buffer_then_reset, create_string_10, create_string_100);
+fn create_byte_vector_100_naive(bench: &mut Bencher) {
+    let builder = &mut flatbuffers::FlatBufferBuilder::new_with_capacity(1<<20);
+    let v_owned = (0u8..100).map(|i| i).collect::<Vec<u8>>();
+    let v: &[u8] = &v_owned;
+
+    let mut i = 0;
+    bench.iter(|| {
+        builder.create_vector(v); // zero-terminated -> 100 bytes
+        i += 1;
+        if i == 10000 {
+            builder.reset();
+            i = 0;
+        }
+    });
+
+    bench.bytes = v.len() as u64;
+}
+
+fn create_byte_vector_100_optimal(bench: &mut Bencher) {
+    let builder = &mut flatbuffers::FlatBufferBuilder::new_with_capacity(1<<20);
+    let v_owned = (0u8..100).map(|i| i).collect::<Vec<u8>>();
+    let v: &[u8] = &v_owned;
+
+    let mut i = 0;
+    bench.iter(|| {
+        builder.create_byte_vector(v);
+        i += 1;
+        if i == 10000 {
+            builder.reset();
+            i = 0;
+        }
+    });
+
+    bench.bytes = v.len() as u64;
+}
+
+benchmark_group!(benches, create_byte_vector_100_naive, create_byte_vector_100_optimal, traverse_canonical_buffer, create_canonical_buffer_then_reset, create_string_10, create_string_100);
 benchmark_main!(benches);
