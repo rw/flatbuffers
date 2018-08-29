@@ -10,7 +10,6 @@ pub struct VTable<'a> {
     loc: usize,
 }
 
-
 impl<'a> PartialEq for VTable<'a> {
     fn eq(&self, other: &VTable) -> bool {
         self.as_bytes().eq(other.as_bytes())
