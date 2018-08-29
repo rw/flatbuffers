@@ -1,7 +1,7 @@
 [package]
 name = "rust_usage_test"
 version = "0.1.0"
-authors = ["Robert Winslow <me@rwinslow.com>", "FlatBuffers Maintainers"]
+authors = ["Robert Winslow <hello@rwinslow.com>", "FlatBuffers Maintainers"]
 
 [dependencies]
 flatbuffers = { path = "../../rust/flatbuffers" }
@@ -13,8 +13,7 @@ path = "bin/monster_example.rs"
 
 [dev-dependencies]
 quickcheck = "0.6"
-# TODO(rw): look into moving to criterion.rs once its (I think?) compilation
-#           issue is fixed with 0.2.4.
+# TODO(rw): look into moving to criterion.rs
 bencher = "0.1.5"
 
 [[bench]]
