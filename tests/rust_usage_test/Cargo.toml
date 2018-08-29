@@ -6,6 +6,10 @@ authors = ["Robert Winslow <me@rwinslow.com>", "FlatBuffers Maintainers"]
 [dependencies]
 flatbuffers = { path = "../../rust/flatbuffers" }
 
+[[bin]]
+name = "monster_example"
+path = "bin/monster_example.rs"
+
 
 [dev-dependencies]
 quickcheck = "0.6"
