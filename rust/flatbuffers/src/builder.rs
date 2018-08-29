@@ -240,6 +240,7 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     pub fn create_vector<'a, T: Push + Copy + 'fbb>(&'a mut self, items: &'a [T]) -> WIPOffset<Vector<'fbb, T::Output>> {
         let elemsize = size_of::<T>();
         self.start_vector(elemsize, items.len());
+        // TODO(rw): precompute the space needed and call `make_space` only once
         for i in (0..items.len()).rev() {
             self.push(items[i]);
         }
@@ -542,20 +543,25 @@ impl<'fbb> FlatBufferBuilder<'fbb> {
     fn unused_ready_space(&self) -> usize {
         self.head
     }
+    #[inline]
     fn assert_nested(&self, msg: &'static str) {
         // we don't assert that self.field_locs.len() >0 because the vtable
         // could be empty (e.g. for empty tables, or for all-default values).
-        assert!(self.nested, msg);
+        debug_assert!(self.nested, msg);
     }
+    #[inline]
     fn assert_not_nested(&self, msg: &'static str) {
-        assert!(!self.nested, msg);
+        debug_assert!(!self.nested, msg);
     }
+    #[inline]
     fn assert_finished(&self, msg: &'static str) {
-        assert!(self.finished, msg);
+        debug_assert!(self.finished, msg);
     }
+    #[inline]
     fn assert_not_finished(&self, msg: &'static str) {
-        assert!(!self.finished, msg);
+        debug_assert!(!self.finished, msg);
     }
+
 }
 
 #[inline]

@@ -4,6 +4,8 @@ use endian_scalar::emplace_scalar;
 use primitives::*;
 use vector::Vector;
 
+/// Trait to abstract over functionality needed to write values. Used in
+/// FlatBufferBuilder and implemented for generated types.
 pub trait Push: Sized {
     type Output;
     fn push(&self, dst: &mut [u8], _rest: &[u8]);
@@ -62,6 +64,8 @@ impl<'b> Push for &'b str {
 }
 
 
+/// Push-able wrapper for byte slices that need a zero-terminator written
+/// after them.
 pub struct ZeroTerminatedByteSlice<'a>(&'a [u8]);
 
 impl<'a> ZeroTerminatedByteSlice<'a> {
@@ -76,7 +80,7 @@ impl<'a> ZeroTerminatedByteSlice<'a> {
     }
 }
 
-impl<'b> Push for ZeroTerminatedByteSlice<'b> {
+impl<'a> Push for ZeroTerminatedByteSlice<'a> {
     type Output = Vector<'b, u8>;
 
     #[inline]
@@ -97,7 +101,8 @@ impl<'b> Push for ZeroTerminatedByteSlice<'b> {
     }
 }
 
-macro_rules! impl_pushable_method_for_endian_scalar {
+/// Macro to implement Push for EndianScalar types.
+macro_rules! impl_push_for_endian_scalar {
     ($ty:ident) => (
         impl Push for $ty {
             type Output = $ty;
@@ -110,49 +115,14 @@ macro_rules! impl_pushable_method_for_endian_scalar {
     )
 }
 
-impl_pushable_method_for_endian_scalar!(bool);
-impl_pushable_method_for_endian_scalar!(u8);
-impl_pushable_method_for_endian_scalar!(i8);
-impl_pushable_method_for_endian_scalar!(u16);
-impl_pushable_method_for_endian_scalar!(i16);
-impl_pushable_method_for_endian_scalar!(u32);
-impl_pushable_method_for_endian_scalar!(i32);
-impl_pushable_method_for_endian_scalar!(u64);
-impl_pushable_method_for_endian_scalar!(i64);
-impl_pushable_method_for_endian_scalar!(f32);
-impl_pushable_method_for_endian_scalar!(f64);
-
-impl<T> Push for WIPOffset<T> {
-    type Output = ForwardsUOffset<T>;
-
-    #[inline]
-    fn push(&self, dst: &mut [u8], rest: &[u8]) {
-        let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
-        emplace_scalar::<UOffsetT>(dst, n);
-    }
-}
-impl<T> Push for ForwardsUOffset<T> {
-    type Output = Self;
-
-    #[inline]
-    fn push(&self, dst: &mut [u8], rest: &[u8]) {
-        self.value().push(dst, rest);
-    }
-}
-impl<T> Push for ForwardsVOffset<T> {
-    type Output = Self;
-
-    #[inline]
-    fn push(&self, dst: &mut [u8], rest: &[u8]) {
-        self.value().push(dst, rest);
-    }
-}
-impl<T> Push for BackwardsSOffset<T> {
-    type Output = Self;
-
-    #[inline]
-    fn push(&self, dst: &mut [u8], rest: &[u8]) {
-        self.value().push(dst, rest);
-    }
-}
-
+impl_push_for_endian_scalar!(bool);
+impl_push_for_endian_scalar!(u8);
+impl_push_for_endian_scalar!(i8);
+impl_push_for_endian_scalar!(u16);
+impl_push_for_endian_scalar!(i16);
+impl_push_for_endian_scalar!(u32);
+impl_push_for_endian_scalar!(i32);
+impl_push_for_endian_scalar!(u64);
+impl_push_for_endian_scalar!(i64);
+impl_push_for_endian_scalar!(f32);
+impl_push_for_endian_scalar!(f64);

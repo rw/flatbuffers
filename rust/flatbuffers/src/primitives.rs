@@ -105,6 +105,25 @@ impl<'a, T: 'a> WIPOffset<T> {
     }
 }
 
+impl<T> Push for WIPOffset<T> {
+    type Output = ForwardsUOffset<T>;
+
+    #[inline]
+    fn push(&self, dst: &mut [u8], rest: &[u8]) {
+        let n = (SIZE_UOFFSET + rest.len() - self.value() as usize) as UOffsetT;
+        emplace_scalar::<UOffsetT>(dst, n);
+    }
+}
+
+impl<T> Push for ForwardsUOffset<T> {
+    type Output = Self;
+
+    #[inline]
+    fn push(&self, dst: &mut [u8], rest: &[u8]) {
+        self.value().push(dst, rest);
+    }
+}
+
 /// ForwardsUOffset is used by Follow to traverse a FlatBuffer: the pointer
 /// is incremented by the value contained in this type.
 #[derive(Debug)]
@@ -147,6 +166,15 @@ impl<'a, T: Follow<'a>> Follow<'a> for ForwardsVOffset<T> {
     }
 }
 
+impl<T> Push for ForwardsVOffset<T> {
+    type Output = Self;
+
+    #[inline]
+    fn push(&self, dst: &mut [u8], rest: &[u8]) {
+        self.value().push(dst, rest);
+    }
+}
+
 /// ForwardsSOffset is used by Follow to traverse a FlatBuffer: the pointer
 /// is incremented by the *negative* of the value contained in this type.
 #[derive(Debug)]
@@ -165,6 +193,15 @@ impl<'a, T: Follow<'a>> Follow<'a> for BackwardsSOffset<T> {
         let slice = &buf[loc..loc + SIZE_SOFFSET];
         let off = read_scalar::<SOffsetT>(slice);
         T::follow(buf, (loc as SOffsetT - off) as usize)
+    }
+}
+
+impl<T> Push for BackwardsSOffset<T> {
+    type Output = Self;
+
+    #[inline]
+    fn push(&self, dst: &mut [u8], rest: &[u8]) {
+        self.value().push(dst, rest);
     }
 }
 
